@@ -4,14 +4,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
-import { authApi } from '@/features/auth/api/auth';
 import { catalogApi } from '@/features/common/api/catalog';
 import { Filters as FiltersType, Work } from '@/features/shop/types';
 import { shopApi } from '@/features/shop/api/shop';
 import { useDashboard } from '@/contexts/DashboardContext';
 import styles from './ShopReadyWorks.module.css';
 import { logger } from '@/utils/logger';
-import { useCurrentUser, useSubjects } from '@/hooks/queries';
+import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -38,10 +37,7 @@ const ShopReadyWorks: React.FC = () => {
 
   const {data: subjects = []} = useSubjects();
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => catalogApi.getWorkTypes(),
-  });
+  const { data: categories = [] } = useWorkTypes();
 
   const processedWorks = React.useMemo(() => {
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : [];
@@ -106,7 +102,9 @@ const ShopReadyWorks: React.FC = () => {
 
 
   const handleDownload = (id: number) => {
-    const purchase = (Array.isArray(purchases) ? purchases : []).find((p) => p.work === id);
+    const purchase = (Array.isArray(purchases) ? purchases : [])
+      .filter((p) => p.work === id && p.delivered_file_available)
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())[0];
     if (!purchase?.delivered_file_available) return;
     shopApi.downloadPurchaseFile(purchase.id)
       .then((blob) => {
@@ -188,7 +186,13 @@ const ShopReadyWorks: React.FC = () => {
 
   const purchasesByWorkId = React.useMemo(() => {
     const list = Array.isArray(purchases) ? purchases : [];
-    return Object.fromEntries(list.map((p) => [p.work, p]));
+    return list.reduce<Record<number, typeof list[number]>>((acc, purchase) => {
+      const current = acc[purchase.work];
+      if (!current || new Date(purchase.created_at || 0).getTime() > new Date(current.created_at || 0).getTime()) {
+        acc[purchase.work] = purchase;
+      }
+      return acc;
+    }, {});
   }, [purchases]);
 
   return (

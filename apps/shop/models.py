@@ -1,134 +1,118 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from apps.catalog.models import Subject, WorkType
 
 
 class ReadyWork(models.Model):
-    """Модель готовой работы для продажи в магазине"""
-    
     title = models.CharField("Название", max_length=200)
     description = models.TextField("Описание")
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
-    
-    # Связи с каталогом
     subject = models.ForeignKey(
         Subject,
         on_delete=models.CASCADE,
-        verbose_name="Предмет"
+        verbose_name="Предмет",
     )
     work_type = models.ForeignKey(
         WorkType,
         on_delete=models.CASCADE,
-        verbose_name="Тип работы"
+        verbose_name="Тип работы",
     )
-    
-    # Автор работы
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name="Автор",
-        related_name="ready_works"
+        related_name="ready_works",
     )
-    
-    # Превью работы (изображение)
-    preview = models.ImageField("Превью работы", upload_to="ready_works/previews/", blank=True, null=True)
-    
-    # Статус
+    preview = models.ImageField(
+        "Превью работы",
+        upload_to="ready_works/previews/",
+        blank=True,
+        null=True,
+    )
     is_active = models.BooleanField("Активна", default=True)
-    
-    # Временные метки
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
-    
+
     class Meta:
         verbose_name = "Готовая работа"
         verbose_name_plural = "Готовые работы"
-        ordering = ['-created_at']
-    
+        ordering = ["-created_at"]
+
     def __str__(self):
         return self.title
 
 
 class ReadyWorkFile(models.Model):
-    """Файлы готовой работы"""
-    
     work = models.ForeignKey(
         ReadyWork,
         on_delete=models.CASCADE,
         related_name="files",
-        verbose_name="Работа"
+        verbose_name="Работа",
     )
     name = models.CharField("Название файла", max_length=255)
     file = models.FileField("Файл", upload_to="ready_works/")
     file_type = models.CharField("Тип файла", max_length=50, blank=True)
     file_size = models.PositiveIntegerField("Размер файла", default=0)
-    
     created_at = models.DateTimeField("Создано", auto_now_add=True)
-    
+
     class Meta:
         verbose_name = "Файл готовой работы"
         verbose_name_plural = "Файлы готовых работ"
-    
+
     def __str__(self):
         return f"{self.work.title} - {self.name}"
 
 
 class Purchase(models.Model):
-    """Покупка готовой работы"""
-    
     work = models.ForeignKey(
         ReadyWork,
         on_delete=models.CASCADE,
-        verbose_name="Работа"
+        verbose_name="Работа",
     )
     buyer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name="Покупатель",
-        related_name="purchases"
+        related_name="purchases",
     )
     price_paid = models.DecimalField("Оплаченная цена", max_digits=10, decimal_places=2)
-
     delivered_file = models.FileField("Файл работы", upload_to="purchases/", blank=True, null=True)
     delivered_file_name = models.CharField("Имя файла", max_length=255, blank=True, default="")
     delivered_file_type = models.CharField("Тип файла", max_length=50, blank=True, default="")
     delivered_file_size = models.PositiveIntegerField("Размер файла", default=0)
-
     rating = models.PositiveSmallIntegerField("Оценка", blank=True, null=True)
     rated_at = models.DateTimeField("Дата оценки", blank=True, null=True)
-    
     created_at = models.DateTimeField("Дата покупки", auto_now_add=True)
-    
+
     class Meta:
         verbose_name = "Покупка"
         verbose_name_plural = "Покупки"
-        unique_together = ['work', 'buyer']  # Один пользователь не может купить одну работу дважды
-    
+        ordering = ["-created_at", "-id"]
+
     def __str__(self):
         return f"{self.buyer.username} купил {self.work.title}"
 
 
 class FavoriteWork(models.Model):
-    """Избранные работы"""
-    
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='favorite_works',
-        verbose_name="Пользователь"
+        related_name="favorite_works",
+        verbose_name="Пользователь",
     )
     work = models.ForeignKey(
         ReadyWork,
         on_delete=models.CASCADE,
-        related_name='favorited_by',
-        verbose_name="Работа"
+        related_name="favorited_by",
+        verbose_name="Работа",
     )
     created_at = models.DateTimeField("Дата добавления", auto_now_add=True)
 
     class Meta:
         verbose_name = "Избранная работа"
         verbose_name_plural = "Избранные работы"
-        unique_together = ['user', 'work']
+        unique_together = ["user", "work"]
 
     def __str__(self):
         return f"{self.user.username} добавил в избранное {self.work.title}"

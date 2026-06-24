@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Layout, Typography, Avatar, Empty } from 'antd';
 import { MessageOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -50,9 +50,11 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
         const response = await axios.get(`${API_BASE}/api/knowledge/questions/`);
         const payload = response.data;
         const allQuestions: unknown =
-          Array.isArray(payload) ? payload :
-          (payload && typeof payload === 'object' && Array.isArray((payload as any).results)) ? (payload as any).results :
-          [];
+          Array.isArray(payload)
+            ? payload
+            : payload && typeof payload === 'object' && Array.isArray((payload as { results?: unknown[] }).results)
+              ? (payload as { results: unknown[] }).results
+              : [];
 
         const recentQuestions = (allQuestions as Question[]).slice(-5);
         setQuestions(Array.isArray(recentQuestions) ? recentQuestions : []);
@@ -98,19 +100,19 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
       collapsed={false}
     >
       <div className={styles.rightSidebarContent}>
-        <Title 
-          level={4} 
+        <Title
+          level={4}
           className={styles.mainTitle}
           onClick={handleTitleClick}
           style={{ cursor: 'pointer' }}
         >
           Око Ответы
         </Title>
-        
+
         <div className={styles.questionsList}>
           {questions.length === 0 ? (
-            <Empty 
-              description="Пока нет вопросов" 
+            <Empty
+              description="Пока нет вопросов"
               image={Empty.PRESENTED_IMAGE_SIMPLE}
               style={{ padding: '20px 0' }}
             />
@@ -118,26 +120,21 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
             questions.map((q) => (
               <div key={q.id} className={styles.questionCard} onClick={() => handleQuestionClick(q.id)}>
                 <div className={styles.questionHeader}>
-                  <Avatar 
-                    size={24} 
-                    src={q.author.avatar} 
-                    icon={<UserOutlined />} 
+                  <Avatar
+                    size={24}
+                    src={q.author.avatar}
+                    icon={<UserOutlined />}
                     className={styles.avatar}
                   />
-                  <Text
-                    className={styles.authorName}
-                    onClick={(e) => handleAuthorClick(q.author, e)}
-                  >{getDisplayUsername(q.author)}</Text>
-                </div>
-                
-                <Text className={styles.questionText}>
-                  {q.title}
-                </Text>
-                
-                <div className={styles.questionFooter}>
-                  <Text className={styles.dateText}>
-                    {dayjs(q.created_at).fromNow()}
+                  <Text className={styles.authorName} onClick={(e) => handleAuthorClick(q.author, e)}>
+                    {getDisplayUsername(q.author)}
                   </Text>
+                </div>
+
+                <Text className={styles.questionText}>{q.title}</Text>
+
+                <div className={styles.questionFooter}>
+                  <Text className={styles.dateText}>{dayjs(q.created_at).fromNow()}</Text>
                   <div className={styles.answersBlock}>
                     <MessageOutlined className={styles.messageIcon} />
                     <Text className={styles.answersCount}>{q.answers_count}</Text>

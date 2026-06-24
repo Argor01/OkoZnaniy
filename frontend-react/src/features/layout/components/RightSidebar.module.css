@@ -1,5 +1,5 @@
 .rightSidebar {
-  background: #ffffff;
+  background: #ffffff !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   position: sticky;
@@ -30,11 +30,12 @@
 }
 
 .rightSidebar:global(.ant-layout-sider) {
-  background: transparent !important;
+  background: #ffffff !important;
+  border-radius: 22px;
 }
 
 .rightSidebar:global(.ant-layout-sider-children) {
-  background: #ffffff;
+  background: #ffffff !important;
   border-radius: 22px;
   height: 100%;
 }
@@ -160,23 +161,27 @@
 
 /* ===== DARK THEME ===== */
 :global([data-theme="dark"]) .rightSidebar {
-  background: var(--color-sidebar-bg, #161922);
-  border-color: var(--color-border-base, #2d3348);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background: #ffffff !important;
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 :global([data-theme="dark"]) .rightSidebar:global(.ant-layout-sider-children) {
-  background: var(--color-sidebar-bg, #161922);
+  background: #ffffff !important;
+}
+
+:global([data-theme="dark"]) .rightSidebar:global(.ant-layout-sider) {
+  background: #ffffff !important;
 }
 
 :global([data-theme="dark"]) .mainTitle {
-  color: var(--color-text-heading, #e2e8f0) !important;
-  border-color: var(--color-border-base, #2d3348);
+  color: #1f2937 !important;
+  border-color: #f3f4f6;
 }
 
 :global([data-theme="dark"]) .questionCard {
-  background: var(--color-bg-container, #1a1d27);
-  border-color: var(--color-text-base, #cbd5e1);
+  background: #f3f4f6;
+  border-color: #1f2937;
 }
 
 :global([data-theme="dark"]) .questionCard:hover {
@@ -185,7 +190,7 @@
 }
 
 :global([data-theme="dark"]) .authorName {
-  color: var(--color-text-secondary, #94a3b8);
+  color: #4b5563;
 }
 
 :global([data-theme="dark"]) .authorName:hover {
@@ -193,20 +198,20 @@
 }
 
 :global([data-theme="dark"]) .questionText {
-  color: var(--color-text-base, #cbd5e1);
+  color: #1f2937;
 }
 
 :global([data-theme="dark"]) .dateText {
-  color: var(--color-text-tertiary, #64748b);
+  color: #9ca3af;
 }
 
 :global([data-theme="dark"]) .answersBlock {
-  color: var(--color-text-secondary, #94a3b8);
+  color: #6b7280;
 }
 
 :global([data-theme="dark"]) .avatar {
-  background-color: var(--color-bg-spotlight, #1e2230);
-  color: var(--color-text-secondary, #94a3b8);
+  background-color: #f3f4f6;
+  color: #9ca3af;
 }
 
 /* ===== ANIMATIONS ===== */

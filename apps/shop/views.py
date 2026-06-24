@@ -1,17 +1,13 @@
-from rest_framework import viewsets, permissions, status
+﻿from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.db.models import Q, Exists, OuterRef
-from django.db.models import Avg, Count
+from django.conf import settings
+from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.http import FileResponse
 import mimetypes
-from django.conf import settings
-from .models import ReadyWork, Purchase, FavoriteWork
-from .serializers import (
-    ReadyWorkSerializer, 
-    CreateReadyWorkSerializer, 
-    PurchaseSerializer
-)
+
+from .models import FavoriteWork, Purchase, ReadyWork
+from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
 
 class IsExpertOrStaff(permissions.BasePermission):
@@ -22,56 +18,47 @@ class IsExpertOrStaff(permissions.BasePermission):
 
 
 class ReadyWorkViewSet(viewsets.ModelViewSet):
-    """ViewSet для готовых работ"""
-    
+    """ViewSet для готовых работ."""
+
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
         queryset = ReadyWork.objects.filter(is_active=True).select_related('subject', 'work_type', 'author').order_by('-created_at')
         user = self.request.user
 
-        # Аннотация избранного
         if user.is_authenticated:
-             queryset = queryset.annotate(
+            queryset = queryset.annotate(
                 is_favorite=Exists(FavoriteWork.objects.filter(user=user, work=OuterRef('pk')))
             )
-        
-        # Фильтрация по избранному
+
         is_favorite_filter = self.request.query_params.get('is_favorite')
         if is_favorite_filter == 'true' and user.is_authenticated:
             queryset = queryset.filter(is_favorite=True)
-        
-        # Фильтрация по предмету
+
         subject = self.request.query_params.get('subject')
         if subject:
             queryset = queryset.filter(subject_id=subject)
-        
-        # Фильтрация по типу работы
+
         work_type = self.request.query_params.get('work_type')
         if work_type:
             queryset = queryset.filter(work_type_id=work_type)
-            
-        # Фильтрация по автору
+
         author = self.request.query_params.get('author')
         if author:
             queryset = queryset.filter(author_id=author)
-        
-        # Поиск по названию
+
         search = self.request.query_params.get('search')
         if search:
-            queryset = queryset.filter(
-                Q(title__icontains=search) | 
-                Q(description__icontains=search)
-            )
+            queryset = queryset.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
         queryset = queryset.annotate(
             rating_avg=Avg('purchase__rating'),
             rating_count=Count('purchase__rating'),
             purchase_count=Count('purchase', distinct=True),
         )
-        
+
         return queryset.select_related('subject', 'work_type', 'author').prefetch_related('files')
-    
+
     def get_serializer_class(self):
         if self.action == 'create':
             return CreateReadyWorkSerializer
@@ -83,27 +70,24 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [permissions.IsAuthenticated()]
         return super().get_permissions()
-    
+
     def create(self, request, *args, **kwargs):
         import logging
+
         logger = logging.getLogger(__name__)
-        logger.info('[ReadyWorkViewSet.create] Data keys: %s, FILES keys: %s',
-                     list(request.data.keys()), list(request.FILES.keys()))
-        
+        logger.info('[ReadyWorkViewSet.create] Data keys: %s, FILES keys: %s', list(request.data.keys()), list(request.FILES.keys()))
+
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             logger.warning('[ReadyWorkViewSet.create] Validation errors: %s', serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Обрабатываем множественные файлы
+
         work_files = request.FILES.getlist('work_files')
         if work_files:
             max_files = getattr(settings, 'MAX_READY_WORK_FILES', 5)
             if len(work_files) > max_files:
-                return Response(
-                    {'detail': f'Максимум файлов на работу: {max_files}'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'detail': f'Максимум файлов на работу: {max_files}'}, status=status.HTTP_400_BAD_REQUEST)
+
             allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [])
             max_size = getattr(settings, 'MAX_UPLOAD_SIZE', 50 * 1024 * 1024)
             for uploaded_file in work_files:
@@ -111,88 +95,60 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
                 if allowed_extensions and ext not in allowed_extensions:
                     return Response(
                         {'detail': f'Недопустимый тип файла. Разрешены: {", ".join(allowed_extensions)}'},
-                        status=status.HTTP_400_BAD_REQUEST
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
                 if uploaded_file.size > max_size:
                     return Response(
-                        {'detail': f'Размер файла не должен превышать {max_size // (1024*1024)} МБ.'},
-                        status=status.HTTP_400_BAD_REQUEST
+                        {'detail': f'Размер файла не должен превышать {max_size // (1024 * 1024)} МБ.'},
+                        status=status.HTTP_400_BAD_REQUEST,
                     )
-        
-        # Добавляем файлы в validated_data
+
         if work_files:
             serializer.validated_data['work_files'] = work_files
-        
+
         work = serializer.save(author=request.user)
-        
-        # Возвращаем полные данные работы с файлами
         response_serializer = ReadyWorkSerializer(work, context={'request': request})
         headers = self.get_success_headers(response_serializer.data)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-    
+
     @action(detail=False, methods=['get'])
     def my_works(self, request):
-        """Получить работы текущего пользователя"""
-        works = ReadyWork.objects.filter(
-            author=request.user,
-            is_active=True
-        ).select_related('subject', 'work_type')
-        
+        works = ReadyWork.objects.filter(author=request.user, is_active=True).select_related('subject', 'work_type')
         serializer = self.get_serializer(works, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def toggle_favorite(self, request, pk=None):
-        """Добавить/удалить из избранного"""
         work = self.get_object()
         favorite, created = FavoriteWork.objects.get_or_create(user=request.user, work=work)
-        
+
         if not created:
             favorite.delete()
             return Response({'status': 'removed', 'is_favorite': False})
-            
+
         return Response({'status': 'added', 'is_favorite': True})
-    
+
     @action(detail=True, methods=['post'])
     def purchase(self, request, pk=None):
-        """Купить готовую работу"""
+        """Купить готовую работу."""
         work = self.get_object()
-        
-        # Проверяем, что пользователь не покупает свою работу
+
         if work.author == request.user:
-            return Response(
-                {'error': 'Нельзя купить собственную работу'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Проверяем, что работа еще не куплена этим пользователем
-        if Purchase.objects.filter(work=work, buyer=request.user).exists():
-            return Response(
-                {'error': 'Работа уже куплена'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Создаем покупку
-        purchase = Purchase.objects.create(
-            work=work,
-            buyer=request.user,
-            price_paid=work.price
-        )
-        
-        serializer = PurchaseSerializer(purchase)
+            return Response({'error': 'Нельзя купить собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
+
+        purchase = Purchase.objects.create(work=work, buyer=request.user, price_paid=work.price)
+        serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet для покупок"""
-    
+    """ViewSet для покупок."""
+
     serializer_class = PurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
-        return Purchase.objects.filter(
-            buyer=self.request.user
-        ).select_related('work', 'work__subject', 'work__work_type', 'work__author')
+        return Purchase.objects.filter(buyer=self.request.user).select_related('work', 'work__subject', 'work__work_type', 'work__author')
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -213,6 +169,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'detail': 'rating должен быть в диапазоне 1..5'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
+
         purchase.rating = rating
         purchase.rated_at = timezone.now()
         purchase.save(update_fields=['rating', 'rated_at'])

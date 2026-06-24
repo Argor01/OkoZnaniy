@@ -70,7 +70,7 @@ export function useOrderDetail(orderId?: string) {
     if (status === 404 && orderId) {
       const idNum = Number(orderId);
       if (!Number.isNaN(idNum)) removeOrderFromCaches(idNum);
-      message.warning('Заказ был удалён и больше недоступен');
+      message.warning('Р—Р°РєР°Р· Р±С‹Р» СѓРґР°Р»С‘РЅ Рё Р±РѕР»СЊС€Рµ РЅРµРґРѕСЃС‚СѓРїРµРЅ');
       navigate(ROUTES.orders.feed);
     }
   }, [orderError, orderId, navigate, removeOrderFromCaches]);
@@ -100,45 +100,63 @@ export function useOrderDetail(orderId?: string) {
     try {
       setReviewSubmitting(true);
       setReviewActionLoading('approve');
-      await ordersApi.approveOrder(Number(orderId));
+
+      if (order?.status === 'review') {
+        await ordersApi.approveOrder(Number(orderId));
+      } else if (order?.status !== 'completed') {
+        message.error('Оставить отзыв можно только после проверки или завершения заказа');
+        return;
+      }
+
       await ordersApi.createReview(Number(orderId), reviewRating, reviewComment.trim());
       await refreshOrderWithLists();
       setReviewModalOpen(false);
       setReviewRating(5);
       setReviewComment('');
-      message.success('Работа принята, отзыв оставлен');
+      message.success(order?.status === 'review' ? 'Работа принята, отзыв оставлен' : 'Отзыв сохранён');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось принять работу');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'Не удалось сохранить отзыв');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [orderId, refreshOrderWithLists, reviewRating, reviewComment]);
+  }, [order?.status, orderId, refreshOrderWithLists, reviewRating, reviewComment]);
 
   const handleApproveWithoutReview = useCallback(async () => {
     if (!orderId) return;
     try {
       setReviewSubmitting(true);
       setReviewActionLoading('approve');
-      await ordersApi.approveOrder(Number(orderId));
+
+      if (order?.status === 'review') {
+        await ordersApi.approveOrder(Number(orderId));
+      } else if (order?.status !== 'completed') {
+        message.error('Принять работу можно только из статуса проверки');
+        return;
+      }
+
       await refreshOrderWithLists();
       setReviewModalOpen(false);
       setReviewRating(5);
       setReviewComment('');
-      message.success('Работа принята. Вы сможете оставить отзыв позже в разделе «Отзывы».');
+      message.success(
+        order?.status === 'review'
+          ? 'Работа принята. Вы сможете оставить отзыв позже.'
+          : 'Заказ уже завершён. Отзыв можно оставить позже.'
+      );
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось принять работу');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'Не удалось принять работу');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [orderId, refreshOrderWithLists]);
+  }, [order?.status, orderId, refreshOrderWithLists]);
 
   const handleConfirmRevisionFromCard = useCallback(async () => {
     if (!orderId) return;
     const comment = revisionComment.trim();
     if (!comment) {
-      message.warning('Добавьте комментарий для доработки');
+      message.warning('Р”РѕР±Р°РІСЊС‚Рµ РєРѕРјРјРµРЅС‚Р°СЂРёР№ РґР»СЏ РґРѕСЂР°Р±РѕС‚РєРё');
       return;
     }
     try {
@@ -148,9 +166,9 @@ export function useOrderDetail(orderId?: string) {
       await refreshOrderWithLists();
       setRevisionModalOpen(false);
       setRevisionComment('');
-      message.success('Работа отправлена на доработку');
+      message.success('Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° РґРѕСЂР°Р±РѕС‚РєСѓ');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось отправить на доработку');
+      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РїСЂР°РІРёС‚СЊ РЅР° РґРѕСЂР°Р±РѕС‚РєСѓ');
     } finally {
       setRevisionSubmitting(false);
       setReviewActionLoading(null);
@@ -163,9 +181,9 @@ export function useOrderDetail(orderId?: string) {
       setReviewActionLoading('reject');
       await ordersApi.rejectOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success('Работа отклонена');
+      message.success('Р Р°Р±РѕС‚Р° РѕС‚РєР»РѕРЅРµРЅР°');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось отклонить работу');
+      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ');
     } finally {
       setReviewActionLoading(null);
     }
@@ -177,7 +195,7 @@ export function useOrderDetail(orderId?: string) {
       setAssigningExpertId(expertId);
       const response = await ordersApi.acceptBid(Number(orderId), bidId);
       await refreshOrderWithLists();
-      message.success(`Эксперт ${expertUsername} назначен исполнителем`);
+      message.success(`Р­РєСЃРїРµСЂС‚ ${expertUsername} РЅР°Р·РЅР°С‡РµРЅ РёСЃРїРѕР»РЅРёС‚РµР»РµРј`);
       const chatId = response?.chat_id;
       if (chatId) {
         setTimeout(() => { dashboard.openOrderChat(Number(orderId), expertId, chatId); }, 300);
@@ -187,7 +205,7 @@ export function useOrderDetail(orderId?: string) {
         }, 500);
       }
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось назначить исполнителя');
+      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р·РЅР°С‡РёС‚СЊ РёСЃРїРѕР»РЅРёС‚РµР»СЏ');
     } finally {
       setAssigningExpertId(null);
     }
@@ -200,15 +218,15 @@ export function useOrderDetail(orderId?: string) {
       const uploadPromises = files.map(file =>
         ordersApi.uploadOrderFile(Number(orderId), file, {
           file_type: 'solution',
-          description: 'Готовая работа загружена экспертом'
+          description: 'Р“РѕС‚РѕРІР°СЏ СЂР°Р±РѕС‚Р° Р·Р°РіСЂСѓР¶РµРЅР° СЌРєСЃРїРµСЂС‚РѕРј'
         })
       );
       await Promise.all(uploadPromises);
       await ordersApi.submitOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
+      message.success(files.length > 1 ? 'Р Р°Р±РѕС‚С‹ РѕС‚РїСЂР°РІР»РµРЅС‹ РЅР° РїСЂРѕРІРµСЂРєСѓ' : 'Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° РїСЂРѕРІРµСЂРєСѓ');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Ошибка при загрузке файлов');
+      message.error(e?.response?.data?.detail || 'РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»РѕРІ');
     } finally {
       setUploadingFiles(false);
     }
@@ -220,7 +238,7 @@ export function useOrderDetail(orderId?: string) {
       const fileIdNum = Number(file?.id);
       const filename = file?.filename || file?.file_name || 'file';
       if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
-        message.error('Не удалось скачать файл');
+        message.error('РќРµ СѓРґР°Р»РѕСЃСЊ СЃРєР°С‡Р°С‚СЊ С„Р°Р№Р»');
         return;
       }
       const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
@@ -235,29 +253,29 @@ export function useOrderDetail(orderId?: string) {
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 401) {
-        message.error('Не авторизовано для скачивания файла');
+        message.error('РќРµ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРѕ РґР»СЏ СЃРєР°С‡РёРІР°РЅРёСЏ С„Р°Р№Р»Р°');
       } else {
-        message.error('Ошибка при скачивании файла');
+        message.error('РћС€РёР±РєР° РїСЂРё СЃРєР°С‡РёРІР°РЅРёРё С„Р°Р№Р»Р°');
       }
     }
   }, [orderId]);
 
   const handleDeleteOrderFile = useCallback((file: any) => {
     if (!orderId || !file?.id) return;
-    const filename = file?.filename || file?.file_name || 'файл';
+    const filename = file?.filename || file?.file_name || 'С„Р°Р№Р»';
     Modal.confirm({
-      title: 'Удалить файл?',
-      content: `Файл "${filename}" будет удалён из заказа.`,
-      okText: 'Удалить',
-      cancelText: 'Отмена',
+      title: 'РЈРґР°Р»РёС‚СЊ С„Р°Р№Р»?',
+      content: `Р¤Р°Р№Р» "${filename}" Р±СѓРґРµС‚ СѓРґР°Р»С‘РЅ РёР· Р·Р°РєР°Р·Р°.`,
+      okText: 'РЈРґР°Р»РёС‚СЊ',
+      cancelText: 'РћС‚РјРµРЅР°',
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
           await ordersApi.deleteOrderFile(Number(orderId), Number(file.id));
           await refreshOrderWithLists();
-          message.success('Файл удалён');
+          message.success('Р¤Р°Р№Р» СѓРґР°Р»С‘РЅ');
         } catch (e: any) {
-          message.error(e?.response?.data?.detail || 'Не удалось удалить файл');
+          message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р»');
         }
       },
     });

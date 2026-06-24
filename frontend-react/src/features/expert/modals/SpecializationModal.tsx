@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select } from 'antd';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
 import SkillsSelectNew from '../components/inputs/SkillsSelectNew';
 import styles from './SpecializationModal.module.css';
@@ -24,7 +24,7 @@ interface SpecializationModalProps {
 const SpecializationModal: React.FC<SpecializationModalProps> = ({
   visible,
   onClose,
-  editingSpecialization
+  editingSpecialization,
 }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
@@ -41,7 +41,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 
   React.useEffect(() => {
     if (visible && isMobile) {
-      // Блокируем прокрутку только на мобильных устройствах
       const originalStyle = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = 'hidden';
       return () => {
@@ -50,7 +49,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
     }
   }, [visible, isMobile]);
 
-  const {data: subjects = []} = useSubjects();
+  const { data: subjects = [] } = useSubjects();
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: CreateSpecializationRequest) => expertsApi.createSpecialization(data),
@@ -100,14 +99,16 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         hourly_rate: toNumberOrUndefined(editingSpecialization.hourly_rate),
         description: editingSpecialization.description,
       };
-      
-      
+
       if (editingSpecialization.skills && typeof editingSpecialization.skills === 'string') {
-        formValues.skills = editingSpecialization.skills.split(',').map((s: string) => s.trim()).filter((s: string) => s);
+        formValues.skills = editingSpecialization.skills
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s);
       } else if (Array.isArray(editingSpecialization.skills)) {
         formValues.skills = editingSpecialization.skills;
       }
-      
+
       form.setFieldsValue(formValues);
     } else if (visible) {
       form.resetFields();
@@ -149,7 +150,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         form={form}
         layout="vertical"
         onFinish={(values: SpecializationFormValues) => {
-          const selectedSubject = subjects.find(s => s.id === values.subject_id);
+          const selectedSubject = subjects.find((s) => s.id === values.subject_id);
           const dataToSend: CreateSpecializationRequest = {
             subject_id: values.subject_id,
             custom_name: values.custom_name || selectedSubject?.name,
@@ -162,7 +163,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
                 ? values.skills
                 : undefined,
           };
-          
+
           if (editingSpecialization) {
             updateSpecializationMutation.mutate({ id: editingSpecialization.id, data: dataToSend });
           } else {
@@ -181,10 +182,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             className={styles.inputField}
             showSearch
             optionFilterProp="children"
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-            options={subjects.map(subject => ({
+            filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+            options={subjects.map((subject) => ({
               value: subject.id,
               label: subject.name,
             }))}
@@ -192,7 +191,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             virtual={!isMobile}
           />
         </Form.Item>
-        
+
         <Form.Item
           label="Своё название (необязательно)"
           name="custom_name"
@@ -205,18 +204,18 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             maxLength={100}
           />
         </Form.Item>
-        
+
         <div className={`${styles.specializationModalGrid} ${isMobile ? styles.specializationModalGridMobile : styles.specializationModalGridDesktop}`}>
           <Form.Item
             label="Опыт работы (лет)"
             name="experience_years"
             rules={[
               { required: true, message: 'Укажите опыт работы' },
-              { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' }
+              { type: 'number', min: 0, max: 90, message: 'Опыт должен быть от 0 до 90 лет' },
             ]}
           >
-            <AntInputNumber 
-              min={0} 
+            <AntInputNumber
+              min={0}
               max={90}
               precision={0}
               parser={(value) => {
@@ -224,7 +223,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
                 const parsed = value.replace(/\D/g, '');
                 return parsed ? Number(parsed) : 0;
               }}
-              formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+              formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
               controls={false}
               className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
               size={isMobile ? 'middle' : 'large'}
@@ -241,10 +240,10 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             name="hourly_rate"
             rules={[
               { required: true, message: 'Укажите часовую ставку' },
-              { type: 'number', min: 0, message: 'Ставка должна быть положительным числом' }
+              { type: 'number', min: 0, message: 'Ставка должна быть положительным числом' },
             ]}
           >
-            <AntInputNumber 
+            <AntInputNumber
               min={0}
               max={999999}
               precision={0}
@@ -253,7 +252,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
                 const parsed = value.replace(/\D/g, '');
                 return parsed ? Number(parsed) : 0;
               }}
-              formatter={(value) => value !== undefined && value !== null ? String(value) : ''}
+              formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
               controls={false}
               step={100}
               className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
@@ -280,12 +279,9 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             getPopupContainer={() => document.body}
           />
         </Form.Item>
-        <Form.Item
-          label="Описание"
-          name="description"
-        >
-          <Input.TextArea 
-            rows={isMobile ? 3 : 4} 
+        <Form.Item label="Описание" name="description">
+          <Input.TextArea
+            rows={isMobile ? 3 : 4}
             placeholder="Опишите ваш опыт в этой области"
             className={styles.textareaField}
           />

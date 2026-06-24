@@ -1,8 +1,9 @@
 import React from 'react';
-import { Select, Modal, Input, Button, message } from 'antd';
+import { Select, Modal, Input, Button, message, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { catalogApi } from '@/features/common/api/catalog';
+import { POPULAR_SKILLS } from '@/config/skills';
 
 interface SkillsSelectNewProps {
   value?: string[] | number[];
@@ -59,11 +60,39 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
   });
 
   const options = React.useMemo(() => {
-    return skills.map((skill) => ({
+    const apiOptions = skills.map((skill) => ({
       label: skill.name,
-      value: valueType === 'id' ? skill.id : skill.name
+      value: valueType === 'id' ? skill.id : skill.name,
     }));
+
+    if (valueType === 'id') {
+      return apiOptions;
+    }
+
+    const merged = new Map<string, { label: string; value: string }>();
+    for (const option of apiOptions) {
+      merged.set(String(option.value).toLowerCase(), {
+        label: String(option.label),
+        value: String(option.value),
+      });
+    }
+    for (const skillName of POPULAR_SKILLS) {
+      const key = skillName.toLowerCase();
+      if (!merged.has(key)) {
+        merged.set(key, { label: skillName, value: skillName });
+      }
+    }
+
+    return Array.from(merged.values()).sort((a, b) => a.label.localeCompare(b.label, 'ru'));
   }, [skills, valueType]);
+
+  const notFoundContent = isLoading ? (
+    <div style={{ padding: 12, textAlign: 'center' }}>
+      <Spin size="small" />
+    </div>
+  ) : (
+    'Нет навыков. Можно добавить свой.'
+  );
 
   return (
     <>
@@ -76,18 +105,19 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
         onChange={onChange}
         options={options}
         loading={isLoading}
+        notFoundContent={notFoundContent}
         maxTagCount="responsive"
         showSearch
         disabled={disabled}
         filterOption={(input, option) =>
-          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+          String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
         }
         getPopupContainer={getPopupContainer}
         popupRender={(menu) => (
           <>
             {menu}
             {!disabled && (
-              <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0' }}>
+              <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0', background: '#fff' }}>
                 <Button
                   type="text"
                   icon={<PlusOutlined />}

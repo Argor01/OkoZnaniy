@@ -461,35 +461,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       if (!silent) setLoading(true);
       try {
         const data = await chatApi.getAll();
-        // Удаляем дубликаты чатов по other_user.id, оставляя самый последний
-        const uniqueChatsMap = new Map<number, ChatListItem>();
-        data.forEach((chat) => {
-          const otherUserId = chat.other_user?.id;
-          if (!otherUserId) {
-            // Если other_user.id отсутствует, используем chat.id как ключ
-            uniqueChatsMap.set(chat.id, chat);
-            return;
-          }
-          const existing = uniqueChatsMap.get(otherUserId);
-          if (!existing) {
-            uniqueChatsMap.set(otherUserId, chat);
-          } else {
-            // Оставляем чат с более поздним last_message_time
-            const existingTime = new Date(existing.last_message_time || 0).getTime();
-            const newTime = new Date(chat.last_message_time || 0).getTime();
-            if (newTime > existingTime) {
-              uniqueChatsMap.set(otherUserId, chat);
-            }
-          }
-        });
-        const deduplicatedData = Array.from(uniqueChatsMap.values());
-      
+
         setChatList((prev) => {
-          if (!Array.isArray(prev) || prev.length !== deduplicatedData.length) return deduplicatedData;
+          if (!Array.isArray(prev) || prev.length !== data.length) return data;
 
           const prevById = new Map(prev.map((chat) => [chat.id, chat]));
           let changed = false;
-          const merged = deduplicatedData.map((nextChat) => {
+          const merged = data.map((nextChat) => {
             const prevChat = prevById.get(nextChat.id);
             if (!prevChat) {
               changed = true;
