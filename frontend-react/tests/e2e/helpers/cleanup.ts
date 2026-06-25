@@ -100,20 +100,8 @@ print('cleanup-ok')
 
 export function cleanupE2EData() {
   const cleanupScript = buildCleanupScript();
-  const baseEnv = {
-    ...process.env,
-    ...LOCAL_DJANGO_ENV,
-  };
 
   try {
-    execFileSync('python', ['manage.py', 'shell', '-c', cleanupScript], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-      env: baseEnv,
-      stdio: 'pipe',
-    });
-    return;
-  } catch {
     execFileSync('docker', [
       'exec',
       'okoznaniy-backend-1',
@@ -125,6 +113,19 @@ export function cleanupE2EData() {
     ], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
+      stdio: 'pipe',
+    });
+    return;
+  } catch {
+    const baseEnv = {
+      ...process.env,
+      ...LOCAL_DJANGO_ENV,
+    };
+
+    execFileSync('python', ['manage.py', 'shell', '-c', cleanupScript], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      env: baseEnv,
       stdio: 'pipe',
     });
   }

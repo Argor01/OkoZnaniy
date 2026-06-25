@@ -1748,12 +1748,16 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
     """ViewSet для чат-комнат директора"""
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = DirectorChatRoomSerializer
+
+    @staticmethod
+    def _can_access_director_chats(user):
+        return getattr(user, 'role', None) in ['admin', 'director']
     
     def get_queryset(self):
         user = self.request.user
         
         # Только админы и директор могут видеть чаты
-        if user.role not in ['admin', 'director']:
+        if not self._can_access_director_chats(user):
             return DirectorChatRoom.objects.none()
         
         # Показываем чаты, где пользователь - участник
@@ -1761,6 +1765,14 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
             members=user,
             is_active=True
         ).prefetch_related('members', 'messages__sender').order_by('-updated_at')
+
+    def create(self, request, *args, **kwargs):
+        if not self._can_access_director_chats(request.user):
+            return Response(
+                {'error': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРѕРІ Рё РґРёСЂРµРєС‚РѕСЂРѕРІ'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        return super().create(request, *args, **kwargs)
     
     def perform_create(self, serializer):
         room = serializer.save(created_by=self.request.user)

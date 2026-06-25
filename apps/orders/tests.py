@@ -23,6 +23,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
+from apps.chat.models import Chat, Message
 from apps.orders.models import Order
 
 User = get_user_model()
@@ -115,3 +116,125 @@ class OrderCreationRegressionTests(TestCase):
             status="new",
         )
         self.assertIsNotNone(order.pk)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class OrderReviewLifecycleTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name="Order lifecycle subject")
+        cls.work_type = WorkType.objects.create(name="Order lifecycle work type")
+        cls.client_user = User.objects.create_user(
+            username="orders_lifecycle_client",
+            email="orders_lifecycle_client@example.com",
+            password="testpass123",
+            role="client",
+        )
+        cls.expert_user = User.objects.create_user(
+            username="orders_lifecycle_expert",
+            email="orders_lifecycle_expert@example.com",
+            password="testpass123",
+            role="expert",
+        )
+        cls.other_client = User.objects.create_user(
+            username="orders_lifecycle_other",
+            email="orders_lifecycle_other@example.com",
+            password="testpass123",
+            role="client",
+        )
+
+    def setUp(self):
+        self.api_client = APIClient()
+
+    def _create_order(self, **overrides):
+        defaults = {
+            "client": self.client_user,
+            "expert": self.expert_user,
+            "subject": self.subject,
+            "work_type": self.work_type,
+            "title": "Lifecycle order",
+            "description": "Order for lifecycle tests",
+            "budget": Decimal("5000"),
+            "deadline": timezone.now() + timedelta(days=5),
+            "status": "in_progress",
+        }
+        defaults.update(overrides)
+        return Order.objects.create(**defaults)
+
+    def test_expert_can_submit_work_for_review(self):
+        order = self._create_order(status="in_progress")
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/submit/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "review")
+
+    def test_non_executor_cannot_submit_work_for_review(self):
+        order = self._create_order(status="in_progress")
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/submit/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "in_progress")
+
+    def test_client_can_approve_review_order(self):
+        order = self._create_order(status="review")
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "completed")
+
+    def test_other_client_cannot_approve_review_order(self):
+        order = self._create_order(status="review")
+        self.api_client.force_authenticate(user=self.other_client)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "review")
+
+    def test_client_can_send_review_order_to_revision_and_chat_gets_message(self):
+        order = self._create_order(status="review")
+        chat = Chat.objects.create(order=order, client=self.client_user, expert=self.expert_user)
+        chat.participants.add(self.client_user, self.expert_user)
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/revision/",
+            {"comment": "Please fix the calculations"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "revision")
+        self.assertTrue(
+            Message.objects.filter(
+                chat=chat,
+                sender=self.client_user,
+                message_type="system",
+                offer_data__revision_comment="Please fix the calculations",
+            ).exists()
+        )
+
+    def test_revision_requires_comment(self):
+        order = self._create_order(status="review")
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/revision/",
+            {"comment": "   "},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "review")

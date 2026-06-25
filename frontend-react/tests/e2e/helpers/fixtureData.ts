@@ -27,10 +27,12 @@ export interface E2EFixtureData {
   client: E2EFixtureUser;
   expert: E2EFixtureUser;
   partner: E2EFixtureUser;
+  director: E2EFixtureUser;
   auth: {
     client: E2EAuthPayload;
     expert: E2EAuthPayload;
     partner: E2EAuthPayload;
+    director: E2EAuthPayload;
   };
   category: { id: number; name: string };
   subject: { id: number; name: string };
@@ -44,6 +46,8 @@ export interface E2EFixtureData {
 export const authDir = path.resolve(__dirname, '..', '.auth');
 export const clientStorageState = path.join(authDir, 'client.json');
 export const expertStorageState = path.join(authDir, 'expert.json');
+export const partnerStorageState = path.join(authDir, 'partner.json');
+export const directorStorageState = path.join(authDir, 'director.json');
 
 export function loadFixtureData(): E2EFixtureData {
   const fixturePath = path.join(authDir, 'fixture-data.json');

@@ -30,10 +30,12 @@ interface E2EFixtureData {
   client: E2EFixtureUser;
   expert: E2EFixtureUser;
   partner: E2EFixtureUser;
+  director: E2EFixtureUser;
   auth: {
     client: LoginPayload;
     expert: LoginPayload;
     partner: LoginPayload;
+    director: LoginPayload;
   };
   category: { id: number; name: string };
   subject: { id: number; name: string };
@@ -51,6 +53,8 @@ const AUTH_DIR = path.resolve(__dirname, '.auth');
 const FIXTURE_PATH = path.join(AUTH_DIR, 'fixture-data.json');
 const CLIENT_STATE_PATH = path.join(AUTH_DIR, 'client.json');
 const EXPERT_STATE_PATH = path.join(AUTH_DIR, 'expert.json');
+const PARTNER_STATE_PATH = path.join(AUTH_DIR, 'partner.json');
+const DIRECTOR_STATE_PATH = path.join(AUTH_DIR, 'director.json');
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 const LOCAL_DJANGO_ENV = {
   DEBUG: process.env.DEBUG ?? 'True',
@@ -115,13 +119,23 @@ User = get_user_model()
 client_email = f'client.{run_id}@e2e.local'
 expert_email = f'expert.{run_id}@e2e.local'
 partner_email = f'partner.{run_id}@e2e.local'
+director_email = f'director.{run_id}@e2e.local'
 client_username = f'client_{run_id}'
 expert_username = f'expert_{run_id}'
 partner_username = f'partner_{run_id}'
+director_username = f'director_{run_id}'
 
 client = User.objects.create_user(username=client_username, email=client_email, password=password, role='client')
 expert = User.objects.create_user(username=expert_username, email=expert_email, password=password, role='expert')
 partner = User.objects.create_user(username=partner_username, email=partner_email, password=password, role='partner')
+director = User.objects.create_user(
+    username=director_username,
+    email=director_email,
+    password=password,
+    role='director',
+    first_name='E2E',
+    last_name='Director',
+)
 
 category = SubjectCategory.objects.create(name=f'E2E Category {run_id}', description='Seed category for Playwright tests', order=1)
 subject = Subject.objects.create(name=f'E2E Subject {run_id}', description='Seed subject for Playwright tests', category=category, min_price=Decimal('1000.00'))
@@ -178,6 +192,7 @@ print(json.dumps({
     'client': {'email': client.email, 'username': client.username, 'id': client.id},
     'expert': {'email': expert.email, 'username': expert.username, 'id': expert.id},
     'partner': {'email': partner.email, 'username': partner.username, 'id': partner.id},
+    'director': {'email': director.email, 'username': director.username, 'id': director.id},
     'category': {'id': category.id, 'name': category.name},
     'subject': {'id': subject.id, 'name': subject.name},
     'workType': {'id': work_type.id, 'name': work_type.name},
@@ -191,12 +206,6 @@ print(json.dumps({
 
 function seedViaOrm(runId: string, password: string): Omit<E2EFixtureData, 'auth'> {
   const pythonScript = buildSeedScript();
-  const baseEnv = {
-    ...process.env,
-    ...LOCAL_DJANGO_ENV,
-    E2E_RUN_ID: runId,
-    E2E_PASSWORD: password,
-  };
 
   const parseLastJsonLine = (raw: string) => {
     const lines = raw.trim().split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
@@ -208,13 +217,6 @@ function seedViaOrm(runId: string, password: string): Omit<E2EFixtureData, 'auth
   };
 
   try {
-    const stdout = execFileSync('python', ['manage.py', 'shell', '-c', pythonScript], {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-      env: baseEnv,
-    });
-    return parseLastJsonLine(stdout);
-  } catch {
     const dockerStdout = execFileSync('docker', [
       'exec',
       '-e', `E2E_RUN_ID=${runId}`,
@@ -230,6 +232,20 @@ function seedViaOrm(runId: string, password: string): Omit<E2EFixtureData, 'auth
       encoding: 'utf8',
     });
     return parseLastJsonLine(dockerStdout);
+  } catch {
+    const baseEnv = {
+      ...process.env,
+      ...LOCAL_DJANGO_ENV,
+      E2E_RUN_ID: runId,
+      E2E_PASSWORD: password,
+    };
+
+    const stdout = execFileSync('python', ['manage.py', 'shell', '-c', pythonScript], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+      env: baseEnv,
+    });
+    return parseLastJsonLine(stdout);
   }
 }
 
@@ -245,6 +261,7 @@ export default async function globalSetup(_config: FullConfig) {
   const clientLogin = await loginUser(bootstrapApi, seededData.client.email, password);
   const expertLogin = await loginUser(bootstrapApi, seededData.expert.email, password);
   const partnerLogin = await loginUser(bootstrapApi, seededData.partner.email, password);
+  const directorLogin = await loginUser(bootstrapApi, seededData.director.email, password);
 
   const fixtureData: E2EFixtureData = {
     ...seededData,
@@ -252,11 +269,14 @@ export default async function globalSetup(_config: FullConfig) {
       client: clientLogin,
       expert: expertLogin,
       partner: partnerLogin,
+      director: directorLogin,
     },
   };
 
   writeStorageState(CLIENT_STATE_PATH, clientLogin);
   writeStorageState(EXPERT_STATE_PATH, expertLogin);
+  writeStorageState(PARTNER_STATE_PATH, partnerLogin);
+  writeStorageState(DIRECTOR_STATE_PATH, directorLogin);
   fs.writeFileSync(FIXTURE_PATH, JSON.stringify(fixtureData, null, 2), 'utf8');
 
   await bootstrapApi.dispose();
