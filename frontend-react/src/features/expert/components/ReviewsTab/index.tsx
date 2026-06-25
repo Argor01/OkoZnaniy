@@ -183,15 +183,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
               <Paragraph className={styles.reviewText}>{review.text || review.comment || ''}</Paragraph>
 
               {review.reply_text && (
-                <div
-                  style={{
-                    marginTop: 12,
-                    padding: 12,
-                    background: '#f5f0ff',
-                    borderRadius: 8,
-                    borderLeft: '3px solid #6435a5',
-                  }}
-                >
+                <div className={styles.reviewReplyCard}>
                   <Text strong>Ответ эксперта:</Text>
                   <Paragraph style={{ marginTop: 4, marginBottom: 0 }}>{review.reply_text}</Paragraph>
                   {review.reply_at && (

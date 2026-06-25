@@ -227,6 +227,19 @@
   font-size: 17px;
 }
 
+.reviewReplyCard {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f5f0ff;
+  border-radius: 8px;
+  border-left: 3px solid #6435a5;
+}
+
+[data-theme="dark"] .reviewReplyCard {
+  background: rgba(100, 53, 165, 0.18);
+  border-left-color: #8b5cf6;
+}
+
 .sectionCard {
   background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(10px);
