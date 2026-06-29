@@ -31,7 +31,7 @@ export default defineConfig({
   globalTeardown: path.resolve(__dirname, 'tests/e2e/global.teardown.ts'),
   webServer: [
     {
-      command: 'python manage.py migrate && python manage.py runserver 127.0.0.1:8000',
+      command: 'DJANGO_TESTING=True python manage.py migrate && DJANGO_TESTING=True python manage.py runserver 127.0.0.1:8000',
       cwd: path.resolve(__dirname, '..'),
       url: `${BACKEND_URL}/api/users/me/`,
       reuseExistingServer: !process.env.CI,
