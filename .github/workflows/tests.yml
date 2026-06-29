@@ -52,6 +52,7 @@ jobs:
         env:
           DEBUG: 'False'
           SECRET_KEY: test-secret-key
+          ALLOWED_HOSTS: localhost,127.0.0.1,testserver
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/okoznaniy_test
           POSTGRES_DB: okoznaniy_test
           POSTGRES_USER: postgres
@@ -133,6 +134,7 @@ jobs:
           CI: 'true'
           DEBUG: 'False'
           SECRET_KEY: test-secret-key
+          ALLOWED_HOSTS: localhost,127.0.0.1,testserver
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/okoznaniy_test
           POSTGRES_DB: okoznaniy_test
           POSTGRES_USER: postgres

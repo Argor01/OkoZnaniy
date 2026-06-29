@@ -22,6 +22,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
+import sys as _sys
+TESTING = ("test" in _sys.argv) or (os.getenv("DJANGO_TESTING") == "True")
 ALLOWED_HOSTS = [host for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host]
 # Добавляем testserver для тестов
 if 'testserver' not in ALLOWED_HOSTS:
@@ -187,6 +189,11 @@ if DEBUG:
     CSRF_COOKIE_SECURE = False
     CSRF_COOKIE_HTTPONLY = False
     CSRF_USE_SESSIONS = False
+elif TESTING:
+    # During tests: no HTTPS redirect / secure cookies (test client uses http)
+    SECURE_SSL_REDIRECT = False
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
 else:
     # Production security settings
     SECURE_SSL_REDIRECT = True
