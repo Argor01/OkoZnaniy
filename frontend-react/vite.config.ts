@@ -1,4 +1,4 @@
-﻿import { defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
@@ -9,18 +9,17 @@ const vendorChunk = (id: string) => {
     return 'vendor-react'
   }
 
-  if (id.includes(`${path.sep}antd${path.sep}`) || id.includes(`${path.sep}@ant-design${path.sep}`)) {
-    if (id.includes(`${path.sep}@ant-design${path.sep}icons`)) {
-      return 'vendor-ant-icons'
-    }
-    if (id.includes(`${path.sep}@ant-design${path.sep}cssinjs`)) {
-      return 'vendor-ant-cssinjs'
-    }
-    return 'vendor-antd'
-  }
-
-  if (id.includes(`${path.sep}rc-`)) {
-    return 'vendor-ant-rc'
+  // Keep React together with the entire antd ecosystem (antd, @ant-design, rc-*)
+  // in a single chunk. Splitting them caused a circular-dependency init-order bug
+  // where rc-* executed before React was defined -> "Cannot read properties of
+  // undefined (reading 'version')" white screen.
+  if (
+    id.includes(`${path.sep}antd${path.sep}`) ||
+    id.includes(`${path.sep}@ant-design${path.sep}`) ||
+    id.includes(`${path.sep}rc-`) ||
+    id.includes(`${path.sep}@rc-component${path.sep}`)
+  ) {
+    return 'vendor-react'
   }
 
   if (id.includes('emoji-picker-react')) {
