@@ -9,6 +9,7 @@
 }
 
 .authCard {
+  position: relative;
   width: 100%;
   max-width: 1200px;
   display: flex;
@@ -397,9 +398,8 @@
   background: transparent;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 40px 30px;
   position: relative;
   z-index: 3;
 }
@@ -549,7 +549,9 @@
 }
 
 .authPanel {
+  flex: 1 1 auto;
   width: 100%;
+  min-height: 100%;
   max-width: 800px;
   background: #fff;
   border-radius: 20px;
@@ -610,6 +612,8 @@
 }
 
 .telegramLogin, .googleLogin, .vkLogin {
+  position: relative;
+  z-index: 6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -821,11 +825,10 @@
   border-left-color: rgba(30, 34, 48, 0.96);
 }
 
-[data-theme="dark"] .authRight {
-  background: #1a1d27 !important;
-}
 
 [data-theme="dark"] .authPanel {
+  position: relative;
+  z-index: 5;
   background: #1a1d27 !important;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
 }

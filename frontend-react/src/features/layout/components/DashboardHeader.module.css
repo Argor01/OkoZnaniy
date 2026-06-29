@@ -58,7 +58,7 @@
 
 .navItemActive {
   color: #6435a5 !important;
-  background-color: #f3e8ff !important;
+  background-color: #ffffff !important;
   font-weight: 600;
 }
 
@@ -558,8 +558,8 @@
 
 /* ===== DARK THEME ===== */
 :global([data-theme="dark"]) .navItemActive {
-  color: #c4a0e8 !important;
-  background-color: rgba(43, 159, 230, 0.2) !important;
+  color: #6435a5 !important;
+  background-color: #ffffff !important;
 }
 
 :global([data-theme="dark"]) .supportRow {

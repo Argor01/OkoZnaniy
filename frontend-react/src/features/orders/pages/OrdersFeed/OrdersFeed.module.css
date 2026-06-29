@@ -81,6 +81,13 @@
   flex-wrap: wrap;
 }
 
+.filtersGrid {
+  box-sizing: border-box;
+  margin-top: 10px;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 .filterLabel {
   display: block;
   margin-bottom: 8px;
@@ -111,6 +118,15 @@
 }
 
 @media (max-width: 576px) {
+  .filterCard :global(.ant-card-body) {
+    padding: 10px;
+    display: block;
+  }
+
+  .filtersGrid {
+    padding-inline: 8px;
+  }
+
   .budgetRow {
     display: flex;
     flex-wrap: nowrap;

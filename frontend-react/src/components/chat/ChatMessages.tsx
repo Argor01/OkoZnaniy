@@ -68,7 +68,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 {senderName}
                 {msg.is_pinned && (
                   <Tooltip title="Закреплено">
-                    <PushpinOutlined style={{ marginLeft: 4, color: '#faad14' }} />
+                    <PushpinOutlined style={{ marginLeft: 4, color: '#faad14'}} />
                   </Tooltip>
                 )}
               </div>

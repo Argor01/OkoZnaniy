@@ -368,8 +368,8 @@ const OrdersFeed: React.FC = () => {
       <AppCard 
         className={styles.filterCard}
       >
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} md={12} lg={6}>
+        <Row gutter={[16, 16]} className={styles.filtersGrid}>
+          <Col xs={24} sm={12} md={12} lg={12}>
             <AppInput
               size="large"
               placeholder="Поиск по названию или описанию..."

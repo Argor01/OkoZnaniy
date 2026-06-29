@@ -250,18 +250,6 @@ const Login: React.FC = () => {
             {activeTab === 'register' && <ChatBubbles />}
             <img className={styles.heroImage} src="/assets/first-screen/first-screen-students.png" alt="hero" />
           </div>
-          <svg
-            className={styles.bottomWave}
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 1440 140"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M0,64 C240,120 480,8 720,64 C960,120 1200,8 1440,64 L1440,140 L0,140 Z"
-              fill="#ffffff"
-            />
-          </svg>
         </div>
         <div className={styles.authRight}>
           <div className={styles.authPanel}>
@@ -339,6 +327,18 @@ const Login: React.FC = () => {
             </div>
           </div>
         </div>
+        <svg
+          className={styles.bottomWave}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 140"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M0,64 C240,120 480,8 720,64 C960,120 1200,8 1440,64 L1440,140 L0,140 Z"
+            fill="#ffffff"
+          />
+        </svg>
       </div>
     </div>
   );
