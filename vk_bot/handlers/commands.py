@@ -6,6 +6,7 @@ from django.conf import settings
 from vk_bot.utils.keyboards import get_main_keyboard
 
 logger = logging.getLogger(__name__)
+NOT_SET = 'Не указан'
 
 WEBSITE_URL = settings.FRONTEND_URL
 
@@ -85,8 +86,8 @@ def handle_profile(vk, event):
             f"\U0001F464 \u0412\u0430\u0448 \u043F\u0440\u043E\u0444\u0438\u043B\u044C:\n\n"
             f"\u0418\u043C\u044F: {user.first_name} {user.last_name}\n"
             f"\u0420\u043E\u043B\u044C: {user.get_role_display()}\n"
-            f"Email: {user.email or '\u041D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D'}\n"
-            f"\u0422\u0435\u043B\u0435\u0444\u043E\u043D: {user.phone or '\u041D\u0435 \u0443\u043A\u0430\u0437\u0430\u043D'}\n"
+            f"Email: {user.email or NOT_SET}\n"
+            f"\u0422\u0435\u043B\u0435\u0444\u043E\u043D: {user.phone or NOT_SET}\n"
             f"\u0414\u0430\u0442\u0430 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438: {user.date_joined.strftime('%d.%m.%Y')}\n"
         )
     except User.DoesNotExist:
