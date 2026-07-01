@@ -340,13 +340,13 @@ class ChatViewSet(viewsets.ModelViewSet):
                     offer_payload = offer_data if isinstance(offer_data, dict) else {}
                     offer_title = (offer_payload.get('title') or '').strip()
                     offer_cost = offer_payload.get('cost')
-                    cost_suffix = f" РЎСѓРјРјР°: {offer_cost} в‚Ѕ." if offer_cost not in [None, ''] else ''
-                    target_label = f"РїРѕ Р·Р°РєР°Р·Сѓ в„–{chat.order.id}" if getattr(chat, 'order', None) else "РІ С‡Р°С‚Рµ"
+                    cost_suffix = f" Сумма: {offer_cost} ₽." if offer_cost not in [None, ''] else ''
+                    target_label = f"по заказу №{chat.order.id}" if getattr(chat, 'order', None) else "в чате"
                     safe_call(NotificationService.create_notification,
                         recipient=recipient,
                         type=NotificationType.NEW_BID,
-                        title=f"РРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ{f': {offer_title}' if offer_title else ''}",
-                        message=f"Р­РєСЃРїРµСЂС‚ {request.user.get_full_name() or request.user.username} РѕС‚РїСЂР°РІРёР» РІР°Рј РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ {target_label}.{cost_suffix}",
+                        title=f"Индивидуальное предложение{f': {offer_title}' if offer_title else ''}",
+                        message=f"Эксперт {request.user.get_full_name() or request.user.username} отправил вам индивидуальное предложение {target_label}.{cost_suffix}",
                         related_object_id=chat.order_id if chat.order_id else chat.id,
                         related_object_type='order' if chat.order_id else 'chat',
                         data={
@@ -815,8 +815,8 @@ class ChatViewSet(viewsets.ModelViewSet):
                 safe_call(NotificationService.create_notification,
                     recipient=expert_user,
                     type=NotificationType.ORDER_ASSIGNED,
-                    title="РРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ РїСЂРёРЅСЏС‚Рѕ",
-                    message=f"РљР»РёРµРЅС‚ РїСЂРёРЅСЏР» РІР°С€Рµ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ. РњРѕР¶РЅРѕ РЅР°С‡РёРЅР°С‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ Р·Р°РєР°Р·Сѓ в„–{order.id}.",
+                    title="Индивидуальное предложение принято",
+                    message=f"Клиент принял ваше индивидуальное предложение. Можно начинать работу по заказу №{order.id}.",
                     related_object_id=order.id,
                     related_object_type='order',
                     data={

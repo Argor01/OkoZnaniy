@@ -41,12 +41,42 @@ const defaultDescriptionByMode: Record<SupportMode, string> = {
   arbitration: '',
 };
 
+const getApiErrorMessage = (error: unknown): string => {
+  const responseData = (error as {
+    response?: {
+      data?: Record<string, unknown> & {
+        detail?: string;
+        error?: string;
+      };
+    };
+  })?.response?.data;
+
+  if (!responseData) return 'Не удалось отправить обращение';
+  if (typeof responseData.detail === 'string' && responseData.detail.trim()) return responseData.detail;
+  if (typeof responseData.error === 'string' && responseData.error.trim()) return responseData.error;
+
+  for (const value of Object.values(responseData)) {
+    if (typeof value === 'string' && value.trim()) return value;
+    if (Array.isArray(value)) {
+      const firstText = value.find((item) => typeof item === 'string' && item.trim());
+      if (typeof firstText === 'string') return firstText;
+    }
+  }
+
+  return 'Не удалось отправить обращение';
+};
+
 const ClaimForm: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [form] = Form.useForm<FormValues>();
   const [submitting, setSubmitting] = React.useState(false);
-  const [orders, setOrders] = React.useState<Array<{ id: number; title?: string }>>([]);
+  const [orders, setOrders] = React.useState<Array<{
+    id: number;
+    title?: string;
+    status?: string;
+    expert?: { id?: number | null } | null;
+  }>>([]);
 
   const initialMode = (searchParams.get('mode') === 'arbitration' ? 'arbitration' : 'support') as SupportMode;
   const initialOrderId = Number(searchParams.get('orderId') || '');
@@ -80,6 +110,14 @@ const ClaimForm: React.FC = () => {
 
   const mode = Form.useWatch('mode', form) ?? initialMode;
   const refundType = Form.useWatch('refund_type', form) ?? 'none';
+  const arbitrationOrders = React.useMemo(
+    () =>
+      orders.filter((order) => {
+        const status = String(order?.status ?? '');
+        return Boolean(order?.expert?.id) || !['new', 'draft', ''].includes(status);
+      }),
+    [orders]
+  );
 
   const handleSubmit = async (values: FormValues) => {
     try {
@@ -106,8 +144,7 @@ const ClaimForm: React.FC = () => {
 
       navigate('/support');
     } catch (error: unknown) {
-      const apiError = error as { response?: { data?: { detail?: string; error?: string } } };
-      message.error(apiError?.response?.data?.detail || apiError?.response?.data?.error || 'Не удалось отправить обращение');
+      message.error(getApiErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -204,12 +241,21 @@ const ClaimForm: React.FC = () => {
                       showSearch
                       optionFilterProp="label"
                       placeholder="Выберите заказ"
-                      options={orders.map((order) => ({
+                      options={arbitrationOrders.map((order) => ({
                         value: order.id,
                         label: `Заказ #${order.id}${order.title ? ` - ${order.title}` : ''}`,
                       }))}
                     />
                   </Form.Item>
+
+                  {arbitrationOrders.length === 0 ? (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="Нет доступных заказов для арбитража"
+                      description="Подать обращение можно только по заказу, в котором уже есть второй участник."
+                    />
+                  ) : null}
 
                   <Form.Item
                     name="reason"
