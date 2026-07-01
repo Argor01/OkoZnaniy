@@ -1,20 +1,29 @@
 """
-Сервисы для обработки чатов и обнаружения контактных данных
+Chat services for moderation and order conversation helpers.
 """
+
+from __future__ import annotations
+
 import re
-from typing import List, Dict, Any
-from django.conf import settings
+from typing import Any, Dict, List, Optional, Tuple
+
+from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
+
+from apps.orders.models import Order
+
+from .models import Chat, Message
 
 
 VIOLATION_TYPE_LABELS = {
-    'phone': 'номер телефона',
-    'email': 'email-адрес',
-    'telegram': 'Telegram',
-    'whatsapp': 'WhatsApp',
-    'social': 'социальные сети',
-    'keywords': 'подозрительные ключевые слова',
-    'multiple': 'несколько типов контактов',
+    "phone": "номер телефона",
+    "email": "email-адрес",
+    "telegram": "Telegram",
+    "whatsapp": "WhatsApp",
+    "social": "социальные сети",
+    "keywords": "подозрительные ключевые слова",
+    "multiple": "несколько типов контактов",
 }
 
 
@@ -23,198 +32,157 @@ def violation_type_label(violation_type: str) -> str:
 
 
 class ContactDetectionService:
-    """Сервис для обнаружения контактных данных в сообщениях"""
-    
-    # Регулярные выражения для обнаружения контактов
+    """Detects contact data in chat messages."""
+
     PHONE_PATTERNS = [
-        r'\+7\s*\(?(\d{3})\)?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})',  # +7 (999) 999-99-99
-        r'8\s*\(?(\d{3})\)?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})',    # 8 (999) 999-99-99
-        r'\b(\d{3})\s*-?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})\b',     # 999-999-99-99
-        r'\b(\d{11})\b',  # 11 цифр подряд
+        r"\+7\s*\(?(\d{3})\)?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})",
+        r"8\s*\(?(\d{3})\)?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})",
+        r"\b(\d{3})\s*-?\s*(\d{3})\s*-?\s*(\d{2})\s*-?\s*(\d{2})\b",
+        r"\b(\d{11})\b",
     ]
-    
-    EMAIL_PATTERN = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    
+    EMAIL_PATTERN = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
     TELEGRAM_PATTERNS = [
-        r'@[A-Za-z0-9_]{5,32}',  # @username
-        r't\.me/[A-Za-z0-9_]{5,32}',  # t.me/username
-        r'telegram\.me/[A-Za-z0-9_]{5,32}',  # telegram.me/username
-        r'tg://resolve\?domain=[A-Za-z0-9_]{5,32}',  # tg://resolve?domain=username
+        r"@[A-Za-z0-9_]{5,32}",
+        r"t\.me/[A-Za-z0-9_]{5,32}",
+        r"telegram\.me/[A-Za-z0-9_]{5,32}",
+        r"tg://resolve\?domain=[A-Za-z0-9_]{5,32}",
     ]
-    
     WHATSAPP_PATTERNS = [
-        r'wa\.me/\d+',  # wa.me/79999999999
-        r'whatsapp\.com/send\?phone=\d+',  # whatsapp.com/send?phone=79999999999
+        r"wa\.me/\d+",
+        r"whatsapp\.com/send\?phone=\d+",
     ]
-    
     SOCIAL_PATTERNS = [
-        r'vk\.com/[A-Za-z0-9_.]{1,50}',  # vk.com/username
-        r'instagram\.com/[A-Za-z0-9_.]{1,30}',  # instagram.com/username
-        r'facebook\.com/[A-Za-z0-9_.]{1,50}',  # facebook.com/username
+        r"vk\.com/[A-Za-z0-9_.]{1,50}",
+        r"instagram\.com/[A-Za-z0-9_.]{1,30}",
+        r"facebook\.com/[A-Za-z0-9_.]{1,50}",
     ]
-    
-    # Ключевые слова, которые могут указывать на обмен контактами
     CONTACT_KEYWORDS = [
-        'мой номер', 'мой телефон', 'моя почта', 'мой email', 'мой тг', 'мой телеграм',
-        'свяжись со мной', 'напиши мне', 'позвони мне', 'мои контакты',
-        'личные сообщения', 'в лс', 'в личку', 'скинь номер', 'дай номер',
-        'whatsapp', 'viber', 'skype', 'discord'
+        "мой номер",
+        "мой телефон",
+        "моя почта",
+        "мой email",
+        "мой тг",
+        "мой телеграм",
+        "свяжись со мной",
+        "напиши мне",
+        "позвони мне",
+        "мои контакты",
+        "личные сообщения",
+        "в лс",
+        "в личку",
+        "скинь номер",
+        "дай номер",
+        "whatsapp",
+        "viber",
+        "skype",
+        "discord",
     ]
-    
+
     @classmethod
     def detect_contacts(cls, text: str) -> Dict[str, Any]:
-        """
-        Обнаруживает контактные данные в тексте
-        
-        Returns:
-            dict: {
-                'has_contacts': bool,
-                'contact_types': list,
-                'detected_data': dict,
-                'risk_level': str  # 'low', 'medium', 'high'
-            }
-        """
         text_lower = text.lower()
-        detected_data = {}
-        contact_types = []
-        
-        # Проверяем телефоны
+        detected_data: Dict[str, Any] = {}
+        contact_types: List[str] = []
+
         phones = cls._detect_phones(text)
         if phones:
-            detected_data['phones'] = phones
-            contact_types.append('phone')
-        
-        # Проверяем email
+            detected_data["phones"] = phones
+            contact_types.append("phone")
+
         emails = cls._detect_emails(text)
         if emails:
-            detected_data['emails'] = emails
-            contact_types.append('email')
-        
-        # Проверяем Telegram
+            detected_data["emails"] = emails
+            contact_types.append("email")
+
         telegram_contacts = cls._detect_telegram(text)
         if telegram_contacts:
-            detected_data['telegram'] = telegram_contacts
-            contact_types.append('telegram')
-        
-        # Проверяем WhatsApp
+            detected_data["telegram"] = telegram_contacts
+            contact_types.append("telegram")
+
         whatsapp_contacts = cls._detect_whatsapp(text)
         if whatsapp_contacts:
-            detected_data['whatsapp'] = whatsapp_contacts
-            contact_types.append('whatsapp')
-        
-        # Проверяем социальные сети
+            detected_data["whatsapp"] = whatsapp_contacts
+            contact_types.append("whatsapp")
+
         social_contacts = cls._detect_social(text)
         if social_contacts:
-            detected_data['social'] = social_contacts
-            contact_types.append('social')
-        
-        # Проверяем ключевые слова
+            detected_data["social"] = social_contacts
+            contact_types.append("social")
+
         keywords_found = cls._detect_keywords(text_lower)
         if keywords_found:
-            detected_data['keywords'] = keywords_found
-            contact_types.append('keywords')
-        
-        # Определяем уровень риска
-        risk_level = cls._calculate_risk_level(contact_types, detected_data)
-        
+            detected_data["keywords"] = keywords_found
+            contact_types.append("keywords")
+
+        risk_level = cls._calculate_risk_level(contact_types)
         return {
-            'has_contacts': len(contact_types) > 0,
-            'contact_types': contact_types,
-            'detected_data': detected_data,
-            'risk_level': risk_level
+            "has_contacts": len(contact_types) > 0,
+            "contact_types": contact_types,
+            "detected_data": detected_data,
+            "risk_level": risk_level,
         }
-    
+
     @classmethod
     def _detect_phones(cls, text: str) -> List[str]:
-        """Обнаруживает номера телефонов"""
-        phones = []
+        phones: List[str] = []
         for pattern in cls.PHONE_PATTERNS:
             matches = re.findall(pattern, text)
             for match in matches:
-                if isinstance(match, tuple):
-                    phone = ''.join(match)
-                else:
-                    phone = match
-                # Проверяем, что это похоже на российский номер
+                phone = "".join(match) if isinstance(match, tuple) else match
                 if len(phone) >= 10:
                     phones.append(phone)
-        return list(set(phones))  # Убираем дубликаты
-    
+        return list(set(phones))
+
     @classmethod
     def _detect_emails(cls, text: str) -> List[str]:
-        """Обнаруживает email адреса"""
         return re.findall(cls.EMAIL_PATTERN, text)
-    
+
     @classmethod
     def _detect_telegram(cls, text: str) -> List[str]:
-        """Обнаруживает Telegram контакты"""
-        telegram_contacts = []
+        telegram_contacts: List[str] = []
         for pattern in cls.TELEGRAM_PATTERNS:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            telegram_contacts.extend(matches)
+            telegram_contacts.extend(re.findall(pattern, text, re.IGNORECASE))
         return list(set(telegram_contacts))
-    
+
     @classmethod
     def _detect_whatsapp(cls, text: str) -> List[str]:
-        """Обнаруживает WhatsApp контакты"""
-        whatsapp_contacts = []
+        whatsapp_contacts: List[str] = []
         for pattern in cls.WHATSAPP_PATTERNS:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            whatsapp_contacts.extend(matches)
+            whatsapp_contacts.extend(re.findall(pattern, text, re.IGNORECASE))
         return list(set(whatsapp_contacts))
-    
+
     @classmethod
     def _detect_social(cls, text: str) -> List[str]:
-        """Обнаруживает ссылки на социальные сети"""
-        social_contacts = []
+        social_contacts: List[str] = []
         for pattern in cls.SOCIAL_PATTERNS:
-            matches = re.findall(pattern, text, re.IGNORECASE)
-            social_contacts.extend(matches)
+            social_contacts.extend(re.findall(pattern, text, re.IGNORECASE))
         return list(set(social_contacts))
-    
+
     @classmethod
     def _detect_keywords(cls, text: str) -> List[str]:
-        """Обнаруживает ключевые слова, связанные с обменом контактами"""
-        found_keywords = []
-        for keyword in cls.CONTACT_KEYWORDS:
-            if keyword in text:
-                found_keywords.append(keyword)
-        return found_keywords
-    
+        return [keyword for keyword in cls.CONTACT_KEYWORDS if keyword in text]
+
     @classmethod
-    def _calculate_risk_level(cls, contact_types: List[str], detected_data: Dict) -> str:
-        """Вычисляет уровень риска на основе обнаруженных данных"""
+    def _calculate_risk_level(cls, contact_types: List[str]) -> str:
         if not contact_types:
-            return 'low'
-        
-        # Высокий риск: прямые контакты (телефон, email, telegram)
-        high_risk_types = {'phone', 'email', 'telegram', 'whatsapp'}
-        if any(ct in high_risk_types for ct in contact_types):
-            return 'high'
-        
-        # Средний риск: социальные сети или подозрительные ключевые слова
-        medium_risk_types = {'social', 'keywords'}
-        if any(ct in medium_risk_types for ct in contact_types):
-            return 'medium'
-        
-        return 'low'
+            return "low"
+        if any(ct in {"phone", "email", "telegram", "whatsapp"} for ct in contact_types):
+            return "high"
+        if any(ct in {"social", "keywords"} for ct in contact_types):
+            return "medium"
+        return "low"
 
 
 class ChatModerationService:
-    """Сервис для модерации чатов"""
-    
+    """Moderates chats after contact exchange detection."""
+
     @staticmethod
-    def freeze_chat(chat, violation_type: str, detected_data: Dict, message=None, risk_level: str = 'medium'):
-        """
-        Замораживает чат и создает запись о нарушении
-        """
-        from .models import Chat, ContactViolationLog
-        
-        # Замораживаем чат
+    def freeze_chat(chat, violation_type: str, detected_data: Dict[str, Any], message=None, risk_level: str = "medium"):
+        from .models import ContactViolationLog
+
         violation_label = violation_type_label(violation_type)
         chat.freeze(f"Обнаружен обмен контактами: {violation_label}")
-        
-        # Создаем запись о нарушении
+
         violation = ContactViolationLog.objects.create(
             chat=chat,
             user=message.sender if message else None,
@@ -222,56 +190,51 @@ class ChatModerationService:
             violation_type=violation_type,
             detected_data=detected_data,
             risk_level=risk_level,
-            status='pending'
+            status="pending",
         )
-        
-        # Баним пользователя за обмен контактами
+
         if message and message.sender:
             user = message.sender
             user.is_banned_for_contacts = True
             user.contact_ban_reason = f"Обнаружен обмен контактами: {violation_label}"
             user.contact_ban_date = timezone.now()
             user.contact_violations_count += 1
-            user.banned_by = None  # Система
+            user.banned_by = None
             user.save()
-        
-        # Уведомляем администраторов
+
         ChatModerationService._notify_admins_about_violation(violation)
         ChatModerationService._freeze_expert_scope_if_needed(chat, message, violation)
-        
         return violation
-    
+
     @staticmethod
     def _notify_admins_about_violation(violation):
-        """Уведомляет администраторов о нарушении"""
-        from apps.notifications.services import NotificationService
         from django.contrib.auth import get_user_model
-        
+        from apps.notifications.services import NotificationService
+
         User = get_user_model()
-        admins = User.objects.filter(role='admin')
-        
+        admins = User.objects.filter(role="admin")
         for admin in admins:
             try:
                 NotificationService.create_notification(
                     recipient=admin,
-                    type='chat_violation',
-                    title='Обнаружен обмен контактами в чате',
-                    message=f'Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}',
+                    type="chat_violation",
+                    title="Обнаружен обмен контактами в чате",
+                    message=f"Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}",
                     related_object_id=violation.id,
-                    related_object_type='contact_violation'
+                    related_object_type="contact_violation",
                 )
             except Exception:
                 import logging
-                logging.getLogger('oko.safe_notify').error('Notification failed in _notify_admins', exc_info=True)
-    
+                logging.getLogger("oko.safe_notify").error("Notification failed in _notify_admins", exc_info=True)
+
     @staticmethod
     def _freeze_expert_scope_if_needed(chat, message, violation):
         expert = ChatModerationService._get_violation_expert(chat, message)
         if not expert:
             return
+
         reason = f"Эксперт {expert.get_full_name() or expert.username} нарушил правила платформы. Обмен контактными данными запрещен."
         from .models import Chat as ChatModel
-        from apps.orders.models import Order
         from apps.notifications.models import NotificationType
         from apps.notifications.services import NotificationService
 
@@ -281,8 +244,8 @@ class ChatModerationService:
 
         active_orders = Order.objects.filter(
             expert=expert,
-            status__in=['in_progress', 'review', 'revision'],
-            is_frozen=False
+            status__in=["in_progress", "review", "revision"],
+            is_frozen=False,
         )
         for order in active_orders:
             order.freeze(reason)
@@ -294,45 +257,40 @@ class ChatModerationService:
                 NotificationService.create_notification(
                     recipient=order.client,
                     type=NotificationType.EXPERT_VIOLATION,
-                    title='Эксперт нарушил правила платформы',
+                    title="Эксперт нарушил правила платформы",
                     message=f"Эксперт по заказу #{order.id} временно отстранен. Сроки заказа заморожены до решения администратора.",
                     related_object_id=order.id,
-                    related_object_type='order',
-                    data={'order_id': order.id, 'expert_id': expert.id}
+                    related_object_type="order",
+                    data={"order_id": order.id, "expert_id": expert.id},
                 )
             except Exception:
                 import logging
-                logging.getLogger('oko.safe_notify').error('Notification failed in _freeze_expert_scope', exc_info=True)
+                logging.getLogger("oko.safe_notify").error("Notification failed in _freeze_expert_scope", exc_info=True)
 
     @staticmethod
     def _get_violation_expert(chat, message):
         if message:
-            return message.sender if getattr(message.sender, 'role', None) == 'expert' else None
-        expert = getattr(chat, 'expert', None)
-        if expert and getattr(expert, 'role', None) == 'expert':
+            return message.sender if getattr(message.sender, "role", None) == "expert" else None
+        expert = getattr(chat, "expert", None)
+        if expert and getattr(expert, "role", None) == "expert":
             return expert
-        order = getattr(chat, 'order', None)
-        if order and getattr(order, 'expert', None):
+        order = getattr(chat, "order", None)
+        if order and getattr(order, "expert", None):
             return order.expert
         return None
 
     @staticmethod
     def unfreeze_chat(chat, admin_user, decision: str):
-        """
-        Размораживает чат после проверки администратором
-        """
         chat.unfreeze()
-        
-        # Обновляем статус нарушения
-        violation = chat.contact_violations.filter(status='pending').first()
+
+        violation = chat.contact_violations.filter(status="pending").first()
         if violation:
-            violation.status = 'approved'
+            violation.status = "approved"
             violation.admin_decision = decision
             violation.reviewed_by = admin_user
             violation.reviewed_at = timezone.now()
             violation.save()
-            
-            # Снимаем бан с пользователя, если администратор одобрил
+
             if violation.user:
                 user = violation.user
                 user.is_banned_for_contacts = False
@@ -340,23 +298,20 @@ class ChatModerationService:
                 user.save()
 
         ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
-
         return violation
 
     @staticmethod
     def _post_unfreeze_system_message(chat):
-        """Публикует системное сообщение о разморозке чата."""
         from django.contrib.auth import get_user_model
-        from .models import Message
 
         User = get_user_model()
         system_user, _ = User.objects.get_or_create(
-            username='system',
+            username="system",
             defaults={
-                'email': 'system@platform.com',
-                'first_name': 'Система',
-                'last_name': 'Безопасности',
-                'is_active': False,
+                "email": "system@platform.com",
+                "first_name": "Система",
+                "last_name": "Безопасности",
+                "is_active": False,
             },
         )
         Message.objects.create(
@@ -368,20 +323,20 @@ class ChatModerationService:
                 "Обмен контактными данными запрещён правилами платформы — "
                 "повторные нарушения приведут к блокировке."
             ),
-            message_type='system',
+            message_type="system",
         )
 
     @staticmethod
     def _unfreeze_expert_scope_if_possible(chat, violation):
         expert = ChatModerationService._get_violation_expert(chat, None)
-        if violation and getattr(violation.user, 'role', None) == 'expert':
+        if violation and getattr(violation.user, "role", None) == "expert":
             expert = violation.user
         if not expert:
             return
-        from .models import Chat as ChatModel, ContactViolationLog
-        from apps.orders.models import Order
 
-        if ContactViolationLog.objects.filter(user=expert, status='pending').exists():
+        from .models import Chat as ChatModel, ContactViolationLog
+
+        if ContactViolationLog.objects.filter(user=expert, status="pending").exists():
             return
 
         chats = ChatModel.objects.filter(expert=expert, is_frozen=True)
@@ -391,3 +346,172 @@ class ChatModerationService:
         orders = Order.objects.filter(expert=expert, is_frozen=True)
         for order in orders:
             order.unfreeze()
+
+
+def is_order_context_title(context_title: Optional[str]) -> bool:
+    value = (context_title or "").strip().lower()
+    return value.startswith("заказ #") or "заказ из ленты #" in value
+
+
+def resolve_direct_chat_users(user_a, user_b):
+    role_a = getattr(user_a, "role", None)
+    role_b = getattr(user_b, "role", None)
+
+    if role_a == "client" and role_b == "expert":
+        return user_a, user_b
+    if role_a == "expert" and role_b == "client":
+        return user_b, user_a
+    if int(user_a.id) <= int(user_b.id):
+        return user_a, user_b
+    return user_b, user_a
+
+
+def get_or_create_direct_chat(user_a, user_b, *, context_title: Optional[str] = None) -> Chat:
+    client_user, expert_user = resolve_direct_chat_users(user_a, user_b)
+    normalized_context = str(context_title).strip()[:255] or None if context_title is not None else None
+
+    chat = (
+        Chat.objects.filter(order__isnull=True)
+        .filter(
+            Q(client_id=client_user.id, expert_id=expert_user.id)
+            | Q(client_id=expert_user.id, expert_id=client_user.id)
+        )
+        .order_by("id")
+        .first()
+    )
+
+    if not chat:
+        chat = (
+            Chat.objects.filter(order__isnull=True, participants=user_a)
+            .filter(participants=user_b)
+            .order_by("id")
+            .first()
+        )
+
+    if not chat:
+        try:
+            with transaction.atomic():
+                chat = Chat.objects.create(
+                    order=None,
+                    client=client_user,
+                    expert=expert_user,
+                    context_title=normalized_context if normalized_context and not is_order_context_title(normalized_context) else None,
+                )
+        except IntegrityError:
+            chat = (
+                Chat.objects.filter(order__isnull=True)
+                .filter(
+                    Q(client_id=client_user.id, expert_id=expert_user.id)
+                    | Q(client_id=expert_user.id, expert_id=client_user.id)
+                )
+                .order_by("id")
+                .first()
+            )
+            if not chat:
+                raise
+
+    updated_fields = []
+    if chat.client_id != client_user.id:
+        chat.client = client_user
+        updated_fields.append("client")
+    if chat.expert_id != expert_user.id:
+        chat.expert = expert_user
+        updated_fields.append("expert")
+    if normalized_context and not is_order_context_title(normalized_context) and not chat.context_title:
+        chat.context_title = normalized_context
+        updated_fields.append("context_title")
+    if updated_fields:
+        chat.save(update_fields=updated_fields)
+
+    chat.participants.add(user_a, user_b)
+    chat.hidden_for_users.remove(user_a, user_b)
+    return chat
+
+
+def get_or_create_order_chat(order: Order, *, client_user=None, expert_user=None) -> Chat:
+    client_user = client_user or order.client
+    expert_user = expert_user or order.expert
+    if not client_user or not expert_user:
+        raise ValueError("order chat requires both client and expert")
+
+    try:
+        with transaction.atomic():
+            chat, _created = Chat.objects.get_or_create(
+                order=order,
+                client=client_user,
+                expert=expert_user,
+            )
+    except IntegrityError:
+        chat = Chat.objects.filter(order=order).order_by("id").first()
+        if not chat:
+            raise
+
+    updated_fields = []
+    if chat.client_id != client_user.id:
+        chat.client = client_user
+        updated_fields.append("client")
+    if chat.expert_id != expert_user.id:
+        chat.expert = expert_user
+        updated_fields.append("expert")
+    if updated_fields:
+        chat.save(update_fields=updated_fields)
+
+    chat.participants.add(client_user, expert_user)
+    chat.hidden_for_users.remove(client_user, expert_user)
+    return chat
+
+
+def build_order_offer_data(order: Order) -> dict:
+    return {
+        "status": "accepted",
+        "order_id": order.id,
+        "title": order.title or f"Заказ #{order.id}",
+        "description": order.description or "",
+        "cost": str(order.budget) if order.budget is not None else "",
+        "deadline": order.deadline.isoformat() if order.deadline else None,
+        "subject_id": order.subject_id,
+        "subject": order.custom_subject or (order.subject.name if order.subject else None),
+        "work_type_id": order.work_type_id,
+        "work_type": order.custom_work_type or (order.work_type.name if order.work_type else None),
+        "expert_id": order.expert_id,
+        "expert_username": order.expert.username if order.expert else None,
+        "client_id": order.client_id,
+        "accepted_at": timezone.now().isoformat(),
+    }
+
+
+def ensure_order_chat_started(
+    order: Order,
+    *,
+    sender=None,
+    text: Optional[str] = None,
+) -> Tuple[Chat, Chat, Message]:
+    if not order.client_id or not order.expert_id:
+        raise ValueError("order chat bootstrap requires assigned client and expert")
+
+    direct_chat = get_or_create_direct_chat(order.client, order.expert)
+    order_chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
+
+    existing_message = (
+        Message.objects.filter(
+            chat=order_chat,
+            message_type="offer",
+            offer_data__status="accepted",
+            offer_data__order_id=order.id,
+        )
+        .order_by("id")
+        .first()
+    )
+    if existing_message:
+        return direct_chat, order_chat, existing_message
+
+    message = Message(
+        chat=order_chat,
+        sender=sender or order.client,
+        text=text or f"Заказ #{order.id} принят в работу",
+        message_type="offer",
+        offer_data=build_order_offer_data(order),
+    )
+    message.full_clean()
+    message.save()
+    return direct_chat, order_chat, message

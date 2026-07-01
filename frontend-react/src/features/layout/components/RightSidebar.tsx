@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
-import axios from 'axios';
 import styles from './RightSidebar.module.css';
 import { logger } from '@/utils/logger';
 import { getDisplayUsername } from '@/utils/formatters';
+import { knowledgeApi } from '@/features/knowledge/api/knowledgeApi';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -38,8 +38,6 @@ interface Question {
   tags: string[];
 }
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
-
 const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -47,16 +45,8 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
   useEffect(() => {
     const loadQuestions = async () => {
       try {
-        const response = await axios.get(`${API_BASE}/api/knowledge/questions/`);
-        const payload = response.data;
-        const allQuestions: unknown =
-          Array.isArray(payload)
-            ? payload
-            : payload && typeof payload === 'object' && Array.isArray((payload as { results?: unknown[] }).results)
-              ? (payload as { results: unknown[] }).results
-              : [];
-
-        const recentQuestions = (allQuestions as Question[]).slice(0, 5);
+        const allQuestions = await knowledgeApi.getQuestions({ status: 'open' });
+        const recentQuestions = Array.isArray(allQuestions) ? allQuestions.slice(0, 5) : [];
         setQuestions(Array.isArray(recentQuestions) ? recentQuestions : []);
       } catch (error) {
         logger.error('Failed to load questions:', error);
@@ -70,9 +60,15 @@ const RightSidebar: React.FC<RightSidebarProps> = React.memo(({ className }) => 
       loadQuestions();
     };
 
+    const refreshTimer = window.setInterval(loadQuestions, 30000);
+    window.addEventListener('focus', handleUpdate);
+    document.addEventListener('visibilitychange', handleUpdate);
     window.addEventListener('knowledgeQuestionsUpdated', handleUpdate);
 
     return () => {
+      window.clearInterval(refreshTimer);
+      window.removeEventListener('focus', handleUpdate);
+      document.removeEventListener('visibilitychange', handleUpdate);
       window.removeEventListener('knowledgeQuestionsUpdated', handleUpdate);
     };
   }, []);

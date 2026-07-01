@@ -871,6 +871,47 @@
   align-self: center;
 }
 
+.chatOrderRedirectNotice {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  border: 1px solid rgba(251, 146, 60, 0.35);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 247, 237, 0.98) 0%, rgba(255, 255, 255, 0.98) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(249, 115, 22, 0.08);
+}
+
+.chatOrderRedirectTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.chatOrderRedirectText {
+  font-size: 14px;
+  color: #7c2d12;
+  line-height: 1.5;
+}
+
+:global([data-theme="dark"]) .chatOrderRedirectNotice {
+  border-color: rgba(251, 146, 60, 0.28);
+  background: linear-gradient(180deg, rgba(67, 20, 7, 0.92) 0%, rgba(31, 41, 55, 0.96) 100%);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.24);
+}
+
+:global([data-theme="dark"]) .chatOrderRedirectTitle {
+  color: #fdba74;
+}
+
+:global([data-theme="dark"]) .chatOrderRedirectText {
+  color: #fed7aa;
+}
+
 .chatEmptyState {
   text-align: center;
   color: var(--text-tertiary, #9ca3af);
@@ -1708,6 +1749,24 @@
   font-size: 11px;
   margin-top: 12px;
   font-weight: 500;
+}
+
+:global([data-theme="dark"]) .messageSystemCard {
+  background: linear-gradient(135deg, rgba(69, 10, 10, 0.92) 0%, rgba(127, 29, 29, 0.88) 100%);
+  border-color: #f87171;
+  box-shadow: 0 10px 30px rgba(248, 113, 113, 0.18);
+}
+
+:global([data-theme="dark"]) .messageSystemIcon {
+  color: #fca5a5;
+}
+
+:global([data-theme="dark"]) .messageSystemText {
+  color: #ffe4e6;
+}
+
+:global([data-theme="dark"]) .messageSystemTime {
+  color: #fda4af;
 }
 
 .simpleModalContent {

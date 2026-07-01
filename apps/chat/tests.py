@@ -81,6 +81,71 @@ class AcceptOfferRegressionTests(TestCase):
         self.assertEqual(order.expert_id, self.expert_user.id)
         self.assertEqual(order.subject_id, self.subject.id)
         self.assertEqual(order.status, "in_progress")
+        self.assertIn("chat_id", payload)
+        order_chat = Chat.objects.get(pk=payload["chat_id"])
+        self.assertEqual(order_chat.order_id, order.id)
+        self.chat.refresh_from_db()
+        self.assertIsNone(self.chat.order_id)
         # Offer message must be marked accepted
         self.offer_message.refresh_from_db()
         self.assertEqual(self.offer_message.offer_data.get("status"), "accepted")
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ChatConversationRoutingTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name="Routing subject")
+        cls.work_type = WorkType.objects.create(name="Routing work type")
+        cls.client_user = User.objects.create_user(
+            username="chat_routing_client",
+            email="chat_routing_client@example.com",
+            password="pwd",
+            role="client",
+        )
+        cls.expert_user = User.objects.create_user(
+            username="chat_routing_expert",
+            email="chat_routing_expert@example.com",
+            password="pwd",
+            role="expert",
+        )
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.client_user)
+        self.direct_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
+        self.direct_chat.participants.set([self.client_user, self.expert_user])
+        self.order = Order.objects.create(
+            client=self.client_user,
+            expert=self.expert_user,
+            subject=self.subject,
+            work_type=self.work_type,
+            title="Routing order",
+            description="Routing order body",
+            budget=1500,
+            deadline=timezone.now() + timedelta(days=4),
+            status="in_progress",
+        )
+        self.order_chat = Chat.objects.create(order=self.order, client=self.client_user, expert=self.expert_user)
+        self.order_chat.participants.set([self.client_user, self.expert_user])
+
+    def test_get_or_create_by_user_prefers_main_direct_chat(self):
+        response = self.api_client.post(
+            "/api/chat/chats/get_or_create_by_user/",
+            {"user_id": self.expert_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["id"], self.direct_chat.id)
+
+    def test_get_or_create_by_order_and_user_returns_order_subdialog(self):
+        response = self.api_client.post(
+            "/api/chat/chats/get_or_create_by_order_and_user/",
+            {"order_id": self.order.id, "user_id": self.expert_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["id"], self.order_chat.id)
+        self.assertEqual(response.json()["order_id"], self.order.id)

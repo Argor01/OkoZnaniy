@@ -24,7 +24,7 @@ from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
-from apps.orders.models import Order
+from apps.orders.models import Bid, Order
 
 User = get_user_model()
 
@@ -238,3 +238,105 @@ class OrderReviewLifecycleTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         order.refresh_from_db()
         self.assertEqual(order.status, "review")
+
+    def test_client_can_delete_own_new_order(self):
+        order = self._create_order(status="new", expert=None)
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.delete(f"/api/orders/orders/{order.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Order.objects.filter(pk=order.id).exists())
+
+    def test_client_cannot_delete_other_clients_order(self):
+        order = self._create_order(status="new", expert=None, client=self.other_client)
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.delete(f"/api/orders/orders/{order.id}/")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Order.objects.filter(pk=order.id).exists())
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class OrderChatBootstrapTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name="Order chat bootstrap subject")
+        cls.work_type = WorkType.objects.create(name="Order chat bootstrap work type")
+        cls.client_user = User.objects.create_user(
+            username="order_chat_client",
+            email="order_chat_client@example.com",
+            password="testpass123",
+            role="client",
+        )
+        cls.expert_user = User.objects.create_user(
+            username="order_chat_expert",
+            email="order_chat_expert@example.com",
+            password="testpass123",
+            role="expert",
+        )
+
+    def setUp(self):
+        self.api_client = APIClient()
+
+    def _create_order(self, **overrides):
+        defaults = {
+            "client": self.client_user,
+            "subject": self.subject,
+            "work_type": self.work_type,
+            "title": "Chat bootstrap order",
+            "description": "Order body",
+            "budget": Decimal("2500"),
+            "deadline": timezone.now() + timedelta(days=5),
+            "status": "new",
+        }
+        defaults.update(overrides)
+        return Order.objects.create(**defaults)
+
+    def test_accept_bid_keeps_main_chat_and_creates_order_subdialog(self):
+        order = self._create_order()
+        main_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
+        main_chat.participants.set([self.client_user, self.expert_user])
+        bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"))
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/accept_bid/",
+            {"bid_id": bid.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.expert_id, self.expert_user.id)
+        main_chat.refresh_from_db()
+        self.assertIsNone(main_chat.order_id)
+        order_chat = Chat.objects.get(pk=response.json()["chat_id"])
+        self.assertEqual(order_chat.order_id, order.id)
+        self.assertTrue(
+            Message.objects.filter(
+                chat=order_chat,
+                message_type="offer",
+                offer_data__status="accepted",
+                offer_data__order_id=order.id,
+            ).exists()
+        )
+
+    def test_take_creates_main_chat_and_order_subdialog(self):
+        order = self._create_order()
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/take/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.expert_id, self.expert_user.id)
+        self.assertEqual(order.status, "in_progress")
+        self.assertTrue(
+            Chat.objects.filter(order__isnull=True, participants=self.client_user)
+            .filter(participants=self.expert_user)
+            .exists()
+        )
+        order_chat = Chat.objects.get(pk=response.json()["chat_id"])
+        self.assertEqual(order_chat.order_id, order.id)

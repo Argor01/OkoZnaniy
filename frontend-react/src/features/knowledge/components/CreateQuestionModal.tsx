@@ -169,6 +169,10 @@ export const CreateQuestionModal: React.FC<CreateQuestionModalProps> = ({
         tags: tags
       });
 
+      window.dispatchEvent(new CustomEvent('knowledgeQuestionsUpdated', {
+        detail: { questionId: newQuestion.id }
+      }));
+
       message.success('Вопрос успешно создан!');
       form.resetFields();
       setTags([]);

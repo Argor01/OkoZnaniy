@@ -9,6 +9,7 @@ from django.db.models import Q, Max, Count, Prefetch
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
+from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat
 from .websocket_utils import notify_chat_message, notify_typing
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
@@ -784,13 +785,6 @@ class ChatViewSet(viewsets.ModelViewSet):
             client_user = chat.client or request.user
             expert_user = chat.expert or message.sender
 
-            if not chat.client_id:
-                chat.client = client_user
-            if not chat.expert_id:
-                chat.expert = expert_user
-            if not chat.client_id or not chat.expert_id:
-                chat.save(update_fields=['client', 'expert'])
-
             order = Order.objects.create(
                 client=client_user,
                 expert=expert_user,
@@ -809,11 +803,13 @@ class ChatViewSet(viewsets.ModelViewSet):
             offer_data['status'] = 'accepted'
             offer_data['order_id'] = order.id
             message.offer_data = offer_data
-            message.save()
-            
-            if chat.order_id != order.id:
-                chat.order = order
-                chat.save(update_fields=['order'])
+            message.save(update_fields=['offer_data'])
+
+            _direct_chat, order_chat, _order_message = ensure_order_chat_started(
+                order,
+                sender=client_user,
+                text=message.text or f'Заказ #{order.id} принят в работу',
+            )
 
             try:
                 safe_call(NotificationService.create_notification,
@@ -825,13 +821,13 @@ class ChatViewSet(viewsets.ModelViewSet):
                     related_object_type='order',
                     data={
                         'order_id': order.id,
-                        'chat_id': chat.id,
+                        'chat_id': order_chat.id,
                         'offer_message_id': message.id
                     })
             except Exception:
                 pass
                 
-            return Response({'status': 'success', 'order_id': order.id})
+            return Response({'status': 'success', 'order_id': order.id, 'chat_id': order_chat.id})
             
         except Exception as e:
             import logging
@@ -982,13 +978,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # РџРѕР»СѓС‡Р°РµРј РёР»Рё СЃРѕР·РґР°РµРј С‡Р°С‚
-        chat, created = Chat.objects.get_or_create(
-            order=order,
-            client=order.client,
-            expert=order.expert
-        )
-        if created:
-            chat.participants.add(order.client, order.expert)
+        chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
         return Response(serializer.data)
@@ -1028,6 +1018,12 @@ class ChatViewSet(viewsets.ModelViewSet):
                 {'detail': 'Р§Р°С‚ РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С‚РѕР»СЊРєРѕ СЃ СЌРєСЃРїРµСЂС‚РѕРј'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        if order.expert_id and {order.client_id, other_user.id} == {order.client_id, order.expert_id}:
+            chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
+            chat.hidden_for_users.remove(request.user)
+            serializer = ChatDetailSerializer(chat, context={'request': request})
+            return Response(serializer.data)
 
         client = order.client
         expert = other_user
@@ -1123,6 +1119,11 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # РћРїСЂРµРґРµР»СЏРµРј client/expert РїРѕ ID (РјРµРЅСЊС€РёР№ ID = client), С‡С‚РѕР±С‹ constraint СЂР°Р±РѕС‚Р°Р» РєРѕСЂСЂРµРєС‚РЅРѕ
+        chat = get_or_create_direct_chat(request.user, other_user, context_title=context_title)
+        chat.hidden_for_users.remove(request.user)
+        serializer = ChatDetailSerializer(chat, context={'request': request})
+        return Response(serializer.data)
+
         user_ids = sorted([request.user.id, other_user.id])
         resolved_client_id = user_ids[0]
         resolved_expert_id = user_ids[1]

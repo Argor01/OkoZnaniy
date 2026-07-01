@@ -104,6 +104,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [order, setOrder] = useState<OrderForChat | null>(null);
   const [headerOrder, setHeaderOrder] = useState<{ id: number | null; title: string | null }>({ id: null, title: null });
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+  const [orderStatusById, setOrderStatusById] = useState<Record<number, string>>({});
   const [orderIdsByChatId, setOrderIdsByChatId] = useState<Record<number, number[]>>({});
   const [closedOrderIdsByChatId, setClosedOrderIdsByChatId] = useState<Record<number, number[]>>({});
   const [workUploading, setWorkUploading] = useState(false);
@@ -338,6 +339,17 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       .map((r) => r.id);
     const openIds = closedIds.length === 0 ? orderIds : orderIds.filter((id) => !closedIds.includes(id));
 
+    setOrderStatusById((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const result of results) {
+        if (typeof result.status !== 'string') continue;
+        if (next[result.id] === result.status) continue;
+        next[result.id] = result.status;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
     setClosedOrderIdsByChatId((prev) => ({ ...prev, [chatId]: closedIds }));
     setOrderIdsByChatId((prev) => ({ ...prev, [chatId]: openIds }));
   }, [extractOrderIdsFromChat]);
@@ -409,21 +421,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const prevAcceptedOrderIdsRef = useRef<number[]>([]);
   useEffect(() => {
     if (!visible) return;
-    const prevIds = prevAcceptedOrderIdsRef.current;
     prevAcceptedOrderIdsRef.current = orderIdsForTabs;
-    if (orderIdsForTabs.length === 0) {
-      setActiveOrderId(null);
-      return;
-    }
-    const prevLast = prevIds[prevIds.length - 1];
-    const nextLast = orderIdsForTabs[orderIdsForTabs.length - 1];
-    const hasNewOrder = orderIdsForTabs.length > prevIds.length && nextLast !== prevLast;
-    setActiveOrderId((prev) => {
-      if (hasNewOrder) return nextLast;
-      if (prev && orderIdsForTabs.includes(prev)) return prev;
-      return nextLast;
-    });
-  }, [visible, orderIdsForTabs]);
+    const chatOrderId = toPositiveNumber(selectedChat?.order_id);
+    setActiveOrderId(chatOrderId);
+  }, [visible, orderIdsForTabs, selectedChat?.order_id, toPositiveNumber]);
 
   const effectiveOrderId = activeOrderId;
 
@@ -633,6 +634,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         return same ? prev : data;
       });
       syncChatListItemFromDetail(data);
+      setActiveOrderId(toPositiveNumber(data.order_id) ?? null);
       const orderIdFromContext = (() => {
         const ctx = typeof (data as { context_title?: unknown } | null)?.context_title === 'string'
           ? String((data as { context_title?: unknown }).context_title)
@@ -737,6 +739,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const chatData = await chatApi.getOrCreateByOrderAndUser(orderId, userId);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
+      setActiveOrderId(toPositiveNumber(chatData.order_id) ?? null);
       if (!chatData.order_id) {
         try {
           const orderData = await ordersApi.getById(orderId);
@@ -808,6 +811,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       logger.log('🔧 Chat data received:', chatData);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
+      setActiveOrderId(toPositiveNumber(chatData.order_id) ?? null);
       logger.log('🔧 Selected chat set to:', chatData);
       await loadChats();
     } catch (error: unknown) {
@@ -885,6 +889,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           const chatData = await chatApi.getById(chatId);
           await hydrateClosedOrdersForChat(chatData);
           setSelectedChat(chatData);
+          setActiveOrderId(toPositiveNumber(chatData.order_id) ?? null);
           logger.log('🔧 Chat loaded by ID:', chatData);
           await loadChats();
           
@@ -906,6 +911,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             logger.log('🔧 Found order_id from accepted offer:', orderIdFromAcceptedOffer);
             setActiveOrderId(orderIdFromAcceptedOffer);
             setOrderPanelOpen(true);
+          } else if (!toPositiveNumber(chatData.order_id)) {
+            setActiveOrderId(null);
           }
         } catch (error: unknown) {
           logger.error('🔧 Error in handleOpenChatById (by chatId):', error);
@@ -979,7 +986,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     ordersApi
       .getById(effectiveOrderId)
       .then((data) => {
-        if (!cancelled) setOrder(data as OrderForChat);
+        if (cancelled) return;
+        const nextOrder = data as OrderForChat;
+        setOrder(nextOrder);
+        if (typeof nextOrder.status === 'string') {
+          setOrderStatusById((prev) => (prev[effectiveOrderId] === nextOrder.status ? prev : { ...prev, [effectiveOrderId]: nextOrder.status }));
+        }
       })
       .catch(() => {
         if (!cancelled) setOrder(null);
@@ -997,7 +1009,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     try {
       setOrderLoading(true);
       const data = await ordersApi.getById(effectiveOrderId);
-      setOrder(data as OrderForChat);
+      const nextOrder = data as OrderForChat;
+      setOrder(nextOrder);
+      if (typeof nextOrder.status === 'string') {
+        setOrderStatusById((prev) => (prev[effectiveOrderId] === nextOrder.status ? prev : { ...prev, [effectiveOrderId]: nextOrder.status }));
+      }
     } catch {
       setOrder(null);
     } finally {
@@ -1068,69 +1084,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [visible, order?.deadline]);
 
   const isClosedOrder = order?.status === 'completed' || order?.status === 'cancelled';
-
-  const closedOrderIdsForChat = useMemo(() => {
-    if (!selectedChat?.id) return [];
-    const ids = closedOrderIdsByChatId[selectedChat.id];
-    return Array.isArray(ids) ? ids : [];
-  }, [closedOrderIdsByChatId, selectedChat?.id]);
-
-  const tabsBaseOrderIds = useMemo(() => {
-    const base = Array.isArray(orderIdsForTabs) && orderIdsForTabs.length > 0 ? orderIdsForTabs : computedOrderIds;
-    const next = [...base];
-    for (const id of computedOrderIds) {
-      if (!next.includes(id)) next.push(id);
-    }
-    return next;
-  }, [computedOrderIds, orderIdsForTabs]);
-
-  const tabsOrderIds = useMemo(() => {
-    const filteredByClosed = tabsBaseOrderIds.filter((id) => !closedOrderIdsForChat.includes(id));
-    if (!effectiveOrderId || !isClosedOrder) return filteredByClosed;
-    return filteredByClosed.filter((id) => id !== effectiveOrderId);
-  }, [closedOrderIdsForChat, effectiveOrderId, isClosedOrder, tabsBaseOrderIds]);
-
-  useEffect(() => {
-    if (!visible) return;
-    if (!isClosedOrder) return;
-    if (!selectedChat?.id) return;
-    if (!effectiveOrderId) return;
-
-    setClosedOrderIdsByChatId((prev) => {
-      const prevIds = prev[selectedChat.id] || [];
-      if (prevIds.includes(effectiveOrderId)) return prev;
-      return { ...prev, [selectedChat.id]: [...prevIds, effectiveOrderId] };
-    });
-
-    const removedIndex = tabsBaseOrderIds.indexOf(effectiveOrderId);
-    const nextIds = tabsBaseOrderIds.filter(
-      (id) => id !== effectiveOrderId && !closedOrderIdsForChat.includes(id)
-    );
-    const nextActive =
-      nextIds.length === 0 ? null : nextIds[Math.min(Math.max(removedIndex, 0), nextIds.length - 1)];
-
-    setOrderIdsByChatId((prev) => {
-      const existing = prev[selectedChat.id];
-      if (
-        Array.isArray(existing) &&
-        existing.length === tabsOrderIds.length &&
-        existing.every((v, i) => v === tabsOrderIds[i])
-      ) {
-        return prev;
-      }
-      return { ...prev, [selectedChat.id]: tabsOrderIds };
-    });
-
-    setActiveOrderId(nextActive);
-  }, [
-    visible,
-    isClosedOrder,
-    selectedChat?.id,
-    effectiveOrderId,
-    tabsBaseOrderIds,
-    tabsOrderIds,
-    closedOrderIdsForChat,
-  ]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -1392,47 +1345,47 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const chatId = selectedChat.id;
       const result = await chatApi.acceptOffer(chatId, messageId);
       const createdOrderIdRaw = (result as { order_id?: unknown } | undefined)?.order_id;
+      const createdChatIdRaw = (result as { chat_id?: unknown } | undefined)?.chat_id;
       const createdOrderId =
         typeof createdOrderIdRaw === 'number'
           ? createdOrderIdRaw
           : typeof createdOrderIdRaw === 'string'
             ? Number(createdOrderIdRaw)
             : NaN;
+      const createdChatId =
+        typeof createdChatIdRaw === 'number'
+          ? createdChatIdRaw
+          : typeof createdChatIdRaw === 'string'
+            ? Number(createdChatIdRaw)
+            : NaN;
 
-      if (Number.isFinite(createdOrderId) && createdOrderId > 0) {
-        setSelectedChat((prev) =>
-          prev
-            ? {
-                ...prev,
-                order_id: createdOrderId,
-                order: createdOrderId,
-                messages: Array.isArray(prev.messages)
-                  ? prev.messages.map((m) => {
-                      if (m.id !== messageId) return m;
-                      return {
-                        ...m,
-                        offer_data: {
-                          ...(m.offer_data || {}),
-                          status: 'accepted',
-                          order_id: createdOrderId,
-                        },
-                      };
-                    })
-                  : prev.messages,
-              }
-            : prev
-        );
-        setChatList((prev) =>
-          prev.map((chat) =>
-            chat.id === chatId
-              ? { ...chat, order_id: createdOrderId, order: createdOrderId }
-              : chat
-          )
-        );
-      }
+      setSelectedChat((prev) =>
+        prev
+          ? {
+              ...prev,
+              messages: Array.isArray(prev.messages)
+                ? prev.messages.map((m) => {
+                    if (m.id !== messageId) return m;
+                    return {
+                      ...m,
+                      offer_data: {
+                        ...(m.offer_data || {}),
+                        status: 'accepted',
+                        order_id: Number.isFinite(createdOrderId) && createdOrderId > 0 ? createdOrderId : m.offer_data?.order_id,
+                      },
+                    };
+                  })
+                : prev.messages,
+            }
+          : prev
+      );
 
-      await loadChatDetail(chatId);
       await loadChats();
+      if (Number.isFinite(createdChatId) && createdChatId > 0) {
+        await loadChatDetail(createdChatId);
+      } else {
+        await loadChatDetail(chatId);
+      }
       antMessage.success('Предложение принято');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Ошибка принятия предложения');
@@ -1953,7 +1906,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-    const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
+  const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
   const showChatListLoading = loading && safeChatList.length === 0;
 
   useEffect(() => {
@@ -2164,15 +2117,210 @@ const handleOverdueComplaint = async () => {
     setSupportCenterSelected(false);
   }, []);
 
-    const filteredChats = useMemo(() => safeChatList.filter(chat => {
+  const closedOrderStatuses = useMemo(() => new Set(['completed', 'cancelled', 'canceled', 'done']), []);
+
+  const conversationGroups = useMemo(() => {
+    const groups = new Map<number, {
+      key: number;
+      otherUser: ChatListItem['other_user'];
+      chats: ChatListItem[];
+      mainChat: ChatListItem | null;
+      orderChats: ChatListItem[];
+      representative: ChatListItem;
+      unreadCount: number;
+      lastMessage: ChatListItem['last_message'];
+      lastMessageTime: string;
+      isPinned: boolean;
+    }>();
+
+    for (const chat of safeChatList) {
+      const key = Number(chat.other_user?.id ?? 0);
+      if (!Number.isFinite(key) || key <= 0) continue;
+
+      const existing = groups.get(key);
+      if (existing) {
+        existing.chats.push(chat);
+        if ((chat.order_id ?? chat.order) && !existing.orderChats.some((item) => item.id === chat.id)) {
+          existing.orderChats.push(chat);
+        }
+        if (!(chat.order_id ?? chat.order) && !existing.mainChat) {
+          existing.mainChat = chat;
+        }
+        continue;
+      }
+
+      groups.set(key, {
+        key,
+        otherUser: chat.other_user,
+        chats: [chat],
+        mainChat: (chat.order_id ?? chat.order) ? null : chat,
+        orderChats: (chat.order_id ?? chat.order) ? [chat] : [],
+        representative: chat,
+        unreadCount: 0,
+        lastMessage: chat.last_message,
+        lastMessageTime: chat.last_message_time,
+        isPinned: Boolean(chat.is_pinned),
+      });
+    }
+
+    return Array.from(groups.values())
+      .map((group) => {
+        const sortedChats = [...group.chats].sort((a, b) => {
+          const aPinned = a.is_pinned ? 1 : 0;
+          const bPinned = b.is_pinned ? 1 : 0;
+          if (aPinned !== bPinned) return bPinned - aPinned;
+          return new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime();
+        });
+        const representative = sortedChats[0] || group.chats[0];
+        const mainChat = group.mainChat || sortedChats.find((chat) => !(chat.order_id ?? chat.order)) || null;
+        const orderChats = [...group.orderChats].sort(
+          (a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime()
+        );
+        return {
+          ...group,
+          id: mainChat?.id ?? representative?.id ?? group.key,
+          representative,
+          mainChat,
+          orderChats,
+          other_user: group.otherUser,
+          unreadCount: group.chats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0),
+          unread_count: group.chats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0),
+          lastMessage: representative?.last_message ?? null,
+          last_message: representative?.last_message ?? null,
+          lastMessageTime: representative?.last_message_time ?? '',
+          last_message_time: representative?.last_message_time ?? '',
+          isPinned: group.chats.some((chat) => Boolean(chat.is_pinned)),
+          is_pinned: group.chats.some((chat) => Boolean(chat.is_pinned)),
+        };
+      })
+      .sort((a, b) => {
+        const aPinned = a.isPinned ? 1 : 0;
+        const bPinned = b.isPinned ? 1 : 0;
+        if (aPinned !== bPinned) return bPinned - aPinned;
+        return new Date(b.lastMessageTime || 0).getTime() - new Date(a.lastMessageTime || 0).getTime();
+      });
+  }, [safeChatList]);
+
+  const selectedConversationUserId = useMemo(() => {
+    const directId = Number(selectedChat?.other_user?.id ?? 0);
+    if (Number.isFinite(directId) && directId > 0) return directId;
+    const externalId = Number(selectedUserId ?? 0);
+    return Number.isFinite(externalId) && externalId > 0 ? externalId : null;
+  }, [selectedChat?.other_user?.id, selectedUserId]);
+
+  const selectedConversationGroup = useMemo(() => {
+    if (!selectedConversationUserId) return null;
+    return conversationGroups.find((group) => group.key === selectedConversationUserId) ?? null;
+  }, [conversationGroups, selectedConversationUserId]);
+
+  const selectedConversationOrderChats = useMemo(() => {
+    if (!selectedConversationGroup) return [];
+    return selectedConversationGroup.orderChats.filter((chat) => {
+      const orderId = toPositiveNumber(chat.order_id ?? chat.order);
+      if (!orderId) return false;
+      const knownStatus = orderStatusById[orderId];
+      return !knownStatus || !closedOrderStatuses.has(knownStatus);
+    });
+  }, [closedOrderStatuses, orderStatusById, selectedConversationGroup, toPositiveNumber]);
+
+  const tabsOrderIds = useMemo(() => (
+    selectedConversationOrderChats
+      .map((chat) => toPositiveNumber(chat.order_id ?? chat.order))
+      .filter((id): id is number => Boolean(id))
+  ), [selectedConversationOrderChats, toPositiveNumber]);
+
+  const primaryOrderChatId = useMemo(() => {
+    const directMatch = selectedConversationOrderChats.find(
+      (chat) => toPositiveNumber(chat.order_id ?? chat.order) === effectiveOrderId
+    );
+    if (directMatch) return directMatch.id;
+    return selectedConversationOrderChats[0]?.id ?? null;
+  }, [effectiveOrderId, selectedConversationOrderChats, toPositiveNumber]);
+
+  const primaryOrderId = useMemo(() => {
+    if (!primaryOrderChatId) return null;
+    const targetChat = selectedConversationOrderChats.find((chat) => chat.id === primaryOrderChatId);
+    return toPositiveNumber(targetChat?.order_id ?? targetChat?.order) ?? null;
+  }, [primaryOrderChatId, selectedConversationOrderChats, toPositiveNumber]);
+
+  const isMainChatLocked = Boolean(
+    selectedChat &&
+    !selectedChat.order_id &&
+    selectedConversationOrderChats.length > 0 &&
+    !isSupportChatSelected
+  );
+
+  const handleOpenMainConversation = useCallback(() => {
+    if (!selectedConversationGroup?.key) return;
+    setOrderPanelOpen(false);
+    void loadOrCreateChatWithUser(selectedConversationGroup.key);
+  }, [loadOrCreateChatWithUser, selectedConversationGroup?.key]);
+
+  const handleOpenOrderConversation = useCallback((orderId: number) => {
+    const existingChat = selectedConversationOrderChats.find(
+      (chat) => toPositiveNumber(chat.order_id ?? chat.order) === orderId
+    );
+    setOrderPanelOpen(true);
+    if (existingChat) {
+      void loadChatDetail(existingChat.id);
+      return;
+    }
+    if (selectedConversationGroup?.key) {
+      void loadOrCreateChatByOrderAndUser(orderId, selectedConversationGroup.key);
+    }
+  }, [
+    loadChatDetail,
+    loadOrCreateChatByOrderAndUser,
+    selectedConversationGroup?.key,
+    selectedConversationOrderChats,
+    toPositiveNumber,
+  ]);
+
+  const filteredChats = useMemo(() => conversationGroups.filter((chat) => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const userName = chat.other_user?.username?.toLowerCase() || '';
-      const lastMessage = chat.last_message?.text?.toLowerCase() || '';
+      const userName = chat.otherUser?.username?.toLowerCase() || '';
+      const lastMessage = chat.lastMessage?.text?.toLowerCase() || '';
       return userName.includes(query) || lastMessage.includes(query);
     }
     return true;
-  }), [safeChatList, searchQuery]);
+  }), [conversationGroups, searchQuery]);
+
+  useEffect(() => {
+    if (!visible) return;
+    const missingOrderIds = selectedConversationOrderChats
+      .map((chat) => toPositiveNumber(chat.order_id ?? chat.order))
+      .filter((id): id is number => Boolean(id) && !orderStatusById[id]);
+    if (missingOrderIds.length === 0) return;
+
+    let cancelled = false;
+    Promise.all(
+      missingOrderIds.map(async (id) => {
+        try {
+          const data = await ordersApi.getById(id);
+          return { id, status: typeof (data as { status?: unknown } | undefined)?.status === 'string' ? String((data as { status?: unknown }).status) : undefined };
+        } catch {
+          return { id, status: undefined };
+        }
+      })
+    ).then((results) => {
+      if (cancelled) return;
+      setOrderStatusById((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const result of results) {
+          if (!result.status || next[result.id] === result.status) continue;
+          next[result.id] = result.status;
+          changed = true;
+        }
+        return changed ? next : prev;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [orderStatusById, selectedConversationOrderChats, toPositiveNumber, visible]);
   
   const groupedMessages = useMemo(() => {
     if (!selectedChat?.messages) return [];
@@ -2283,10 +2431,12 @@ const handleOverdueComplaint = async () => {
               </div>
             ) : (
               filteredChats.map((chat) => {
+                const menuChatId = chat.mainChat?.id ?? chat.representative.id;
+                const isConversationSelected = selectedConversationUserId === chat.key;
                 const menuItems: MenuProps['items'] = [
                   {
                     key: 'pin',
-                    icon: chat.is_pinned ? <PushpinFilled /> : <PushpinOutlined />,
+                    icon: chat.isPinned ? <PushpinFilled /> : <PushpinOutlined />,
                     label: chat.is_pinned ? 'Открепить' : 'Закрепить',
                     onClick: () => handleTogglePin(chat.id),
                   },
@@ -2312,10 +2462,14 @@ const handleOverdueComplaint = async () => {
                     <div
                       onClick={() => {
                         setSupportCenterSelected(false);
-                        loadChatDetail(chat.id);
+                        if (chat.mainChat?.id) {
+                          void loadChatDetail(chat.mainChat.id);
+                        } else {
+                          void loadOrCreateChatWithUser(chat.key);
+                        }
                       }}
                       onContextMenu={handleContextMenu}
-                      className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${selectedChat?.id === chat.id ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
+                      className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isConversationSelected ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
                     >
                       {chat.is_pinned && (
                         <PushpinFilled className={styles.chatListItemPinIcon} />
@@ -2459,7 +2613,7 @@ const handleOverdueComplaint = async () => {
                   }}
                 />
                 <div className={styles.chatHeaderActions}>
-                  {canUseExpertOfferButtons && !isSupportChatSelected ? (
+                  {canUseExpertOfferButtons && !isSupportChatSelected && !isMainChatLocked ? (
                     headerContextTitle ? (
                       <Button
                         type="primary"
@@ -2561,7 +2715,7 @@ const handleOverdueComplaint = async () => {
             )}
           </div>
 
-          {tabsOrderIds.length > 0 && !isSupportChatSelected ? (
+          {selectedConversationGroup && tabsOrderIds.length > 0 && !isSupportChatSelected ? (
             <>
               <input
                 ref={workFileInputRef}
@@ -2576,25 +2730,26 @@ const handleOverdueComplaint = async () => {
               <div className={`${styles.orderTabsHeader} ${isMobile ? styles.orderTabsHeaderMobile : ''}`}>
                 <Tabs
                   size="small"
-                  activeKey={
-                    effectiveOrderId && !isClosedOrder
-                      ? String(effectiveOrderId)
-                      : (tabsOrderIds.length > 0 ? String(tabsOrderIds[tabsOrderIds.length - 1]) : undefined)
-                  }
+                  activeKey={effectiveOrderId && !isClosedOrder ? String(effectiveOrderId) : 'main'}
                   onChange={(key) => {
+                    if (key === 'main') {
+                      handleOpenMainConversation();
+                      return;
+                    }
                     const next = Number(key);
-                    if (Number.isFinite(next) && next > 0) setActiveOrderId(next);
-                    setOrderPanelOpen(true);
+                    if (Number.isFinite(next) && next > 0) {
+                      void handleOpenOrderConversation(next);
+                    }
                   }}
                   className={styles.orderTabs}
-                  items={tabsOrderIds.map((id) => ({
+                  items={[{ key: 'main', label: 'Основной чат' }, ...tabsOrderIds.map((id) => ({
                     key: String(id),
                     label: `Заказ #${id}`,
-                  }))}
+                  }))]}
                 />
               </div>
               
-              {!isClosedOrder && (
+              {effectiveOrderId && !isClosedOrder && (
                 <div className={styles.orderSummaryContainer}>
                   {orderLoading ? (
                     <div className={styles.orderLoading}>
@@ -2752,7 +2907,25 @@ const handleOverdueComplaint = async () => {
               </div>
             ) : selectedChat ? (
               <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
-                {isChatFrozen ? (
+                {isMainChatLocked ? (
+                  <div className={styles.chatOrderRedirectNotice}>
+                    <Text className={styles.chatOrderRedirectTitle}>Основной чат временно закрыт</Text>
+                    <Text className={styles.chatOrderRedirectText}>
+                      По активному заказу общение продолжается внутри чата заказа.
+                    </Text>
+                    <Button
+                      type="primary"
+                      className={styles.goToOrderButton}
+                      onClick={() => {
+                        if (primaryOrderId) {
+                          void handleOpenOrderConversation(primaryOrderId);
+                        }
+                      }}
+                    >
+                      {primaryOrderId ? `Перейти в чат заказа #${primaryOrderId}` : 'Перейти в чат заказа'}
+                    </Button>
+                  </div>
+                ) : isChatFrozen ? (
                   <div className={styles.chatFrozenNotice}>
                     <Text className={styles.chatFrozenTitle}>Переписка временно недоступна</Text>
                     <Text className={styles.chatFrozenReason}>Обнаружен обмен контактами</Text>
@@ -3300,7 +3473,7 @@ const handleOverdueComplaint = async () => {
           </div>
 
           
-          {selectedChat && !isChatFrozen && (
+          {selectedChat && !isChatFrozen && !isMainChatLocked && (
             <div 
               key={`chat-input-${selectedChat.id}-${isChatFrozen}`}
               className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}
