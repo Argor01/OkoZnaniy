@@ -100,6 +100,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       };
 
       const formValues: Record<string, unknown> = { ...profile };
+      formValues.display_username = profile.display_username || profile.username || '';
       formValues.experience_years = toNumberOrUndefined(profile.experience_years);
       formValues.hourly_rate = toNumberOrUndefined(profile.hourly_rate);
 
@@ -158,7 +159,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             };
 
             const profileData: UpdateProfilePayload = {
-              username: values.username,
+              username: typeof values.display_username === 'string' ? values.display_username.trim() : values.display_username,
               first_name: values.first_name,
               last_name: values.last_name,
               bio: values.bio,
@@ -271,7 +272,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
 
         <Form.Item
           label={TEXT.username}
-          name="username"
+          name="display_username"
           rules={[
             { required: true, message: TEXT.usernameRequired },
             { min: 3, message: TEXT.usernameMin },

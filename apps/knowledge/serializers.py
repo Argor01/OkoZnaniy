@@ -64,6 +64,18 @@ class ArticleComplaintCreateSerializer(serializers.ModelSerializer):
         model = ArticleComplaint
         fields = ['article', 'reason', 'description']
 
+    def validate(self, attrs):
+        article = attrs.get('article')
+        request = self.context.get('request')
+
+        if article is None:
+            raise serializers.ValidationError({'article': 'Статья обязательна.'})
+
+        if request and request.user.is_authenticated and article.author_id == request.user.id:
+            raise serializers.ValidationError({'article': 'Нельзя пожаловаться на собственную статью.'})
+
+        return attrs
+
 
 class ArticleComplaintSerializer(serializers.ModelSerializer):
     complainant = ArticleAuthorSerializer(read_only=True)

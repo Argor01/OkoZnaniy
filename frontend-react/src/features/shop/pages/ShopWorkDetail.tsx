@@ -1,19 +1,30 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { formatCurrency, getDisplayUsername, isEmailLike } from '@/utils/formatters';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Typography, Space, Tag, Avatar, Spin, message, Rate, List, Popconfirm } from 'antd';
-import { ArrowLeftOutlined, UserOutlined, CalendarOutlined, DollarOutlined, StarOutlined, ShoppingCartOutlined, EyeOutlined, FileOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
-import { shopApi } from '@/features/shop/api/shop';
-import { authApi } from '@/features/auth/api/auth';
+import {
+  ArrowLeftOutlined,
+  CalendarOutlined,
+  DeleteOutlined,
+  DollarOutlined,
+  DownloadOutlined,
+  EyeOutlined,
+  FileOutlined,
+  ShoppingCartOutlined,
+  StarOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Avatar, List, Popconfirm, Rate, Space, Spin, Tag, Typography, message } from 'antd';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import type { WorkFile } from '@/features/shop/types';
-import { useDashboard } from '@/contexts/DashboardContext';
-import { AppCard } from '@/components/ui/AppCard';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import { AppButton } from '@/components/ui/AppButton';
-import styles from './ShopWorkDetail.module.css';
+import { AppCard } from '@/components/ui/AppCard';
+import { useDashboard } from '@/contexts/DashboardContext';
+import { shopApi } from '@/features/shop/api/shop';
+import type { WorkFile } from '@/features/shop/types';
 import { useCurrentUser } from '@/hooks/queries';
+import { formatCurrency, getDisplayUsername, isEmailLike } from '@/utils/formatters';
+import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
 
@@ -24,7 +35,7 @@ const ShopWorkDetail: React.FC = () => {
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  const {data: userProfile, isLoading: isUserLoading} = useCurrentUser();
+  const { data: userProfile, isLoading: isUserLoading } = useCurrentUser();
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -36,7 +47,7 @@ const ShopWorkDetail: React.FC = () => {
     queryKey: ['shop-work', workId],
     queryFn: () => shopApi.getWork(Number(workId)),
     enabled: !!workId,
-    staleTime: 5 * 60 * 1000, // 5 minutes cache
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: purchases = [] } = useQuery({
@@ -52,9 +63,9 @@ const ShopWorkDetail: React.FC = () => {
   }, [purchases, workId]);
 
   const deleteMutation = useMutation({
-    mutationFn: (workId: number) => shopApi.deleteWork(workId),
+    mutationFn: (targetWorkId: number) => shopApi.deleteWork(targetWorkId),
     onSuccess: () => {
-      message.success('Работа успешно удалена!');
+      message.success('Работа успешно удалена');
       queryClient.invalidateQueries({ queryKey: ['shop-works'] });
       queryClient.invalidateQueries({ queryKey: ['shop-work', Number(workId)] });
       navigate('/shop/ready-works');
@@ -98,19 +109,25 @@ const ShopWorkDetail: React.FC = () => {
   };
 
   const handlePurchase = () => {
-    const sellerId = work?.author?.id;
+    const sellerId = work.author?.id;
     if (!sellerId) {
-      message.error('Не удалось открыть чат: неизвестен продавец');
+      message.error('Не удалось оформить покупку: неизвестен продавец');
       return;
     }
+
     shopApi
       .purchaseWork(work.id)
-      .then(() => {
+      .then((createdPurchase) => {
+        queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
+        if (createdPurchase.order) {
+          navigate(`/orders/${createdPurchase.order}`);
+          return;
+        }
         dashboard.openContextChat(sellerId, work.title, work.id);
       })
       .catch((error: unknown) => {
-        const detail = (error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error || 
-                       (error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.detail;
+        const detail = (error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error ||
+          (error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.detail;
         message.error(detail || 'Не удалось купить работу');
       });
   };
@@ -120,14 +137,14 @@ const ShopWorkDetail: React.FC = () => {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.pageInner}>
-        <AppButton 
-          icon={<ArrowLeftOutlined />} 
+        <AppButton
+          icon={<ArrowLeftOutlined />}
           onClick={() => navigate(-1)}
           className={styles.backButton}
           size={isMobile ? 'middle' : 'large'}
@@ -148,17 +165,13 @@ const ShopWorkDetail: React.FC = () => {
 
             {work.preview && (
               <div className={styles.preview}>
-                <img 
-                  src={work.preview} 
-                  alt={work.title}
-                  className={styles.previewImage}
-                />
+                <img src={work.preview} alt={work.title} className={styles.previewImage} />
               </div>
             )}
 
             <div className={styles.sectionStack}>
               <div className={styles.clientInfo}>
-                <Space 
+                <Space
                   size={12}
                   style={{ cursor: work.author?.username ? 'pointer' : 'default' }}
                   onClick={() => {
@@ -167,9 +180,9 @@ const ShopWorkDetail: React.FC = () => {
                     }
                   }}
                 >
-                  <Avatar 
-                    size={48} 
-                    src={work.author?.avatar || work.author_avatar} 
+                  <Avatar
+                    size={48}
+                    src={work.author?.avatar || work.author_avatar}
                     icon={<UserOutlined />}
                     className={styles.clientAvatar}
                   />
@@ -185,82 +198,56 @@ const ShopWorkDetail: React.FC = () => {
               </div>
 
               <div className={styles.infoGrid}>
-
-                <AppCard 
-                  size="small" 
-                  className={styles.infoCard}
-                >
+                <AppCard size="small" className={styles.infoCard}>
                   <div className={styles.centeredStat}>
-                    <Text type="secondary" className={styles.statLabel}>
-                      Просмотры
-                    </Text>
+                    <Text type="secondary" className={styles.statLabel}>Просмотры</Text>
                     <Space align="center" className={styles.centeredRow}>
                       <EyeOutlined className={styles.mutedIcon} />
-                      <Text className={styles.mutedValue}>
-                        {work.viewsCount || 0}
-                      </Text>
+                      <Text className={styles.mutedValue}>{work.viewsCount || 0}</Text>
                     </Space>
                   </div>
                 </AppCard>
 
-                <AppCard 
-                  size="small" 
-                  className={styles.infoCard}
-                >
+                <AppCard size="small" className={styles.infoCard}>
                   <Space direction="vertical" size={4} className={styles.fullWidth}>
-                    <Text type="secondary" className={styles.infoLabel}>
-                      Предмет
-                    </Text>
+                    <Text type="secondary" className={styles.infoLabel}>Предмет</Text>
                     <Text className={styles.subjectValue}>
                       {work.subject_name || work.subject || 'Не указан'}
                     </Text>
                   </Space>
                 </AppCard>
 
-                <AppCard 
-                  size="small" 
-                  className={styles.infoCard}
-                >
+                <AppCard size="small" className={styles.infoCard}>
                   <Space direction="vertical" size={4} className={styles.fullWidth}>
-                    <Text type="secondary" className={styles.infoLabel}>
-                      Цена
-                    </Text>
+                    <Text type="secondary" className={styles.infoLabel}>Цена</Text>
                     <Space align="center">
                       <DollarOutlined className={styles.priceIcon} />
-                      <Text className={styles.priceValue}>
-                        {formatCurrency(work.price)}
-                      </Text>
+                      <Text className={styles.priceValue}>{formatCurrency(work.price)}</Text>
                     </Space>
                   </Space>
                 </AppCard>
 
-                
-                <AppCard 
-                  size="small" 
-                  className={styles.infoCard}
-                >
+                <AppCard size="small" className={styles.infoCard}>
                   <Space direction="vertical" size={4} className={styles.fullWidth}>
-                    <Text type="secondary" className={styles.infoLabel}>
-                      Рейтинг
-                    </Text>
+                    <Text type="secondary" className={styles.infoLabel}>Рейтинг</Text>
                     <Space align="center" wrap className={styles.ratingRow}>
                       <StarOutlined className={styles.ratingIcon} />
                       <Rate disabled value={work.rating} className={styles.rateSmall} />
-                      <Text className={styles.ratingCount}>
-                        ({work.reviewsCount || 0})
-                      </Text>
+                      <Text className={styles.ratingCount}>({work.reviewsCount || 0})</Text>
                     </Space>
                   </Space>
                 </AppCard>
 
-                <AppCard 
-                  size="small" 
-                  className={styles.infoCard}
-                >
+                <AppCard size="small" className={styles.infoCard}>
                   <Space direction="vertical" size={4} className={styles.fullWidth}>
-                    <Text type="secondary" className={styles.infoLabel}>
-                      Создана
-                    </Text>
+                    <Text type="secondary" className={styles.infoLabel}>Срок выполнения</Text>
+                    <Text className={styles.createdValue}>{work.execution_days || 0} дн.</Text>
+                  </Space>
+                </AppCard>
+
+                <AppCard size="small" className={styles.infoCard}>
+                  <Space direction="vertical" size={4} className={styles.fullWidth}>
+                    <Text type="secondary" className={styles.infoLabel}>Создана</Text>
                     <Space align="center">
                       <CalendarOutlined className={styles.createdIcon} />
                       <Text className={styles.createdValue}>
@@ -274,12 +261,12 @@ const ShopWorkDetail: React.FC = () => {
 
             <div>
               <Title level={4}>Описание работы</Title>
-              <div 
+              <div
                 className={styles.description}
                 dangerouslySetInnerHTML={{ __html: work.description || 'Описание отсутствует' }}
               />
             </div>
-            
+
             {work.files && work.files.length > 0 && (
               <div>
                 <Title level={4}>Прикрепленные файлы</Title>
@@ -289,6 +276,7 @@ const ShopWorkDetail: React.FC = () => {
                     <List.Item
                       actions={[
                         <AppButton
+                          key={`open-${file.id}`}
                           variant="link"
                           icon={<DownloadOutlined />}
                           onClick={() => {
@@ -300,7 +288,7 @@ const ShopWorkDetail: React.FC = () => {
                           }}
                         >
                           Открыть
-                        </AppButton>
+                        </AppButton>,
                       ]}
                     >
                       <List.Item.Meta
@@ -314,14 +302,12 @@ const ShopWorkDetail: React.FC = () => {
               </div>
             )}
 
-            
             <div className={styles.actionRow}>
               {isUserLoading ? (
                 <div className={styles.centered}>
                   <Spin />
                 </div>
               ) : userProfile?.id === work.author?.id ? (
-
                 <Popconfirm
                   title="Удалить работу?"
                   description="Вы уверены, что хотите удалить эту работу? Это действие нельзя отменить."
@@ -329,9 +315,9 @@ const ShopWorkDetail: React.FC = () => {
                   okText="Да"
                   cancelText="Нет"
                 >
-                  <AppButton 
+                  <AppButton
                     variant="danger"
-                    size="large" 
+                    size="large"
                     icon={<DeleteOutlined />}
                     loading={deleteMutation.isPending}
                     className={styles.actionButton}
@@ -371,10 +357,9 @@ const ShopWorkDetail: React.FC = () => {
                   Скачать
                 </AppButton>
               ) : (
-
-                <AppButton 
-                  variant="primary" 
-                  size="large" 
+                <AppButton
+                  variant="primary"
+                  size="large"
                   icon={<ShoppingCartOutlined />}
                   onClick={handlePurchase}
                   className={styles.actionButton}

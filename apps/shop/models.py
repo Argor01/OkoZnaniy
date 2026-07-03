@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from apps.catalog.models import Subject, WorkType
+from apps.orders.models import Order
 
 
 class ReadyWork(models.Model):
@@ -30,6 +31,7 @@ class ReadyWork(models.Model):
         blank=True,
         null=True,
     )
+    execution_days = models.PositiveIntegerField("Срок выполнения в днях", default=7)
     is_active = models.BooleanField("Активна", default=True)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
@@ -75,6 +77,14 @@ class Purchase(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Покупатель",
         related_name="purchases",
+    )
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Заказ",
+        related_name="shop_purchases",
     )
     price_paid = models.DecimalField("Оплаченная цена", max_digits=10, decimal_places=2)
     delivered_file = models.FileField("Файл работы", upload_to="purchases/", blank=True, null=True)

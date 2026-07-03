@@ -1,4 +1,3 @@
-
 export * from '@/features/shop/types/shop';
 
 export interface Filters {
@@ -29,6 +28,7 @@ export interface WorkFormData {
   price: number;
   subject: string;
   workType: string;
+  executionDays: number;
   preview?: File | null;
   files?: File[];
 }
@@ -41,13 +41,14 @@ export interface WorkFormProps {
 export interface PurchasedWork {
   id: number;
   workId: number;
+  orderId?: number | null;
   subjectId: number;
   workTypeId: number;
   title: string;
   description: string;
   price: number;
-  purchaseDate: string; 
-  isDownloaded: boolean; 
+  purchaseDate: string;
+  isDownloaded: boolean;
   category: string;
   subject: string;
   workType: string;
@@ -63,7 +64,6 @@ export interface PurchasedWork {
     avatar?: string;
     rating: number;
   };
-
   preview?: string;
   deliveredFileAvailable: boolean;
   deliveredFileName?: string;

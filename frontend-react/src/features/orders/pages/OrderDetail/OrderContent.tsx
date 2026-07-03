@@ -121,6 +121,13 @@ const OrderContent: React.FC<OrderContentProps> = ({
     });
   }, [order?.files]);
 
+  const canUploadDeliveredWork = useMemo(() => {
+    if (!isOrderExpert) return false;
+    if (order.status === 'in_progress' || order.status === 'revision') return true;
+    if (order.status === 'review' && deliveredWorkFiles.length === 0) return true;
+    return false;
+  }, [deliveredWorkFiles.length, isOrderExpert, order.status]);
+
   const attachedOrderFiles = useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
     const deliveredIds = new Set(deliveredWorkFiles.map((file: any) => Number(file?.id)));
@@ -194,7 +201,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
       {canSeeDeliveredWorkBlock ? (
         <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
           <Title level={4} className={styles.sectionTitle}>Готовая работа</Title>
-          {isOrderExpert && order.status === 'in_progress' && (
+          {canUploadDeliveredWork && (
             <div
               className={`${styles.uploadDropzone} ${dragActive ? styles.uploadDropzoneActive : ''}`}
               onDragEnter={onDrag}

@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.utils.html import strip_tags
-from .models import ReadyWork, ReadyWorkFile, Purchase
+
 from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
+from .models import Purchase, ReadyWork, ReadyWorkFile
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -9,18 +10,18 @@ class AuthorSerializer(serializers.ModelSerializer):
     display_username = serializers.CharField(read_only=True)
     rating = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
-    
+
     class Meta:
         from django.contrib.auth import get_user_model
+
         User = get_user_model()
         model = User
         fields = ['id', 'username', 'display_username', 'name', 'rating', 'avatar']
-    
+
     def get_name(self, obj):
         return obj.display_username
-    
+
     def get_rating(self, obj):
-        # TODO: Implement rating calculation
         return 0
 
     def get_avatar(self, obj):
@@ -51,28 +52,26 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
     purchasesCount = serializers.SerializerMethodField()
     viewsCount = serializers.SerializerMethodField()
     is_favorite = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ReadyWork
         fields = [
             'id', 'title', 'description', 'price', 'subject', 'work_type',
-            'subject_name', 'work_type_name', 'author', 'author_name', 'author_avatar',
-            'preview', 'rating', 'reviewsCount', 'viewsCount', 'purchasesCount',
-            'is_favorite', 'is_active', 'created_at', 'updated_at', 'files'
+            'execution_days', 'subject_name', 'work_type_name', 'author',
+            'author_name', 'author_avatar', 'preview', 'rating',
+            'reviewsCount', 'viewsCount', 'purchasesCount', 'is_favorite',
+            'is_active', 'created_at', 'updated_at', 'files',
         ]
         read_only_fields = ['author', 'created_at', 'updated_at']
-    
+
     def get_is_favorite(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            # Check if annotated first
             if hasattr(obj, 'is_favorite'):
                 return obj.is_favorite
-            # Fallback to query
             return obj.favorited_by.filter(user=request.user).exists()
         return False
 
-    
     def get_author_avatar(self, obj):
         if obj.author.avatar:
             request = self.context.get('request')
@@ -100,7 +99,7 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
 
     def get_viewsCount(self, obj):
         return int(getattr(obj, 'views_count', None) or 0)
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['description'] = strip_tags(data.get('description') or '')
@@ -116,35 +115,34 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
     work_files = serializers.ListField(
         child=serializers.FileField(),
         required=False,
-        write_only=True
+        write_only=True,
     )
-    
+
     class Meta:
         model = ReadyWork
         fields = [
             'title', 'description', 'price', 'subject', 'work_type',
-            'preview', 'work_files'
+            'execution_days', 'preview', 'work_files',
         ]
-    
+
     def validate_description(self, value):
         return strip_tags(value or '')
 
     def create(self, validated_data):
         work_files = validated_data.pop('work_files', [])
         validated_data['author'] = self.context['request'].user
-        
+
         work = ReadyWork.objects.create(**validated_data)
-        
-        # Создаем файлы работы
+
         for file in work_files:
             ReadyWorkFile.objects.create(
                 work=work,
                 name=file.name,
                 file=file,
                 file_type=file.content_type or '',
-                file_size=file.size
+                file_size=file.size,
             )
-        
+
         return work
 
 
@@ -152,12 +150,13 @@ class PurchaseSerializer(serializers.ModelSerializer):
     work_title = serializers.CharField(source='work.title', read_only=True)
     work_detail = ReadyWorkSerializer(source='work', read_only=True)
     delivered_file_available = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Purchase
         fields = [
             'id',
             'work',
+            'order',
             'work_title',
             'work_detail',
             'price_paid',

@@ -298,6 +298,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
     defendant = UserSerializer(read_only=True)
     order = OrderSerializer(read_only=True)
     files = serializers.SerializerMethodField()
+    review = serializers.SerializerMethodField()
     
     # Write-only поля
     order_id = serializers.IntegerField(write_only=True)
@@ -315,7 +316,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
             'complaint_type',
             'is_order_relevant', 'relevant_until',
             'financial_requirement',
-            'refund_percent', 'description', 'files', 'files_upload',
+            'refund_percent', 'description', 'files', 'files_upload', 'review',
             'status',
             'created_at', 'updated_at', 'resolved_at', 'resolution',
             'chat_id',
@@ -337,6 +338,27 @@ class ComplaintSerializer(serializers.ModelSerializer):
             for f in files
         ]
     
+    def get_review(self, obj):
+        """Возвращаем данные отзыва, если жалоба связана с его обжалованием."""
+        if obj.complaint_type != 'unjustified_review' or not obj.order_id:
+            return None
+
+        review = getattr(obj.order, 'expert_rating', None)
+        if review is None:
+            return None
+
+        return {
+            'id': review.id,
+            'rating': review.rating,
+            'comment': review.comment,
+            'is_published': review.is_published,
+            'is_appealed': review.is_appealed,
+            'appeal_resolved': review.appeal_resolved,
+            'appeal_resolution': review.appeal_resolution,
+            'created_at': review.created_at,
+            'updated_at': review.updated_at,
+        }
+
     def validate_order_id(self, value):
         """Проверяем, что для заказа нет открытых претензий"""
         existing_complaint = Complaint.objects.filter(

@@ -15,6 +15,21 @@ export const catalogApi = {
     return response.data;
   },
 
+  createCategory: async (name: string) => {
+    const normalizedName = name.trim();
+    try {
+      const response = await apiClient.post('/catalog/categories/', {
+        name: normalizedName,
+        description: `Категория "${normalizedName}" добавлена пользователем`,
+        order: 0,
+      });
+      return response.data;
+    } catch (error) {
+      logger.error('❌ Ошибка создания категории:', error);
+      throw error;
+    }
+  },
+
   
   getSubjects: async (): Promise<Subject[]> => {
     try {

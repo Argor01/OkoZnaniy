@@ -64,6 +64,8 @@ const ComplaintDetails: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeResolution, setCloseResolution] = useState('');
+  const [reviewAction, setReviewAction] = useState<'remove' | 'restore' | null>(null);
+  const [reviewResolution, setReviewResolution] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -117,6 +119,26 @@ const ComplaintDetails: React.FC = () => {
     },
   });
 
+  const reviewModerationMutation = useMutation({
+    mutationFn: async ({ id, resolution, action }: { id: number; resolution?: string; action: 'remove' | 'restore' }) => {
+      if (action === 'remove') {
+        return complaintsApi.removeReview(id, resolution);
+      }
+
+      return complaintsApi.restoreReview(id, resolution);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['complaint', complaintId] });
+      queryClient.invalidateQueries({ queryKey: ['complaints'] });
+      antMessage.success(variables.action === 'remove' ? 'Отзыв скрыт' : 'Отзыв возвращен');
+      setReviewAction(null);
+      setReviewResolution('');
+    },
+    onError: (error: any) => {
+      antMessage.error(error?.response?.data?.detail || 'Не удалось изменить состояние отзыва');
+    },
+  });
+
   const handleCloseComplaint = () => {
     if (!complaint || !closeResolution.trim()) return;
     closeComplaintMutation.mutate({ id: complaint.id, resolution: closeResolution.trim() });
@@ -124,10 +146,23 @@ const ComplaintDetails: React.FC = () => {
     setCloseResolution('');
   };
 
+  const handleReviewAction = () => {
+    if (!complaint || !reviewAction) return;
+
+    reviewModerationMutation.mutate({
+      id: complaint.id,
+      action: reviewAction,
+      resolution: reviewResolution.trim() || undefined,
+    });
+  };
+
   const currentUserId = userProfile?.id;
   const isPlaintiff = currentUserId === complaint?.plaintiff_id;
   const isDefendant = currentUserId === complaint?.defendant_id;
   const canClose = (isPlaintiff || isDefendant) && complaint?.status === 'open';
+  const isAdmin = userProfile?.role === 'admin';
+  const canModerateReview = isAdmin && complaint?.complaint_type === 'unjustified_review' && !!complaint?.review;
+  const isReviewPublished = complaint?.review?.is_published;
 
   if (isLoading) {
     return (
@@ -203,6 +238,15 @@ const ComplaintDetails: React.FC = () => {
                 loading={closeComplaintMutation.isPending}
               >
                 Закрыть претензию
+              </AppButton>
+            )}
+            {canModerateReview && (
+              <AppButton
+                variant="secondary"
+                onClick={() => setReviewAction(isReviewPublished ? 'remove' : 'restore')}
+                loading={reviewModerationMutation.isPending}
+              >
+                {isReviewPublished ? 'Убрать отзыв' : 'Вернуть отзыв'}
               </AppButton>
             )}
           </Space>
@@ -395,6 +439,49 @@ const ComplaintDetails: React.FC = () => {
                 <Paragraph className={styles.description}>{complaint.description}</Paragraph>
               </div>
 
+              {complaint.review && (
+                <>
+                  <Divider />
+
+                  <div className={styles.descriptionSection}>
+                    <Title level={5} className={styles.descriptionTitle}>Отзыв по заказу</Title>
+                    <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                      <Space wrap size={8}>
+                        <Tag color={complaint.review.is_published ? 'green' : 'red'}>
+                          {complaint.review.is_published ? 'Отзыв опубликован' : 'Отзыв скрыт'}
+                        </Tag>
+                        <Tag color="gold">
+                          <StarFilled /> {complaint.review.rating}/5
+                        </Tag>
+                      </Space>
+                      <Paragraph className={styles.description} style={{ marginBottom: 0 }}>
+                        {complaint.review.comment || 'Текст отзыва не указан'}
+                      </Paragraph>
+                      {canModerateReview && (
+                        <Space wrap size={12}>
+                          <AppButton
+                            variant="secondary"
+                            onClick={() => setReviewAction('remove')}
+                            disabled={!complaint.review.is_published}
+                            loading={reviewModerationMutation.isPending && reviewAction === 'remove'}
+                          >
+                            Убрать отзыв
+                          </AppButton>
+                          <AppButton
+                            variant="secondary"
+                            onClick={() => setReviewAction('restore')}
+                            disabled={complaint.review.is_published}
+                            loading={reviewModerationMutation.isPending && reviewAction === 'restore'}
+                          >
+                            Вернуть отзыв
+                          </AppButton>
+                        </Space>
+                      )}
+                    </Space>
+                  </div>
+                </>
+              )}
+
               {complaint.files && complaint.files.length > 0 && (
                 <div className={styles.orderFilesSection}>
                   <Title level={5} className={styles.sectionTitle}>Файлы</Title>
@@ -550,6 +637,39 @@ const ComplaintDetails: React.FC = () => {
               value={closeResolution}
               onChange={(e) => setCloseResolution(e.target.value)}
               placeholder="Введите резолюцию по закрытию претензии"
+              rows={4}
+              style={{ marginTop: 8 }}
+            />
+          </div>
+        </Modal>
+
+        <Modal
+          title={reviewAction === 'remove' ? 'Убрать отзыв' : 'Вернуть отзыв'}
+          open={!!reviewAction}
+          onCancel={() => {
+            setReviewAction(null);
+            setReviewResolution('');
+          }}
+          onOk={handleReviewAction}
+          okText={reviewAction === 'remove' ? 'Убрать отзыв' : 'Вернуть отзыв'}
+          cancelText="Отмена"
+          okButtonProps={{
+            loading: reviewModerationMutation.isPending,
+          }}
+          width={isMobile ? '100%' : 600}
+          centered
+        >
+          <div style={{ padding: '16px 0' }}>
+            <Typography.Paragraph>
+              {reviewAction === 'remove'
+                ? `После подтверждения отзыв по жалобе №${complaint?.id} будет скрыт.`
+                : `После подтверждения отзыв по жалобе №${complaint?.id} снова станет опубликованным.`}
+            </Typography.Paragraph>
+            <Typography.Text strong>Комментарий администратора:</Typography.Text>
+            <Input.TextArea
+              value={reviewResolution}
+              onChange={(e) => setReviewResolution(e.target.value)}
+              placeholder="Можно указать причину решения"
               rows={4}
               style={{ marginTop: 8 }}
             />

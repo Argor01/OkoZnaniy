@@ -722,6 +722,50 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     queryset = Complaint.objects.all()
     serializer_class = ComplaintSerializer
     permission_classes = [IsAuthenticated]
+
+    def _get_review_for_admin_action(self, complaint, user):
+        if user.role != 'admin':
+            return None, Response(
+                {'detail': 'Только администратор может управлять отзывом в жалобе'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if complaint.complaint_type != 'unjustified_review':
+            return None, Response(
+                {'detail': 'Это обращение не связано с обжалованием отзыва'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if complaint.status not in ['open', 'in_progress', 'resolved']:
+            return None, Response(
+                {'detail': 'Управлять отзывом можно только в активной или уже разрешенной жалобе'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        review = getattr(complaint.order, 'expert_rating', None) if complaint.order_id else None
+        if review is None:
+            return None, Response(
+                {'detail': 'Отзыв по этому заказу не найден'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return review, None
+
+    def _apply_review_decision(self, complaint, review, *, is_published, resolution):
+        review.is_published = is_published
+        review.is_appealed = True
+        review.appeal_resolved = True
+        review.appeal_at = review.appeal_at or timezone.now()
+        review.appeal_resolution = resolution
+        review.save()
+
+        complaint.status = 'resolved'
+        complaint.resolution = resolution
+        complaint.resolved_at = timezone.now()
+        complaint.save(update_fields=['status', 'resolution', 'resolved_at', 'updated_at'])
+
+        if complaint.order:
+            complaint.order.unfreeze()
     
     def get_queryset(self):
         """Пользователи видят только свои претензии (как истец или ответчик)"""
@@ -817,6 +861,52 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         if complaint.order:
             complaint.order.unfreeze()
         
+        return Response(ComplaintSerializer(complaint).data)
+
+    @action(detail=True, methods=['post'], url_path='remove-review')
+    def remove_review(self, request, pk=None):
+        """Скрыть отзыв в рамках жалобы на отзыв."""
+        complaint = self.get_object()
+        review, error_response = self._get_review_for_admin_action(complaint, request.user)
+        if error_response is not None:
+            return error_response
+
+        if not review.is_published:
+            return Response(
+                {'detail': 'Отзыв уже скрыт'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resolution = request.data.get('resolution', '').strip() or 'Администратор убрал отзыв по результатам рассмотрения жалобы.'
+        self._apply_review_decision(
+            complaint,
+            review,
+            is_published=False,
+            resolution=resolution,
+        )
+        return Response(ComplaintSerializer(complaint).data)
+
+    @action(detail=True, methods=['post'], url_path='restore-review')
+    def restore_review(self, request, pk=None):
+        """Вернуть отзыв в публикацию в рамках жалобы на отзыв."""
+        complaint = self.get_object()
+        review, error_response = self._get_review_for_admin_action(complaint, request.user)
+        if error_response is not None:
+            return error_response
+
+        if review.is_published:
+            return Response(
+                {'detail': 'Отзыв уже опубликован'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        resolution = request.data.get('resolution', '').strip() or 'Администратор вернул отзыв после повторной проверки жалобы.'
+        self._apply_review_decision(
+            complaint,
+            review,
+            is_published=True,
+            resolution=resolution,
+        )
         return Response(ComplaintSerializer(complaint).data)
     
     @action(detail=False, methods=['get'], url_path='by-order/(?P<order_id>[^/.]+)')

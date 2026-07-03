@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.db import models
 from django.db.models import Count, Q
-from .models import Question, Answer, AnswerLike, QuestionView
+from .models import Question, Answer, AnswerLike, QuestionView, ArticleComplaint, ArticleDeletion
 from .serializers import (
     QuestionListSerializer,
     QuestionDetailSerializer,
@@ -15,8 +15,12 @@ from .serializers import (
     ArticleDetailSerializer,
     ArticleCreateSerializer,
     ArticleFileSerializer,
+    ArticleComplaintCreateSerializer,
+    ArticleComplaintSerializer,
+    ArticleDeletionSerializer,
 )
 from apps.notifications.services import NotificationService
+from apps.admin_panel.models import Claim
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -292,4 +296,133 @@ class ArticleViewSet(viewsets.ModelViewSet):
         instance.views_count += 1
         instance.save(update_fields=["views_count"])
         serializer = self.get_serializer(instance, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def complain(self, request, pk=None):
+        article = self.get_object()
+        serializer = ArticleComplaintCreateSerializer(
+            data={
+                'article': article.id,
+                'reason': request.data.get('reason'),
+                'description': request.data.get('description'),
+            },
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+
+        complaint = serializer.save(
+            complainant=request.user,
+            article_title=article.title,
+        )
+
+        claim = Claim.objects.create(
+            user=request.user,
+            plaintiff=request.user,
+            defendant=article.author,
+            claim_type='complaint',
+            subject=f'Жалоба на статью: {article.title}',
+            description=complaint.description,
+            reason='other',
+            priority='medium',
+        )
+        complaint.claim = claim
+        complaint.save(update_fields=['claim', 'updated_at'])
+
+        return Response(
+            ArticleComplaintSerializer(complaint, context={'request': request}).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='complaints')
+    def complaints(self, request):
+        if not request.user.is_staff:
+            return Response({'error': 'Доступно только администраторам'}, status=status.HTTP_403_FORBIDDEN)
+
+        queryset = ArticleComplaint.objects.select_related('complainant').all()
+        serializer = ArticleComplaintSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='deletions')
+    def deletions(self, request):
+        queryset = ArticleDeletion.objects.select_related('author')
+        if not request.user.is_staff:
+            queryset = queryset.filter(author=request.user)
+
+        serializer = ArticleDeletionSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def delete_with_reason(self, request, pk=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Доступно только администраторам'}, status=status.HTTP_403_FORBIDDEN)
+
+        article = self.get_object()
+        reason = (request.data.get('reason') or '').strip()
+        complaint_id = request.data.get('complaint_id')
+
+        if not reason:
+            return Response({'reason': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        complaint = None
+        if complaint_id:
+            complaint = ArticleComplaint.objects.filter(pk=complaint_id).first()
+
+        ArticleDeletion.objects.create(
+            article_title=article.title,
+            article_description=article.description,
+            article_work_type=article.work_type,
+            article_subject=article.subject,
+            author=article.author,
+            deleted_by=request.user,
+            reason=reason,
+            complaint=complaint,
+        )
+
+        if complaint:
+            complaint.status = 'article_deleted'
+            complaint.admin_response = reason
+            complaint.save(update_fields=['status', 'admin_response', 'updated_at'])
+
+        article.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path=r'deletions/(?P<deletion_id>[^/.]+)/dispute')
+    def dispute(self, request, deletion_id=None):
+        deletion = ArticleDeletion.objects.filter(pk=deletion_id).select_related('author').first()
+        if not deletion:
+            return Response({'error': 'Удаление не найдено'}, status=status.HTTP_404_NOT_FOUND)
+
+        if deletion.author_id != request.user.id:
+            return Response({'error': 'Можно оспаривать только свои статьи'}, status=status.HTTP_403_FORBIDDEN)
+
+        dispute_message = (request.data.get('dispute_message') or '').strip()
+        if not dispute_message:
+            return Response({'dispute_message': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        deletion.dispute_message = dispute_message
+        deletion.status = 'disputed'
+        deletion.save(update_fields=['dispute_message', 'status', 'updated_at'])
+
+        serializer = ArticleDeletionSerializer(deletion, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path=r'deletions/(?P<deletion_id>[^/.]+)/resolve_dispute')
+    def resolve_dispute(self, request, deletion_id=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Доступно только администраторам'}, status=status.HTTP_403_FORBIDDEN)
+
+        deletion = ArticleDeletion.objects.filter(pk=deletion_id).select_related('author').first()
+        if not deletion:
+            return Response({'error': 'Удаление не найдено'}, status=status.HTTP_404_NOT_FOUND)
+
+        decision = request.data.get('decision')
+        if decision not in ('upheld', 'restored'):
+            return Response({'decision': ['Недопустимое решение.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        deletion.status = decision
+        deletion.admin_final_response = (request.data.get('response') or '').strip()
+        deletion.save(update_fields=['status', 'admin_final_response', 'updated_at'])
+
+        serializer = ArticleDeletionSerializer(deletion, context={'request': request})
         return Response(serializer.data)

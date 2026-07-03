@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { Space, Row, Col, Typography, message, Modal } from 'antd';
 import { InboxOutlined, PlusOutlined } from '@ant-design/icons';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { catalogApi } from '@/features/common/api/catalog';
-import { RichTextEditor } from '@/features/common';
-import { WorkFormProps, WorkFormData } from '@/features/shop/types';
-import { Subject, WorkType } from '@/features/common/types/catalog';
-import { AppCard } from '@/components/ui/AppCard';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Col, Modal, Row, Space, Typography, message } from 'antd';
+
 import { AppButton } from '@/components/ui/AppButton';
+import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { AppUpload } from '@/components/ui/AppUpload';
+import { catalogApi } from '@/features/common/api/catalog';
+import { Subject, WorkType } from '@/features/common/types/catalog';
+import { RichTextEditor } from '@/features/common';
+import { WorkFormData, WorkFormProps } from '@/features/shop/types';
+import { useSubjects, useWorkTypes } from '@/hooks/queries';
 import styles from './WorkForm.module.css';
-import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Text } = Typography;
 const { Option } = AppSelect;
@@ -33,6 +34,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     price: 0,
     subject: '',
     workType: '',
+    executionDays: 7,
     preview: null,
     files: [],
   });
@@ -41,12 +43,9 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
 
-  
-  const {data: subjects = []} = useSubjects();
+  const { data: subjects = [] } = useSubjects();
+  const { data: workTypes = [] } = useWorkTypes();
 
-  const {data: workTypes = []} = useWorkTypes();
-
-  
   const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
     onSuccess: () => {
@@ -78,14 +77,22 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       .replace(/<[^>]*>/g, '')
       .replace(/&nbsp;/g, ' ')
       .trim();
+
     if (!formData.title || !formData.price || !formData.workType || !formData.subject) {
       message.error('Заполните все обязательные поля');
       return;
     }
+
+    if (!formData.executionDays || formData.executionDays < 1) {
+      message.error('Укажите корректный срок выполнения');
+      return;
+    }
+
     if (!plainDescription) {
       message.error('Добавьте описание работы');
       return;
     }
+
     onSave(formData);
   };
 
@@ -97,9 +104,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       <Space direction="vertical" className={styles.spaceFullWidth} size="large">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>
-              Название работы
-            </Text>
+            <Text className={styles.label}>Название работы</Text>
             <AppInput
               placeholder="Введите название работы"
               value={formData.title}
@@ -108,9 +113,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             />
           </Col>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>
-              Стоимость работы
-            </Text>
+            <Text className={styles.label}>Стоимость работы</Text>
             <div className={styles.priceInputWrap}>
               <AppInput.Number
                 placeholder="Введите стоимость работы"
@@ -127,9 +130,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>
-              Тип работы
-            </Text>
+            <Text className={styles.label}>Тип работы</Text>
             <AppSelect
               placeholder="Выберите тип работы"
               value={formData.workType}
@@ -161,9 +162,21 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </AppSelect>
           </Col>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>
-              Предмет
-            </Text>
+            <Text className={styles.label}>Срок выполнения (дни)</Text>
+            <AppInput.Number
+              placeholder="Например, 7"
+              value={formData.executionDays}
+              onChange={(value) => setFormData({ ...formData, executionDays: Number(value) || 1 })}
+              className={styles.input}
+              min={1}
+              size="middle"
+            />
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} sm={12}>
+            <Text className={styles.label}>Предмет</Text>
             <AppSelect
               placeholder="Выберите предмет"
               value={formData.subject}
@@ -197,9 +210,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </Row>
 
         <div>
-          <Text className={styles.label}>
-            Подробное описание
-          </Text>
+          <Text className={styles.label}>Подробное описание</Text>
           <RichTextEditor
             value={formData.description}
             onChange={(value) => setFormData({ ...formData, description: value })}
@@ -208,9 +219,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text className={styles.label}>
-            Обложка работы (изображение)
-          </Text>
+          <Text className={styles.label}>Обложка работы (изображение)</Text>
           <AppUpload.Dragger
             name="preview"
             listType="picture-card"
@@ -219,24 +228,24 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             beforeUpload={(file) => {
               const isImage = file.type.startsWith('image/');
               if (!isImage) {
-                message.error('Можно загружать только изображения!');
+                message.error('Можно загружать только изображения');
                 return AppUpload.LIST_IGNORE;
               }
-              
+
               const isLt5M = file.size < 5 * 1024 * 1024;
               if (!isLt5M) {
                 message.error('Максимальный размер изображения: 5 МБ');
                 return AppUpload.LIST_IGNORE;
               }
-              
+
               setFormData({ ...formData, preview: file });
               return false;
             }}
           >
             {formData.preview ? (
               <img
-                src={URL.createObjectURL(formData.preview)} 
-                alt="preview" 
+                src={URL.createObjectURL(formData.preview)}
+                alt="preview"
                 className={styles.previewImage}
               />
             ) : (
@@ -249,8 +258,8 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             )}
           </AppUpload.Dragger>
           {formData.preview && (
-            <AppButton 
-              variant="text" 
+            <AppButton
+              variant="text"
               onClick={() => setFormData({ ...formData, preview: null })}
               className={styles.removePreviewButton}
             >
@@ -260,9 +269,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text className={styles.label}>
-            Файлы работы (необязательно)
-          </Text>
+          <Text className={styles.label}>Файлы работы (необязательно)</Text>
           <AppUpload.Dragger
             name="files"
             multiple
@@ -279,21 +286,21 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
                 message.error('Максимальный размер файла: 50 МБ');
                 return AppUpload.LIST_IGNORE;
               }
-              
+
               const ext = file.name.split('.').pop()?.toLowerCase() || '';
               if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
                 message.error('Неподдерживаемый формат файла');
                 return AppUpload.LIST_IGNORE;
               }
-              
-              setFormData({ 
-                ...formData, 
-                files: [...(formData.files || []), file] 
+
+              setFormData({
+                ...formData,
+                files: [...(formData.files || []), file],
               });
               return false;
             }}
             onRemove={(file) => {
-              const index = parseInt(file.uid);
+              const index = parseInt(file.uid, 10);
               const newFiles = [...(formData.files || [])];
               newFiles.splice(index, 1);
               setFormData({
@@ -317,7 +324,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           )}
         </div>
 
-        
         <div className={styles.actions}>
           <AppButton onClick={onCancel} className={styles.cancelButton} variant="secondary">
             Отмена
@@ -328,7 +334,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
       </Space>
 
-      
       <Modal
         title="Добавить новый тип работы"
         open={newWorkTypeModalVisible}
@@ -357,7 +362,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         />
       </Modal>
 
-      
       <Modal
         title="Добавить новый предмет"
         open={newSubjectModalVisible}

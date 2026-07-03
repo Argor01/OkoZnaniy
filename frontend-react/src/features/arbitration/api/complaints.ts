@@ -45,6 +45,17 @@ export interface Complaint {
     is_frozen?: boolean;
     frozen_reason?: string;
   };
+  review?: {
+    id: number;
+    rating: number;
+    comment: string;
+    is_published: boolean;
+    is_appealed: boolean;
+    appeal_resolved: boolean;
+    appeal_resolution?: string;
+    created_at?: string;
+    updated_at?: string;
+  } | null;
   chat_id?: number;
 }
 
@@ -108,6 +119,16 @@ class ComplaintsApi {
 
   async close(id: number, resolution?: string): Promise<Complaint> {
     const response = await apiClient.patch(`${this.baseUrl}${id}/close/`, { resolution });
+    return response.data;
+  }
+
+  async removeReview(id: number, resolution?: string): Promise<Complaint> {
+    const response = await apiClient.post(`${this.baseUrl}${id}/remove-review/`, { resolution });
+    return response.data;
+  }
+
+  async restoreReview(id: number, resolution?: string): Promise<Complaint> {
+    const response = await apiClient.post(`${this.baseUrl}${id}/restore-review/`, { resolution });
     return response.data;
   }
 

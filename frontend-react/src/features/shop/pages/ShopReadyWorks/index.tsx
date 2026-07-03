@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { Typography, message } from 'antd';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Typography, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
+
+import { useDashboard } from '@/contexts/DashboardContext';
+import { shopApi } from '@/features/shop/api/shop';
+import { Filters as FiltersType, Work } from '@/features/shop/types';
+import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
+import { logger } from '@/utils/logger';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
-import { catalogApi } from '@/features/common/api/catalog';
-import { Filters as FiltersType, Work } from '@/features/shop/types';
-import { shopApi } from '@/features/shop/api/shop';
-import { useDashboard } from '@/contexts/DashboardContext';
 import styles from './ShopReadyWorks.module.css';
-import { logger } from '@/utils/logger';
-import { useCurrentUser, useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -33,15 +33,13 @@ const ShopReadyWorks: React.FC = () => {
     queryFn: () => shopApi.getPurchases(),
   });
 
-  const {data: _profile} = useCurrentUser();
-
-  const {data: subjects = []} = useSubjects();
-
+  const { data: profile } = useCurrentUser();
+  const { data: subjects = [] } = useSubjects();
   const { data: categories = [] } = useWorkTypes();
 
   const processedWorks = React.useMemo(() => {
     const base = apiWorks && Array.isArray(apiWorks) ? apiWorks : [];
-    
+
     interface RawWork extends Work {
       subjectId?: number;
       subject_id?: number;
@@ -68,6 +66,7 @@ const ShopReadyWorks: React.FC = () => {
         reviewsCount: work.reviewsCount || 0,
         viewsCount: work.viewsCount || 0,
         purchasesCount: work.purchasesCount || 0,
+        execution_days: work.execution_days || 0,
         author: work.author ? {
           ...work.author,
           avatar: work.author.avatar,
@@ -84,14 +83,20 @@ const ShopReadyWorks: React.FC = () => {
   }, [apiWorks]);
 
   const handlePurchase = async (id: number) => {
-    const work = processedWorks.find((w) => w.id === id);
+    const work = processedWorks.find((item) => item.id === id);
     const sellerId = work?.author?.id;
     if (!work || !sellerId) {
-      message.error('Не удалось открыть чат: неизвестен продавец');
+      message.error('Не удалось оформить покупку: неизвестен продавец');
       return;
     }
+
     try {
-      await shopApi.purchaseWork(id);
+      const purchase = await shopApi.purchaseWork(id);
+      queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
+      if (purchase.order) {
+        navigate(`/orders/${purchase.order}`);
+        return;
+      }
       dashboard.openContextChat(sellerId, work.title, id);
     } catch (error: any) {
       const detail = error?.response?.data?.error || error?.response?.data?.detail;
@@ -99,13 +104,12 @@ const ShopReadyWorks: React.FC = () => {
     }
   };
 
-
-
   const handleDownload = (id: number) => {
     const purchase = (Array.isArray(purchases) ? purchases : [])
-      .filter((p) => p.work === id && p.delivered_file_available)
+      .filter((item) => item.work === id && item.delivered_file_available)
       .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())[0];
     if (!purchase?.delivered_file_available) return;
+
     shopApi.downloadPurchaseFile(purchase.id)
       .then((blob) => {
         const blobUrl = window.URL.createObjectURL(blob);
@@ -132,36 +136,28 @@ const ShopReadyWorks: React.FC = () => {
       await shopApi.deleteWork(id);
       queryClient.setQueryData(['shop-works', filters.sortBy], (oldData: Work[] | undefined) => {
         if (!oldData) return [];
-        return oldData.filter(w => w.id !== id);
+        return oldData.filter((work) => work.id !== id);
       });
     } catch (error) {
       logger.error('Error deleting work:', error);
     }
   };
 
-  
   const filteredWorks = React.useMemo(() => {
     let result = [...processedWorks];
 
-    
     if (filters.search) {
-      result = result.filter(
-        (work) =>
-          work.title.toLowerCase().includes(filters.search!.toLowerCase())
-      );
+      result = result.filter((work) => work.title.toLowerCase().includes(filters.search!.toLowerCase()));
     }
 
-    
     if (filters.category) {
       result = result.filter((work) => work.work_type === filters.category);
     }
 
-    
     if (filters.subject) {
       result = result.filter((work) => work.subject === filters.subject);
     }
 
-    
     switch (filters.sortBy) {
       case 'price-asc':
         result.sort((a, b) => a.price - b.price);
@@ -200,14 +196,14 @@ const ShopReadyWorks: React.FC = () => {
       <Title level={2} className={styles.pageTitle}>
         Магазин готовых работ
       </Title>
-      
+
       <Filters
         filters={filters}
         onFilterChange={setFilters}
         subjects={subjects}
         workTypes={categories}
       />
-      
+
       <WorksList
         works={filteredWorks}
         loading={isLoading}
@@ -216,7 +212,7 @@ const ShopReadyWorks: React.FC = () => {
         onDownload={handleDownload}
         purchasesByWorkId={purchasesByWorkId}
         onDelete={handleDelete}
-        currentUserId={_profile?.id}
+        currentUserId={profile?.id}
       />
     </div>
   );

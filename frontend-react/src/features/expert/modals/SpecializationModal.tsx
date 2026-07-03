@@ -1,9 +1,11 @@
 ﻿import React from 'react';
-import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select } from 'antd';
+import { Modal, Form, Input, InputNumber as AntInputNumber, message, Select, Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type CreateSpecializationRequest, type Specialization } from '@/features/expert/api/experts';
 import SkillsSelectNew from '../components/inputs/SkillsSelectNew';
 import styles from './SpecializationModal.module.css';
+import { catalogApi } from '@/features/common/api/catalog';
 import { useSubjects } from '@/hooks/queries';
 
 type SpecializationFormValues = {
@@ -29,6 +31,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [newSubjectModalVisible, setNewSubjectModalVisible] = React.useState(false);
+  const [newSubjectName, setNewSubjectName] = React.useState('');
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -50,6 +54,24 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
   }, [visible, isMobile]);
 
   const { data: subjects = [] } = useSubjects();
+
+  const createSubjectMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createSubject(name),
+    onSuccess: (createdSubject) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      form.setFieldValue('subject_id', createdSubject.id);
+      if (!form.getFieldValue('custom_name')) {
+        form.setFieldValue('custom_name', createdSubject.name);
+      }
+      setNewSubjectModalVisible(false);
+      setNewSubjectName('');
+      message.success('Новый предмет добавлен');
+    },
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось добавить предмет';
+      message.error(errorMessage);
+    },
+  });
 
   const createSpecializationMutation = useMutation({
     mutationFn: (data: CreateSpecializationRequest) => expertsApi.createSpecialization(data),
@@ -189,6 +211,22 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             }))}
             getPopupContainer={() => document.body}
             virtual={!isMobile}
+            popupRender={(menu) => (
+              <>
+                {menu}
+                <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0' }}>
+                  <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setNewSubjectModalVisible(true)}
+                    style={{ width: '100%', textAlign: 'left' }}
+                  >
+                    Добавить новый предмет
+                  </Button>
+                </div>
+              </>
+            )}
           />
         </Form.Item>
 
@@ -287,6 +325,35 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           />
         </Form.Item>
       </Form>
+      <Modal
+        title="Добавить новый предмет"
+        open={newSubjectModalVisible}
+        onOk={() => {
+          const normalizedName = newSubjectName.trim();
+          if (!normalizedName) {
+            message.error('Введите название предмета');
+            return;
+          }
+          createSubjectMutation.mutate(normalizedName);
+        }}
+        onCancel={() => {
+          setNewSubjectModalVisible(false);
+          setNewSubjectName('');
+        }}
+        confirmLoading={createSubjectMutation.isPending}
+      >
+        <Input
+          placeholder="Название предмета"
+          value={newSubjectName}
+          onChange={(e) => setNewSubjectName(e.target.value)}
+          onPressEnter={() => {
+            const normalizedName = newSubjectName.trim();
+            if (normalizedName) {
+              createSubjectMutation.mutate(normalizedName);
+            }
+          }}
+        />
+      </Modal>
     </Modal>
   );
 };

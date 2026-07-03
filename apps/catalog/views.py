@@ -56,6 +56,24 @@ class SubjectCategoryViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'order']
     ordering = ['order', 'name']
 
+    def create(self, request, *args, **kwargs):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = SubjectCategory.objects.filter(name__iexact=name).first()
+        if existing:
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        payload = request.data.copy()
+        payload['name'] = name
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def get_queryset(self):
         return SubjectCategory.objects.annotate(
             subjects_count=Count('subjects'),
@@ -72,6 +90,24 @@ class SubjectViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'min_price']
     ordering = ['name']
+
+    def create(self, request, *args, **kwargs):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = Subject.objects.filter(name__iexact=name).first()
+        if existing:
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        payload = request.data.copy()
+        payload['name'] = name
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -323,6 +359,24 @@ class WorkTypeViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'base_price', 'estimated_time', 'orders_count']
     ordering = ['name']
+
+    def create(self, request, *args, **kwargs):
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        existing = WorkType.objects.filter(name__iexact=name).first()
+        if existing:
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        payload = request.data.copy()
+        payload['name'] = name
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_queryset(self):
         return WorkType.objects.all()

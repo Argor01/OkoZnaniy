@@ -230,6 +230,48 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Serializer РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ"""
+    username = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=150,
+        trim_whitespace=False
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username', 'first_name', 'last_name', 'phone', 'avatar', 'bio',
+            'experience_years', 'hourly_rate', 'education', 'skills',
+            'portfolio_url', 'city'
+        ]
+
+    def validate_username(self, value):
+        """Р Р°Р·СЂРµС€Р°РµРј РїСЂРѕР±РµР»С‹ РІ РЅРёРєРЅРµР№РјРµ"""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("РќРёРєРЅРµР№Рј РЅРµ РјРѕР¶РµС‚ СЃРѕСЃС‚РѕСЏС‚СЊ С‚РѕР»СЊРєРѕ РёР· РїСЂРѕР±РµР»РѕРІ")
+
+        normalized_value = value.strip() if isinstance(value, str) else value
+        if normalized_value:
+            user = self.context.get('request').user if self.context.get('request') else None
+            if user:
+                existing = User.objects.filter(username=normalized_value).exclude(id=user.id).first()
+                if existing:
+                    raise serializers.ValidationError("Р­С‚РѕС‚ РЅРёРєРЅРµР№Рј СѓР¶Рµ Р·Р°РЅСЏС‚")
+        return normalized_value
+
+    def update(self, instance, validated_data):
+        username = validated_data.get('username')
+        if isinstance(username, str):
+            validated_data['username'] = username.strip()
+            username = validated_data['username']
+        if username is not None and username and username != (instance.username or '').strip():
+            validated_data['has_custom_username'] = True
+        return super().update(instance, validated_data)
+
+
 class PasswordResetSerializer(serializers.Serializer):
     """Serializer для запроса сброса пароля"""
     email = serializers.EmailField(required=True)

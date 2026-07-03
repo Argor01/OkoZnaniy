@@ -26,7 +26,7 @@ import {
   WarningOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   articlesApi,
   type Article,
@@ -90,6 +90,10 @@ export const KnowledgeBaseSection: React.FC = () => {
   const [formSubject, setFormSubject] = useState<string | undefined>();
   const [formFiles, setFormFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [newWorkTypeModalOpen, setNewWorkTypeModalOpen] = useState(false);
+  const [newWorkTypeName, setNewWorkTypeName] = useState('');
+  const [newSubjectModalOpen, setNewSubjectModalOpen] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState('');
 
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
@@ -106,6 +110,36 @@ export const KnowledgeBaseSection: React.FC = () => {
   const {data: workTypes = []} = useWorkTypes();
 
   const {data: subjects = []} = useSubjects();
+
+  const createWorkTypeMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createWorkType(name),
+    onSuccess: (createdWorkType) => {
+      queryClient.invalidateQueries({ queryKey: ['workTypes'] });
+      setFormWorkType(createdWorkType.name);
+      setNewWorkTypeModalOpen(false);
+      setNewWorkTypeName('');
+      message.success('Новый тип работы добавлен');
+    },
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось добавить тип работы';
+      message.error(errorMessage);
+    },
+  });
+
+  const createSubjectMutation = useMutation({
+    mutationFn: (name: string) => catalogApi.createSubject(name),
+    onSuccess: (createdSubject) => {
+      queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      setFormSubject(createdSubject.name);
+      setNewSubjectModalOpen(false);
+      setNewSubjectName('');
+      message.success('Новый предмет добавлен');
+    },
+    onError: (error: unknown) => {
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось добавить предмет';
+      message.error(errorMessage);
+    },
+  });
 
   const { data: articles = [], isLoading } = useQuery<Article[]>({
     queryKey: ['knowledge-articles', searchText, selectedWorkType, selectedSubject],
@@ -265,6 +299,22 @@ export const KnowledgeBaseSection: React.FC = () => {
                     ?.toLowerCase()
                     .includes(input.toLowerCase()) ?? false
                 }
+                popupRender={(menu) => (
+                  <>
+                    {menu}
+                    <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0' }}>
+                      <Button
+                        type="text"
+                        icon={<PlusOutlined />}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setNewWorkTypeModalOpen(true)}
+                        style={{ width: '100%', textAlign: 'left' }}
+                      >
+                        Добавить новый тип работы
+                      </Button>
+                    </div>
+                  </>
+                )}
               >
                 {workTypes.map((wt) => (
                   <Select.Option key={wt.id} value={wt.name}>
@@ -288,6 +338,22 @@ export const KnowledgeBaseSection: React.FC = () => {
                     ?.toLowerCase()
                     .includes(input.toLowerCase()) ?? false
                 }
+                popupRender={(menu) => (
+                  <>
+                    {menu}
+                    <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0' }}>
+                      <Button
+                        type="text"
+                        icon={<PlusOutlined />}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => setNewSubjectModalOpen(true)}
+                        style={{ width: '100%', textAlign: 'left' }}
+                      >
+                        Добавить новый предмет
+                      </Button>
+                    </div>
+                  </>
+                )}
               >
                 {subjects.map((s) => (
                   <Select.Option key={s.id} value={s.name}>
@@ -699,6 +765,65 @@ export const KnowledgeBaseSection: React.FC = () => {
             />
           </div>
         </div>
+      </Modal>
+      <Modal
+        title="Добавить новый тип работы"
+        open={newWorkTypeModalOpen}
+        onOk={() => {
+          const normalizedName = newWorkTypeName.trim();
+          if (!normalizedName) {
+            message.error('Введите название типа работы');
+            return;
+          }
+          createWorkTypeMutation.mutate(normalizedName);
+        }}
+        onCancel={() => {
+          setNewWorkTypeModalOpen(false);
+          setNewWorkTypeName('');
+        }}
+        confirmLoading={createWorkTypeMutation.isPending}
+      >
+        <Input
+          placeholder="Название типа работы"
+          value={newWorkTypeName}
+          onChange={(e) => setNewWorkTypeName(e.target.value)}
+          onPressEnter={() => {
+            const normalizedName = newWorkTypeName.trim();
+            if (normalizedName) {
+              createWorkTypeMutation.mutate(normalizedName);
+            }
+          }}
+        />
+      </Modal>
+
+      <Modal
+        title="Добавить новый предмет"
+        open={newSubjectModalOpen}
+        onOk={() => {
+          const normalizedName = newSubjectName.trim();
+          if (!normalizedName) {
+            message.error('Введите название предмета');
+            return;
+          }
+          createSubjectMutation.mutate(normalizedName);
+        }}
+        onCancel={() => {
+          setNewSubjectModalOpen(false);
+          setNewSubjectName('');
+        }}
+        confirmLoading={createSubjectMutation.isPending}
+      >
+        <Input
+          placeholder="Название предмета"
+          value={newSubjectName}
+          onChange={(e) => setNewSubjectName(e.target.value)}
+          onPressEnter={() => {
+            const normalizedName = newSubjectName.trim();
+            if (normalizedName) {
+              createSubjectMutation.mutate(normalizedName);
+            }
+          }}
+        />
       </Modal>
     </div>
   );

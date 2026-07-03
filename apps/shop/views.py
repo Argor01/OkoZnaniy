@@ -1,11 +1,16 @@
-﻿from rest_framework import permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
+import mimetypes
+from datetime import timedelta
+
 from django.conf import settings
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.http import FileResponse
-import mimetypes
+from django.utils import timezone
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
+from apps.chat.services import ensure_order_chat_started
+from apps.orders.models import Order
 from .models import FavoriteWork, Purchase, ReadyWork
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
@@ -18,8 +23,6 @@ class IsExpertOrStaff(permissions.BasePermission):
 
 
 class ReadyWorkViewSet(viewsets.ModelViewSet):
-    """ViewSet для готовых работ."""
-
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -130,25 +133,53 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def purchase(self, request, pk=None):
-        """Купить готовую работу."""
         work = self.get_object()
 
         if work.author == request.user:
             return Response({'error': 'Нельзя купить собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
-        purchase = Purchase.objects.create(work=work, buyer=request.user, price_paid=work.price)
+        deadline = timezone.now() + timedelta(days=max(work.execution_days, 1))
+        order = Order.objects.create(
+            client=request.user,
+            expert=work.author,
+            subject=work.subject,
+            work_type=work.work_type,
+            title=work.title,
+            description=work.description,
+            deadline=deadline,
+            budget=work.price,
+            original_price=work.price,
+            final_price=work.price,
+            status='in_progress',
+        )
+        ensure_order_chat_started(
+            order,
+            sender=request.user,
+            text=f'Создан заказ по готовой работе "{work.title}"',
+        )
+
+        purchase = Purchase.objects.create(
+            work=work,
+            buyer=request.user,
+            order=order,
+            price_paid=work.price,
+        )
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet для покупок."""
-
     serializer_class = PurchaseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Purchase.objects.filter(buyer=self.request.user).select_related('work', 'work__subject', 'work__work_type', 'work__author')
+        return Purchase.objects.filter(buyer=self.request.user).select_related(
+            'work',
+            'work__subject',
+            'work__work_type',
+            'work__author',
+            'order',
+        )
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -167,8 +198,6 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({'detail': 'rating должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
         if rating < 1 or rating > 5:
             return Response({'detail': 'rating должен быть в диапазоне 1..5'}, status=status.HTTP_400_BAD_REQUEST)
-
-        from django.utils import timezone
 
         purchase.rating = rating
         purchase.rated_at = timezone.now()

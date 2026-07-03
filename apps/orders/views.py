@@ -962,6 +962,9 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         order = instance.order
         user = self.request.user
+        file_type = str(instance.file_type or '').lower()
+        description = str(instance.description or '')
+        was_delivered_work = file_type in ['solution', 'revision'] or 'chat_delivery_message_id:' in description
         can_delete = (
             user.is_staff
             or instance.uploaded_by_id == user.id
@@ -975,6 +978,14 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         instance.delete()
         if storage_file:
             storage_file.delete(save=False)
+
+        if was_delivered_work and order.status == 'review':
+            has_delivered_files = OrderFile.objects.filter(order=order).filter(
+                Q(file_type__in=['solution', 'revision']) | Q(description__icontains='chat_delivery_message_id:')
+            ).exists()
+            if not has_delivered_files:
+                order.status = 'in_progress'
+                order.save(update_fields=['status', 'updated_at'])
 
     def _mark_expert_view(self, request, order_file):
         user = request.user

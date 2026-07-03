@@ -49,6 +49,7 @@ export const shopApi = {
     formData.append('price', data.price.toString());
     formData.append('subject', data.subject);
     formData.append('work_type', data.work_type);
+    formData.append('execution_days', data.execution_days.toString());
     
     if (data.preview) {
       formData.append('preview', data.preview);
