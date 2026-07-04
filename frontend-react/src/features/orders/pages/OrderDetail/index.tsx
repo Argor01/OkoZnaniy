@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Typography, Space, Tag, Spin, Modal, Input, Button } from 'antd';
 import {
@@ -51,6 +51,8 @@ const OrderDetail: React.FC = () => {
     handleDrag,
     handleDrop,
     handleFileInput,
+    handleTaskFileDrop,
+    handleTaskFileInput,
     navigate,
     location,
   } = useOrderDetail(orderId);
@@ -107,16 +109,24 @@ const OrderDetail: React.FC = () => {
 
   const getStatusText = (status: string) => {
     const texts: Record<string, string> = {
-      new: 'Новый', in_progress: 'В работе', review: 'На проверке',
-      revision: 'Доработка', completed: 'Завершен', cancelled: 'Отменен',
+      new: 'Новый',
+      in_progress: 'В работе',
+      review: 'На проверке',
+      revision: 'Доработка',
+      completed: 'Завершен',
+      cancelled: 'Отменен',
     };
     return texts[status] || status;
   };
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
-      new: 'purple', in_progress: 'orange', review: 'purple',
-      revision: 'gold', completed: 'green', cancelled: 'red',
+      new: 'purple',
+      in_progress: 'orange',
+      review: 'purple',
+      revision: 'gold',
+      completed: 'green',
+      cancelled: 'red',
     };
     return colors[status] || 'default';
   };
@@ -166,6 +176,8 @@ const OrderDetail: React.FC = () => {
               onDrag={handleDrag}
               onDrop={handleDrop}
               onFileInput={handleFileInput}
+              onTaskFileDrop={handleTaskFileDrop}
+              onTaskFileInput={handleTaskFileInput}
               onDownloadFile={handleDownloadFile}
               onDeleteOrderFile={handleDeleteOrderFile}
             />
@@ -258,94 +270,81 @@ const OrderDetail: React.FC = () => {
         open={revisionModalOpen}
         centered
         onCancel={() => {
+          if (revisionSubmitting) return;
           setRevisionModalOpen(false);
           setRevisionComment('');
         }}
-        onOk={handleConfirmRevisionFromCard}
-        okButtonProps={{ loading: revisionSubmitting || reviewActionLoading === 'revision' }}
+        title="Отправить на доработку"
         okText="Отправить"
         cancelText="Отмена"
-        title="Комментарий для доработки"
-        destroyOnHidden
+        onOk={handleConfirmRevisionFromCard}
+        okButtonProps={{ loading: revisionSubmitting, disabled: !revisionComment.trim() }}
       >
-        <div className={styles.revisionModalSpacing}>
-          <Input.TextArea
-            value={revisionComment}
-            onChange={(e) => setRevisionComment(e.target.value)}
-            placeholder="Опишите, что нужно исправить"
-            autoSize={{ minRows: 4, maxRows: 8 }}
-            maxLength={1500}
-            showCount
-          />
-        </div>
+        <Input.TextArea
+          rows={4}
+          placeholder="Опишите, что нужно исправить"
+          value={revisionComment}
+          onChange={(e) => setRevisionComment(e.target.value)}
+          maxLength={2000}
+        />
       </Modal>
-
-      <EditOrderModal
-        visible={editOrderModalVisible}
-        onClose={() => setEditOrderModalVisible(false)}
-        order={order}
-        onSuccess={() => {
-          refreshOrderWithLists();
-        }}
-      />
 
       <Modal
         open={reviewModalOpen}
         centered
         onCancel={() => {
+          if (reviewSubmitting) return;
           setReviewModalOpen(false);
           setReviewRating(5);
           setReviewComment('');
         }}
-        title="Принять работу"
-        destroyOnHidden
-        footer={[
-          <Button
-            key="approve-only"
-            onClick={handleApproveWithoutReview}
-            loading={reviewSubmitting && reviewActionLoading === 'approve'}
-          >
-            Принять без отзыва
-          </Button>,
-          <Button
-            key="approve-with-review"
-            type="primary"
-            onClick={handleConfirmReviewAndApprove}
-            loading={reviewSubmitting && reviewActionLoading === 'approve'}
-          >
-            Принять и оставить отзыв
-          </Button>,
-        ]}
+        title="Принять работу и оставить отзыв"
+        footer={null}
       >
-        <div className={styles.revisionModalSpacing}>
-          <div className={styles.reviewModalContent}>
-            <div className={styles.reviewRatingSection}>
-              <Text strong className={styles.reviewRatingLabel}>Оценка работы:</Text>
-              <div className={styles.reviewStars}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <StarFilled
-                    key={star}
-                    className={star <= reviewRating ? styles.reviewStarFilled : styles.reviewStarEmpty}
-                    onClick={() => setReviewRating(star)}
-                    style={{ fontSize: '32px', cursor: 'pointer' }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className={styles.reviewCommentSection}>
-              <Text strong>Комментарий (необязательно):</Text>
-              <Input.TextArea
-                value={reviewComment}
-                onChange={(e) => setReviewComment(e.target.value)}
-                placeholder="Поделитесь впечатлениями о работе эксперта"
-                autoSize={{ minRows: 4, maxRows: 6 }}
-                maxLength={1000}
-                showCount
-              />
+        <Space direction="vertical" size={16} className={styles.fullWidth}>
+          <div>
+            <Text strong>Ваша оценка</Text>
+            <div className={styles.reviewStarsRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Button
+                  key={star}
+                  type="text"
+                  icon={<StarFilled style={{ color: star <= reviewRating ? '#faad14' : '#d9d9d9' }} />}
+                  onClick={() => setReviewRating(star)}
+                />
+              ))}
             </div>
           </div>
-        </div>
+          <div>
+            <Text strong>Комментарий</Text>
+            <Input.TextArea
+              rows={4}
+              placeholder="Напишите пару слов о работе исполнителя"
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              maxLength={2000}
+            />
+          </div>
+          <Space>
+            <AppButton variant="primary" onClick={handleConfirmReviewAndApprove} loading={reviewSubmitting}>
+              Принять и оставить отзыв
+            </AppButton>
+            <AppButton variant="secondary" onClick={handleApproveWithoutReview} loading={reviewSubmitting}>
+              Принять без отзыва
+            </AppButton>
+          </Space>
+        </Space>
       </Modal>
+
+      <EditOrderModal
+        open={editOrderModalVisible}
+        onClose={() => setEditOrderModalVisible(false)}
+        order={order}
+        onSaved={async () => {
+          await refreshOrderWithLists();
+          setEditOrderModalVisible(false);
+        }}
+      />
     </div>
   );
 };

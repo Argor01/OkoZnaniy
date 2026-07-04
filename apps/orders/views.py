@@ -1114,12 +1114,11 @@ class BidViewSet(viewsets.ModelViewSet):
         if order.client_id == user.id:
             raise PermissionDenied('Нельзя ставить на свой заказ.')
         
-        if order.status not in ['new', 'in_progress', 'revision', 'review']:
-            raise PermissionDenied('Нельзя сделать ставку для текущего статуса заказа.')
-        
-        # Если эксперт уже назначен и это не он
-        if order.expert_id and order.expert_id != user.id:
-            raise PermissionDenied('У заказа уже есть назначенный эксперт.')
+        if order.status != 'new':
+            raise PermissionDenied('Откликнуться можно только на новый заказ.')
+
+        if order.expert_id:
+            raise PermissionDenied('У заказа уже есть назначенный эксперт. Заказчик должен выбрать исполнителя вручную.')
         
         # Создаем или обновляем ставку
         bid, created = Bid.objects.get_or_create(

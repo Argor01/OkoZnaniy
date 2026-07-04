@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+﻿import React, { useCallback, useMemo } from 'react';
 import { Typography, Spin, Tag } from 'antd';
 import {
   FileOutlined,
@@ -27,13 +27,14 @@ interface OrderContentProps {
   onDrag: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onTaskFileDrop: (e: React.DragEvent) => void;
+  onTaskFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDownloadFile: (file: any) => void;
   onDeleteOrderFile: (file: any) => void;
 }
 
 const OrderContent: React.FC<OrderContentProps> = ({
   order,
-  isMobile,
   isOrderOwner,
   isOrderExpert,
   canSeeDeliveredWorkBlock,
@@ -43,6 +44,8 @@ const OrderContent: React.FC<OrderContentProps> = ({
   onDrag,
   onDrop,
   onFileInput,
+  onTaskFileDrop,
+  onTaskFileInput,
   onDownloadFile,
   onDeleteOrderFile,
 }) => {
@@ -58,11 +61,11 @@ const OrderContent: React.FC<OrderContentProps> = ({
   const formatOrderFileTileName = useCallback((filename: string, maxLength = 30) => {
     if (filename.length <= maxLength) return filename;
     const extIndex = filename.lastIndexOf('.');
-    if (extIndex <= 0) return `${filename.slice(0, maxLength - 1)}…`;
+    if (extIndex <= 0) return `${filename.slice(0, maxLength - 3)}...`;
     const ext = filename.slice(extIndex);
     const base = filename.slice(0, extIndex);
-    const allowedBaseLength = Math.max(6, maxLength - ext.length - 1);
-    return `${base.slice(0, allowedBaseLength)}…${ext}`;
+    const allowedBaseLength = Math.max(6, maxLength - ext.length - 3);
+    return `${base.slice(0, allowedBaseLength)}...${ext}`;
   }, []);
 
   const formatFileDateTime = useCallback((value?: string | null) => {
@@ -70,8 +73,11 @@ const OrderContent: React.FC<OrderContentProps> = ({
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return '';
     return parsed.toLocaleString('ru-RU', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }, []);
 
@@ -89,32 +95,39 @@ const OrderContent: React.FC<OrderContentProps> = ({
       if (description.includes('chat_delivery_message_id:')) return true;
       return false;
     });
+
     const extractDeliveryBatchId = (descriptionRaw: unknown): string => {
       const description = String(descriptionRaw || '');
       const match = description.match(/chat_delivery_batch_id:([^\s;]+)/);
       return match?.[1] || '';
     };
+
     const deliveredWithMeta = deliveredCandidates.map((file: any) => ({
       file,
       batchId: extractDeliveryBatchId(file?.description),
       createdAt: new Date(file?.created_at || 0).getTime(),
     }));
+
     const latestBatched = deliveredWithMeta
       .filter((item) => !!item.batchId)
       .sort((a, b) => b.createdAt - a.createdAt)[0];
+
     if (latestBatched?.batchId) {
       return deliveredWithMeta
         .filter((item) => item.batchId === latestBatched.batchId)
         .sort((a, b) => b.createdAt - a.createdAt)
         .map((item) => item.file);
     }
-    const sortedByDate = deliveredCandidates.sort((a: any, b: any) => {
+
+    const sortedByDate = [...deliveredCandidates].sort((a: any, b: any) => {
       const left = new Date(a?.created_at || 0).getTime();
       const right = new Date(b?.created_at || 0).getTime();
       return right - left;
     });
+
     const latestTime = new Date(sortedByDate[0]?.created_at || 0).getTime();
     const fallbackBatchWindowMs = 2 * 60 * 1000;
+
     return sortedByDate.filter((file: any) => {
       const createdAt = new Date(file?.created_at || 0).getTime();
       return latestTime - createdAt <= fallbackBatchWindowMs;
@@ -132,6 +145,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
     if (!Array.isArray(order?.files)) return [];
     const deliveredIds = new Set(deliveredWorkFiles.map((file: any) => Number(file?.id)));
     const orderClientIdFromOrder = Number(order?.client?.id ?? (order as any)?.client_id ?? 0);
+
     return order.files.filter((file: any) => {
       if (deliveredIds.has(Number(file?.id))) return false;
       const fileType = String(file?.file_type || '').toLowerCase();
@@ -144,12 +158,22 @@ const OrderContent: React.FC<OrderContentProps> = ({
     });
   }, [order?.files, deliveredWorkFiles]);
 
+  const canUploadTaskFiles = useMemo(() => {
+    if (!isOrderOwner) return false;
+    return !['completed', 'cancelled', 'canceled'].includes(String(order.status || '').toLowerCase());
+  }, [isOrderOwner, order.status]);
+
   const renderFileTile = (file: any, index: number, keyPrefix: string) => (
     <div
       className={styles.orderFileTile}
       key={file.id ?? `${keyPrefix}-${index}`}
       onClick={(e) => { e.stopPropagation(); onDownloadFile(file); }}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDownloadFile(file); } }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onDownloadFile(file);
+        }
+      }}
       role="button"
       tabIndex={0}
     >
@@ -169,7 +193,10 @@ const OrderContent: React.FC<OrderContentProps> = ({
         {canDeleteOrderFile(file) && (
           <DeleteOutlined
             className={styles.orderFileDeleteIcon}
-            onClick={(e) => { e.stopPropagation(); onDeleteOrderFile(file); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteOrderFile(file);
+            }}
           />
         )}
       </div>
@@ -191,9 +218,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
             <span>Поле, которое видите только Вы</span>
           </Title>
           <div className={styles.clientNoteBox}>
-            <Paragraph className={styles.clientNoteText}>
-              {order.client_note}
-            </Paragraph>
+            <Paragraph className={styles.clientNoteText}>{order.client_note}</Paragraph>
           </div>
         </div>
       )}
@@ -240,9 +265,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
           {deliveredWorkFiles.length > 0 ? (
             <>
               <div className={styles.orderFilesGrid}>
-                {deliveredWorkFiles.map((file: any, index: number) =>
-                  renderFileTile(file, index, 'delivered')
-                )}
+                {deliveredWorkFiles.map((file: any, index: number) => renderFileTile(file, index, 'delivered'))}
               </div>
               {isOrderOwner && order.status === 'review' && (
                 <Tag color="purple" className={styles.deliveredTag}>На проверке</Tag>
@@ -250,20 +273,56 @@ const OrderContent: React.FC<OrderContentProps> = ({
             </>
           ) : (
             <Text type="secondary" className={styles.deliveredEmpty}>
-              {isOrderExpert ? 'Вы ещё не загрузили работу' : 'Работа ещё не сдана'}
+              {isOrderExpert ? 'Вы еще не загрузили работу' : 'Работа еще не сдана'}
             </Text>
           )}
         </div>
       ) : null}
 
-      {attachedOrderFiles.length > 0 && (
+      {(canUploadTaskFiles || attachedOrderFiles.length > 0) && (
         <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
           <Title level={4} className={styles.sectionTitle}>Файлы задания</Title>
-          <div className={styles.orderFilesGrid}>
-            {attachedOrderFiles.map((file: any, index: number) =>
-              renderFileTile(file, index, 'attached')
-            )}
-          </div>
+          {canUploadTaskFiles && (
+            <div
+              className={`${styles.uploadDropzone} ${dragActive ? styles.uploadDropzoneActive : ''}`}
+              onDragEnter={onDrag}
+              onDragLeave={onDrag}
+              onDragOver={onDrag}
+              onDrop={onTaskFileDrop}
+            >
+              <input
+                type="file"
+                id="task-file-upload"
+                multiple
+                className={styles.fileInput}
+                onChange={onTaskFileInput}
+                disabled={uploadingFiles}
+                accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak"
+              />
+              <label htmlFor="task-file-upload" className={styles.uploadLabel}>
+                <div className={styles.uploadContent}>
+                  {uploadingFiles ? (
+                    <Spin size="large" />
+                  ) : (
+                    <>
+                      <InboxOutlined className={styles.uploadIcon} />
+                      <Text strong className={styles.uploadTitle}>
+                        Перетащите файлы задания сюда или нажмите для загрузки
+                      </Text>
+                      <Text type="secondary" className={styles.uploadSubtitle}>
+                        После удаления файла можно сразу добавить новый
+                      </Text>
+                    </>
+                  )}
+                </div>
+              </label>
+            </div>
+          )}
+          {attachedOrderFiles.length > 0 && (
+            <div className={styles.orderFilesGrid}>
+              {attachedOrderFiles.map((file: any, index: number) => renderFileTile(file, index, 'attached'))}
+            </div>
+          )}
         </div>
       )}
     </>

@@ -232,13 +232,13 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
 from .models import Article, ArticleFile
 # Article serializers imported at top of file
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
 
 class ArticleViewSet(viewsets.ModelViewSet):
     """ViewSet для статей в Базе Знаний"""
     permission_classes = [IsAuthenticatedOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
     pagination_class = None
 
     def get_queryset(self):

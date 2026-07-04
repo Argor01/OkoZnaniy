@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+﻿import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { message, Modal } from 'antd';
@@ -70,7 +70,7 @@ export function useOrderDetail(orderId?: string) {
     if (status === 404 && orderId) {
       const idNum = Number(orderId);
       if (!Number.isNaN(idNum)) removeOrderFromCaches(idNum);
-      message.warning('Р—Р°РєР°Р· Р±С‹Р» СѓРґР°Р»С‘РЅ Рё Р±РѕР»СЊС€Рµ РЅРµРґРѕСЃС‚СѓРїРµРЅ');
+      message.warning('Р вЂ”Р В°Р С”Р В°Р В· Р В±РЎвЂ№Р В» РЎС“Р Т‘Р В°Р В»РЎвЂР Р… Р С‘ Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ Р Р…Р ВµР Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р…');
       navigate(ROUTES.orders.feed);
     }
   }, [orderError, orderId, navigate, removeOrderFromCaches]);
@@ -107,7 +107,7 @@ export function useOrderDetail(orderId?: string) {
       const currentUserId = Number(userProfile?.id ?? 0);
 
       if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
-        message.error('Оставить отзыв может только заказчик этого заказа');
+        message.error('РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє СЌС‚РѕРіРѕ Р·Р°РєР°Р·Р°');
         return;
       }
 
@@ -127,7 +127,7 @@ export function useOrderDetail(orderId?: string) {
       }
 
       if (latestStatus !== 'completed') {
-        message.error('Оставить отзыв можно только после проверки или завершения заказа');
+        message.error('РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїСЂРѕРІРµСЂРєРё РёР»Рё Р·Р°РІРµСЂС€РµРЅРёСЏ Р·Р°РєР°Р·Р°');
         return;
       }
 
@@ -138,11 +138,11 @@ export function useOrderDetail(orderId?: string) {
       setReviewComment('');
       message.success(
         String(freshOrder?.status ?? '') === 'review'
-          ? 'Работа принята, отзыв оставлен'
-          : 'Отзыв сохранён'
+          ? 'Р Р°Р±РѕС‚Р° РїСЂРёРЅСЏС‚Р°, РѕС‚Р·С‹РІ РѕСЃС‚Р°РІР»РµРЅ'
+          : 'РћС‚Р·С‹РІ СЃРѕС…СЂР°РЅС‘РЅ'
       );
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'Не удалось сохранить отзыв');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РѕС‚Р·С‹РІ');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
@@ -161,7 +161,7 @@ export function useOrderDetail(orderId?: string) {
       const currentUserId = Number(userProfile?.id ?? 0);
 
       if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
-        message.error('Принять работу может только заказчик этого заказа');
+        message.error('РџСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє СЌС‚РѕРіРѕ Р·Р°РєР°Р·Р°');
         return;
       }
 
@@ -181,7 +181,7 @@ export function useOrderDetail(orderId?: string) {
       }
 
       if (latestStatus !== 'completed') {
-        message.error('Принять работу можно только из статуса проверки');
+        message.error('РџСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ РёР· СЃС‚Р°С‚СѓСЃР° РїСЂРѕРІРµСЂРєРё');
         return;
       }
 
@@ -191,11 +191,11 @@ export function useOrderDetail(orderId?: string) {
       setReviewComment('');
       message.success(
         String(freshOrder?.status ?? '') === 'review'
-          ? 'Работа принята. Вы сможете оставить отзыв позже.'
-          : 'Заказ уже завершён. Отзыв можно оставить позже.'
+          ? 'Р Р°Р±РѕС‚Р° РїСЂРёРЅСЏС‚Р°. Р’С‹ СЃРјРѕР¶РµС‚Рµ РѕСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РїРѕР·Р¶Рµ.'
+          : 'Р—Р°РєР°Р· СѓР¶Рµ Р·Р°РІРµСЂС€С‘РЅ. РћС‚Р·С‹РІ РјРѕР¶РЅРѕ РѕСЃС‚Р°РІРёС‚СЊ РїРѕР·Р¶Рµ.'
       );
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'Не удалось принять работу');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
@@ -206,7 +206,7 @@ export function useOrderDetail(orderId?: string) {
     if (!orderId) return;
     const comment = revisionComment.trim();
     if (!comment) {
-      message.warning('Р”РѕР±Р°РІСЊС‚Рµ РєРѕРјРјРµРЅС‚Р°СЂРёР№ РґР»СЏ РґРѕСЂР°Р±РѕС‚РєРё');
+      message.warning('Р вЂќР С•Р В±Р В°Р Р†РЎРЉРЎвЂљР Вµ Р С”Р С•Р СР СР ВµР Р…РЎвЂљР В°РЎР‚Р С‘Р в„– Р Т‘Р В»РЎРЏ Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”Р С‘');
       return;
     }
     try {
@@ -216,9 +216,9 @@ export function useOrderDetail(orderId?: string) {
       await refreshOrderWithLists();
       setRevisionModalOpen(false);
       setRevisionComment('');
-      message.success('Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° РґРѕСЂР°Р±РѕС‚РєСѓ');
+      message.success('Р В Р В°Р В±Р С•РЎвЂљР В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В° Р Р…Р В° Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”РЎС“');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РїСЂР°РІРёС‚СЊ РЅР° РґРѕСЂР°Р±РѕС‚РєСѓ');
+      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ Р Р…Р В° Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”РЎС“');
     } finally {
       setRevisionSubmitting(false);
       setReviewActionLoading(null);
@@ -231,9 +231,9 @@ export function useOrderDetail(orderId?: string) {
       setReviewActionLoading('reject');
       await ordersApi.rejectOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success('Р Р°Р±РѕС‚Р° РѕС‚РєР»РѕРЅРµРЅР°');
+      message.success('Р В Р В°Р В±Р С•РЎвЂљР В° Р С•РЎвЂљР С”Р В»Р С•Р Р…Р ВµР Р…Р В°');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ');
+      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С”Р В»Р С•Р Р…Р С‘РЎвЂљРЎРЉ РЎР‚Р В°Р В±Р С•РЎвЂљРЎС“');
     } finally {
       setReviewActionLoading(null);
     }
@@ -245,7 +245,7 @@ export function useOrderDetail(orderId?: string) {
       setAssigningExpertId(expertId);
       const response = await ordersApi.acceptBid(Number(orderId), bidId);
       await refreshOrderWithLists();
-      message.success(`Р­РєСЃРїРµСЂС‚ ${expertUsername} РЅР°Р·РЅР°С‡РµРЅ РёСЃРїРѕР»РЅРёС‚РµР»РµРј`);
+      message.success(`Р В­Р С”РЎРѓР С—Р ВµРЎР‚РЎвЂљ ${expertUsername} Р Р…Р В°Р В·Р Р…Р В°РЎвЂЎР ВµР Р… Р С‘РЎРѓР С—Р С•Р В»Р Р…Р С‘РЎвЂљР ВµР В»Р ВµР С`);
       const chatId = response?.chat_id;
       if (chatId) {
         setTimeout(() => { dashboard.openOrderChat(Number(orderId), expertId, chatId); }, 300);
@@ -255,7 +255,7 @@ export function useOrderDetail(orderId?: string) {
         }, 500);
       }
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р·РЅР°С‡РёС‚СЊ РёСЃРїРѕР»РЅРёС‚РµР»СЏ');
+      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р Р…Р В°Р В·Р Р…Р В°РЎвЂЎР С‘РЎвЂљРЎРЉ Р С‘РЎРѓР С—Р С•Р В»Р Р…Р С‘РЎвЂљР ВµР В»РЎРЏ');
     } finally {
       setAssigningExpertId(null);
     }
@@ -265,18 +265,39 @@ export function useOrderDetail(orderId?: string) {
     if (!orderId || files.length === 0) return;
     try {
       setUploadingFiles(true);
-      const uploadPromises = files.map(file =>
+      const uploadPromises = files.map((file) =>
         ordersApi.uploadOrderFile(Number(orderId), file, {
           file_type: 'solution',
-          description: 'Р“РѕС‚РѕРІР°СЏ СЂР°Р±РѕС‚Р° Р·Р°РіСЂСѓР¶РµРЅР° СЌРєСЃРїРµСЂС‚РѕРј'
+          description: 'Готовая работа загружена экспертом',
         })
       );
       await Promise.all(uploadPromises);
       await ordersApi.submitOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success(files.length > 1 ? 'Р Р°Р±РѕС‚С‹ РѕС‚РїСЂР°РІР»РµРЅС‹ РЅР° РїСЂРѕРІРµСЂРєСѓ' : 'Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР° РЅР° РїСЂРѕРІРµСЂРєСѓ');
+      message.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'РћС€РёР±РєР° РїСЂРё Р·Р°РіСЂСѓР·РєРµ С„Р°Р№Р»РѕРІ');
+      message.error(e?.response?.data?.detail || 'Ошибка при загрузке файлов');
+    } finally {
+      setUploadingFiles(false);
+    }
+  }, [orderId, refreshOrderWithLists]);
+
+  const handleTaskFileUpload = useCallback(async (files: File[]) => {
+    if (!orderId || files.length === 0) return;
+    try {
+      setUploadingFiles(true);
+      await Promise.all(
+        files.map((file) =>
+          ordersApi.uploadOrderFile(Number(orderId), file, {
+            file_type: 'task',
+            description: 'Файл задания',
+          })
+        )
+      );
+      await refreshOrderWithLists();
+      message.success(files.length > 1 ? 'Файлы задания загружены' : 'Файл задания загружен');
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось загрузить файл задания');
     } finally {
       setUploadingFiles(false);
     }
@@ -288,7 +309,7 @@ export function useOrderDetail(orderId?: string) {
       const fileIdNum = Number(file?.id);
       const filename = file?.filename || file?.file_name || 'file';
       if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
-        message.error('РќРµ СѓРґР°Р»РѕСЃСЊ СЃРєР°С‡Р°С‚СЊ С„Р°Р№Р»');
+        message.error('Не удалось скачать файл');
         return;
       }
       const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
@@ -303,29 +324,29 @@ export function useOrderDetail(orderId?: string) {
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 401) {
-        message.error('РќРµ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРѕ РґР»СЏ СЃРєР°С‡РёРІР°РЅРёСЏ С„Р°Р№Р»Р°');
+        message.error('Недостаточно прав для скачивания файла');
       } else {
-        message.error('РћС€РёР±РєР° РїСЂРё СЃРєР°С‡РёРІР°РЅРёРё С„Р°Р№Р»Р°');
+        message.error('Ошибка при скачивании файла');
       }
     }
   }, [orderId]);
 
   const handleDeleteOrderFile = useCallback((file: any) => {
     if (!orderId || !file?.id) return;
-    const filename = file?.filename || file?.file_name || 'С„Р°Р№Р»';
+    const filename = file?.filename || file?.file_name || 'Файл';
     Modal.confirm({
-      title: 'РЈРґР°Р»РёС‚СЊ С„Р°Р№Р»?',
-      content: `Р¤Р°Р№Р» "${filename}" Р±СѓРґРµС‚ СѓРґР°Р»С‘РЅ РёР· Р·Р°РєР°Р·Р°.`,
-      okText: 'РЈРґР°Р»РёС‚СЊ',
-      cancelText: 'РћС‚РјРµРЅР°',
+      title: 'Удалить файл?',
+      content: `Файл "${filename}" будет удален из заказа.`,
+      okText: 'Удалить',
+      cancelText: 'Отмена',
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
           await ordersApi.deleteOrderFile(Number(orderId), Number(file.id));
           await refreshOrderWithLists();
-          message.success('Р¤Р°Р№Р» СѓРґР°Р»С‘РЅ');
+          message.success('Файл удален');
         } catch (e: any) {
-          message.error(e?.response?.data?.detail || 'РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р»');
+          message.error(e?.response?.data?.detail || 'Не удалось удалить файл');
         }
       },
     });
@@ -347,11 +368,26 @@ export function useOrderDetail(orderId?: string) {
     }
   }, [handleFileUpload]);
 
+  const handleTaskFileDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleTaskFileUpload(Array.from(e.dataTransfer.files));
+    }
+  }, [handleTaskFileUpload]);
+
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFileUpload(Array.from(e.target.files));
     }
   }, [handleFileUpload]);
+
+  const handleTaskFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleTaskFileUpload(Array.from(e.target.files));
+    }
+  }, [handleTaskFileUpload]);
 
   return {
     // State
@@ -390,6 +426,8 @@ export function useOrderDetail(orderId?: string) {
     handleDrag,
     handleDrop,
     handleFileInput,
+    handleTaskFileDrop,
+    handleTaskFileInput,
     removeOrderFromCaches,
     navigate,
     location,
@@ -397,3 +435,5 @@ export function useOrderDetail(orderId?: string) {
     dashboard,
   };
 }
+
+

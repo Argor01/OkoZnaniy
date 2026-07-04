@@ -56,6 +56,10 @@ export const formatUserName = (user: {
   display_username?: string | null;
   email?: string;
 }): string => {
+  const displayUsername = user.display_username?.trim();
+  if (displayUsername) {
+    return displayUsername;
+  }
   if (user.first_name && user.last_name) {
     return `${user.first_name} ${user.last_name}`;
   }
