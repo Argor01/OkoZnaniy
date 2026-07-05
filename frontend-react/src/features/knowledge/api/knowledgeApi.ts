@@ -92,6 +92,11 @@ export interface ArticleComplaint {
   updated_at: string;
 }
 
+export interface ResolveArticleComplaintPayload {
+  decision: 'reviewed' | 'rejected';
+  admin_response: string;
+}
+
 export interface ArticleDeletion {
   id: number;
   article_title: string;
@@ -144,6 +149,14 @@ export const articlesApi = {
   getComplaints: async (): Promise<ArticleComplaint[]> => {
     const response = await apiClient.get('/knowledge/articles/complaints/');
     return response.data.results || response.data;
+  },
+
+  resolveComplaint: async (
+    complaintId: number,
+    data: ResolveArticleComplaintPayload
+  ): Promise<ArticleComplaint> => {
+    const response = await apiClient.post(`/knowledge/articles/complaints/${complaintId}/resolve/`, data);
+    return response.data;
   },
 
   getDeletions: async (): Promise<ArticleDeletion[]> => {

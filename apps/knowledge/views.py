@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.db import models
 from django.db.models import Count, Q
+from django.utils import timezone
 from .models import Question, Answer, AnswerLike, QuestionView, ArticleComplaint, ArticleDeletion
 from .serializers import (
     QuestionListSerializer,
@@ -341,6 +342,48 @@ class ArticleViewSet(viewsets.ModelViewSet):
 
         queryset = ArticleComplaint.objects.select_related('complainant').all()
         serializer = ArticleComplaintSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated], url_path=r'complaints/(?P<complaint_id>[^/.]+)/resolve')
+    def resolve_complaint(self, request, complaint_id=None):
+        if not request.user.is_staff:
+            return Response({'error': 'Доступно только администраторам'}, status=status.HTTP_403_FORBIDDEN)
+
+        complaint = ArticleComplaint.objects.filter(pk=complaint_id).select_related('claim').first()
+        if not complaint:
+            return Response({'error': 'Жалоба не найдена'}, status=status.HTTP_404_NOT_FOUND)
+
+        if complaint.status != 'pending':
+            return Response(
+                {'error': 'Рассмотреть можно только жалобу в статусе ожидания'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        decision = request.data.get('decision')
+        admin_response = (request.data.get('admin_response') or '').strip()
+
+        if decision not in ('reviewed', 'rejected'):
+            return Response({'decision': ['Недопустимое решение.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not admin_response:
+            return Response({'admin_response': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
+
+        complaint.status = decision
+        complaint.admin_response = admin_response
+        complaint.save(update_fields=['status', 'admin_response', 'updated_at'])
+
+        if complaint.claim:
+            resolution_prefix = (
+                'Жалоба на статью рассмотрена без удаления статьи.'
+                if decision == 'reviewed'
+                else 'Жалоба на статью отклонена.'
+            )
+            complaint.claim.status = 'completed'
+            complaint.claim.resolution = f'{resolution_prefix} {admin_response}'.strip()
+            complaint.claim.completed_at = timezone.now()
+            complaint.claim.save(update_fields=['status', 'resolution', 'completed_at', 'updated_at'])
+
+        serializer = ArticleComplaintSerializer(complaint, context={'request': request})
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated], url_path='deletions')

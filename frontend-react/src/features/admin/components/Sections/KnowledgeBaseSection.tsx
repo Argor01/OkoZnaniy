@@ -25,6 +25,7 @@ import {
   ArrowLeftOutlined,
   WarningOutlined,
   CheckCircleOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -100,6 +101,11 @@ export const KnowledgeBaseSection: React.FC = () => {
   const [deleteArticleId, setDeleteArticleId] = useState<number | null>(null);
   const [deleteComplaintId, setDeleteComplaintId] = useState<number | undefined>();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [complaintModalOpen, setComplaintModalOpen] = useState(false);
+  const [complaintResolutionId, setComplaintResolutionId] = useState<number | null>(null);
+  const [complaintDecision, setComplaintDecision] = useState<'reviewed' | 'rejected'>('reviewed');
+  const [complaintResponse, setComplaintResponse] = useState('');
+  const [complaintLoading, setComplaintLoading] = useState(false);
 
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [resolveDeletionId, setResolveDeletionId] = useState<number | null>(null);
@@ -215,6 +221,34 @@ export const KnowledgeBaseSection: React.FC = () => {
       message.error('Ошибка обработки');
     } finally {
       setResolveLoading(false);
+    }
+  };
+
+  const handleResolveComplaint = async () => {
+    if (!complaintResolutionId || !complaintResponse.trim()) {
+      message.error('Добавьте ответ администратора');
+      return;
+    }
+    setComplaintLoading(true);
+    try {
+      await articlesApi.resolveComplaint(complaintResolutionId, {
+        decision: complaintDecision,
+        admin_response: complaintResponse.trim(),
+      });
+      message.success(
+        complaintDecision === 'reviewed'
+          ? 'Жалоба закрыта без удаления статьи'
+          : 'Жалоба отклонена'
+      );
+      queryClient.invalidateQueries({ queryKey: ['article-complaints'] });
+      setComplaintModalOpen(false);
+      setComplaintResolutionId(null);
+      setComplaintResponse('');
+      setComplaintDecision('reviewed');
+    } catch {
+      message.error('Ошибка при обработке жалобы');
+    } finally {
+      setComplaintLoading(false);
     }
   };
 
@@ -582,8 +616,8 @@ export const KnowledgeBaseSection: React.FC = () => {
           <Card key={complaint.id} style={{ marginBottom: 12, borderRadius: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                  <Tag color={complaint.status === 'pending' ? 'orange' : complaint.status === 'article_deleted' ? 'red' : 'green'}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
+                  <Tag color={complaint.status === 'pending' ? 'orange' : complaint.status === 'article_deleted' ? 'red' : complaint.status === 'rejected' ? 'red' : 'green'}>
                     {STATUS_LABELS[complaint.status] || complaint.status}
                   </Tag>
                   <Tag>{REASON_LABELS[complaint.reason] || complaint.reason}</Tag>
@@ -596,19 +630,52 @@ export const KnowledgeBaseSection: React.FC = () => {
                   <UserOutlined /> {getAuthorName(complaint.complainant)} &bull; {dayjs(complaint.created_at).format('D MMMM YYYY, HH:mm')}
                 </Text>
                 <Text>{complaint.description}</Text>
+                {complaint.admin_response && (
+                  <div style={{ marginTop: 8, padding: 12, background: '#f6ffed', borderRadius: 6 }}>
+                    <Text strong style={{ color: '#389e0d' }}>Ответ администратора: </Text>
+                    <Text>{complaint.admin_response}</Text>
+                  </div>
+                )}
               </div>
-              {complaint.status === 'pending' && complaint.article && (
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={() => {
-                    setDeleteArticleId(complaint.article!);
-                    setDeleteComplaintId(complaint.id);
-                    setDeleteModalOpen(true);
-                  }}
-                >
-                  Удалить статью
-                </Button>
+              {complaint.status === 'pending' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginLeft: 16 }}>
+                  {complaint.article && (
+                    <Button
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => {
+                        setDeleteArticleId(complaint.article!);
+                        setDeleteComplaintId(complaint.id);
+                        setDeleteModalOpen(true);
+                      }}
+                    >
+                      Удалить статью
+                    </Button>
+                  )}
+                  <Button
+                    type="primary"
+                    icon={<CheckCircleOutlined />}
+                    onClick={() => {
+                      setComplaintResolutionId(complaint.id);
+                      setComplaintDecision('reviewed');
+                      setComplaintResponse('');
+                      setComplaintModalOpen(true);
+                    }}
+                  >
+                    Закрыть без удаления
+                  </Button>
+                  <Button
+                    icon={<CloseCircleOutlined />}
+                    onClick={() => {
+                      setComplaintResolutionId(complaint.id);
+                      setComplaintDecision('rejected');
+                      setComplaintResponse('');
+                      setComplaintModalOpen(true);
+                    }}
+                  >
+                    Отклонить жалобу
+                  </Button>
+                </div>
               )}
             </div>
           </Card>
@@ -761,6 +828,44 @@ export const KnowledgeBaseSection: React.FC = () => {
               value={resolveResponse}
               onChange={(e) => setResolveResponse(e.target.value)}
               placeholder="Комментарий к решению..."
+              style={{ marginTop: 4 }}
+            />
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        title={complaintDecision === 'reviewed' ? 'Закрыть жалобу без удаления статьи' : 'Отклонить жалобу'}
+        open={complaintModalOpen}
+        onCancel={() => {
+          setComplaintModalOpen(false);
+          setComplaintResolutionId(null);
+          setComplaintResponse('');
+          setComplaintDecision('reviewed');
+        }}
+        onOk={handleResolveComplaint}
+        okText={complaintDecision === 'reviewed' ? 'Закрыть жалобу' : 'Отклонить жалобу'}
+        cancelText="Отмена"
+        confirmLoading={complaintLoading}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text strong>Действие</Text>
+            <Select
+              value={complaintDecision}
+              onChange={(value) => setComplaintDecision(value)}
+              style={{ width: '100%', marginTop: 4 }}
+            >
+              <Select.Option value="reviewed">Закрыть без удаления</Select.Option>
+              <Select.Option value="rejected">Отклонить жалобу</Select.Option>
+            </Select>
+          </div>
+          <div>
+            <Text strong>Ответ администратора *</Text>
+            <TextArea
+              rows={4}
+              value={complaintResponse}
+              onChange={(e) => setComplaintResponse(e.target.value)}
+              placeholder="Опишите решение администратора..."
               style={{ marginTop: 4 }}
             />
           </div>
