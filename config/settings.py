@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'apps.arbitration',
     'apps.knowledge',
     'apps.payments',
+    'apps.wallet',
     'apps.regression_tests',
 ]
 

@@ -365,12 +365,18 @@ class TransactionType(models.TextChoices):
     PAYOUT = "payout", "Выплата"
     COMMISSION = "commission", "Комиссия"
     REFUND = "refund", "Возврат"
+    TOPUP = "topup", "Пополнение"
+    WITHDRAWAL = "withdrawal", "Вывод средств"
+    PURCHASE = "purchase", "Покупка"
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="transactions")
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="transactions", null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     type = models.CharField(max_length=20, choices=TransactionType.choices)
+    description = models.CharField(max_length=255, blank=True, default="")
+    balance_after = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    payment = models.ForeignKey("payments.Payment", on_delete=models.SET_NULL, null=True, blank=True, related_name="transactions")
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

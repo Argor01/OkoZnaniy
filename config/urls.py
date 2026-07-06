@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/arbitration/', include('apps.arbitration.urls')),
     path('api/knowledge/', include('apps.knowledge.urls')),
     path('api/payments/', include('apps.payments.urls')),
+    path('api/wallet/', include('apps.wallet.urls')),
     path("api/accounts/", include("allauth.urls")),
 ]
 
