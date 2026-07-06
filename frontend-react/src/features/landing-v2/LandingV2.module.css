@@ -2183,3 +2183,15 @@
 @media (max-width: 640px) {
   .becomePage .safetyCard { flex-basis: 100%; max-width: 420px; }
 }
+/* ============ Become hero illustration ============ */
+.becomeHeroImg {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 40px auto 8px;
+  border-radius: 24px;
+}
+@media (max-width: 600px) {
+  .becomeHeroImg { margin-top: 28px; border-radius: 18px; }
+}

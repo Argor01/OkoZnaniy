@@ -69,7 +69,7 @@ const BecomePartner: React.FC = () => {
           <button className={styles.btnPrimaryBig} onClick={() => navigate('/become-partner#feedback')}>
             Стать партнёром →
           </button>
-          <div className={styles.becomeHeroStats}>
+          <img src="/assets/become/partner-hero.png" alt="" className={styles.becomeHeroImg} /><div className={styles.becomeHeroStats}>
             <div className={styles.becomeHeroStat}>
               <span className={styles.becomeHeroStatVal}>25%</span>
               <span className={styles.becomeHeroStatLabel}>от каждого заказа</span>

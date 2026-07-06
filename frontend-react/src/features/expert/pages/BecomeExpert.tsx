@@ -63,7 +63,7 @@ const BecomeExpert: React.FC = () => {
           <button className={styles.btnPrimaryBig} onClick={() => navigate('/expert-application')}>
             Стать экспертом →
           </button>
-          <div className={styles.becomeHeroStats}>
+          <img src="/assets/become/expert-hero.png" alt="" className={styles.becomeHeroImg} /><div className={styles.becomeHeroStats}>
             <div className={styles.becomeHeroStat}>
               <span className={styles.becomeHeroStatVal}>5 000+</span>
               <span className={styles.becomeHeroStatLabel}>активных заказов</span>
