@@ -2305,3 +2305,28 @@
   .bpGuarantee { padding:40px 26px; }
   .bpChip { display:none; }
 }
+/* ==================== BECOME — benefits bento ==================== */
+.bpBento { display:grid; grid-template-columns: 1.1fr 1fr; gap:22px; max-width:1080px; margin:0 auto; align-items:stretch; }
+.bpBentoFeatured { position:relative; overflow:hidden; border-radius:26px; padding:40px; color:#fff; display:flex; flex-direction:column; justify-content:space-between; min-height:340px;
+  background:linear-gradient(140deg,#2a1259 0%, #4a1f8a 50%, #6435a5 100%); box-shadow:0 40px 80px -34px rgba(74,31,138,.7); }
+.bpBentoFeatured::after { content:''; position:absolute; width:340px; height:340px; border-radius:50%; right:-120px; bottom:-140px; background:radial-gradient(circle, rgba(236,72,153,.55), transparent 70%); filter:blur(10px); }
+.bpBentoFeaturedTop { position:relative; z-index:1; display:flex; align-items:center; gap:14px; }
+.bpBentoFeaturedIcon { width:60px; height:60px; border-radius:18px; display:grid; place-items:center; font-size:30px; color:#2a1259; background:linear-gradient(135deg,#f6c14a,#f59e0b); box-shadow:0 14px 30px -12px rgba(246,193,74,.7); flex:0 0 auto; }
+.bpBentoBadge { position:relative; z-index:1; display:inline-block; align-self:flex-start; padding:6px 14px; border-radius:999px; background:rgba(255,255,255,.12); color:#f6c14a; font-weight:800; font-size:12px; letter-spacing:.04em; }
+.bpBentoValue { position:relative; z-index:1; font-size:88px; font-weight:800; line-height:.9; margin:6px 0 0; background:linear-gradient(135deg,#fff,#f6c14a); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.bpBentoFeaturedTitle { position:relative; z-index:1; font-size:22px; font-weight:700; margin:14px 0 8px; }
+.bpBentoFeaturedText { position:relative; z-index:1; font-size:15px; line-height:1.55; color:rgba(255,255,255,.8); max-width:380px; }
+.bpBentoList { display:flex; flex-direction:column; gap:16px; }
+.bpBentoItem { display:flex; align-items:center; gap:18px; background:#fff; border:1px solid var(--v2-border); border-radius:20px; padding:22px 24px; flex:1; transition:transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s; }
+.bpBentoItem:hover { transform:translateX(6px); box-shadow:0 22px 46px -22px rgba(72,30,130,.32); border-color:transparent; }
+.bpBentoItemIcon { width:52px; height:52px; border-radius:15px; display:grid; place-items:center; font-size:24px; color:#fff; flex:0 0 auto; background:linear-gradient(135deg,#6435a5,#8b5cf6); box-shadow:0 12px 26px -12px rgba(100,53,165,.6); }
+.bpBentoItem:nth-child(2) .bpBentoItemIcon { background:linear-gradient(135deg,#8b5cf6,#ec4899); }
+.bpBentoItem:nth-child(3) .bpBentoItemIcon { background:linear-gradient(135deg,#ec4899,#f6c14a); }
+.bpBentoItemVal { font-size:20px; font-weight:800; line-height:1; margin-bottom:5px; background:linear-gradient(135deg,#6435a5,#ec4899); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.bpBentoItemTitle { font-size:16px; font-weight:700; color:var(--v2-text); margin-bottom:3px; }
+.bpBentoItemText { font-size:13.5px; color:var(--v2-text-muted); line-height:1.5; }
+@media (max-width: 900px) {
+  .bpBento { grid-template-columns:1fr; }
+  .bpBentoFeatured { min-height:auto; }
+  .bpBentoValue { font-size:72px; }
+}

@@ -108,15 +108,32 @@ const BecomePartner: React.FC = () => {
             <h2 className={styles.bpTitle}>Стабильный доход и <span className={styles.g}>наша поддержка</span></h2>
             <p className={styles.bpSub}>Развивай свой бизнес с командой Око Знаний за спиной.</p>
           </div>
-          <div ref={ben.ref} className={`${styles.bpGrid} ${ben.cls}`} style={{ maxWidth: 900 }}>
-            {benefits.map((b) => (
-              <div className={styles.bpCard} key={b.title}>
-                <div className={styles.bpCardIcon}>{b.icon}</div>
-                <div className={styles.bpCardValue}>{b.value}</div>
-                <div className={styles.bpCardTitle}>{b.title}</div>
-                <div className={styles.bpCardText}>{b.text}</div>
+          <div ref={ben.ref} className={`${styles.bpBento} ${ben.cls}`}>
+            <div className={styles.bpBentoFeatured}>
+              <div>
+                <div className={styles.bpBentoFeaturedTop}>
+                  <div className={styles.bpBentoFeaturedIcon}>{benefits[0].icon}</div>
+                  <span className={styles.bpBentoBadge}>Главное преимущество</span>
+                </div>
+                <div className={styles.bpBentoValue}>{benefits[0].value}</div>
               </div>
-            ))}
+              <div>
+                <div className={styles.bpBentoFeaturedTitle}>{benefits[0].title}</div>
+                <div className={styles.bpBentoFeaturedText}>{benefits[0].text}</div>
+              </div>
+            </div>
+            <div className={styles.bpBentoList}>
+              {benefits.slice(1).map((b) => (
+                <div className={styles.bpBentoItem} key={b.title}>
+                  <div className={styles.bpBentoItemIcon}>{b.icon}</div>
+                  <div>
+                    <div className={styles.bpBentoItemVal}>{b.value}</div>
+                    <div className={styles.bpBentoItemTitle}>{b.title}</div>
+                    <div className={styles.bpBentoItemText}>{b.text}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
