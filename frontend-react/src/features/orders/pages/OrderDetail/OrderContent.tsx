@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useMemo } from 'react';
+﻿import React, { useCallback, useEffect, useMemo } from 'react';
 import { Typography, Spin, Tag } from 'antd';
 import {
   FileOutlined,
@@ -31,6 +31,8 @@ interface OrderContentProps {
   onTaskFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDownloadFile: (file: any) => void;
   onDeleteOrderFile: (file: any) => void;
+  onDeliveredFilesResolved?: (ids: number[]) => void;
+  onDeliveredFileViewed?: (id: number) => void;
 }
 
 const OrderContent: React.FC<OrderContentProps> = ({
@@ -48,6 +50,8 @@ const OrderContent: React.FC<OrderContentProps> = ({
   onTaskFileInput,
   onDownloadFile,
   onDeleteOrderFile,
+  onDeliveredFilesResolved,
+  onDeliveredFileViewed,
 }) => {
   const getOrderFileIcon = useCallback((filename: string) => {
     const ext = filename.split('.').pop()?.toLowerCase();
@@ -163,15 +167,30 @@ const OrderContent: React.FC<OrderContentProps> = ({
     return !['completed', 'cancelled', 'canceled'].includes(String(order.status || '').toLowerCase());
   }, [isOrderOwner, order.status]);
 
+  const handleTileDownload = useCallback((file: any, keyPrefix: string) => {
+    onDownloadFile(file);
+    if (keyPrefix === 'delivered' && onDeliveredFileViewed && file?.id != null) {
+      onDeliveredFileViewed(Number(file.id));
+    }
+  }, [onDownloadFile, onDeliveredFileViewed]);
+
+  useEffect(() => {
+    if (!onDeliveredFilesResolved) return;
+    const ids = deliveredWorkFiles
+      .map((f: any) => Number(f?.id))
+      .filter((n: number) => Number.isFinite(n));
+    onDeliveredFilesResolved(ids);
+  }, [deliveredWorkFiles, onDeliveredFilesResolved]);
+
   const renderFileTile = (file: any, index: number, keyPrefix: string) => (
     <div
       className={styles.orderFileTile}
       key={file.id ?? `${keyPrefix}-${index}`}
-      onClick={(e) => { e.stopPropagation(); onDownloadFile(file); }}
+      onClick={(e) => { e.stopPropagation(); handleTileDownload(file, keyPrefix); }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onDownloadFile(file);
+          handleTileDownload(file, keyPrefix);
         }
       }}
       role="button"

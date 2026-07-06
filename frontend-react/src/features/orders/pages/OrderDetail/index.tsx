@@ -60,6 +60,22 @@ const OrderDetail: React.FC = () => {
     location,
   } = useOrderDetail(orderId);
 
+  const [deliveredFileIds, setDeliveredFileIds] = React.useState<number[]>([]);
+  const [viewedDeliveredIds, setViewedDeliveredIds] = React.useState<Set<number>>(new Set());
+  const handleDeliveredFilesResolved = React.useCallback((ids: number[]) => {
+    setDeliveredFileIds((prev) => (
+      prev.length === ids.length && prev.every((v, i) => v === ids[i]) ? prev : ids
+    ));
+  }, []);
+  const handleDeliveredFileViewed = React.useCallback((id: number) => {
+    setViewedDeliveredIds((prev) => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
   if (isLoading) {
     return (
       <div className={styles.centered}>
@@ -88,6 +104,9 @@ const OrderDetail: React.FC = () => {
   const canSeeDeliveredWorkBlock = currentUserId > 0 && (isOrderOwner || currentUserId === orderExpertId);
   const isAwaitingExpertDecision = order.status === 'awaiting_expert_acceptance';
   const canRespondToAssignment = isOrderExpert && isAwaitingExpertDecision && currentUserBid?.status === 'invited';
+  const deliveredWorkReviewed = deliveredFileIds.length === 0
+    ? true
+    : deliveredFileIds.every((id) => viewedDeliveredIds.has(id));
 
   const expertReview = (() => {
     const raw = (order as any)?.rating ?? (order as any)?.expert_rating;
@@ -187,32 +206,44 @@ const OrderDetail: React.FC = () => {
               onTaskFileInput={handleTaskFileInput}
               onDownloadFile={handleDownloadFile}
               onDeleteOrderFile={handleDeleteOrderFile}
+              onDeliveredFilesResolved={handleDeliveredFilesResolved}
+              onDeliveredFileViewed={handleDeliveredFileViewed}
             />
 
             {isOrderOwner && order.status === 'review' ? (
-              <Space className={`${styles.reviewActionsRow} ${styles.sectionBlock}`} wrap>
-                <AppButton
-                  variant="success"
-                  loading={reviewActionLoading === 'approve'}
-                  onClick={() => setReviewModalOpen(true)}
-                >
-                  Принять
-                </AppButton>
-                <AppButton
-                  variant="secondary"
-                  loading={reviewActionLoading === 'revision'}
-                  onClick={() => setRevisionModalOpen(true)}
-                >
-                  На доработку
-                </AppButton>
-                <AppButton
-                  variant="danger"
-                  loading={reviewActionLoading === 'reject'}
-                  onClick={handleRejectFromCard}
-                >
-                  Отклонить
-                </AppButton>
-              </Space>
+              <div className={styles.sectionBlock}>
+                {!deliveredWorkReviewed && (
+                  <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+                    Скачайте и просмотрите готовую работу, чтобы принять, отправить на доработку или отклонить заказ.
+                  </Text>
+                )}
+                <Space className={styles.reviewActionsRow} wrap>
+                  <AppButton
+                    variant="success"
+                    loading={reviewActionLoading === 'approve'}
+                    disabled={!deliveredWorkReviewed}
+                    onClick={() => setReviewModalOpen(true)}
+                  >
+                    Принять
+                  </AppButton>
+                  <AppButton
+                    variant="secondary"
+                    loading={reviewActionLoading === 'revision'}
+                    disabled={!deliveredWorkReviewed}
+                    onClick={() => setRevisionModalOpen(true)}
+                  >
+                    На доработку
+                  </AppButton>
+                  <AppButton
+                    variant="danger"
+                    loading={reviewActionLoading === 'reject'}
+                    disabled={!deliveredWorkReviewed}
+                    onClick={handleRejectFromCard}
+                  >
+                    Отклонить
+                  </AppButton>
+                </Space>
+              </div>
             ) : null}
 
             {canRespondToAssignment ? (
