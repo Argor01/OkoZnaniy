@@ -117,7 +117,7 @@ const Hero: React.FC = () => {
             за тебя
           </h1>
           <p className={styles.heroSubtitle}>
-            Более 8 000 проверенных авторов: курсовые, дипломы, рефераты, контрольные.
+            Более 1 500 проверенных авторов: курсовые, дипломы, рефераты, контрольные.
             Авторский подход, бессрочная гарантия, рассрочка 0%.
           </p>
 
@@ -167,7 +167,7 @@ const Hero: React.FC = () => {
                 <img src="/assets/landing-v2/expert4.jpg" alt="" />
               </div>
               <div className={styles.heroTrustText}>
-                <strong>+ 8 000 экспертов</strong>
+                <strong>+ 1 500 экспертов</strong>
                 готовы помочь прямо сейчас
               </div>
             </div>
@@ -264,7 +264,7 @@ const useCount = (target: number) => {
 };
 
 const StatsDark: React.FC = () => {
-  const a = useCount(8420);
+  const a = useCount(1500);
   const b = useCount(127500);
   const c = useCount(4.9 as any);
   const d = useCount(97);
@@ -509,7 +509,7 @@ const ExpertsGrid: React.FC = () => {
     <section className={styles.section} id="experts">
       <div ref={r.ref} className={`${styles.container} ${r.className}`}>
         <div className={styles.sectionTag}>Эксперты</div>
-        <h2 className={styles.sectionTitle}>Более 8 000 проверенных авторов</h2>
+        <h2 className={styles.sectionTitle}>Более 1 500 проверенных авторов</h2>
         <p className={styles.sectionSubtitle}>
           Только 2% кандидатов проходят отбор. Преподаватели вузов, кандидаты и доктора наук,
           практикующие специалисты.
@@ -750,7 +750,7 @@ const LandingV2: React.FC = () => {
     <div className={styles.page}>
       <SEO
         title="Око Знаний — Помощь студентам онлайн | Эксперты, гарантия, авторский подход"
-        description="8 000+ проверенных авторов. Курсовые, дипломы, рефераты, контрольные. Антиплагиат от 80%, 0% AI, бессрочная гарантия, рассрочка 0%."
+        description="1 500+ проверенных авторов. Курсовые, дипломы, рефераты, контрольные. Антиплагиат от 80%, 0% AI, бессрочная гарантия, рассрочка 0%."
       />
       <TopBar />
       <Hero />
