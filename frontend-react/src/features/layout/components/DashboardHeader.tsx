@@ -27,6 +27,7 @@ import { ThemeToggle } from '@/components/ui';
 import styles from './DashboardHeader.module.css';
 import { ROUTES } from '@/utils/constants';
 import { getDisplayUsername } from '@/utils/formatters';
+import WalletBadge from '@/features/wallet/components/WalletBadge';
 
 const { Header } = Layout;
 const { Text } = Typography;
@@ -364,6 +365,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
                 title={isDark ? 'Светлая тема' : 'Тёмная тема'}
               />
 
+              <WalletBadge />
+
               <Dropdown
                 menu={{
                   items: [
@@ -401,6 +404,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           
           {isMobile && (
             <>
+              <WalletBadge compact />
               <ThemeToggle
                 size="middle"
                 className={`${styles.iconButton} ${styles.themeToggle} ${styles.mobileThemeToggle}`}
