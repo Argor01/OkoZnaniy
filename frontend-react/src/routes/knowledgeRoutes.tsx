@@ -1,6 +1,7 @@
 import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
 import { DashboardLayout } from '@/features/layout';
+import PublicLayout from '@/features/layout/components/PublicLayout';
 import { ProtectedRoute } from '@/features/auth';
 
 const KnowledgePortal = lazy(() => import('@/features/knowledge/pages/KnowledgePortal'));
@@ -11,15 +12,13 @@ const CreateArticle = lazy(() => import('@/features/knowledge/pages/CreateArticl
 
 export const knowledgeRoutes = (
   <>
-    {/* Knowledge Base (Articles) */}
+    {/* Knowledge Base (Articles) — публичное чтение для SEO */}
     <Route
       path="/knowledge-base"
       element={
-        <ProtectedRoute>
-          <DashboardLayout>
-            <ArticlesFeed />
-          </DashboardLayout>
-        </ProtectedRoute>
+        <PublicLayout>
+          <ArticlesFeed />
+        </PublicLayout>
       }
     />
     <Route
@@ -35,33 +34,27 @@ export const knowledgeRoutes = (
     <Route
       path="/knowledge-base/:id"
       element={
-        <ProtectedRoute>
-          <DashboardLayout>
-            <ArticleDetail />
-          </DashboardLayout>
-        </ProtectedRoute>
+        <PublicLayout>
+          <ArticleDetail />
+        </PublicLayout>
       }
     />
 
-    {/* Knowledge Portal (Q&A) */}
+    {/* Knowledge Portal (Q&A) — публичное чтение для SEO */}
     <Route
       path="/knowledge"
       element={
-        <ProtectedRoute>
-          <DashboardLayout>
-            <KnowledgePortal />
-          </DashboardLayout>
-        </ProtectedRoute>
+        <PublicLayout>
+          <KnowledgePortal />
+        </PublicLayout>
       }
     />
     <Route
       path="/knowledge/:id"
       element={
-        <ProtectedRoute>
-          <DashboardLayout>
-            <QuestionDetail />
-          </DashboardLayout>
-        </ProtectedRoute>
+        <PublicLayout>
+          <QuestionDetail />
+        </PublicLayout>
       }
     />
   </>

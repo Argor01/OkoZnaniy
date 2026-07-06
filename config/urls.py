@@ -22,11 +22,15 @@ from django.contrib import admin
 from django.urls import path
 from apps.core.health import health_check
 from apps.users.views import public_stats_view
+from apps.core.seo import robots_txt, sitemap_xml, prerender
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),  # Изменили с admin/ на django-admin/
     path('hijack/', include('hijack.urls')),
     path('api/health/', health_check, name='health_check'),
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
+    path('api/seo/prerender', prerender, name='seo_prerender'),
     path('api/public/stats/', public_stats_view, name='public_stats'),
     path('api/users/', include('apps.users.urls')),
     path('api/orders/', include('apps.orders.urls')),
