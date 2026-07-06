@@ -32,6 +32,25 @@ def can_access_ticket(user, ticket):
     return getattr(ticket, 'user_id', None) == user.id
 
 
+def _normalize_tags(tags):
+    """Приводит теги (список или строка) к нормализованной строке '#a, #b'."""
+    if isinstance(tags, str):
+        items = [t.strip() for t in tags.split(',')]
+    elif isinstance(tags, (list, tuple)):
+        items = [str(t).strip() for t in tags]
+    else:
+        items = []
+    normalized = []
+    for t in items:
+        if not t:
+            continue
+        if not t.startswith('#'):
+            t = f'#{t}'
+        if t not in normalized:
+            normalized.append(t)
+    return ', '.join(normalized)
+
+
 def log_activity(actor, activity_type, text, meta=None, support_request=None, claim=None):
     """Записать событие в ленту активности тикета"""
     TicketActivity.objects.create(
@@ -297,8 +316,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     def update_tags(self, request, pk=None):
         """Обновить все теги тикета"""
         support_request = self.get_object()
-        tags = request.data.get('tags', '')
-        support_request.tags = tags
+        support_request.tags = _normalize_tags(request.data.get('tags', ''))
         support_request.save(update_fields=['tags'])
         return Response({'message': 'Теги обновлены', 'tags': support_request.get_tags_list()})
 
@@ -589,8 +607,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
     def update_tags(self, request, pk=None):
         """Обновить все теги претензии"""
         claim = self.get_object()
-        tags = request.data.get('tags', '')
-        claim.tags = tags
+        claim.tags = _normalize_tags(request.data.get('tags', ''))
         claim.save(update_fields=['tags'])
         return Response({'message': 'Теги обновлены', 'tags': claim.get_tags_list()})
 
