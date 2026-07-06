@@ -17,7 +17,7 @@ export function useOrderDetail(orderId?: string) {
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [bidModalVisible, setBidModalVisible] = useState(false);
-  const [reviewActionLoading, setReviewActionLoading] = useState<'approve' | 'revision' | 'reject' | null>(null);
+  const [reviewActionLoading, setReviewActionLoading] = useState<'approve' | 'revision' | 'reject' | 'accept_assignment' | 'decline_assignment' | null>(null);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const [revisionComment, setRevisionComment] = useState('');
   const [revisionSubmitting, setRevisionSubmitting] = useState(false);
@@ -81,9 +81,12 @@ export function useOrderDetail(orderId?: string) {
     enabled: !!orderId,
   });
 
-  const userHasBid = useMemo(() => {
-    return Array.isArray(bids) && bids.some((bid: Bid) => bid.expert.id === userProfile?.id);
+  const currentUserBid = useMemo(() => {
+    if (!Array.isArray(bids)) return null;
+    return bids.find((bid: Bid) => bid.expert.id === userProfile?.id) ?? null;
   }, [bids, userProfile]);
+
+  const userHasBid = useMemo(() => Boolean(currentUserBid), [currentUserBid]);
 
   const refreshOrderWithLists = useCallback(async () => {
     await refetchOrder();
@@ -243,23 +246,48 @@ export function useOrderDetail(orderId?: string) {
     if (!orderId) return;
     try {
       setAssigningExpertId(expertId);
-      const response = await ordersApi.acceptBid(Number(orderId), bidId);
+      await ordersApi.acceptBid(Number(orderId), bidId);
       await refreshOrderWithLists();
-      message.success(`Р В­Р С”РЎРѓР С—Р ВµРЎР‚РЎвЂљ ${expertUsername} Р Р…Р В°Р В·Р Р…Р В°РЎвЂЎР ВµР Р… Р С‘РЎРѓР С—Р С•Р В»Р Р…Р С‘РЎвЂљР ВµР В»Р ВµР С`);
-      const chatId = response?.chat_id;
-      if (chatId) {
-        setTimeout(() => { dashboard.openOrderChat(Number(orderId), expertId, chatId); }, 300);
-      } else {
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('openChatById', { detail: { userId: expertId } }));
-        }, 500);
-      }
+      message.success(`Исполнителю ${expertUsername} отправлено приглашение принять заказ`);
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р Р…Р В°Р В·Р Р…Р В°РЎвЂЎР С‘РЎвЂљРЎРЉ Р С‘РЎРѓР С—Р С•Р В»Р Р…Р С‘РЎвЂљР ВµР В»РЎРЏ');
+      message.error(e?.response?.data?.detail || 'Не удалось отправить приглашение исполнителю');
     } finally {
       setAssigningExpertId(null);
     }
-  }, [orderId, refreshOrderWithLists, dashboard]);
+  }, [orderId, refreshOrderWithLists]);
+
+  const handleAcceptAssignment = useCallback(async () => {
+    if (!orderId || !order) return;
+    try {
+      setReviewActionLoading('accept_assignment');
+      const response = await ordersApi.acceptAssignment(Number(orderId));
+      await refreshOrderWithLists();
+      message.success('Заказ принят в работу');
+      if (response?.chat_id && order.expert?.id) {
+        setTimeout(() => {
+          dashboard.openOrderChat(Number(orderId), order.expert!.id, response.chat_id);
+        }, 300);
+      }
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось принять заказ');
+    } finally {
+      setReviewActionLoading(null);
+    }
+  }, [dashboard, order, orderId, refreshOrderWithLists]);
+
+  const handleDeclineAssignment = useCallback(async () => {
+    if (!orderId) return;
+    try {
+      setReviewActionLoading('decline_assignment');
+      await ordersApi.declineAssignment(Number(orderId));
+      await refreshOrderWithLists();
+      message.success('Приглашение на заказ отклонено');
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось отклонить заказ');
+    } finally {
+      setReviewActionLoading(null);
+    }
+  }, [orderId, refreshOrderWithLists]);
 
   const handleFileUpload = useCallback(async (files: File[]) => {
     if (!orderId || files.length === 0) return;
@@ -411,6 +439,7 @@ export function useOrderDetail(orderId?: string) {
     userProfile,
     order, isLoading, orderError,
     bids, bidsLoading,
+    currentUserBid,
     userHasBid,
 
     // Handlers
@@ -420,6 +449,8 @@ export function useOrderDetail(orderId?: string) {
     handleConfirmRevisionFromCard,
     handleRejectFromCard,
     handleAssignExpert,
+    handleAcceptAssignment,
+    handleDeclineAssignment,
     handleFileUpload,
     handleDownloadFile,
     handleDeleteOrderFile,

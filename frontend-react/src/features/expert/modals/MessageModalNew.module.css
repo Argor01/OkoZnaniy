@@ -179,6 +179,16 @@
   width: 300px;
 }
 
+.chatSidebarCompact {
+  width: 96px;
+  min-width: 96px;
+}
+
+.chatSidebarCompact .chatSearchHeader,
+.chatSidebarCompact .chatSearchHeaderMobile {
+  display: none;
+}
+
 .chatSidebarHidden {
   display: none;
 }
@@ -372,6 +382,31 @@
   padding: 8px;
 }
 
+.chatListItemCompact {
+  justify-content: center;
+  padding: 14px 10px;
+  min-height: 76px;
+  border-left: none;
+}
+
+.chatListItemCompact.chatListItemPinned {
+  padding-left: 10px;
+}
+
+.chatListItemCompact .chatListItemPinIcon {
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.chatListItemCompact.chatListItemSelected {
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0.18) 100%);
+}
+
+.chatListItemCompact.chatListItemUnread:not(.chatListItemSelected) {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.06) 100%);
+}
+
 .chatListItem:hover {
   background: var(--color-bg-hover, #f9fafb);
 }
@@ -400,6 +435,18 @@
 
 .chatListContentMobile {
   margin-left: 8px;
+}
+
+.chatListContentCompact {
+  display: none;
+}
+
+.chatListTextHidden {
+  display: none !important;
+}
+
+.chatListMetaRowCompact {
+  justify-content: center;
 }
 
 .chatListHeaderRow {
@@ -494,6 +541,16 @@
   margin-right: 8px;
 }
 
+.chatBadgeCompact {
+  margin-right: 0;
+}
+
+.chatBadgeCompact :global(.ant-badge-dot) {
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 0 2px var(--bg-primary, #ffffff);
+}
+
 .chatListLoading {
   display: flex;
   justify-content: center;
@@ -524,6 +581,11 @@
 
 .chatAvatar {
   background-color: #6b7280;
+}
+
+.chatAvatarCompact {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.85);
 }
 
 .chatPanel {
@@ -2944,8 +3006,21 @@
   border-left-color: #d4a017;
 }
 
+:global([data-theme="dark"]) .chatListItemCompact.chatListItemSelected {
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.24) 0%, rgba(124, 58, 237, 0.32) 100%);
+}
+
+:global([data-theme="dark"]) .chatListItemCompact.chatListItemUnread:not(.chatListItemSelected) {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.14) 0%, rgba(59, 130, 246, 0.1) 100%);
+}
+
 :global([data-theme="dark"]) .chatListItemPinIcon {
   color: #f4c84f;
+}
+
+:global([data-theme="dark"]) .chatAvatarCompact {
+  border-color: rgba(30, 41, 59, 0.9);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.28);
 }
 
 :global([data-theme="dark"]) .chatTabletBackRail {

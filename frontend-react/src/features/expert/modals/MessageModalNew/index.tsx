@@ -77,7 +77,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   selectedUserId,
   selectedOrderId,
   chatContextTitle,
-  userProfile
+  userProfile,
+  renderAsPage = false
 }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -2375,27 +2376,28 @@ const handleOverdueComplaint = async () => {
   const isChatFrozen = Boolean(selectedChat?.is_frozen || order?.is_frozen);
   const hasActiveConversation = Boolean(selectedChat || isSupportChatSelected);
   const useStackedConversationLayout = isMobile || isTablet;
+  const useCompactSidebar = hasActiveConversation && isDesktop;
   const showSidebar = !useStackedConversationLayout || !hasActiveConversation;
   const showChatPanel = !useStackedConversationLayout || hasActiveConversation;
   const showTabletBackRail = isTablet && hasActiveConversation;
+  const modalWidth = isMobile ? '100%' : (isDesktop ? 'min(1600px, calc(100vw - 48px))' : 'calc(100vw - 32px)');
+  const pageContainerStyle = renderAsPage
+    ? {
+        maxWidth: modalWidth,
+        width: '100%',
+        margin: '0 auto',
+        minHeight: isMobile ? 'calc(100vh - 32px)' : 'calc(100vh - 48px)',
+      }
+    : undefined;
 
-  return (
-    <Modal
-      open={visible}
-      centered={!useStackedConversationLayout}
-      closable={false}
-      onCancel={onClose}
-      footer={null}
-      destroyOnHidden
-      width={isMobile ? '100%' : (isDesktop ? 'min(1600px, calc(100vw - 48px))' : 'calc(100vw - 32px)')}
-      wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
-    >
-      <ErrorBoundary>
+  const chatShell = (
+    <ErrorBoundary>
       <div
         className={`${styles.chatModalContainer} ${isMobile ? styles.chatModalContainerMobile : ''}`}
+        style={pageContainerStyle}
       >
         <div
-          className={`${styles.chatSidebar} ${isMobile ? styles.chatSidebarMobile : isTablet ? styles.chatSidebarTablet : styles.chatSidebarDesktop} ${(isMobile || isTablet) && showSidebar ? styles.chatSidebarStackedFullscreen : ''} ${!showSidebar ? styles.chatSidebarHidden : ''}`}
+          className={`${styles.chatSidebar} ${isMobile ? styles.chatSidebarMobile : isTablet ? styles.chatSidebarTablet : styles.chatSidebarDesktop} ${useCompactSidebar ? styles.chatSidebarCompact : ''} ${(isMobile || isTablet) && showSidebar ? styles.chatSidebarStackedFullscreen : ''} ${!showSidebar ? styles.chatSidebarHidden : ''}`}
         >
           
           <div className={`${styles.chatSearchHeader} ${isMobile ? styles.chatSearchHeaderMobile : ''}`}>
@@ -2469,38 +2471,45 @@ const handleOverdueComplaint = async () => {
                         }
                       }}
                       onContextMenu={handleContextMenu}
-                      className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${isConversationSelected ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
+                      className={`${styles.chatListItem} ${isMobile ? styles.chatListItemMobile : ''} ${useCompactSidebar ? styles.chatListItemCompact : ''} ${isConversationSelected ? styles.chatListItemSelected : ''} ${chat.unread_count > 0 ? styles.chatListItemUnread : ''} ${chat.is_pinned ? styles.chatListItemPinned : ''}`}
+                      title={getDisplayUsername(chat.other_user || {})}
                     >
                       {chat.is_pinned && (
                         <PushpinFilled className={styles.chatListItemPinIcon} />
                       )}
-                      <Avatar
-                        size={isMobile ? 36 : 40}
-                        icon={<UserOutlined />}
-                        src={getMediaUrl(chat.other_user?.avatar)}
-                        className={styles.chatAvatar}
-                      />
-                      <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''}`}>
+                      <Badge
+                        dot={chat.unread_count > 0}
+                        offset={useCompactSidebar ? [-6, 34] : [-4, 30]}
+                        className={`${styles.chatBadge} ${useCompactSidebar ? styles.chatBadgeCompact : ''}`}
+                      >
+                        <Avatar
+                          size={isMobile ? 36 : useCompactSidebar ? 44 : 40}
+                          icon={<UserOutlined />}
+                          src={getMediaUrl(chat.other_user?.avatar)}
+                          className={`${styles.chatAvatar} ${useCompactSidebar ? styles.chatAvatarCompact : ''}`}
+                        />
+                      </Badge>
+                      <div className={`${styles.chatListContent} ${isMobile ? styles.chatListContentMobile : ''} ${useCompactSidebar ? styles.chatListContentCompact : ''}`}>
                         <div className={styles.chatListHeaderRow}>
                           <Text
                             strong
                             ellipsis
-                            className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
+                            className={`${styles.chatListName} ${isMobile ? styles.chatListNameMobile : ''} ${useCompactSidebar ? styles.chatListTextHidden : ''} ${chat.unread_count > 0 ? styles.chatListNameUnread : ''}`}
                           >
                             {getDisplayUsername(chat.other_user || {})}
                           </Text>
-                          <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''}`}>
+                          <Text type="secondary" className={`${styles.chatListTime} ${isMobile ? styles.chatListTimeMobile : ''} ${useCompactSidebar ? styles.chatListTextHidden : ''}`}>
                             {chat.last_message ? formatTimestamp(chat.last_message.created_at) : ''}
                           </Text>
                         </div>
-                        <div className={styles.chatListMetaRow}>
+                        <div className={`${styles.chatListMetaRow} ${useCompactSidebar ? styles.chatListMetaRowCompact : ''}`}>
                           <Text
                             ellipsis
-                            className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${chat.unread_count > 0 ? styles.chatListPreviewUnread : ''}`}
+                            className={`${styles.chatListPreview} ${isMobile ? styles.chatListPreviewMobile : styles.chatListPreviewDesktop} ${useCompactSidebar ? styles.chatListTextHidden : ''} ${chat.unread_count > 0 ? styles.chatListPreviewUnread : ''}`}
                           >
                             {chat.last_message?.text || 'Нет сообщений'}
                           </Text>
-                          {chat.unread_count > 0 && (
+                          {chat.unread_count > 0 && !useCompactSidebar && (
                             <Badge
                               dot
                               className={styles.chatBadge}
@@ -3609,7 +3618,32 @@ const handleOverdueComplaint = async () => {
           )}
         </div>
       </div>
-      </ErrorBoundary>
+    </ErrorBoundary>
+  );
+
+  return (
+    <>
+      {renderAsPage ? (
+        <div
+          className={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
+          style={{ padding: isMobile ? '16px 0' : '24px 0' }}
+        >
+          {chatShell}
+        </div>
+      ) : (
+        <Modal
+          open={visible}
+          centered={!useStackedConversationLayout}
+          closable={false}
+          onCancel={onClose}
+          footer={null}
+          destroyOnHidden
+          width={modalWidth}
+          wrapClassName={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
+        >
+          {chatShell}
+        </Modal>
+      )}
 
       <Modal
         open={overdueExtendModalOpen}
@@ -3925,7 +3959,7 @@ const handleOverdueComplaint = async () => {
         variant="work_offer"
         workTitle={headerContextTitle || chatContextTitle || undefined}
       />
-    </Modal>
+    </>
   );
 };
 

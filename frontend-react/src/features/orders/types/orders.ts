@@ -50,7 +50,7 @@ export interface Bid {
   prepayment_percent: number;
   comment?: string;
   created_at: string;
-  status: 'active' | 'rejected' | 'cancelled';
+  status: 'active' | 'invited' | 'accepted' | 'rejected' | 'cancelled';
   expert_rating: number;
 }
 

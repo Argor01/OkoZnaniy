@@ -8,7 +8,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
-from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
+from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid, BidStatus
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from apps.chat.services import ensure_order_chat_started
 from apps.notifications.services import NotificationService
@@ -366,7 +366,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_bid(self, request, pk=None):
-        """Клиент принимает ставку: назначает эксперта, фиксирует бюджет и создает чат с данными заказа."""
+        """Клиент выбирает исполнителя и отправляет приглашение на принятие заказа."""
         blocked = _ensure_not_banned_for_contacts(request.user, 'Принятие ставки')
         if blocked is not None:
             return blocked
@@ -393,44 +393,111 @@ class OrderViewSet(viewsets.ModelViewSet):
         except Bid.DoesNotExist:
             return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
         
-        # Назначаем эксперта и согласованную цену (в транзакции для целостности)
         with transaction.atomic():
+            if order.expert_id and order.expert_id != bid.expert_id and order.status == 'awaiting_expert_acceptance':
+                return Response({'detail': 'Заказ уже ожидает ответа другого исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+            if order.status not in ['new', 'awaiting_expert_acceptance']:
+                return Response({'detail': 'Выбрать исполнителя можно только для нового заказа.'}, status=status.HTTP_400_BAD_REQUEST)
+
             order.expert = bid.expert
-            order.budget = bid.amount
-        
-        # Переводим заказ в in_progress, если он был в одном из допустимых статусов
-        old_status = order.status
-        if order.status in ['new', 'revision', 'review', 'waiting_payment']:
-            order.status = 'in_progress'
-        
-        order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
-        
-        _direct_chat, chat, _order_message = ensure_order_chat_started(
-            order,
-            sender=order.client,
-            text=f'Вас назначили исполнителем по заказу {order.id}',
-        )
-        logger.info(f"Поддиалог по заказу {order.id} подготовлен: chat_id={chat.id}")
-        
-        # Уведомляем эксперта о назначении на заказ
+            order.status = 'awaiting_expert_acceptance'
+            order.save(update_fields=['expert', 'status', 'updated_at'])
+
+            Bid.objects.filter(order=order, expert=bid.expert).update(status=BidStatus.INVITED)
+
+        logger.info(f"Заказ {order.id} ожидает ответа эксперта {bid.expert.id}")
+
         try:
             safe_call(NotificationService.create_notification,
                 recipient=bid.expert,
-                type='new_bid',  # Используем существующий тип
-                title=f'Вас назначили исполнителем по заказу {order.id}',
-                message=f'Вы назначены исполнителем заказа №{order.id}. Подробности в деталях заказа.',
+                type='expert_invitation',
+                title=f'Заказчик выбрал вас для заказа №{order.id}',
+                message=f'Заказчик выбрал вас исполнителем по заказу №{order.id}. Откройте заказ и примите или отклоните его.',
                 related_object_id=order.id,
-                related_object_type='order')
-            # Уведомляем клиента о том, что эксперт назначен
-            safe_call(NotificationService.notify_new_bid, order, bid, bid.expert, is_updated=False)
+                related_object_type='order',
+                data={'order_id': order.id, 'bid_id': bid.id, 'action_required': 'expert_assignment_response'})
         except Exception as e:
             logger.error(f"Ошибка при отправке уведомлений: {str(e)}")
-        
-        # Возвращаем ID чата, чтобы фронтенд мог сразу открыть его
+
+        response_data = OrderSerializer(order).data
+        response_data['selected_bid_id'] = bid.id
+        return Response(response_data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def accept_assignment(self, request, pk=None):
+        """Эксперт принимает приглашение и только после этого заказ стартует."""
+        order = self.get_object()
+        user = request.user
+        if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if order.status != 'awaiting_expert_acceptance':
+            return Response({'detail': 'Заказ не ожидает подтверждения исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        bid = Bid.objects.filter(order=order, expert=user, status=BidStatus.INVITED).first()
+        if not bid:
+            return Response({'detail': 'Для этого заказа не найдено активное приглашение.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            bid.status = BidStatus.ACCEPTED
+            bid.save(update_fields=['status'])
+            order.budget = bid.amount
+            order.status = 'in_progress'
+            order.save(update_fields=['budget', 'status', 'updated_at'])
+
+        _direct_chat, chat, _order_message = ensure_order_chat_started(
+            order,
+            sender=order.client,
+            text=f'Заказ #{order.id} принят в работу',
+        )
+
+        safe_call(
+            NotificationService.create_notification,
+            recipient=order.client,
+            type='expert_response',
+            title=f'Исполнитель принял заказ №{order.id}',
+            message=f'Эксперт {user.get_full_name() or user.username} принял ваш заказ и приступил к работе.',
+            related_object_id=order.id,
+            related_object_type='order',
+            data={'order_id': order.id, 'expert_id': user.id, 'accepted': True},
+        )
+
         response_data = OrderSerializer(order).data
         response_data['chat_id'] = chat.id
-        logger.info(f"accept_bid: заказ {order.id}, чат {chat.id}, эксперт {bid.expert.id}")
         return Response(response_data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def decline_assignment(self, request, pk=None):
+        """Эксперт отклоняет приглашение на заказ."""
+        order = self.get_object()
+        user = request.user
+        if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if order.status != 'awaiting_expert_acceptance':
+            return Response({'detail': 'Заказ не ожидает подтверждения исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        bid = Bid.objects.filter(order=order, expert=user, status=BidStatus.INVITED).first()
+        if not bid:
+            return Response({'detail': 'Для этого заказа не найдено активное приглашение.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            bid.status = BidStatus.REJECTED
+            bid.save(update_fields=['status'])
+            order.expert = None
+            order.status = 'new'
+            order.save(update_fields=['expert', 'status', 'updated_at'])
+
+        safe_call(
+            NotificationService.create_notification,
+            recipient=order.client,
+            type='expert_response',
+            title=f'Исполнитель отклонил заказ №{order.id}',
+            message=f'Эксперт {user.get_full_name() or user.username} отклонил приглашение по вашему заказу. Вы можете выбрать другого исполнителя.',
+            related_object_id=order.id,
+            related_object_type='order',
+            data={'order_id': order.id, 'expert_id': user.id, 'accepted': False},
+        )
+
+        return Response(OrderSerializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def reject_bid(self, request, pk=None):

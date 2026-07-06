@@ -9,6 +9,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:80
 export const ORDER_STATUSES = {
   NEW: 'new',
   CONFIRMING: 'confirming',
+  AWAITING_EXPERT_ACCEPTANCE: 'awaiting_expert_acceptance',
   IN_PROGRESS: 'in_progress',
   WAITING_PAYMENT: 'waiting_payment',
   REVIEW: 'review',
@@ -21,6 +22,7 @@ export const ORDER_STATUSES = {
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
+  awaiting_expert_acceptance: 'РћР¶РёРґР°РµС‚ РѕС‚РІРµС‚Р° СЌРєСЃРїРµСЂС‚Р°',
   new: 'Новый',
   confirming: 'На подтверждении',
   in_progress: 'В работе',
@@ -35,6 +37,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
+  awaiting_expert_acceptance: 'blue',
   new: 'green',
   confirming: 'orange',
   in_progress: 'purple',
@@ -82,6 +85,7 @@ export const ROUTES = {
   home: '/',
   login: '/login',
   dashboard: '/dashboard',
+  messages: '/messages',
   auth: {
     googleCallback: '/auth/google/callback',
     googleCallbackLegacy: '/google-callback',

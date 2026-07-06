@@ -69,7 +69,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
               )}
               <List
                 className={styles.bidsList}
-                dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => (bid.status || 'active') === 'active') : []}
+                dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => ['active', 'invited', 'accepted'].includes(bid.status || 'active')) : []}
                 renderItem={(bid: Bid) => {
                   const bidAmount = Number(bid.amount ?? 0);
                   const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
@@ -86,9 +86,13 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                       key={bid.id}
                       className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
                       actions={
-                        order.expert?.id === bid.expert.id
-                          ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
-                          : isOrderOwner && hasValidPrice
+                        bid.status === 'accepted'
+                          ? [<Tag color="success" icon={<CheckCircleOutlined />}>Принял заказ</Tag>]
+                          : bid.status === 'invited'
+                            ? [<Tag color="blue" icon={<CheckCircleOutlined />}>Ожидается ответ</Tag>]
+                            : order.expert?.id === bid.expert.id
+                              ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
+                            : isOrderOwner && hasValidPrice && !order.expert
                             ? [
                                 <AppButton
                                   size={isMobile ? 'small' : 'middle'}

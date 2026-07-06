@@ -6,6 +6,7 @@ import { ROUTES } from '@/utils/constants';
 
 const ExpertDashboard = lazy(() => import('@/features/expert/pages/ExpertDashboard'));
 const ExpertApplication = lazy(() => import('@/features/expert/pages/ExpertApplication'));
+const MessagesPage = lazy(() => import('@/features/expert/pages/MessagesPage'));
 const UserProfile = lazy(() => import('@/features/user/pages/UserProfile'));
 
 export const expertRoutes = (
@@ -26,6 +27,16 @@ export const expertRoutes = (
         <ProtectedRoute>
           <DashboardLayout>
             <ExpertApplication />
+          </DashboardLayout>
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path={ROUTES.messages}
+      element={
+        <ProtectedRoute>
+          <DashboardLayout>
+            <MessagesPage />
           </DashboardLayout>
         </ProtectedRoute>
       }

@@ -26,6 +26,7 @@ WORK_TYPES = [
 class Order(models.Model):
     STATUS_CHOICES = [
         ('new', 'Новый'),
+        ('awaiting_expert_acceptance', 'Ожидает ответа эксперта'),
         ('waiting_payment', 'Ожидает оплаты'),
         ('in_progress', 'В работе'),
         ('review', 'На проверке'),
@@ -383,6 +384,8 @@ class Transaction(models.Model):
 
 class BidStatus(models.TextChoices):
     ACTIVE = "active", "Активная"
+    INVITED = "invited", "Ожидает ответа эксперта"
+    ACCEPTED = "accepted", "Принята экспертом"
     REJECTED = "rejected", "Отклонена"
     CANCELLED = "cancelled", "Отменена"
 

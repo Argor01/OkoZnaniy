@@ -192,6 +192,16 @@ export const ordersApi = {
     return response.data;
   },
 
+  acceptAssignment: async (orderId: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.acceptAssignment(orderId));
+    return response.data;
+  },
+
+  declineAssignment: async (orderId: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.orders.declineAssignment(orderId));
+    return response.data;
+  },
+
   
   rejectBid: async (orderId: number, bidId: number) => {
     const response = await apiClient.post(API_ENDPOINTS.orders.rejectBid(orderId), { bid_id: bidId });

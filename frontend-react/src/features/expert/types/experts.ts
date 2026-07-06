@@ -96,6 +96,7 @@ export interface ExpertReview {
   created_at: string;
   reply_text?: string;
   reply_at?: string | null;
+  is_published?: boolean;
   is_appealed?: boolean;
   appeal_reason?: string;
   appeal_at?: string | null;

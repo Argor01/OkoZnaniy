@@ -33,6 +33,23 @@
   padding: 8px;
 }
 
+.chatListItemCompact {
+  justify-content: center;
+  padding: 12px 10px;
+}
+
+.chatListContentCompact {
+  display: none;
+}
+
+.chatListTextHidden {
+  display: none !important;
+}
+
+.chatListMetaRowCompact {
+  justify-content: center;
+}
+
 .chatListItem:hover {
   background: #f9fafb;
 }

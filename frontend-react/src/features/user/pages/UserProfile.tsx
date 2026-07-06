@@ -18,6 +18,7 @@ import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
 import { logger } from '@/utils/logger';
 import { getDisplayUsername } from '@/utils/formatters';
+import { ROUTES } from '@/utils/constants';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -142,10 +143,7 @@ const UserProfile: FC = () => {
     try {
       const chatData = await chatApi.getOrCreateByUser(targetId);
 
-      const event = new CustomEvent('openChatById', {
-        detail: { chatId: chatData.id, userId: targetId }
-      });
-      window.dispatchEvent(event);
+      navigate(`${ROUTES.messages}?chatId=${chatData.id}&userId=${targetId}`);
 
       antMessage.success('Чат открыт');
     } catch (error: any) {

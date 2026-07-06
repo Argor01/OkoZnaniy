@@ -255,6 +255,11 @@ export const expertsApi = {
     return data;
   },
 
+  async getReview(reviewId: number): Promise<ExpertReview> {
+    const { data } = await apiClient.get(`/experts/reviews/${reviewId}/`);
+    return data;
+  },
+
   async getPendingReviews(): Promise<{
     count: number;
     results: Array<{

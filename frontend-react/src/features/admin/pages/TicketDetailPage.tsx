@@ -17,6 +17,8 @@ import apiClient from '@/api/client';
 import { useAdminAuth, useTicketActions, useAdminUsers, useTicketByNumber, useTicketActivity } from '@/features/admin/hooks';
 import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
+import { expertsApi } from '@/features/expert/api/experts';
+import type { ExpertReview } from '@/features/expert/types/experts';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -51,6 +53,11 @@ interface TicketDetail {
   refund_amount?: number;
   claim_type?: string;
 }
+
+type ReviewAppealInfo = {
+  reviewId: number;
+  reason: string;
+};
 
 const ACTIVITY_ICON: Record<string, React.ReactNode> = {
   status_change: <SwapOutlined style={{ color: '#6435a5' }} />,
@@ -90,6 +97,10 @@ export const TicketDetailPage: React.FC = () => {
   const [newTag, setNewTag] = useState('');
   const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [refundPercentage, setRefundPercentage] = useState(0);
+  const [reviewAppeal, setReviewAppeal] = useState<ReviewAppealInfo | null>(null);
+  const [reviewAppealData, setReviewAppealData] = useState<ExpertReview | null>(null);
+  const [reviewAppealLoading, setReviewAppealLoading] = useState(false);
+  const [reviewActionLoading, setReviewActionLoading] = useState(false);
   const feedEndRef = useRef<HTMLDivElement>(null);
 
   const { ticket: rawTicket, loading, refetch } = useTicketByNumber(ticketId || '');
@@ -118,6 +129,51 @@ export const TicketDetailPage: React.FC = () => {
   useEffect(() => {
     feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [feed]);
+
+  useEffect(() => {
+    const text = ticket?.description || '';
+    const reviewIdMatch = text.match(/review_id=(\d+)/i);
+    const reasonMatch = text.match(/Причина:\s*([\s\S]*?)(?:\n\s*\n|$)/i);
+
+    if (!reviewIdMatch) {
+      setReviewAppeal(null);
+      setReviewAppealData(null);
+      return;
+    }
+
+    setReviewAppeal({
+      reviewId: Number(reviewIdMatch[1]),
+      reason: reasonMatch?.[1]?.trim() || '',
+    });
+  }, [ticket?.description]);
+
+  useEffect(() => {
+    if (!reviewAppeal?.reviewId) return;
+
+    let cancelled = false;
+    setReviewAppealLoading(true);
+
+    expertsApi.getReview(reviewAppeal.reviewId)
+      .then((data) => {
+        if (!cancelled) {
+          setReviewAppealData(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setReviewAppealData(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setReviewAppealLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reviewAppeal?.reviewId]);
 
   const contactViolationUserId =
     ticket?.reason === 'contact_violation'
@@ -270,6 +326,28 @@ export const TicketDetailPage: React.FC = () => {
     if (!ticket) return;
     try { await removeTag(ticket.id, tag, ticket.type); doRefetch(); }
     catch { message.error('Не удалось удалить тег'); }
+  };
+
+  const handleReviewAppealDecision = async (decision: 'keep' | 'remove') => {
+    if (!reviewAppeal?.reviewId) return;
+
+    setReviewActionLoading(true);
+    try {
+      const updated = await expertsApi.resolveReviewAppeal(
+        reviewAppeal.reviewId,
+        decision,
+        decision === 'remove'
+          ? 'Администратор убрал отзыв по результатам рассмотрения обращения.'
+          : 'Администратор вернул отзыв после рассмотрения обращения.'
+      );
+      setReviewAppealData(updated);
+      message.success(decision === 'remove' ? 'Отзыв скрыт' : 'Отзыв возвращён');
+      doRefetch();
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось изменить состояние отзыва');
+    } finally {
+      setReviewActionLoading(false);
+    }
   };
 
   if (loading) {
@@ -529,6 +607,66 @@ export const TicketDetailPage: React.FC = () => {
             </Card>
 
             {/* Секция арбитража для претензий */}
+            {ticket.type === 'support_request' && reviewAppeal && (
+              <Card title="Жалоба на отзыв" size="small" style={{ marginBottom: 16 }}>
+                {reviewAppealLoading ? (
+                  <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                    <Spin size="small" />
+                  </div>
+                ) : reviewAppealData ? (
+                  <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                    <Descriptions column={1} size="small">
+                      <Descriptions.Item label="Отзыв">#{reviewAppealData.id}</Descriptions.Item>
+                      <Descriptions.Item label="Оценка">
+                        <Space>
+                          <StarOutlined style={{ color: '#faad14' }} />
+                          <span>{reviewAppealData.rating}/5</span>
+                        </Space>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Статус">
+                        <Tag color={reviewAppealData.is_published ? 'green' : 'red'}>
+                          {reviewAppealData.is_published ? 'Опубликован' : 'Скрыт'}
+                        </Tag>
+                      </Descriptions.Item>
+                      {reviewAppeal.reason ? (
+                        <Descriptions.Item label="Причина жалобы">
+                          {reviewAppeal.reason}
+                        </Descriptions.Item>
+                      ) : null}
+                    </Descriptions>
+
+                    <div style={{ padding: 12, background: '#fafafa', borderRadius: 8 }}>
+                      <Text strong style={{ display: 'block', marginBottom: 6 }}>Текст отзыва</Text>
+                      <Text>{reviewAppealData.comment || 'Без текста'}</Text>
+                    </div>
+
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                      <Button
+                        block
+                        danger
+                        loading={reviewActionLoading}
+                        disabled={reviewAppealData.is_published === false}
+                        onClick={() => handleReviewAppealDecision('remove')}
+                      >
+                        Убрать отзыв
+                      </Button>
+                      <Button
+                        block
+                        type="primary"
+                        loading={reviewActionLoading}
+                        disabled={reviewAppealData.is_published === true}
+                        onClick={() => handleReviewAppealDecision('keep')}
+                      >
+                        Вернуть отзыв
+                      </Button>
+                    </Space>
+                  </Space>
+                ) : (
+                  <Text type="secondary">Связанный отзыв не найден.</Text>
+                )}
+              </Card>
+            )}
+
             {ticket.type === 'claim' && (
               <Card title="Детали арбитража" size="small" style={{ marginBottom: 16 }}>
                 <Descriptions column={1} size="small">

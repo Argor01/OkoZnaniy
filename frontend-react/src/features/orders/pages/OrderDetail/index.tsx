@@ -38,6 +38,7 @@ const OrderDetail: React.FC = () => {
     editOrderModalVisible, setEditOrderModalVisible,
     userProfile,
     order, isLoading,
+    currentUserBid,
     bids, bidsLoading,
     userHasBid,
     refreshOrderWithLists,
@@ -46,6 +47,8 @@ const OrderDetail: React.FC = () => {
     handleConfirmRevisionFromCard,
     handleRejectFromCard,
     handleAssignExpert,
+    handleAcceptAssignment,
+    handleDeclineAssignment,
     handleDownloadFile,
     handleDeleteOrderFile,
     handleDrag,
@@ -83,6 +86,8 @@ const OrderDetail: React.FC = () => {
   const isOrderExpert = currentUserId > 0 && currentUserId === orderExpertId;
   const openedFromChat = (location.state as any)?.source === 'order-chat';
   const canSeeDeliveredWorkBlock = currentUserId > 0 && (isOrderOwner || currentUserId === orderExpertId);
+  const isAwaitingExpertDecision = order.status === 'awaiting_expert_acceptance';
+  const canRespondToAssignment = isOrderExpert && isAwaitingExpertDecision && currentUserBid?.status === 'invited';
 
   const expertReview = (() => {
     const raw = (order as any)?.rating ?? (order as any)?.expert_rating;
@@ -110,6 +115,7 @@ const OrderDetail: React.FC = () => {
   const getStatusText = (status: string) => {
     const texts: Record<string, string> = {
       new: 'Новый',
+      awaiting_expert_acceptance: 'Ожидает ответа эксперта',
       in_progress: 'В работе',
       review: 'На проверке',
       revision: 'Доработка',
@@ -122,6 +128,7 @@ const OrderDetail: React.FC = () => {
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       new: 'purple',
+      awaiting_expert_acceptance: 'blue',
       in_progress: 'orange',
       review: 'purple',
       revision: 'gold',
@@ -208,6 +215,36 @@ const OrderDetail: React.FC = () => {
               </Space>
             ) : null}
 
+            {canRespondToAssignment ? (
+              <Space className={`${styles.reviewActionsRow} ${styles.sectionBlock}`} wrap>
+                <Tag color={getStatusColor(order.status)} className={styles.statusTagLarge}>
+                  {getStatusText(order.status)}
+                </Tag>
+                <AppButton
+                  variant="success"
+                  loading={reviewActionLoading === 'accept_assignment'}
+                  onClick={handleAcceptAssignment}
+                >
+                  Принять заказ
+                </AppButton>
+                <AppButton
+                  variant="danger"
+                  loading={reviewActionLoading === 'decline_assignment'}
+                  onClick={handleDeclineAssignment}
+                >
+                  Отклонить заказ
+                </AppButton>
+              </Space>
+            ) : null}
+
+            {isOrderOwner && isAwaitingExpertDecision ? (
+              <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
+                <Tag color={getStatusColor(order.status)} className={styles.statusTagLarge}>
+                  Исполнитель еще не ответил на приглашение
+                </Tag>
+              </div>
+            ) : null}
+
             {userProfile?.role === 'expert' &&
              !order.expert &&
              !userHasBid &&
@@ -231,8 +268,15 @@ const OrderDetail: React.FC = () => {
 
             {userHasBid && (
               <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
-                <Tag color="success" className={styles.statusTagLarge}>
-                  Вы уже откликнулись на этот заказ
+                <Tag
+                  color={currentUserBid?.status === 'invited' ? 'blue' : currentUserBid?.status === 'accepted' ? 'green' : 'success'}
+                  className={styles.statusTagLarge}
+                >
+                  {currentUserBid?.status === 'invited'
+                    ? 'Заказчик выбрал вас, ожидается ваш ответ'
+                    : currentUserBid?.status === 'accepted'
+                      ? 'Вы приняты исполнителем по этому заказу'
+                      : 'Вы уже откликнулись на этот заказ'}
                 </Tag>
               </div>
             )}

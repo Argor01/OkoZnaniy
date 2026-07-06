@@ -61,11 +61,13 @@ class ExpertReviewSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'expert', 'order', 'client', 'rating', 'comment', 'created_at',
             'reply_text', 'reply_at',
+            'is_published',
             'is_appealed', 'appeal_reason', 'appeal_at',
             'appeal_resolved', 'appeal_resolution',
         ]
         read_only_fields = [
             'expert', 'client', 'created_at',
+            'is_published',
             'reply_text', 'reply_at',
             'is_appealed', 'appeal_reason', 'appeal_at',
             'appeal_resolved', 'appeal_resolution',
@@ -180,7 +182,7 @@ class ExpertRatingDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ExpertReview
-        fields = ['id', 'expert', 'client', 'order', 'rating', 'comment', 'created_at']
+        fields = ['id', 'expert', 'client', 'order', 'rating', 'comment', 'is_published', 'created_at']
         read_only_fields = fields
 
     def get_order(self, obj):

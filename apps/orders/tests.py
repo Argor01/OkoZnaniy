@@ -294,7 +294,7 @@ class OrderChatBootstrapTests(TestCase):
         defaults.update(overrides)
         return Order.objects.create(**defaults)
 
-    def test_accept_bid_keeps_main_chat_and_creates_order_subdialog(self):
+    def test_accept_bid_only_sends_invitation_until_expert_accepts(self):
         order = self._create_order()
         main_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
         main_chat.participants.set([self.client_user, self.expert_user])
@@ -310,8 +310,33 @@ class OrderChatBootstrapTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         order.refresh_from_db()
         self.assertEqual(order.expert_id, self.expert_user.id)
+        self.assertEqual(order.status, "awaiting_expert_acceptance")
         main_chat.refresh_from_db()
         self.assertIsNone(main_chat.order_id)
+        self.assertNotIn("chat_id", response.json())
+        self.assertFalse(Chat.objects.filter(order=order).exists())
+        bid.refresh_from_db()
+        self.assertEqual(bid.status, "invited")
+
+    def test_expert_accept_assignment_starts_order_chat(self):
+        order = self._create_order(expert=self.expert_user, status="awaiting_expert_acceptance")
+        main_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
+        main_chat.participants.set([self.client_user, self.expert_user])
+        bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"), status="invited")
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/accept_assignment/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "in_progress")
+        self.assertEqual(order.budget, Decimal("3000"))
+        bid.refresh_from_db()
+        self.assertEqual(bid.status, "accepted")
         order_chat = Chat.objects.get(pk=response.json()["chat_id"])
         self.assertEqual(order_chat.order_id, order.id)
         self.assertTrue(
@@ -322,6 +347,24 @@ class OrderChatBootstrapTests(TestCase):
                 offer_data__order_id=order.id,
             ).exists()
         )
+
+    def test_expert_decline_assignment_restores_order_to_new(self):
+        order = self._create_order(expert=self.expert_user, status="awaiting_expert_acceptance")
+        bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"), status="invited")
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/decline_assignment/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "new")
+        self.assertIsNone(order.expert_id)
+        bid.refresh_from_db()
+        self.assertEqual(bid.status, "rejected")
 
     def test_take_creates_main_chat_and_order_subdialog(self):
         order = self._create_order()

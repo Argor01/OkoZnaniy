@@ -22,6 +22,16 @@
   width: 300px;
 }
 
+.chatSidebarCompact {
+  width: 88px;
+  min-width: 88px;
+}
+
+.chatSidebarCompact .chatSearchHeader,
+.chatSidebarCompact .chatSearchHeaderMobile {
+  display: none;
+}
+
 .chatSidebarHidden {
   display: none;
 }

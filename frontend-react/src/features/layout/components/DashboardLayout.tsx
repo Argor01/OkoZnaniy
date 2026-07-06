@@ -16,11 +16,10 @@ import styles from './DashboardLayout.module.css';
 import '@/styles/modal-overrides.css';
 import logoutStyles from '@/features/common/components/LogoutModal.module.css';
 import { CURRENT_USER_KEY } from '@/hooks/queries';
-import { BREAKPOINTS } from '@/utils/constants';
+import { BREAKPOINTS, ROUTES } from '@/utils/constants';
 
 
 const ProfileModal = lazy(() => import('@/features/expert/modals/ProfileModal'));
-const MessageModal = lazy(() => import('@/features/expert/modals/MessageModalNew'));
 const NotificationsModal = lazy(() => import('@/features/expert/modals/NotificationsModalNew'));
 const ArbitrationModal = lazy(() => import('@/features/expert/modals/ArbitrationModal'));
 const FinanceModal = lazy(() => import('@/features/expert/modals/FinanceModal'));
@@ -41,16 +40,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   
   const [profileModalVisible, setProfileModalVisible] = useState(false);
-  const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
   const [financeModalVisible, setFinanceModalVisible] = useState(false);
   const [faqModalVisible, setFaqModalVisible] = useState(false);
   const [friendProfileModalVisible, setFriendProfileModalVisible] = useState(false);
   
-  const [selectedUserIdForChat, setSelectedUserIdForChat] = useState<number | undefined>(undefined);
-  const [selectedOrderIdForChat, setSelectedOrderIdForChat] = useState<number | undefined>(undefined);
-  const [selectedChatContextTitle, setSelectedChatContextTitle] = useState<string | undefined>(undefined);
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
 
   const { unreadCount: unreadNotifications, loadNotifications: refreshNotifications } = useNotifications();
@@ -183,41 +178,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const closeAllModals = useCallback(() => {
     setProfileModalVisible(false);
-    setMessageModalVisible(false);
     setNotificationsModalVisible(false);
     setArbitrationModalVisible(false);
     setFinanceModalVisible(false);
     setFaqModalVisible(false);
     setFriendProfileModalVisible(false);
-    setSelectedUserIdForChat(undefined);
-    setSelectedOrderIdForChat(undefined);
-    setSelectedChatContextTitle(undefined);
   }, []);
+
+  const openMessagesPage = useCallback((params?: {
+    userId?: number;
+    orderId?: number;
+    chatId?: number;
+    title?: string;
+    support?: boolean;
+  }) => {
+    const search = new URLSearchParams();
+    if (params?.userId) search.set('userId', String(params.userId));
+    if (params?.orderId) search.set('orderId', String(params.orderId));
+    if (params?.chatId) search.set('chatId', String(params.chatId));
+    if (params?.title) search.set('title', params.title);
+    if (params?.support) search.set('support', '1');
+    const query = search.toString();
+
+    navigate(`${ROUTES.messages}${query ? `?${query}` : ''}`, {
+      state: { from: `${location.pathname}${location.search}` },
+    });
+  }, [location.pathname, location.search, navigate]);
 
   const handleMessagesClick = useCallback(() => {
     closeAllModals();
-    setMessageModalVisible(true);
-  }, [closeAllModals]);
+    openMessagesPage();
+  }, [closeAllModals, openMessagesPage]);
 
   // Обработчик события для открытия формы подачи жалобы
   React.useEffect(() => {
     const handleOpenSupportChat = () => {
       // Перенаправляем на форму подачи жалобы вместо открытия чата
       closeAllModals();
-      setMessageModalVisible(true);
-      setSelectedUserIdForChat(undefined);
-      setSelectedOrderIdForChat(undefined);
-      setSelectedChatContextTitle(undefined);
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('openSupportCenter'));
-      }, 300);
+      openMessagesPage({ support: true });
     };
 
     window.addEventListener('openSupportChat', handleOpenSupportChat);
     return () => {
       window.removeEventListener('openSupportChat', handleOpenSupportChat);
     };
-  }, [closeAllModals]);
+  }, [closeAllModals, openMessagesPage]);
 
   // Обработчик события для открытия чата по userId или chatId
   React.useEffect(() => {
@@ -228,25 +233,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       
       closeAllModals();
       
-      if (userId) {
-        setSelectedUserIdForChat(userId);
-      }
-      
-      setMessageModalVisible(true);
+      openMessagesPage({ chatId, userId });
       
       // Отправляем событие для загрузки чата в MessageModalNew
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('messageModalOpenChatById', {
-          detail: { chatId, userId }
-        }));
-      }, 300);
     };
 
     window.addEventListener('openChatById', handleOpenChatById);
     return () => {
       window.removeEventListener('openChatById', handleOpenChatById);
     };
-  }, [closeAllModals]);
+  }, [closeAllModals, openMessagesPage]);
 
   const handleNotificationsClick = useCallback(() => {
     closeAllModals();
@@ -282,14 +278,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const handleSupportClick = useCallback(() => {
     // Перенаправляем на форму подачи жалобы
     closeAllModals();
-    setMessageModalVisible(true);
-    setSelectedUserIdForChat(undefined);
-    setSelectedOrderIdForChat(undefined);
-    setSelectedChatContextTitle(undefined);
-    setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('openSupportCenter'));
-    }, 300);
-  }, [closeAllModals]);
+    openMessagesPage({ support: true });
+  }, [closeAllModals, openMessagesPage]);
 
   const handleHeaderMenuClick = useCallback(() => {
     if (isMobile) {
@@ -311,38 +301,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openProfileModal: () => { closeAllModals(); setProfileModalVisible(true); },
     openMessageModal: (userId?: number) => { 
         closeAllModals(); 
-        setSelectedOrderIdForChat(undefined);
-        if (userId) setSelectedUserIdForChat(userId);
-        setSelectedChatContextTitle(undefined);
-        setMessageModalVisible(true); 
+        openMessagesPage({ userId }); 
     },
     openOrderChat: (orderId: number, userId: number, chatId?: number) => {
         closeAllModals();
-        setSelectedOrderIdForChat(orderId);
-        setSelectedUserIdForChat(userId);
-        setSelectedChatContextTitle(`Заказ #${orderId}`);
+        openMessagesPage({ orderId, userId, chatId, title: `Заказ #${orderId}` });
         // Если передан chatId, отправляем событие для открытия конкретного чата
-        if (chatId) {
-          setMessageModalVisible(true);
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('messageModalOpenChatById', {
-              detail: { chatId }
-            }));
-          }, 300);
-        } else {
-          setMessageModalVisible(true);
-        }
     },
     openContextChat: (userId: number, title: string, workId?: number) => {
         closeAllModals();
-        setSelectedOrderIdForChat(undefined);
-        setSelectedUserIdForChat(userId);
         const contextTitle =
           typeof workId === 'number' && Number.isFinite(workId) && workId > 0
             ? `${title} | work:${workId}`
             : title;
-        setSelectedChatContextTitle(contextTitle);
-        setMessageModalVisible(true);
+        openMessagesPage({ userId, title: contextTitle });
     },
     openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
     openArbitrationModal: () => { closeAllModals(); setArbitrationModalVisible(true); },
@@ -354,7 +326,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         setFriendProfileModalVisible(true);
     },
     closeAllModals,
-  }), [closeAllModals]);
+  }), [closeAllModals, openMessagesPage]);
 
   const handleMenuSelect = useCallback((key: string) => {
     if (key.startsWith('orders-') || key === 'orders') {
@@ -401,6 +373,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const getSelectedKey = () => {
     const path = location.pathname;
     if (path === '/expert') return 'dashboard';
+    if (path.startsWith(ROUTES.messages)) return 'messages';
     if (path.startsWith('/support')) return 'arbitration';
     if (path === '/create-order') return 'create-order';
     if (path === '/orders-feed') return 'orders-feed';
@@ -554,25 +527,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             userProfile={userProfile}
           />
         )}
-        {messageModalVisible && (
-          <MessageModal
-            visible={messageModalVisible}
-            onClose={() => {
-              setMessageModalVisible(false);
-              setSelectedUserIdForChat(undefined);
-              setSelectedOrderIdForChat(undefined);
-              setSelectedChatContextTitle(undefined);
-            }}
-            isMobile={isChatMobile}
-            isTablet={isChatTablet}
-            isDesktop={isChatDesktop}
-            selectedUserId={selectedUserIdForChat}
-            selectedOrderId={selectedOrderIdForChat}
-            chatContextTitle={selectedChatContextTitle}
-            supportUserId={supportUserId || undefined}
-            userProfile={userProfile}
-          />
-        )}
         {notificationsModalVisible && (
           <NotificationsModal
             visible={notificationsModalVisible}
@@ -605,8 +559,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           friend={selectedFriend}
           onOpenChat={() => {
               setFriendProfileModalVisible(false);
-              setMessageModalVisible(true);
-              if (selectedFriend?.id) setSelectedUserIdForChat(selectedFriend.id);
+              if (selectedFriend?.id) openMessagesPage({ userId: selectedFriend.id });
           }}
         />
       </Suspense>

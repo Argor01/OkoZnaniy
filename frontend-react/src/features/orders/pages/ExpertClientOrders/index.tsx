@@ -17,7 +17,7 @@ const { Title } = Typography;
 
 const isInProgressGroup = (order: Order) => {
   const status = String(order?.status ?? '');
-  return status === 'in_progress';
+  return status === 'in_progress' || status === 'awaiting_expert_acceptance';
 };
 
 const isReviewGroup = (order: Order) => {
@@ -210,6 +210,7 @@ const ExpertClientOrders: React.FC = () => {
   }, [orders, inactiveOrders, activeTab, searchText]);
 
   const getStatusLabel = (status: string) => {
+    if (status === 'awaiting_expert_acceptance') return 'Ожидает подтверждения';
     if (status === 'in_progress') return 'В работе';
     if (status === 'completed') return 'Выполнено';
     if (status === 'review' || status === 'under_review') return 'На проверке';

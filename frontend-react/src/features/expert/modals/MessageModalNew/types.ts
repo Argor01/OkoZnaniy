@@ -12,6 +12,7 @@ export interface MessageModalProps {
   chatContextTitle?: string;
   supportUserId?: number;
   userProfile?: { role?: string };
+  renderAsPage?: boolean;
 }
 
 export type OfferData = {
