@@ -1117,7 +1117,7 @@ def get_user_history(request, user_id):
     orders = Order.objects.filter(
         Q(client=user) | Q(expert=user)
     ).order_by('-created_at').values(
-        'id', 'title', 'status', 'created_at', 'price'
+        'id', 'title', 'status', 'created_at', 'budget', 'final_price'
     )[:20]
 
     return Response({
