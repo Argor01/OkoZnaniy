@@ -2154,3 +2154,32 @@
   .becomeHeroStats { gap: 28px; }
   .becomeHero { padding: 120px 0 72px; }
 }
+/* ============ Become pages — centered layout overrides ============ */
+.becomePage .section .container { display: flex; flex-direction: column; align-items: center; }
+.becomePage .sectionTag,
+.becomePage .sectionTitle { text-align: center; }
+.becomePage .sectionSubtitle { text-align: center; margin-left: auto; margin-right: auto; }
+.becomePage .statsDarkHeader { text-align: center; }
+.becomePage .statsDarkGrid { max-width: 1040px; margin: 0 auto; width: 100%; }
+
+/* Flexible, always-centered card grid (works for 4 and 6 items) */
+.becomePage .safetyGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  max-width: 1040px;
+  margin: 0 auto;
+  width: 100%;
+}
+.becomePage .safetyCard {
+  flex: 1 1 280px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.becomeGuarantee { width: 100%; max-width: 1040px; margin-left: auto; margin-right: auto; }
+@media (max-width: 640px) {
+  .becomePage .safetyCard { flex-basis: 100%; max-width: 420px; }
+}

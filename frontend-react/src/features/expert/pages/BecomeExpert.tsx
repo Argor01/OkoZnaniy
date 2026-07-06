@@ -28,7 +28,7 @@ const BecomeExpert: React.FC = () => {
   }, []);
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.becomePage}`}>
       <SEO
         title="Стать экспертом - Око Знаний | Зарабатывай от 100 000 ₽ в месяц"
         description="Стань автором студенческих работ и зарабатывай от 100 000 ₽ в месяц. Большой поток заказов, гибкий график, удаленная работа. Начни работать прямо сейчас!"

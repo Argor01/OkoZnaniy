@@ -34,7 +34,7 @@ const BecomePartner: React.FC = () => {
   }, []);
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${styles.becomePage}`}>
       <SEO
         title="Стать партнером - Око Знаний | Гарантируем 1 000 000 ₽ оборот"
         description="Бизнес с Око Знаний - это просто! Гарантируем 1 000 000 ₽ оборот вашего агентства через 2 месяца. Персональная поддержка от директора биржи. Получай 25% от заказа."
