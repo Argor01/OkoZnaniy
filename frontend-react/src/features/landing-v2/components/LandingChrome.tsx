@@ -149,8 +149,8 @@ export const FooterDark: React.FC = () => (
         </div>
         <div className={styles.footerCol}>
           <div className={styles.footerColTitle}>Контакты</div>
-          <a href="mailto:support@site.ru">support@site.ru</a>
-          <a href="tel:88003243423">8 800 (324) 34-23</a>
+          <a href="mailto:b-oko.znaniy@mail.ru">b-oko.znaniy@mail.ru</a>
+          <a href="tel:88005007857">8 800 500-78-57</a>
         </div>
         <div className={styles.footerCol}>
           <div className={styles.footerColTitle}>Документы</div>
