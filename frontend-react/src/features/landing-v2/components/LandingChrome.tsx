@@ -25,9 +25,7 @@ export const TopBar: React.FC<{ links?: NavLink[] }> = ({ links }) => {
           </div>
         </Link>
         <nav className={styles.topnav}>
-          {nav.map((n) => (
-            <a key={n.href} href={n.href}>{n.label}</a>
-          ))}
+          {nav.map((n) => (<a key={n.href} href={n.href}>{n.label}</a>))}
         </nav>
         <div className={styles.topActions}>
           <Link to="/login" className={styles.btnGhost}>Войти</Link>
@@ -37,33 +35,6 @@ export const TopBar: React.FC<{ links?: NavLink[] }> = ({ links }) => {
     </header>
   );
 };
-
-export const StatsBand: React.FC<{
-  tag?: string;
-  title?: React.ReactNode;
-  items: { value: string; label: string }[];
-}> = ({ tag, title, items }) => (
-  <section className={styles.statsDark}>
-    <div className={styles.statsDarkOrb1} />
-    <div className={styles.statsDarkOrb2} />
-    <div className={styles.container}>
-      {(tag || title) && (
-        <div className={styles.statsDarkHeader}>
-          {tag && <span className={styles.smallTag}>{tag}</span>}
-          {title && <h2 className={styles.statsDarkTitle}>{title}</h2>}
-        </div>
-      )}
-      <div className={styles.statsDarkGrid}>
-        {items.map((it) => (
-          <div className={styles.statBoxDark} key={it.label}>
-            <div className={styles.statValueDark}>{it.value}</div>
-            <div className={styles.statLabelDark}>{it.label}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
 
 export const BecomeLeadForm: React.FC<{
   type: 'registration' | 'partner';
@@ -85,43 +56,26 @@ export const BecomeLeadForm: React.FC<{
         ? API_ENDPOINTS.notifications.sendPartnerEmail
         : API_ENDPOINTS.notifications.sendRegistrationEmail;
       const res = await apiClient.post(endpoint, { email });
-      if (res.status === 200) {
-        setMessage('Инструкция отправлена! Проверьте ваш email');
-        setEmail('');
-      }
+      if (res.status === 200) { setMessage('Инструкция отправлена! Проверьте ваш email'); setEmail(''); }
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Ошибка соединения. Попробуйте позже');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <section className={styles.finalCta} id="feedback">
-      <div className={styles.finalCtaBg1} />
-      <div className={styles.finalCtaBg2} />
-      <div className={styles.finalCtaBg3} />
+    <section className={styles.bpCta} id="feedback">
       <div className={styles.container}>
-        <div className={styles.becomeFormCard}>
-          <span className={styles.finalCtaTag}><ClockCircleOutlined /> Начни сегодня</span>
-          <h2 className={styles.finalCtaTitle}>{title}</h2>
-          <p className={styles.finalCtaSub}>{subtitle}</p>
-          <form className={styles.becomeForm} onSubmit={submit}>
-            <input
-              type="email"
-              className={styles.becomeFormInput}
-              placeholder="Ваш E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            <button type="submit" className={styles.becomeFormBtn} disabled={loading}>
-              {loading ? 'Отправка...' : buttonText}
-            </button>
+        <div className={styles.bpCtaCard}>
+          <span className={styles.bpCtaTag}><ClockCircleOutlined /> Начни сегодня</span>
+          <h2 className={styles.bpCtaTitle}>{title}</h2>
+          <p className={styles.bpCtaSub}>{subtitle}</p>
+          <form className={styles.bpForm} onSubmit={submit}>
+            <input type="email" className={styles.bpFormInput} placeholder="Ваш E-mail" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} />
+            <button type="submit" className={styles.bpFormBtn} disabled={loading}>{loading ? 'Отправка...' : buttonText}</button>
           </form>
-          {message && <p className={styles.becomeFormMsg}>{message}</p>}
-          {error && <p className={styles.becomeFormError}>{error}</p>}
-          <p className={styles.becomeFormLegal}>
+          {message && <p className={styles.bpFormMsg}>{message}</p>}
+          {error && <p className={styles.bpFormError}>{error}</p>}
+          <p className={styles.bpFormLegal}>
             Нажимая «{buttonText}», вы принимаете условия{' '}
             <a href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">Пользовательского соглашения</a>{' '}и{' '}
             <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Политики конфиденциальности</a>

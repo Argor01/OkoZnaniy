@@ -1,34 +1,41 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  RiseOutlined,
-  DollarCircleOutlined,
-  ClockCircleOutlined,
-  DesktopOutlined,
-  SafetyOutlined,
-  TeamOutlined,
+  RiseOutlined, DollarCircleOutlined, ClockCircleOutlined, DesktopOutlined,
+  SafetyOutlined, TeamOutlined, CheckCircleOutlined, StarFilled, ThunderboltOutlined,
 } from '@ant-design/icons';
 import { SEO } from '@/features/common';
-import { TopBar, StatsBand, BecomeLeadForm, FooterDark } from '@/features/landing-v2/components/LandingChrome';
+import { TopBar, BecomeLeadForm, FooterDark } from '@/features/landing-v2/components/LandingChrome';
 import styles from '@/features/landing-v2/LandingV2.module.css';
+
+const useReveal = () => {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [v, setV] = useState(false);
+  useEffect(() => {
+    if (!ref.current) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setV(true); io.disconnect(); } }, { threshold: 0.12 });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+  return { ref, cls: `${styles.bpReveal} ${v ? styles.bpVisible : ''}` };
+};
 
 const advantages = [
   { icon: <RiseOutlined />, title: 'Большой поток заказов', text: 'Тысячи студентов ежедневно размещают задания — выбирай подходящие.' },
-  { icon: <DollarCircleOutlined />, title: 'Сам ставишь цену', text: 'Выбираешь задание и предлагаешь свою ставку — никаких фиксированных тарифов.' },
-  { icon: <ClockCircleOutlined />, title: 'Гибкий график', text: 'Работай когда удобно — утром, вечером или в выходные.' },
-  { icon: <DesktopOutlined />, title: 'Полностью удалённо', text: 'Работай из любой точки мира — нужен только компьютер и интернет.' },
-  { icon: <SafetyOutlined />, title: '100% гарантия оплаты', text: 'Деньги хранятся на эскроу-счёте — получишь оплату после сдачи работы.' },
+  { icon: <DollarCircleOutlined />, title: 'Сам ставишь цену', text: 'Выбираешь задание и предлагаешь свою ставку. Никаких фиксированных тарифов.' },
+  { icon: <ClockCircleOutlined />, title: 'Гибкий график', text: 'Работай когда удобно: утром, вечером или в выходные.' },
+  { icon: <DesktopOutlined />, title: 'Полностью удалённо', text: 'Работай из любой точки мира. Нужен только компьютер и интернет.' },
+  { icon: <SafetyOutlined />, title: '100% гарантия оплаты', text: 'Деньги на эскроу-счёте: получишь оплату сразу после сдачи работы.' },
   { icon: <TeamOutlined />, title: 'Прямой контакт с заказчиком', text: 'Общайся напрямую, уточняй детали и получай обратную связь.' },
 ];
 
 const BecomeExpert: React.FC = () => {
   const navigate = useNavigate();
-  useEffect(() => {
-    document.title = 'Стать экспертом — Око Знаний | Зарабатывай от 100 000 ₽ в месяц';
-  }, []);
+  const adv = useReveal();
+  useEffect(() => { document.title = 'Стать экспертом — Око Знаний | Зарабатывай от 100 000 ₽ в месяц'; }, []);
 
   return (
-    <div className={`${styles.page} ${styles.becomePage}`}>
+    <div className={styles.page}>
       <SEO
         title="Стать экспертом - Око Знаний | Зарабатывай от 100 000 ₽ в месяц"
         description="Стань автором студенческих работ и зарабатывай от 100 000 ₽ в месяц. Большой поток заказов, гибкий график, удаленная работа. Начни работать прямо сейчас!"
@@ -41,69 +48,64 @@ const BecomeExpert: React.FC = () => {
 
       <TopBar links={[{ href: '#adv', label: 'Преимущества' }, { href: '#feedback', label: 'Начать' }]} />
 
-      <section className={styles.becomeHero}>
+      <section className={styles.bpHero}>
         <div className={styles.heroBlobs}>
           <div className={`${styles.blob} ${styles.blob1}`} />
           <div className={`${styles.blob} ${styles.blob2}`} />
           <div className={`${styles.blob} ${styles.blob3}`} />
         </div>
-        <div className={`${styles.container} ${styles.becomeHeroInner}`}>
-          <div className={styles.heroBadge}>
-            <span className={styles.dot} />
-            Работа для экспертов
+        <div className={`${styles.container} ${styles.bpHeroGrid}`}>
+          <div>
+            <div className={styles.heroBadge}><span className={styles.dot} /> Работа для экспертов</div>
+            <h1 className={styles.bpHeroTitle}>
+              Стань <span className={styles.accent}>автором</span> студенческих работ и зарабатывай <span className={styles.underline}>от 100 000 ₽</span>
+            </h1>
+            <p className={styles.bpHeroSub}>
+              Большой поток заказов, гибкий график и удалённая работа. Сам выбираешь задания
+              и ставишь цену. Начни зарабатывать на своих знаниях уже сегодня.
+            </p>
+            <div className={styles.bpHeroCtas}>
+              <button className={styles.btnPrimaryBig} onClick={() => navigate('/expert-application')}>Стать экспертом →</button>
+              <a href="#adv" className={styles.btnGhost}>Узнать подробнее</a>
+            </div>
+            <div className={styles.bpHeroNote}><CheckCircleOutlined /> Регистрация бесплатна, первые заказы уже сегодня</div>
+            <div className={styles.bpHeroStats}>
+              <div className={styles.bpHeroStat}><span className={styles.bpHeroStatVal}>5 000+</span><span className={styles.bpHeroStatLabel}>активных заказов</span></div>
+              <div className={styles.bpHeroStat}><span className={styles.bpHeroStatVal}>от 500 ₽</span><span className={styles.bpHeroStatLabel}>за одну работу</span></div>
+              <div className={styles.bpHeroStat}><span className={styles.bpHeroStatVal}>24/7</span><span className={styles.bpHeroStatLabel}>поддержка авторов</span></div>
+            </div>
           </div>
-          <h1 className={styles.heroTitle}>
-            Стань <span className={styles.accent}>автором</span> студенческих работ<br />
-            и зарабатывай <span className={styles.underline}>от 100 000 ₽</span> в месяц
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Большой поток заказов, гибкий график и удалённая работа. Сам выбираешь задания
-            и ставишь цену. Начни зарабатывать на своих знаниях уже сегодня.
-          </p>
-          <button className={styles.btnPrimaryBig} onClick={() => navigate('/expert-application')}>
-            Стать экспертом →
-          </button>
-          <img src="/assets/become/expert-hero.png" alt="" className={styles.becomeHeroImg} /><div className={styles.becomeHeroStats}>
-            <div className={styles.becomeHeroStat}>
-              <span className={styles.becomeHeroStatVal}>5 000+</span>
-              <span className={styles.becomeHeroStatLabel}>активных заказов</span>
+
+          <div className={styles.bpHeroArt}>
+            <div className={styles.bpHeroArtGlow} />
+            <div className={styles.bpHeroImgWrap}>
+              <img src="/assets/become/expert-hero.png" alt="Эксперт за работой" className={styles.bpHeroImg} />
             </div>
-            <div className={styles.becomeHeroStat}>
-              <span className={styles.becomeHeroStatVal}>от 500 ₽</span>
-              <span className={styles.becomeHeroStatLabel}>за одну работу</span>
+            <div className={`${styles.bpChip} ${styles.bpChip1}`}>
+              <div className={styles.bpChipIcon}><DollarCircleOutlined /></div>
+              <div><div className={styles.bpChipTitle}>100 000 ₽+</div><div className={styles.bpChipSub}>средний доход в месяц</div></div>
             </div>
-            <div className={styles.becomeHeroStat}>
-              <span className={styles.becomeHeroStatVal}>24/7</span>
-              <span className={styles.becomeHeroStatLabel}>поддержка</span>
+            <div className={`${styles.bpChip} ${styles.bpChip2}`}>
+              <div className={`${styles.bpChipIcon} ${styles.bpChipIconPink}`}><StarFilled /></div>
+              <div><div className={styles.bpChipTitle}>4.9 / 5</div><div className={styles.bpChipSub}>рейтинг авторов</div></div>
             </div>
           </div>
         </div>
       </section>
 
-      <StatsBand
-        tag="Око Знаний в цифрах"
-        title={<>Тысячи заказов ждут <span className={styles.gradAccent}>своего автора</span></>}
-        items={[
-          { value: '5 000+', label: 'Активных заказов' },
-          { value: 'от 500 ₽', label: 'За одну работу' },
-          { value: '100 000 ₽', label: 'Средний доход в месяц' },
-          { value: '24/7', label: 'Поддержка авторов' },
-        ]}
-      />
-
-      <section className={styles.section} id="adv">
+      <section className={`${styles.bpSection} ${styles.bpSectionAlt}`} id="adv">
         <div className={styles.container}>
-          <div className={styles.sectionTag}>Почему выбирают нас</div>
-          <h2 className={styles.sectionTitle}>Всё для комфортной удалённой работы</h2>
-          <p className={styles.sectionSubtitle}>
-            Зарабатывай на своих знаниях без офиса, начальства и фиксированного графика.
-          </p>
-          <div className={styles.safetyGrid}>
+          <div className={styles.bpHead}>
+            <span className={styles.bpTag}>Почему выбирают нас</span>
+            <h2 className={styles.bpTitle}>Всё для комфортной <span className={styles.g}>удалённой работы</span></h2>
+            <p className={styles.bpSub}>Зарабатывай на своих знаниях без офиса, начальства и фиксированного графика.</p>
+          </div>
+          <div ref={adv.ref} className={`${styles.bpGrid} ${adv.cls}`}>
             {advantages.map((a) => (
-              <div className={styles.safetyCard} key={a.title}>
-                <div className={styles.safetyIcon}>{a.icon}</div>
-                <div className={styles.safetyTitle}>{a.title}</div>
-                <div className={styles.safetyDesc}>{a.text}</div>
+              <div className={styles.bpCard} key={a.title}>
+                <div className={styles.bpCardIcon}>{a.icon}</div>
+                <div className={styles.bpCardTitle}>{a.title}</div>
+                <div className={styles.bpCardText}>{a.text}</div>
               </div>
             ))}
           </div>
