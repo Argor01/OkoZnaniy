@@ -129,7 +129,7 @@ class Order(models.Model):
         blank=True
     )
     status = models.CharField(
-        max_length=20,
+        max_length=32,
         choices=STATUS_CHOICES,
         default='new',
         verbose_name="Статус"
