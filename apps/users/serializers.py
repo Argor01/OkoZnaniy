@@ -267,7 +267,10 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         if isinstance(username, str):
             validated_data['username'] = username.strip()
             username = validated_data['username']
-        if username is not None and username and username != (instance.username or '').strip():
+        # Любой явно переданный непустой никнейм считаем пользовательским,
+        # иначе display_username продолжает отдавать сгенерированное имя
+        # и правка ника "не сохраняется" с точки зрения пользователя.
+        if username:
             validated_data['has_custom_username'] = True
         return super().update(instance, validated_data)
 
