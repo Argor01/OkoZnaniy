@@ -71,3 +71,49 @@ class PartnerChatRoomSerializer(serializers.ModelSerializer):
     def get_is_muted(self, obj):
         # Можно добавить логику для отключения уведомлений
         return False
+
+
+from .models import PartnerApplication
+
+
+class PartnerApplicationCreateSerializer(serializers.ModelSerializer):
+    """Публичное создание заявки на партнёрство"""
+
+    class Meta:
+        model = PartnerApplication
+        fields = ['id', 'full_name', 'email', 'telegram', 'phone', 'comment']
+        read_only_fields = ['id']
+
+    def validate_full_name(self, value):
+        value = (value or '').strip()
+        if len(value) < 3:
+            raise serializers.ValidationError('Укажите ФИО полностью')
+        return value
+
+    def validate(self, attrs):
+        if not attrs.get('telegram') and not attrs.get('phone'):
+            raise serializers.ValidationError(
+                'Укажите Telegram или телефон для связи'
+            )
+        return attrs
+
+
+class PartnerApplicationSerializer(serializers.ModelSerializer):
+    """Полное представление заявки для директора"""
+
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    processed_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PartnerApplication
+        fields = [
+            'id', 'full_name', 'email', 'telegram', 'phone', 'comment',
+            'status', 'status_display', 'director_note', 'processed_by',
+            'processed_by_name', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'processed_by', 'processed_by_name']
+
+    def get_processed_by_name(self, obj):
+        if obj.processed_by:
+            return obj.processed_by.get_full_name() or obj.processed_by.username
+        return None

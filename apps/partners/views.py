@@ -182,3 +182,82 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         )
 
         return Response({'message': 'Р¤Р°Р№Р» Р·Р°РіСЂСѓР¶РµРЅ', 'filename': file.name})
+
+
+from rest_framework import mixins
+from .models import PartnerApplication
+from .serializers import (
+    PartnerApplicationCreateSerializer,
+    PartnerApplicationSerializer,
+)
+
+
+class PartnerApplicationViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
+    """Заявки на партнёрство.
+
+    - create: доступно всем (в т.ч. неавторизованным) — форма из футера/лендинга.
+    - list/retrieve/update: только директор и админ (обработка заявок в ЛК).
+    """
+
+    queryset = PartnerApplication.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PartnerApplicationCreateSerializer
+        return PartnerApplicationSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def _is_staff(self, user):
+        return getattr(user, 'role', None) in ('director', 'admin')
+
+    def get_queryset(self):
+        user = self.request.user
+        if self.action in ('list', 'retrieve', 'update', 'partial_update'):
+            if not (user.is_authenticated and self._is_staff(user)):
+                return PartnerApplication.objects.none()
+            qs = PartnerApplication.objects.all()
+            status_param = self.request.query_params.get('status')
+            if status_param:
+                qs = qs.filter(status=status_param)
+            return qs
+        return super().get_queryset()
+
+    def perform_create(self, serializer):
+        user = self.request.user if self.request.user.is_authenticated else None
+        application = serializer.save(user=user)
+        self._notify_directors(application)
+
+    def perform_update(self, serializer):
+        serializer.save(processed_by=self.request.user)
+
+    def _notify_directors(self, application):
+        try:
+            from apps.notifications.services import NotificationService
+            directors = User.objects.filter(role='director', is_active=True)
+            for director in directors:
+                NotificationService.create_notification(
+                    recipient=director,
+                    type='new_contact',
+                    title='Новая заявка на партнёрство',
+                    message=(
+                        f'{application.full_name} хочет стать партнёром. '
+                        f'Email: {application.email}'
+                        + (f', Telegram: {application.telegram}' if application.telegram else '')
+                        + (f', тел.: {application.phone}' if application.phone else '')
+                    ),
+                    related_object_id=application.id,
+                    related_object_type='partner_application',
+                )
+        except Exception:
+            # уведомление не должно ломать создание заявки
+            pass

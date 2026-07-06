@@ -4,14 +4,14 @@ from django.conf import settings
 
 class PartnerChatRoom(models.Model):
     """Модель чат-комнаты для партнеров"""
-    
+
     ROOM_TYPE_CHOICES = [
         ('general', 'Общий'),
         ('department', 'Отдел'),
         ('project', 'Проект'),
         ('private', 'Приватный'),
     ]
-    
+
     name = models.CharField(max_length=255, verbose_name='Название')
     description = models.TextField(blank=True, verbose_name='Описание')
     room_type = models.CharField(
@@ -34,7 +34,7 @@ class PartnerChatRoom(models.Model):
     is_active = models.BooleanField(default=True, verbose_name='Активна')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
-    
+
     class Meta:
         verbose_name = 'Чат-комната партнеров'
         verbose_name_plural = 'Чат-комнаты партнеров'
@@ -43,14 +43,14 @@ class PartnerChatRoom(models.Model):
             models.Index(fields=['is_active', '-updated_at']),
             models.Index(fields=['room_type', '-updated_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.name} ({self.get_room_type_display()})"
 
 
 class PartnerChatMessage(models.Model):
     """Модель сообщения в чат-комнате партнеров"""
-    
+
     room = models.ForeignKey(
         PartnerChatRoom,
         on_delete=models.CASCADE,
@@ -67,7 +67,7 @@ class PartnerChatMessage(models.Model):
     is_system = models.BooleanField(default=False, verbose_name='Системное сообщение')
     is_pinned = models.BooleanField(default=False, verbose_name='Закреплено')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    
+
     class Meta:
         verbose_name = 'Сообщение в чате партнеров'
         verbose_name_plural = 'Сообщения в чатах партнеров'
@@ -77,6 +77,54 @@ class PartnerChatMessage(models.Model):
             models.Index(fields=['sender', '-created_at']),
             models.Index(fields=['is_pinned', '-created_at']),
         ]
-    
+
     def __str__(self):
         return f"Сообщение от {self.sender.username} в {self.room.name}"
+
+
+class PartnerApplication(models.Model):
+    """Заявка на партнёрство (с лендинга/футера кабинета)"""
+
+    STATUS_CHOICES = [
+        ('new', 'Новая'),
+        ('contacted', 'Связались'),
+        ('approved', 'Одобрена'),
+        ('rejected', 'Отклонена'),
+    ]
+
+    full_name = models.CharField('ФИО', max_length=255)
+    email = models.EmailField('Email')
+    telegram = models.CharField('Telegram', max_length=100, blank=True, default='')
+    phone = models.CharField('Телефон', max_length=32, blank=True, default='')
+    comment = models.TextField('Комментарий', blank=True, default='')
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='new')
+    director_note = models.TextField('Заметка директора', blank=True, default='')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='partner_applications',
+        verbose_name='Пользователь',
+    )
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processed_partner_applications',
+        verbose_name='Обработал',
+    )
+    created_at = models.DateTimeField('Дата создания', auto_now_add=True)
+    updated_at = models.DateTimeField('Дата обновления', auto_now=True)
+
+    class Meta:
+        verbose_name = 'Заявка на партнёрство'
+        verbose_name_plural = 'Заявки на партнёрство'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.full_name} ({self.email})"

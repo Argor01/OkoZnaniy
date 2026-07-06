@@ -10,6 +10,7 @@ import styles from './AppFooter.module.css';
 const { Footer } = Layout;
 
 const ApplicationModal = React.lazy(() => import('@/features/expert/modals/ApplicationModal'));
+const PartnerApplicationModal = React.lazy(() => import('@/features/partner/modals/PartnerApplicationModal'));
 
 interface AppFooterProps {
   userRole?: 'client' | 'expert' | 'partner' | 'admin' | string;
@@ -30,6 +31,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
   const [applicationModalVisible, setApplicationModalVisible] = useState(false);
+  const [partnerModalVisible, setPartnerModalVisible] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
 
   const agreementLink = userRole === 'expert' || userRole === 'partner'
@@ -57,6 +59,11 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
     } finally {
       setIsCheckingAuth(false);
     }
+  };
+
+  const handleBecomePartnerClick = () => {
+    // Партнёрская заявка доступна всем: просто открываем модальное окно с формой
+    setPartnerModalVisible(true);
   };
 
   const services = [
@@ -135,6 +142,13 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
               >
                 Стать экспертом
               </button>
+              <button
+                onClick={handleBecomePartnerClick}
+                className={styles.becomeExpertButton}
+                style={{ marginTop: 10 }}
+              >
+                Стать партнёром
+              </button>
             </div>
           )}
         </div>
@@ -154,6 +168,12 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             visible={applicationModalVisible}
             onClose={() => setApplicationModalVisible(false)}
             application={null}
+          />
+        )}
+        {partnerModalVisible && (
+          <PartnerApplicationModal
+            visible={partnerModalVisible}
+            onClose={() => setPartnerModalVisible(false)}
           />
         )}
       </Suspense>

@@ -18,6 +18,7 @@ import { authApi } from '@/features/auth/api/auth';
 import PersonnelManagement from '../components/PersonnelManagement/PersonnelManagement';
 import FinancialStatistics from '../components/FinancialStatistics/FinancialStatistics';
 import PartnerPanel from '../components/PartnerPanel/PartnerPanel';
+import PartnerApplications from '../components/PartnerApplications/PartnerApplications';
 import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics';
 import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
@@ -145,6 +146,12 @@ const DirectorDashboard: React.FC = () => {
       icon: <UserAddOutlined />,
       label: 'Панель партнёров',
       component: <ErrorBoundary><PartnerPanel /></ErrorBoundary>,
+    },
+    {
+      key: 'partner-applications',
+      icon: <UserAddOutlined />,
+      label: 'Заявки партнёров',
+      component: <ErrorBoundary><PartnerApplications /></ErrorBoundary>,
     },
     {
       key: 'statistics',
