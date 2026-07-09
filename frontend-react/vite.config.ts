@@ -5,48 +5,17 @@ import path from 'path'
 const vendorChunk = (id: string) => {
   if (!id.includes('node_modules')) return undefined
 
-  if (id.includes('react-dom') || id.includes('react-router-dom') || id.includes(`${path.sep}react${path.sep}`)) {
-    return 'vendor-react'
-  }
+  // Heavy self-contained chunks stay separate
+  if (id.includes('emoji-picker-react')) return 'vendor-emoji'
+  if (id.includes('pdfmake')) return id.includes('vfs_fonts') ? 'vendor-pdf-fonts' : 'vendor-pdfmake'
+  if (id.includes(`${path.sep}xlsx${path.sep}`)) return 'vendor-xlsx'
+  if (id.includes(`${path.sep}recharts${path.sep}`)) return 'vendor-charts'
+  if (id.includes(`${path.sep}axios${path.sep}`)) return 'vendor-axios'
+  if (id.includes(`${path.sep}dayjs${path.sep}`) || id.includes(`${path.sep}date-fns${path.sep}`)) return 'vendor-date'
 
-  // Keep React together with the entire antd ecosystem (antd, @ant-design, rc-*)
-  // in a single chunk. Splitting them caused a circular-dependency init-order bug
-  // where rc-* executed before React was defined -> "Cannot read properties of
-  // undefined (reading 'version')" white screen.
-  if (
-    id.includes(`${path.sep}antd${path.sep}`) ||
-    id.includes(`${path.sep}@ant-design${path.sep}`) ||
-    id.includes(`${path.sep}rc-`) ||
-    id.includes(`${path.sep}@rc-component${path.sep}`)
-  ) {
-    return 'vendor-react'
-  }
-
-  if (id.includes('emoji-picker-react')) {
-    return 'vendor-emoji'
-  }
-
-  if (id.includes('pdfmake')) {
-    return id.includes('vfs_fonts') ? 'vendor-pdf-fonts' : 'vendor-pdfmake'
-  }
-
-  if (id.includes(`${path.sep}xlsx${path.sep}`)) {
-    return 'vendor-xlsx'
-  }
-
-  if (id.includes(`${path.sep}recharts${path.sep}`)) {
-    return 'vendor-charts'
-  }
-
-  if (id.includes(`${path.sep}axios${path.sep}`)) {
-    return 'vendor-axios'
-  }
-
-  if (id.includes(`${path.sep}dayjs${path.sep}`) || id.includes(`${path.sep}date-fns${path.sep}`)) {
-    return 'vendor-date'
-  }
-
-  return 'vendor-misc'
+  // Everything else (React, antd, react-router, @tanstack, swiper, utils, etc.)
+  // goes into vendor-react to avoid circular-dependency init-order crashes.
+  return 'vendor-react'
 }
 
 // https://vite.dev/config/

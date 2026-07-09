@@ -9,10 +9,13 @@ const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedire
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const BecomeExpert = lazy(() => import('@/features/expert/pages/BecomeExpert'));
 const BecomePartner = lazy(() => import('@/features/partner/pages/BecomePartner'));
+const LandingV2 = lazy(() => import('@/features/landing-v2/pages/LandingV2'));
 
 export const authRoutes = (
   <>
-    <Route path={ROUTES.home} element={<Home />} />
+    <Route path={ROUTES.home} element={<LandingV2 />} />
+    <Route path="/len_v1" element={<Home />} />
+    <Route path="/len_v2" element={<LandingV2 />} />
     <Route path={ROUTES.login} element={<Login />} />
     <Route path="/register" element={<RegisterWithEmailVerification />} />
     <Route path={ROUTES.auth.googleCallback} element={<GoogleCallback />} />
@@ -24,3 +27,4 @@ export const authRoutes = (
     <Route path={ROUTES.becomePartner} element={<BecomePartner />} />
   </>
 );
+
