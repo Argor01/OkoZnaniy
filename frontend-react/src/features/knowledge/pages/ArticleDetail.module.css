@@ -90,6 +90,63 @@
   color: var(--color-grey-400);
 }
 
+:global([data-theme="dark"]) .card {
+  background: var(--color-bg-container);
+  border-color: var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .backButton {
+  color: var(--color-text-secondary);
+}
+
+:global([data-theme="dark"]) .title {
+  color: var(--color-text-heading) !important;
+}
+
+:global([data-theme="dark"]) .description {
+  color: var(--color-text-base);
+}
+
+:global([data-theme="dark"]) .filesTitle {
+  color: var(--color-text-heading) !important;
+}
+
+:global([data-theme="dark"]) .fileItem {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .fileItem:hover {
+  background: var(--color-bg-hover);
+}
+
+:global([data-theme="dark"]) .fileName {
+  color: var(--color-text-base);
+}
+
+:global([data-theme="dark"]) .fileSize {
+  color: var(--color-text-secondary);
+}
+
+:global([data-theme="dark"]) .complainModal :global(.ant-select-selector),
+:global([data-theme="dark"]) .complainModal :global(.ant-input),
+:global([data-theme="dark"]) .complainModal :global(.ant-input-textarea textarea) {
+  background: var(--color-bg-input) !important;
+  color: var(--color-text-base) !important;
+  border-color: var(--color-border-base) !important;
+}
+
+:global([data-theme="dark"]) .complainModal :global(.ant-select-selection-item),
+:global([data-theme="dark"]) .complainModal :global(.ant-select-arrow) {
+  color: var(--color-text-base) !important;
+}
+
+:global([data-theme="dark"]) .complainModal :global(.ant-input::placeholder),
+:global([data-theme="dark"]) .complainModal :global(.ant-input-textarea textarea::placeholder) {
+  color: var(--color-text-placeholder) !important;
+}
+
 @media (max-width: 840px) {
   .titleRow {
     flex-direction: column;

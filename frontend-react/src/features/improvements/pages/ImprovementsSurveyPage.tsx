@@ -1,7 +1,16 @@
-import React from 'react';
-import { Card, Typography, Form, Select, Input, Button, message, theme } from 'antd';
+import React, { useState } from 'react';
+import { Card, Typography, Form, Select, Input, Button, Upload, message, theme } from 'antd';
+import type { UploadFile } from 'antd/es/upload/interface';
 import { useMutation } from '@tanstack/react-query';
-import { ExclamationCircleOutlined, PlusSquareOutlined, SendOutlined, SearchOutlined, BarsOutlined } from '@ant-design/icons';
+import {
+  ExclamationCircleOutlined,
+  PlusSquareOutlined,
+  SendOutlined,
+  SearchOutlined,
+  BarsOutlined,
+  PaperClipOutlined,
+  InboxOutlined,
+} from '@ant-design/icons';
 import { improvementApi, ImprovementArea } from '@/features/improvements/api/improvements';
 import styles from './ImprovementsSurveyPage.module.css';
 
@@ -16,23 +25,33 @@ const areaOptions: Array<{ value: ImprovementArea; label: string }> = [
   { value: 'other', label: 'Другое' },
 ];
 
+type SuggestionFormValues = {
+  area: ImprovementArea;
+  comment: string;
+};
+
 const ImprovementsSurveyPage: React.FC = () => {
   const { token } = theme.useToken();
-  const [form] = Form.useForm<{ area: ImprovementArea; comment: string }>();
+  const [form] = Form.useForm<SuggestionFormValues>();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const submitMutation = useMutation({
     mutationFn: improvementApi.submitSuggestion,
     onSuccess: () => {
       message.success('Спасибо! Ваша рекомендация отправлена директору.');
       form.resetFields();
+      setFileList([]);
     },
     onError: () => {
       message.error('Не удалось отправить анкету. Попробуйте еще раз.');
     },
   });
 
-  const onFinish = (values: { area: ImprovementArea; comment: string }) => {
-    submitMutation.mutate(values);
+  const onFinish = (values: SuggestionFormValues) => {
+    submitMutation.mutate({
+      ...values,
+      attachment: fileList[0]?.originFileObj ?? null,
+    });
   };
 
   return (
@@ -45,7 +64,7 @@ const ImprovementsSurveyPage: React.FC = () => {
             <Paragraph className={styles.introText}>
               Мы стремимся сделать сервис «Око Знаний» максимально удобным и полезным для вас.
               Поделитесь, пожалуйста, своими идеями: что стоит добавить, улучшить или изменить.
-              Ваше мнение помогает нам развивать платформу в правильном направлении
+              Ваше мнение помогает нам развивать платформу в правильном направлении.
             </Paragraph>
           </Card>
 
@@ -70,6 +89,28 @@ const ImprovementsSurveyPage: React.FC = () => {
                 <Input.TextArea rows={6} maxLength={1200} showCount placeholder="Опишите, что именно вы хотите улучшить" />
               </Form.Item>
 
+              <Form.Item label="Файл или скриншот">
+                <Upload.Dragger
+                  accept="image/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+                  beforeUpload={() => false}
+                  maxCount={1}
+                  fileList={fileList}
+                  onChange={({ fileList: nextFileList }) => setFileList(nextFileList.slice(-1))}
+                  onRemove={() => {
+                    setFileList([]);
+                    return true;
+                  }}
+                >
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined style={{ color: token.colorPrimary }} />
+                  </p>
+                  <p className="ant-upload-text">Перетащите сюда файл или выберите его</p>
+                  <p className="ant-upload-hint">
+                    Можно приложить скриншот, документ или архив, чтобы директору было проще проверить идею.
+                  </p>
+                </Upload.Dragger>
+              </Form.Item>
+
               <div className={styles.submitRow}>
                 <Button type="primary" htmlType="submit" loading={submitMutation.isPending} icon={<SendOutlined />}>
                   Отправить анкету
@@ -87,6 +128,7 @@ const ImprovementsSurveyPage: React.FC = () => {
               <li><PlusSquareOutlined className={styles.sideIcon} style={{ color: token.colorPrimary }} />Какой новый раздел или инструмент вы хотели бы видеть</li>
               <li><BarsOutlined className={styles.sideIcon} style={{ color: token.colorWarning }} />Какие шаги можно сократить в текущем сценарии</li>
               <li><SearchOutlined className={styles.sideIcon} style={{ color: token.colorPrimary }} />Что мешает быстрее находить нужную информацию</li>
+              <li><PaperClipOutlined className={styles.sideIcon} style={{ color: token.colorPrimary }} />Какие скриншоты или примеры лучше всего показывают проблему</li>
             </ul>
           </Card>
 
@@ -94,8 +136,7 @@ const ImprovementsSurveyPage: React.FC = () => {
             <Title level={5} className={styles.sideTitle}>Что дальше</Title>
             <Paragraph className={styles.metaText}>
               Анкета сразу попадает директору в раздел «Рекомендации по улучшению».
-              Мы рассматриваем предложения регулярно и используем их при планировании
-              новых обновлений сервиса
+              Если приложить файл или скриншот, директор сможет открыть его прямо из списка и быстрее протестировать сценарий.
             </Paragraph>
           </Card>
         </div>

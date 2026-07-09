@@ -183,11 +183,11 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     ) ?? [];
 
       if (!feedItems.length) {
-        return <Empty description="История обращения пока пуста" />;
+        return <div className={styles.feedEmpty}><Empty description="История обращения пока пуста" /></div>;
       }
 
     return (
-      <div style={{ display: 'grid', gap: 12 }}>
+      <div className={styles.feedList}>
         {feedItems.map((item) => {
           if (item.kind === 'message') {
             const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
@@ -197,19 +197,15 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             return (
               <div
                 key={item.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: isSupportMessage ? 'flex-start' : 'flex-end',
-                }}
+                className={isSupportMessage ? styles.feedRowSupport : styles.feedRowUser}
               >
                 <Card
                   size="small"
+                  className={`${styles.feedMessageCard} ${isSupportMessage ? styles.feedMessageSupport : styles.feedMessageUser}`}
                   style={{
                     width: 'fit-content',
                     maxWidth: compact ? '100%' : '78%',
                     borderRadius: 16,
-                    background: isSupportMessage ? '#f5f0ff' : '#fff8e6',
-                    borderColor: isSupportMessage ? '#d0b8ff' : '#f5d27a',
                   }}
                   styles={{ body: { padding: '12px 14px' } }}
                 >
@@ -236,6 +232,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
 
           return (
             <Alert
+              className={styles.feedEvent}
               key={item.id}
               type="info"
               showIcon
@@ -347,6 +344,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       </div>
 
       <Modal
+        className={styles.detailsModal}
         title={selectedItem ? selectedItem.subject : 'Обращение'}
         open={detailsOpen}
         onCancel={closeDetails}
@@ -373,6 +371,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             </Space>
 
             <Alert
+              className={styles.timelineBanner}
               type="info"
               showIcon
               icon={<ClockCircleOutlined />}
@@ -382,10 +381,11 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
 
             {renderFeed()}
 
-            <Card size="small" styles={{ body: { padding: 12 } }}>
+            <Card className={styles.replyCard} size="small" styles={{ body: { padding: 12 } }}>
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 <Text strong>Ответ по обращению</Text>
                 <Input.TextArea
+                  className={styles.replyInput}
                   value={reply}
                   onChange={(event) => setReply(event.target.value)}
                   autoSize={{ minRows: 4, maxRows: 8 }}

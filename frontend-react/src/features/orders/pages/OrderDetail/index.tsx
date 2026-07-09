@@ -248,9 +248,6 @@ const OrderDetail: React.FC = () => {
 
             {canRespondToAssignment ? (
               <Space className={`${styles.reviewActionsRow} ${styles.sectionBlock}`} wrap>
-                <Tag color={getStatusColor(order.status)} className={styles.statusTagLarge}>
-                  {getStatusText(order.status)}
-                </Tag>
                 <AppButton
                   variant="success"
                   loading={reviewActionLoading === 'accept_assignment'}
@@ -266,14 +263,6 @@ const OrderDetail: React.FC = () => {
                   Отклонить заказ
                 </AppButton>
               </Space>
-            ) : null}
-
-            {isOrderOwner && isAwaitingExpertDecision ? (
-              <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
-                <Tag color={getStatusColor(order.status)} className={styles.statusTagLarge}>
-                  Исполнитель еще не ответил на приглашение
-                </Tag>
-              </div>
             ) : null}
 
             {userProfile?.role === 'expert' &&
@@ -304,7 +293,7 @@ const OrderDetail: React.FC = () => {
                   className={styles.statusTagLarge}
                 >
                   {currentUserBid?.status === 'invited'
-                    ? 'Заказчик выбрал вас, ожидается ваш ответ'
+                    ? 'Заказчик выбрал вас'
                     : currentUserBid?.status === 'accepted'
                       ? 'Вы приняты исполнителем по этому заказу'
                       : 'Вы уже откликнулись на этот заказ'}

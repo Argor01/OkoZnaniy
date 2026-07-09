@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, Table, Tag, Typography, Alert, Avatar } from 'antd';
+import { Card, Table, Tag, Typography, Alert, Avatar, Button, Space } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import { DownloadOutlined, EyeOutlined, PaperClipOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { improvementApi, ImprovementSuggestion } from '@/features/improvements/api/improvements';
 import { getMediaUrl } from '@/config/api';
@@ -47,6 +48,34 @@ const ImprovementRecommendations: React.FC = () => {
       key: 'comment',
     },
     {
+      title: 'Вложение',
+      key: 'attachment',
+      width: 260,
+      render: (_: unknown, record: ImprovementSuggestion) => {
+        const attachmentUrl = getMediaUrl(record.attachment_url || record.attachment);
+        if (!attachmentUrl) {
+          return <Typography.Text type="secondary">Без вложения</Typography.Text>;
+        }
+
+        return (
+          <Space direction="vertical" size={6}>
+            <Space size={6}>
+              <PaperClipOutlined />
+              <Typography.Text>{record.attachment_name || 'Файл'}</Typography.Text>
+            </Space>
+            <Space wrap>
+              <Button size="small" icon={<EyeOutlined />} href={attachmentUrl} target="_blank" rel="noreferrer">
+                Открыть
+              </Button>
+              <Button size="small" icon={<DownloadOutlined />} href={attachmentUrl} target="_blank" rel="noreferrer">
+                Скачать
+              </Button>
+            </Space>
+          </Space>
+        );
+      },
+    },
+    {
       title: 'Информация об отправителе',
       key: 'author_info',
       width: 260,
@@ -82,7 +111,7 @@ const ImprovementRecommendations: React.FC = () => {
         dataSource={data}
         loading={isLoading}
         pagination={{ pageSize: 10 }}
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1450 }}
       />
     </Card>
   );

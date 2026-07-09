@@ -350,9 +350,11 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
 
 
 class ImprovementSuggestionCreateSerializer(serializers.ModelSerializer):
+    attachment = serializers.FileField(required=False, allow_null=True)
+
     class Meta:
         model = ImprovementSuggestion
-        fields = ['area', 'comment']
+        fields = ['area', 'comment', 'attachment']
 
 
 class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
@@ -360,8 +362,28 @@ class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
     display_username = serializers.CharField(source='user.display_username', read_only=True)
     role = serializers.CharField(source='user.role', read_only=True)
     avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
     user_id = serializers.IntegerField(source='user.id', read_only=True)
     area_display = serializers.CharField(source='get_area_display', read_only=True)
+    attachment = serializers.FileField(read_only=True)
+    attachment_url = serializers.SerializerMethodField()
+    attachment_name = serializers.SerializerMethodField()
+
+    def get_attachment_url(self, obj):
+        attachment = getattr(obj, 'attachment', None)
+        if not attachment:
+            return None
+        try:
+            return attachment.url
+        except Exception:
+            return None
+
+    def get_attachment_name(self, obj):
+        attachment = getattr(obj, 'attachment', None)
+        if not attachment:
+            return None
+        name = getattr(attachment, 'name', '') or ''
+        return name.split('/')[-1] if name else None
 
     class Meta:
         model = ImprovementSuggestion
@@ -372,8 +394,12 @@ class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
             'display_username',
             'role',
             'avatar',
+            'email',
             'area',
             'area_display',
             'comment',
+            'attachment',
+            'attachment_url',
+            'attachment_name',
             'created_at',
         ]

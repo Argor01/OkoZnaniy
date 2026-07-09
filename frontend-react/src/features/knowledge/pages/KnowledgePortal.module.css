@@ -303,6 +303,58 @@
   text-align: center;
 }
 
+:global([data-theme="dark"]) .container {
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .statItem,
+:global([data-theme="dark"]) .filtersCard,
+:global([data-theme="dark"]) .questionCard {
+  background: var(--color-bg-container) !important;
+  border-color: var(--color-border-base) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+}
+
+:global([data-theme="dark"]) .filtersCard :global(.ant-card-body) {
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .filtersCard :global(.ant-input-affix-wrapper),
+:global([data-theme="dark"]) .filtersCard :global(.ant-input),
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-selector) {
+  background: var(--color-bg-input) !important;
+  border-color: var(--color-border-base) !important;
+  color: var(--color-text-base) !important;
+}
+
+:global([data-theme="dark"]) .filtersCard :global(.ant-input-prefix),
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-arrow),
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-selection-placeholder),
+:global([data-theme="dark"]) .filtersCard :global(.ant-input::placeholder) {
+  color: var(--color-text-tertiary) !important;
+}
+
+:global([data-theme="dark"]) .authorAvatar {
+  background: #23283a;
+  border: 1px solid #30374c;
+}
+
+:global([data-theme="dark"]) .infoChip {
+  background: color-mix(in srgb, var(--primary-blue, #7c3aed) 14%, #171b26 86%);
+  border-color: color-mix(in srgb, var(--primary-blue, #7c3aed) 24%, #2a3142 76%);
+  color: #c4b5fd;
+}
+
+:global([data-theme="dark"]) .regularTag {
+  background: #202533 !important;
+  border-color: #31384b !important;
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) .emptyState :global(.ant-empty-description) {
+  color: var(--color-text-secondary) !important;
+}
+
 /* РџР»Р°РЅС€РµС‚РЅР°СЏ Р°РґР°РїС‚Р°С†РёСЏ */
 @media (max-width: 1024px) and (min-width: 769px) {
   .container {

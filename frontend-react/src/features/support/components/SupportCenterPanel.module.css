@@ -56,3 +56,167 @@
     padding: 8px !important;
   }
 }
+
+.detailsModal :global(.ant-modal-content) {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.detailsModal :global(.ant-modal-header) {
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba(126, 87, 194, 0.12);
+}
+
+.detailsModal :global(.ant-modal-body) {
+  padding: 20px 24px 24px;
+}
+
+.timelineBanner:global(.ant-alert) {
+  border-radius: 16px;
+  border: 1px solid rgba(126, 87, 194, 0.18);
+  background: linear-gradient(180deg, rgba(126, 87, 194, 0.14), rgba(126, 87, 194, 0.08));
+}
+
+.feedList {
+  display: grid;
+  gap: 12px;
+}
+
+.feedEmpty {
+  border: 1px dashed rgba(126, 87, 194, 0.22);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(248, 246, 255, 0.92), rgba(255, 255, 255, 0.96));
+  padding: 24px 12px;
+}
+
+.feedRowSupport,
+.feedRowUser {
+  display: flex;
+}
+
+.feedRowSupport {
+  justify-content: flex-start;
+}
+
+.feedRowUser {
+  justify-content: flex-end;
+}
+
+.feedMessageCard:global(.ant-card) {
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
+}
+
+.feedMessageSupport:global(.ant-card) {
+  background: linear-gradient(180deg, #f6f0ff 0%, #efe6ff 100%);
+  border-color: #d7c2ff;
+}
+
+.feedMessageUser:global(.ant-card) {
+  background: linear-gradient(180deg, #fff7e8 0%, #ffefc7 100%);
+  border-color: #f3d17c;
+}
+
+.feedEvent:global(.ant-alert) {
+  border-radius: 16px;
+  border: 1px solid rgba(126, 87, 194, 0.16);
+  background: #faf7ff;
+}
+
+.replyCard:global(.ant-card) {
+  border-radius: 18px;
+  border-color: rgba(126, 87, 194, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.replyInput:global(.ant-input) {
+  border-radius: 14px;
+}
+
+:global([data-theme="dark"]) .detailsModal :global(.ant-modal-content) {
+  background: #1f2230;
+  border: 1px solid rgba(154, 122, 255, 0.14);
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.42);
+}
+
+:global([data-theme="dark"]) .detailsModal :global(.ant-modal-header) {
+  background: #1f2230;
+  border-bottom-color: rgba(154, 122, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .detailsModal :global(.ant-modal-title),
+:global([data-theme="dark"]) .detailsModal :global(.ant-typography),
+:global([data-theme="dark"]) .detailsModal :global(.ant-typography strong) {
+  color: #f5f7ff;
+}
+
+:global([data-theme="dark"]) .detailsModal :global(.ant-typography.ant-typography-secondary),
+:global([data-theme="dark"]) .detailsModal :global(.ant-empty-description) {
+  color: #aeb6d3;
+}
+
+:global([data-theme="dark"]) .detailsModal :global(.ant-modal-close) {
+  color: #c9d2f0;
+}
+
+:global([data-theme="dark"]) .timelineBanner:global(.ant-alert) {
+  border-color: rgba(154, 122, 255, 0.24);
+  background: linear-gradient(180deg, rgba(112, 84, 214, 0.18), rgba(66, 50, 124, 0.2));
+}
+
+:global([data-theme="dark"]) .timelineBanner :global(.ant-alert-message) {
+  color: #f4f2ff;
+}
+
+:global([data-theme="dark"]) .timelineBanner :global(.ant-alert-description),
+:global([data-theme="dark"]) .timelineBanner :global(.ant-alert-icon) {
+  color: #d6c7ff;
+}
+
+:global([data-theme="dark"]) .feedEmpty {
+  border-color: rgba(154, 122, 255, 0.2);
+  background: linear-gradient(180deg, rgba(40, 45, 67, 0.96), rgba(34, 38, 56, 0.98));
+}
+
+:global([data-theme="dark"]) .feedMessageCard:global(.ant-card) {
+  box-shadow: none;
+}
+
+:global([data-theme="dark"]) .feedMessageSupport:global(.ant-card) {
+  background: linear-gradient(180deg, rgba(77, 61, 138, 0.4), rgba(57, 47, 104, 0.44));
+  border-color: rgba(154, 122, 255, 0.24);
+}
+
+:global([data-theme="dark"]) .feedMessageUser:global(.ant-card) {
+  background: linear-gradient(180deg, rgba(88, 76, 36, 0.42), rgba(68, 58, 26, 0.46));
+  border-color: rgba(244, 194, 82, 0.24);
+}
+
+:global([data-theme="dark"]) .feedEvent:global(.ant-alert) {
+  border-color: rgba(154, 122, 255, 0.18);
+  background: linear-gradient(180deg, rgba(42, 47, 69, 0.98), rgba(36, 40, 58, 0.98));
+}
+
+:global([data-theme="dark"]) .feedEvent :global(.ant-alert-message) {
+  color: #f3f6ff;
+}
+
+:global([data-theme="dark"]) .feedEvent :global(.ant-alert-description),
+:global([data-theme="dark"]) .feedEvent :global(.ant-alert-icon) {
+  color: #b8c0de;
+}
+
+:global([data-theme="dark"]) .replyCard:global(.ant-card) {
+  background: linear-gradient(180deg, rgba(35, 39, 57, 0.98), rgba(29, 33, 49, 0.98));
+  border-color: rgba(154, 122, 255, 0.16);
+}
+
+:global([data-theme="dark"]) .replyInput:global(.ant-input) {
+  background: #1b1f2d;
+  border-color: rgba(154, 122, 255, 0.16);
+  color: #eef2ff;
+}
+
+:global([data-theme="dark"]) .replyInput:global(.ant-input)::placeholder {
+  color: #7f89ab;
+}
+

@@ -657,3 +657,58 @@
   background: var(--color-bg-hover, #2d3348);
 }
 
+/* Dark theme shared modal overrides */
+[data-theme="dark"] .ant-modal-content {
+  background: var(--color-bg-elevated) !important;
+  border: 1px solid var(--color-border-base) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .ant-modal-header,
+[data-theme="dark"] .ant-modal-body,
+[data-theme="dark"] .ant-modal-footer {
+  background: var(--color-bg-elevated) !important;
+}
+
+[data-theme="dark"] .ant-modal-header {
+  border-bottom: 1px solid var(--color-border-secondary) !important;
+}
+
+[data-theme="dark"] .ant-modal-footer {
+  border-top: 1px solid var(--color-border-secondary) !important;
+}
+
+[data-theme="dark"] .ant-modal-title,
+[data-theme="dark"] .ant-modal .ant-typography,
+[data-theme="dark"] .ant-modal .ant-typography strong,
+[data-theme="dark"] .ant-modal label,
+[data-theme="dark"] .ant-modal .ant-form-item-label > label {
+  color: var(--color-text-heading) !important;
+}
+
+[data-theme="dark"] .ant-modal .ant-input,
+[data-theme="dark"] .ant-modal .ant-input-number-input,
+[data-theme="dark"] .ant-modal .ant-input-textarea textarea,
+[data-theme="dark"] .ant-modal .ant-select-selector,
+[data-theme="dark"] .ant-modal .ant-picker {
+  background: var(--color-bg-input) !important;
+  border-color: var(--color-border-base) !important;
+  color: var(--color-text-base) !important;
+}
+
+[data-theme="dark"] .ant-modal .ant-input::placeholder,
+[data-theme="dark"] .ant-modal .ant-input-textarea textarea::placeholder,
+[data-theme="dark"] .ant-modal .ant-select-selection-placeholder {
+  color: var(--color-text-placeholder) !important;
+}
+
+[data-theme="dark"] .ant-modal .ant-input:hover,
+[data-theme="dark"] .ant-modal .ant-input:focus,
+[data-theme="dark"] .ant-modal .ant-input-textarea textarea:hover,
+[data-theme="dark"] .ant-modal .ant-input-textarea textarea:focus,
+[data-theme="dark"] .ant-modal .ant-select-focused .ant-select-selector,
+[data-theme="dark"] .ant-modal .ant-picker:hover,
+[data-theme="dark"] .ant-modal .ant-picker-focused {
+  border-color: var(--primary-blue) !important;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.14) !important;
+}

@@ -189,6 +189,25 @@
   color: #ffffff;
 }
 
+:global([data-theme="dark"]) .footer {
+  background: linear-gradient(180deg, #5f2daa 0%, #4b2388 100%);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.28);
+}
+
+:global([data-theme="dark"]) .link,
+:global([data-theme="dark"]) .contactEmail,
+:global([data-theme="dark"]) .workHoursValue {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+:global([data-theme="dark"]) .statChip {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .serviceChip {
+  background: rgba(255, 255, 255, 0.09);
+}
+
 .socialLinks {
   display: none;
 }

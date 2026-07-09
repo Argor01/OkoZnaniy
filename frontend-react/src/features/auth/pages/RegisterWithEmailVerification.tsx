@@ -27,14 +27,6 @@ const RegisterWithEmailVerification: React.FC = () => {
   const [error, setError] = useState('');
   const [fromGoogle, setFromGoogle] = useState(false);
 
-  // Проверка авторизации - если пользователь уже авторизован, редиректим на главную
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-    if (token) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-  
   // Обработка параметров URL
   useEffect(() => {
     const emailParam = searchParams.get('email');

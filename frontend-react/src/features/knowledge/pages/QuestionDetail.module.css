@@ -100,6 +100,45 @@
   width: 100%;
 }
 
+:global([data-theme="dark"]) .questionCard,
+:global([data-theme="dark"]) .answerCard,
+:global([data-theme="dark"]) .answerFormCard {
+  background: var(--color-bg-container) !important;
+  border: 1px solid var(--color-border-base) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+}
+
+:global([data-theme="dark"]) .questionTitle,
+:global([data-theme="dark"]) .authorName,
+:global([data-theme="dark"]) .answerContent {
+  color: var(--color-text-heading) !important;
+}
+
+:global([data-theme="dark"]) .questionDescription,
+:global([data-theme="dark"]) .dateText {
+  color: var(--color-text-secondary) !important;
+}
+
+:global([data-theme="dark"]) .questionMeta,
+:global([data-theme="dark"]) .answerFooter {
+  border-top-color: var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .bestAnswer {
+  background: linear-gradient(180deg, rgba(250, 173, 20, 0.12) 0%, rgba(26, 29, 39, 0.95) 100%);
+  border-color: rgba(250, 173, 20, 0.55) !important;
+}
+
+:global([data-theme="dark"]) .answerTextarea :global(.ant-input) {
+  background: var(--color-bg-input) !important;
+  border-color: var(--color-border-base) !important;
+  color: var(--color-text-base) !important;
+}
+
+:global([data-theme="dark"]) .answerTextarea :global(.ant-input::placeholder) {
+  color: var(--color-text-tertiary) !important;
+}
+
 /* Мобильная адаптация */
 @media (max-width: 768px) {
   .container {

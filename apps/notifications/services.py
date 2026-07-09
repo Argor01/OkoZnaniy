@@ -278,10 +278,7 @@ class NotificationService:
             recipient=case.defendant,
             type=NotificationType.COMPLAINT_FILED,
             title=f"На вас подана претензия {case.case_number}",
-            message=(
-                f"{plaintiff_name} подал претензию по заказу №{case.order_id}. "
-                f"Откройте дело, чтобы дать пояснения."
-            ),
+            message=f"{plaintiff_name} подал претензию по заказу №{case.order_id}.",
             related_object_id=case.id,
             related_object_type='arbitration_case',
             data={

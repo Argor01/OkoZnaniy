@@ -83,7 +83,7 @@ const TopBar: React.FC = () => (
       </nav>
       <div className={styles.topActions}>
         <Link to="/login" className={styles.btnGhost}>Войти</Link>
-        <Link to="/register" className={styles.btnPrimary}>Регистрация</Link>
+        <Link to="/login?tab=register" className={styles.btnPrimary}>Регистрация</Link>
       </div>
     </div>
   </header>
@@ -579,7 +579,7 @@ const ReviewsBlock: React.FC = () => {
     </div>
   );
   return (
-    <section className={styles.reviewsNew}>
+    <section className={styles.reviewsNew} id="reviews">
       <div className={styles.container}>
         <div className={styles.reviewsHeader}>
           <span className={styles.smallTag}>Отзывы</span>
@@ -646,7 +646,7 @@ const SafetyBand: React.FC = () => {
 const FinalCta: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <section className={styles.finalCta}>
+    <section className={styles.finalCta} id="cta">
       <div className={styles.finalCtaBg1} />
       <div className={styles.finalCtaBg2} />
       <div className={styles.finalCtaBg3} />
@@ -767,3 +767,5 @@ const LandingV2: React.FC = () => {
 };
 
 export default LandingV2;
+
+

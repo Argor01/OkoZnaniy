@@ -77,6 +77,51 @@
   min-width: 100px;
 }
 
+:global([data-theme="dark"]) :global(.ant-modal-wrap) .questionModal :global(.ant-modal-content) {
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border-base);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+}
+
+:global([data-theme="dark"]) :global(.ant-modal-wrap) .questionModal :global(.ant-modal-header) {
+  background: linear-gradient(135deg, #1a1d27 0%, #202536 100%);
+  border-bottom-color: var(--color-border-base);
+}
+
+:global([data-theme="dark"]) :global(.ant-modal-wrap) .questionModal :global(.ant-modal-title),
+:global([data-theme="dark"]) :global(.ant-modal-wrap) .questionModal :global(.ant-form-item-label > label),
+:global([data-theme="dark"]) .formLabel {
+  color: var(--color-text-heading) !important;
+}
+
+:global([data-theme="dark"]) :global(.ant-modal-wrap) .questionModal :global(.ant-modal-footer) {
+  border-top-color: var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .titleInput :global(.ant-input),
+:global([data-theme="dark"]) .descriptionTextarea :global(.ant-input),
+:global([data-theme="dark"]) .categorySelect :global(.ant-select-selector),
+:global([data-theme="dark"]) .tagsSelect :global(.ant-select-selector) {
+  background: var(--color-bg-input) !important;
+  border-color: var(--color-border-base) !important;
+  color: var(--color-text-base) !important;
+}
+
+:global([data-theme="dark"]) .titleInput :global(.ant-input::placeholder),
+:global([data-theme="dark"]) .descriptionTextarea :global(.ant-input::placeholder),
+:global([data-theme="dark"]) .categorySelect :global(.ant-select-selection-placeholder),
+:global([data-theme="dark"]) .tagsSelect :global(.ant-select-selection-placeholder),
+:global([data-theme="dark"]) .categorySelect :global(.ant-select-arrow),
+:global([data-theme="dark"]) .tagsSelect :global(.ant-select-arrow) {
+  color: var(--color-text-tertiary) !important;
+}
+
+:global([data-theme="dark"]) .tagsSelect :global(.ant-select-selection-item) {
+  background: #262d3d !important;
+  border-color: #394257 !important;
+  color: #e2e8f0 !important;
+}
+
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   :global(.ant-modal-wrap) .questionModal {

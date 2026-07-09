@@ -220,6 +220,7 @@ class ImprovementSuggestion(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='improvement_suggestions', verbose_name='Пользователь')
     area = models.CharField(max_length=32, choices=ImprovementArea.choices, verbose_name='Область улучшения')
     comment = models.TextField(verbose_name='Комментарий')
+    attachment = models.FileField(upload_to='improvements/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     class Meta:
@@ -244,5 +245,3 @@ class Friendship(models.Model):
 
     def __str__(self):
         return f'{self.from_user.username} -> {self.to_user.username}'
-
-

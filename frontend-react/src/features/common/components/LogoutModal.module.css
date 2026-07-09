@@ -86,6 +86,32 @@
   transform: translateY(0);
 }
 
+:global([data-theme="dark"]) .logoutModalBody {
+  background: var(--color-bg-container);
+}
+
+:global([data-theme="dark"]) .logoutModalIcon {
+  background: linear-gradient(135deg, rgba(254, 202, 202, 0.18), rgba(239, 68, 68, 0.28));
+}
+
+:global([data-theme="dark"]) .logoutModalTitle {
+  color: var(--color-text-heading);
+}
+
+:global([data-theme="dark"]) .logoutModalText {
+  color: var(--color-text-secondary);
+}
+
+:global([data-theme="dark"]) .logoutModalBtnCancel {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .logoutModalBtnCancel:hover {
+  background: var(--color-bg-hover);
+}
+
 @media (max-width: 575px) {
   body .ant-modal-root .ant-modal-wrap .ant-modal.logoutModal {
     width: calc(100vw - 24px) !important;

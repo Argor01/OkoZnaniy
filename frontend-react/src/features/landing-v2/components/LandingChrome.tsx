@@ -29,7 +29,7 @@ export const TopBar: React.FC<{ links?: NavLink[] }> = ({ links }) => {
         </nav>
         <div className={styles.topActions}>
           <Link to="/login" className={styles.btnGhost}>Войти</Link>
-          <Link to="/register" className={styles.btnPrimary}>Регистрация</Link>
+          <Link to="/login?tab=register" className={styles.btnPrimary}>Регистрация</Link>
         </div>
       </div>
     </header>

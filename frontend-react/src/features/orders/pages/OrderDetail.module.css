@@ -966,3 +966,26 @@
 .sectionBlock:nth-child(2) { animation-delay: 0.12s; }
 .sectionBlock:nth-child(3) { animation-delay: 0.19s; }
 .sectionBlock:nth-child(4) { animation-delay: 0.26s; }
+
+.deliveredTagWrap {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.deliveredTag {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  width: auto;
+  max-width: max-content;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1.2;
+  background: color-mix(in srgb, var(--color-brand-purple-500) 18%, var(--bg-primary) 82%) !important;
+  border-color: color-mix(in srgb, var(--color-brand-purple-500) 34%, var(--border-color) 66%) !important;
+  color: var(--text-primary) !important;
+}

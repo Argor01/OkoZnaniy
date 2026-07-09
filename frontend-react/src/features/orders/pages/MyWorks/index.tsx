@@ -389,12 +389,6 @@ const MyWorks: React.FC = () => {
       sorter: (a: Order, b: Order) => Number(a?.budget ?? 0) - Number(b?.budget ?? 0),
     },
     {
-      title: 'Заметка',
-      key: 'note',
-      render: () => <span className={styles.muted}>—</span>,
-      width: 90,
-    },
-    {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',

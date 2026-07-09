@@ -208,6 +208,7 @@ const ArticleDetail: React.FC = () => {
       <Modal
         title="Пожаловаться на статью"
         open={complainModalOpen}
+        className={styles.complainModal}
         onCancel={() => setComplainModalOpen(false)}
         onOk={handleComplain}
         okText="Отправить жалобу"

@@ -12,6 +12,7 @@ import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -259,7 +260,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(UserSerializer(user).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated], parser_classes=[MultiPartParser, FormParser, JSONParser])
     def submit_improvement_suggestion(self, request):
         serializer = ImprovementSuggestionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -1627,4 +1628,3 @@ def vk_callback(request):
 
     logger.info(f"🔀 VK Redirecting to: {redirect_url}")
     return redirect(redirect_url)
-

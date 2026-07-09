@@ -39,6 +39,10 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'login' || tab === 'register') {
+      setActiveTab(tab);
+    }
     const refCode = params.get('ref');
     if (refCode) {
       setReferralCode(refCode);
@@ -345,3 +349,5 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+
+

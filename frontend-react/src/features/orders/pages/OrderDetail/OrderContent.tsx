@@ -287,7 +287,9 @@ const OrderContent: React.FC<OrderContentProps> = ({
                 {deliveredWorkFiles.map((file: any, index: number) => renderFileTile(file, index, 'delivered'))}
               </div>
               {isOrderOwner && order.status === 'review' && (
-                <Tag color="purple" className={styles.deliveredTag}>На проверке</Tag>
+                <div className={styles.deliveredTagWrap}>
+                  <Tag color="purple" className={styles.deliveredTag}>На проверке</Tag>
+                </div>
               )}
             </>
           ) : (

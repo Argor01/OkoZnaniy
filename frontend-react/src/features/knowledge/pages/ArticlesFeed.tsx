@@ -122,6 +122,7 @@ const ArticlesFeed: React.FC = () => {
           allowClear
           value={selectedWorkType}
           onChange={setSelectedWorkType}
+          className={styles.filterSelect}
           style={{ minWidth: 180 }}
           size="large"
         >
@@ -136,6 +137,7 @@ const ArticlesFeed: React.FC = () => {
           allowClear
           value={selectedSubject}
           onChange={setSelectedSubject}
+          className={styles.filterSelect}
           style={{ minWidth: 180 }}
           size="large"
           showSearch

@@ -2045,6 +2045,12 @@
   border-radius: 6px;
 }
 
+[data-theme="dark"] .blockedUsersModalInfoBox {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border-base);
+  color: var(--color-text-base);
+}
+
 .blockedUsersModalField {
   width: 100%;
 }

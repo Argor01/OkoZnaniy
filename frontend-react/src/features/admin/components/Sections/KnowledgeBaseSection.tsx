@@ -293,6 +293,12 @@ export const KnowledgeBaseSection: React.FC = () => {
     return formatUserName(author);
   };
 
+  const openArticleDetail = (articleId: number) => {
+    setSelectedArticleId(articleId);
+    setActiveTab('articles');
+    setView('detail');
+  };
+
   if (view === 'create') {
     return (
       <div>
@@ -569,8 +575,16 @@ export const KnowledgeBaseSection: React.FC = () => {
           <Card
             key={article.id}
             hoverable
-            style={{ marginBottom: 12, borderRadius: 8 }}
-            onClick={() => { setSelectedArticleId(article.id); setView('detail'); }}
+            style={{ marginBottom: 12, borderRadius: 8, cursor: 'pointer' }}
+            onClick={() => openArticleDetail(article.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openArticleDetail(article.id);
+              }
+            }}
+            tabIndex={0}
+            role="button"
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
@@ -589,6 +603,17 @@ export const KnowledgeBaseSection: React.FC = () => {
                   {article.subject && <Tag color="green">{article.subject}</Tag>}
                 </div>
               </div>
+              <Button
+                type="default"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openArticleDetail(article.id);
+                }}
+                style={{ marginRight: 8 }}
+              >
+                Открыть
+              </Button>
               <Button
                 danger
                 icon={<DeleteOutlined />}
@@ -631,8 +656,16 @@ export const KnowledgeBaseSection: React.FC = () => {
                 </Text>
                 <Text>{complaint.description}</Text>
                 {complaint.admin_response && (
-                  <div style={{ marginTop: 8, padding: 12, background: '#f6ffed', borderRadius: 6 }}>
-                    <Text strong style={{ color: '#389e0d' }}>Ответ администратора: </Text>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      padding: 12,
+                      background: 'var(--color-info-box-green-bg, #f6ffed)',
+                      border: '1px solid var(--color-info-box-green-border, #b7eb8f)',
+                      borderRadius: 6,
+                    }}
+                  >
+                    <Text strong style={{ color: 'var(--ant-color-success, #389e0d)' }}>Ответ администратора: </Text>
                     <Text>{complaint.admin_response}</Text>
                   </div>
                 )}
@@ -652,18 +685,6 @@ export const KnowledgeBaseSection: React.FC = () => {
                       Удалить статью
                     </Button>
                   )}
-                  <Button
-                    type="primary"
-                    icon={<CheckCircleOutlined />}
-                    onClick={() => {
-                      setComplaintResolutionId(complaint.id);
-                      setComplaintDecision('reviewed');
-                      setComplaintResponse('');
-                      setComplaintModalOpen(true);
-                    }}
-                  >
-                    Закрыть без удаления
-                  </Button>
                   <Button
                     icon={<CloseCircleOutlined />}
                     onClick={() => {
@@ -834,31 +855,20 @@ export const KnowledgeBaseSection: React.FC = () => {
         </div>
       </Modal>
       <Modal
-        title={complaintDecision === 'reviewed' ? 'Закрыть жалобу без удаления статьи' : 'Отклонить жалобу'}
+        title="Отклонить жалобу"
         open={complaintModalOpen}
         onCancel={() => {
           setComplaintModalOpen(false);
           setComplaintResolutionId(null);
           setComplaintResponse('');
-          setComplaintDecision('reviewed');
+          setComplaintDecision('rejected');
         }}
         onOk={handleResolveComplaint}
-        okText={complaintDecision === 'reviewed' ? 'Закрыть жалобу' : 'Отклонить жалобу'}
+        okText="Отклонить жалобу"
         cancelText="Отмена"
         confirmLoading={complaintLoading}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <Text strong>Действие</Text>
-            <Select
-              value={complaintDecision}
-              onChange={(value) => setComplaintDecision(value)}
-              style={{ width: '100%', marginTop: 4 }}
-            >
-              <Select.Option value="reviewed">Закрыть без удаления</Select.Option>
-              <Select.Option value="rejected">Отклонить жалобу</Select.Option>
-            </Select>
-          </div>
           <div>
             <Text strong>Ответ администратора *</Text>
             <TextArea

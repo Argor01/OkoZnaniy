@@ -1,4 +1,4 @@
-﻿.container {
+.container {
   max-width: 900px;
   margin: 0 auto;
   padding-top: 24px;
@@ -145,5 +145,25 @@
 }
 
 .searchInput :global(.ant-input-search-button) {
+  min-height: 48px;
+}
+
+.filterSelect:global(.ant-select) {
+  min-width: 180px;
+}
+
+.filterSelect:global(.ant-select) :global(.ant-select-selector) {
+  min-height: 48px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.filterSelect:global(.ant-select) :global(.ant-select-selection-wrap) {
+  align-items: center;
+}
+
+.createButton:global(.ant-btn) {
   min-height: 48px;
 }

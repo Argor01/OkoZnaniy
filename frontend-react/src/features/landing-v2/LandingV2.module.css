@@ -1,4 +1,10 @@
 /* ============== Landing V2 — Premium ============== */
+:global(html) {
+  scroll-behavior: smooth;
+}
+:global(#how),:global(#experts),:global(#reviews),:global(#cta) {
+  scroll-margin-top: 96px;
+}
 .page {
   --v2-primary: #6435a5;
   --v2-primary-dark: #4a1f8a;
