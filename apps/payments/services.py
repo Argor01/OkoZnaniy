@@ -62,10 +62,12 @@ class PaymentService:
                 result = None
 
             if result:
-                # Обновляем статус заказа
-                order = payment.order
-                order.status = 'in_progress'
-                order.save()
+                # Top-ups have no order: the Payment post_save signal credits
+                # the wallet. Legacy order payments still advance the order.
+                if payment.order_id:
+                    order = payment.order
+                    order.status = 'in_progress'
+                    order.save(update_fields=['status'])
                 return True
                 
             return False

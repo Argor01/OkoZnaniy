@@ -84,9 +84,11 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny])
     def process_callback(self, request, pk=None):
-        payment = self.get_object()
+        # Provider callbacks have no site JWT and top-ups have order=None, so
+        # self.get_object() (user-scoped queryset) cannot be used here.
+        payment = get_object_or_404(Payment, pk=pk)
         try:
             with transaction.atomic():
                 success = PaymentService.process_payment_callback(
