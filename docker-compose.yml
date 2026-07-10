@@ -109,6 +109,8 @@ services:
       - app_network
 
   vk-bot:
+    # Optional community-notification bot. Enable explicitly after VK_GROUP_ID/token are configured.
+    profiles: ["vk-bot"]
     build:
       context: .
       dockerfile: Dockerfile.vkbot

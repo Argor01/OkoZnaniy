@@ -80,7 +80,7 @@ class ClaimSerializer(serializers.ModelSerializer):
         model = Claim
         fields = ['id', 'ticket_number', 'user', 'admin', 'assigned_users', 'assigned_user_ids',
                   'order', 'order_id', 'claim_type', 'subject', 'description', 'status', 'priority',
-                  'tags', 'tags_list', 'resolution', 'created_at', 'updated_at', 'completed_at', 'messages',
+                  'tags', 'tags_list', 'resolution', 'progress', 'created_at', 'updated_at', 'completed_at', 'messages',
                   'plaintiff', 'defendant', 'plaintiff_id', 'defendant_id', 'reason', 'refund_type',
                   'refund_percentage', 'refund_amount']
         read_only_fields = ['created_at', 'updated_at', 'completed_at']

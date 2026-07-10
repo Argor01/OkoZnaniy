@@ -249,14 +249,17 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         try:
             user = request.user
             if getattr(user, 'is_banned_for_contacts', False):
-                user.is_banned_for_contacts = False
-                user.contact_ban_until = None
-                user.contact_ban_reason = None
-                user.save(update_fields=[
-                    'is_banned_for_contacts', 'contact_ban_until', 'contact_ban_reason'
-                ])
+                # Clear the false-positive contact ban, but DO NOT unfreeze the
+                # related order/chat: they were just frozen for this arbitration.
                 if hasattr(user, 'clear_contact_ban'):
-                    user.clear_contact_ban(unfreeze_related=True)
+                    user.clear_contact_ban(unfreeze_related=False)
+                else:
+                    user.is_banned_for_contacts = False
+                    user.contact_ban_until = None
+                    user.contact_ban_reason = None
+                    user.save(update_fields=[
+                        'is_banned_for_contacts', 'contact_ban_until', 'contact_ban_reason'
+                    ])
         except Exception:
             pass
         

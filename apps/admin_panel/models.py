@@ -153,6 +153,7 @@ class Claim(models.Model):
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='medium')
     tags = models.TextField(blank=True, verbose_name='Теги', help_text='Теги через запятую, например: #негатив, #срочно, #баг')
     resolution = models.TextField(blank=True)
+    progress = models.PositiveSmallIntegerField(default=0, verbose_name='Прогресс, %')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)

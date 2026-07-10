@@ -260,6 +260,17 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(detail=True, methods=['post'], url_path='assign')
+    def assign_admin(self, request, pk=None):
+        support_request = self.get_object()
+        admin_id = request.data.get('admin_id')
+        admin = get_object_or_404(User, pk=admin_id, role__in=['admin', 'director'])
+        support_request.admin = admin
+        support_request.save(update_fields=['admin'])
+        log_activity(request.user, 'assigned', f'Назначен ответственный: {admin.get_full_name() or admin.username}',
+                     meta={'admin_id': admin.id}, support_request=support_request)
+        return Response({'message': 'Ответственный назначен'})
+
     @action(detail=True, methods=['post'])
     def take_request(self, request, pk=None):
         """Взять запрос в работу"""
@@ -468,6 +479,91 @@ class ClaimViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """При создании претензии автоматически устанавливаем пользователя"""
         serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='assign')
+    def assign_admin(self, request, pk=None):
+        claim = self.get_object()
+        admin_id = request.data.get('admin_id')
+        admin = get_object_or_404(User, pk=admin_id, role__in=['admin', 'director'])
+        claim.admin = admin
+        claim.save(update_fields=['admin'])
+        log_activity(request.user, 'assigned', f'Назначен ответственный: {admin.get_full_name() or admin.username}',
+                     meta={'admin_id': admin.id}, claim=claim)
+        return Response({'message': 'Ответственный назначен'})
+
+    @action(detail=True, methods=['patch'], url_path='progress')
+    def update_progress(self, request, pk=None):
+        claim = self.get_object()
+        try:
+            progress = int(request.data.get('progress'))
+        except (TypeError, ValueError):
+            return Response({'progress': 'Укажите целое число от 0 до 100'}, status=400)
+        if not 0 <= progress <= 100:
+            return Response({'progress': 'Допустимый диапазон: 0–100'}, status=400)
+        claim.progress = progress
+        claim.save(update_fields=['progress'])
+        log_activity(request.user, 'note', f'Прогресс обновлён: {progress}%', meta={'progress': progress}, claim=claim)
+        return Response({'message': 'Прогресс обновлён', 'progress': progress})
+
+    @action(detail=True, methods=['post'], url_path='reopen')
+    def reopen_claim(self, request, pk=None):
+        claim = self.get_object()
+        reason = (request.data.get('reason') or '').strip()
+        claim.status = 'in_progress'
+        claim.completed_at = None
+        claim.resolution = reason
+        claim.save(update_fields=['status', 'completed_at', 'resolution'])
+        log_activity(request.user, 'status_change', f'Обращение переоткрыто: {reason}', meta={'new': 'in_progress'}, claim=claim)
+        return Response({'message': 'Обращение переоткрыто'})
+
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve_claim(self, request, pk=None):
+        claim = self.get_object()
+        decision = (request.data.get('decision') or '').strip()
+        claim.status = 'completed'
+        claim.resolution = decision
+        claim.progress = 100
+        claim.completed_at = timezone.now()
+        claim.save(update_fields=['status', 'resolution', 'progress', 'completed_at'])
+        log_activity(request.user, 'completed', f'Решение одобрено: {decision}', claim=claim)
+        return Response({'message': 'Обращение одобрено'})
+
+    @action(detail=True, methods=['post'], url_path='reject-approval')
+    def reject_approval(self, request, pk=None):
+        claim = self.get_object()
+        reason = (request.data.get('reason') or '').strip()
+        claim.status = 'in_progress'
+        claim.resolution = reason
+        claim.completed_at = None
+        claim.save(update_fields=['status', 'resolution', 'completed_at'])
+        log_activity(request.user, 'status_change', f'Одобрение отклонено: {reason}', meta={'new': 'in_progress'}, claim=claim)
+        return Response({'message': 'Одобрение отклонено'})
+
+    @action(detail=True, methods=['post'], url_path='escalate')
+    def escalate_claim(self, request, pk=None):
+        claim = self.get_object()
+        claim.status = 'pending_approval'
+        claim.priority = 'urgent'
+        claim.add_tag('#эскалация')
+        claim.save(update_fields=['status', 'priority'])
+        log_activity(request.user, 'status_change', 'Обращение эскалировано директору', meta={'new': 'pending_approval'}, claim=claim)
+        return Response({'message': 'Обращение эскалировано директору'})
+
+    @action(detail=True, methods=['post'], url_path='request-info')
+    def request_info(self, request, pk=None):
+        claim = self.get_object()
+        questions = (request.data.get('questions') or '').strip()
+        if not questions:
+            return Response({'questions': 'Введите вопросы'}, status=400)
+        msg = ClaimMessage.objects.create(claim=claim, sender=request.user, message=questions, is_admin=True)
+        log_activity(request.user, 'message', questions, claim=claim)
+        if claim.user_id:
+            NotificationService.create_notification(
+                recipient=claim.user, type=NotificationType.NEW_COMMENT,
+                title=f'Нужна информация по обращению #{claim.ticket_number}', message=questions,
+                related_object_id=claim.id, related_object_type='claim',
+                data={'ticket_type': 'claim', 'ticket_id': claim.id, 'ticket_number': claim.ticket_number})
+        return Response(ClaimMessageSerializer(msg).data)
 
     @action(detail=True, methods=['post'])
     def take_in_work(self, request, pk=None):
