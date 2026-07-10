@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
     requestPasswordReset: '/users/request_password_reset/',
     telegramAuth: '/users/telegram_auth/', 
     telegramAuthStatus: (authId: string) => `/users/telegram_auth_status/${authId}/`,
+    maxAuthStatus: (authId: string) => `/users/max_auth_status/${authId}/`,
     googleLogin: '/accounts/google/login/?process=login',
     vkLogin: '/users/vkid/login/',
     resetPasswordWithCode: '/users/reset_password_with_code/',

@@ -134,6 +134,11 @@ export const authApi = {
     return response.data;
   },
 
+  checkMaxAuthStatus: async (authId: string): Promise<{ authenticated: boolean; access: string; refresh: string; user: any }> => {
+    const response = await apiClient.get(API_ENDPOINTS.auth.maxAuthStatus(authId));
+    return response.data;
+  },
+
   
   confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<void> => {
     await apiClient.post(API_ENDPOINTS.auth.resetPasswordWithCode, {

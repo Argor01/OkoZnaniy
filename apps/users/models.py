@@ -29,6 +29,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CLIENT)
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
     telegram_id = models.BigIntegerField(null=True, blank=True)
+    max_id = models.BigIntegerField(null=True, blank=True)
     vk_id = models.BigIntegerField(
         null=True, blank=True, unique=True,
         verbose_name="VK ID"

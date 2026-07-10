@@ -29,6 +29,7 @@ urlpatterns = [
     path('reset-password/', views.UserViewSet.as_view({'post': 'request_password_reset'}), name='user-reset-password'),
     path('reset-password/confirm/', views.UserViewSet.as_view({'post': 'reset_password_with_code'}), name='user-reset-password-confirm'),
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
+    path('max_auth_status/<str:auth_id>/', views.max_auth_status, name='max_auth_status'),
     path('google/callback/', views.google_callback, name='google_callback'),
     path('vk/callback/', views.vk_callback, name='vk_callback'),
     path('vkid/login/', vkid.vkid_login, name='vkid_login'),

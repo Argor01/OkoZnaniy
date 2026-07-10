@@ -1628,3 +1628,13 @@ def vk_callback(request):
 
     logger.info(f"🔀 VK Redirecting to: {redirect_url}")
     return redirect(redirect_url)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def max_auth_status(request, auth_id):
+    """Check MAX bot authorization status (analogous to telegram_auth_status)."""
+    clean_auth_id = auth_id.replace('auth_', '', 1) if auth_id.startswith('auth_') else auth_id
+    auth_data = cache.get(f'max_auth_{clean_auth_id}')
+    if auth_data:
+        return Response(auth_data, status=status.HTTP_200_OK)
+    return Response({'authenticated': False}, status=status.HTTP_200_OK)

@@ -29,6 +29,41 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     return `auth_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   };
 
+  const handleMaxAuth = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const authId = generateAuthId();
+    window.open(`https://max.ru/id6623148052_bot?start=auth_${authId}`, '_blank', 'noopener,noreferrer');
+    checkMaxAuthStatus(authId);
+  };
+
+  const checkMaxAuthStatus = (authId: string) => {
+    let attempts = 0;
+    const maxAttempts = 150;
+    const checkInterval = setInterval(async () => {
+      attempts++;
+      try {
+        const data = await authApi.checkMaxAuthStatus(authId);
+        if (data.authenticated) {
+          clearInterval(checkInterval);
+          localStorage.setItem('access_token', data.access);
+          localStorage.setItem('refresh_token', data.refresh);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          const user = data.user;
+          let redirectUrl: string = ROUTES.dashboard;
+          if (user.role === 'expert') redirectUrl = ROUTES.expert.root;
+          else if (user.role === 'partner') redirectUrl = ROUTES.partner.root;
+          else if (user.role === 'admin') redirectUrl = ROUTES.admin.dashboard;
+          else if (user.role === 'director') redirectUrl = ROUTES.admin.directorDashboard;
+          else if (user.role === 'arbitrator') redirectUrl = ROUTES.arbitrator.root;
+          window.location.href = redirectUrl;
+        }
+      } catch (error) {
+        if (debugEnabled) logger.error('MAX auth check error:', error);
+      }
+      if (attempts >= maxAttempts) clearInterval(checkInterval);
+    }, 2000);
+  };
+
   const handleTelegramAuth = (e: React.MouseEvent) => {
     e.preventDefault();
     const authId = generateAuthId();
@@ -99,7 +134,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
         <a href={vkHref} aria-label="VK">
           <img src="/assets/vk.svg" alt="vk-login" className={styles.socialLoginIcon} />
         </a>
-        <a href={vkHref} aria-label="MAX">
+        <a href="#" onClick={handleMaxAuth} aria-label="MAX">
           <img src="/assets/max.svg" alt="max-login" className={styles.socialLoginIcon} />
         </a>
       </div>

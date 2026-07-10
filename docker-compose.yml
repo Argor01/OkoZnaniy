@@ -24,6 +24,7 @@ services:
       VK_CLIENT_SECRET: ${VK_CLIENT_SECRET}
       VK_SERVICE_KEY: ${VK_SERVICE_KEY}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
       VK_BOT_TOKEN: ${VK_BOT_TOKEN}
       VK_GROUP_ID: ${VK_GROUP_ID}
       EMAIL_HOST: ${EMAIL_HOST:-smtp.yandex.ru}
@@ -152,6 +153,31 @@ services:
         condition: service_started
       frontend:
         condition: service_started
+    networks:
+      - app_network
+
+  max-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.maxbot
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: config.settings
     networks:
       - app_network
 
