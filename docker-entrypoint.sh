@@ -20,7 +20,9 @@ python manage.py migrate --noinput
 
 # Create test users (idempotent — safe to run on every start)
 echo "Ensuring test users exist..."
-python manage.py create_test_users || echo "Warning: could not create test users"
+if [ "${CREATE_TEST_USERS:-0}" = "1" ] && [ "${DJANGO_ENV:-production}" != "production" ]; then
+  python manage.py create_test_users || echo "Warning: could not create test users"
+fi
 
 # Collect static files
 echo "Collecting static files..."

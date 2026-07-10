@@ -54,12 +54,10 @@ check_code shop "$BASE_URL/api/shop/works/" "200"
 check_code vk_oauth "$BASE_URL/api/users/vkid/login/" "302"
 check_code max_status "$BASE_URL/api/users/max_auth_status/postdeploy-probe/" "200"
 
-# Authenticated admin/wallet checks using disposable access token.
-LOGIN_JSON=$(curl -ksS --max-time 20 -X POST "$BASE_URL/api/users/token/" \
-  -H 'Content-Type: application/json' \
-  -d '{"username":"administrator@test.com","password":"test123"}')
-TOKEN=$(printf '%s' "$LOGIN_JSON" | python3 -c 'import json,sys; print(json.load(sys.stdin)["access"])' 2>/dev/null || true)
-[ -n "$TOKEN" ] || fail "admin login smoke"
+# Authenticated admin/wallet checks. Mint a short-lived token internally;
+# never store a production admin password in scripts.
+TOKEN=$(docker compose exec -T backend python -c "import os; os.environ.setdefault('DJANGO_SETTINGS_MODULE','config.settings'); import django; django.setup(); from django.contrib.auth import get_user_model; from rest_framework_simplejwt.tokens import RefreshToken; U=get_user_model(); u=U.objects.filter(role='admin',is_active=True).first(); print(str(RefreshToken.for_user(u).access_token) if u else '')" 2>/dev/null | tail -1)
+[ -n "$TOKEN" ] || fail "no active admin for authenticated smoke"
 for spec in "admin_stats:/api/admin-panel/stats/" "wallet:/api/wallet/me/" "claims:/api/admin-panel/claims/"; do
   name=${spec%%:*}; path=${spec#*:}
   code=$(curl -ksS --max-time 20 -o /tmp/oko-auth-body -w '%{http_code}' \

@@ -85,13 +85,8 @@ docker-compose exec -T backend python setup_google_oauth.py 2>/dev/null || true
 echo "📚 Проверяем справочники..."
 docker-compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
 
-# Создаем тестовые аккаунты администраторов
-echo "👑 Создаем тестовые аккаунты администраторов..."
-docker-compose exec -T backend python manage.py create_admin_accounts 2>/dev/null || true
-
-# Создаем тестовые аккаунты с чатами
-echo "👥 Создаем тестовые аккаунты с чатами..."
-docker-compose exec -T backend python setup_test_chats.py 2>/dev/null || true
+# Test accounts/data are forbidden in production. To seed a local dev
+# environment, run them manually with DJANGO_ENV=development.
 
 echo "✅ Проект успешно обновлен и перезапущен!"
 echo "📊 Проверьте статус контейнеров: docker-compose ps"
