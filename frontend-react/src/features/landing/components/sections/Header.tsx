@@ -121,6 +121,8 @@ const Header: React.FC = () => {
           </nav>
 
           <div className={styles.headerCabinet}>
+            <button className={`${styles.headerCabinetButton} ${styles.headerBecomeCta} ${landingStyles.button}`} onClick={() => navigate('/become-expert')}>Стать экспертом</button>
+            <button className={`${styles.headerCabinetButton} ${styles.headerBecomeCta} ${styles.headerCabinetButtonSpaced} ${landingStyles.button}`} onClick={() => navigate('/become-partner')}>Стать партнёром</button>
             {localStorage.getItem('access_token') ? (
               <>
                 <button 
