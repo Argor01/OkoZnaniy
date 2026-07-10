@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly deep backup integrity check
+
+[Timer]
+OnCalendar=Sun *-*-* 03:30:00 UTC
+RandomizedDelaySec=20m
+Persistent=true
+Unit=okoznaniy-backup-check.service
+
+[Install]
+WantedBy=timers.target

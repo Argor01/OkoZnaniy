@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily OkoZnaniy backup at 02:20 UTC
+
+[Timer]
+OnCalendar=*-*-* 02:20:00 UTC
+RandomizedDelaySec=15m
+Persistent=true
+Unit=okoznaniy-backup.service
+
+[Install]
+WantedBy=timers.target

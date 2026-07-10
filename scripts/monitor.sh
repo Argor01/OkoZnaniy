@@ -31,6 +31,8 @@ home=$(probe "$BASE_URL/")
 api=$(probe "$BASE_URL/api/shop/works/")
 admin=$(probe "$BASE_URL/admin/dashboard")
 wallet=$(probe "$BASE_URL/api/wallet/")
+backup_status=$(/root/OkoZnaniy/scripts/backup_check.sh 2>/dev/null || true)
+[ "${backup_status#OK }" != "$backup_status" ] || failures="$failures backup:${backup_status:-missing}"
 [ "$home" = 200 ] || failures="$failures home:$home"
 [ "$api" = 200 ] || failures="$failures api:$api"
 [ "$admin" = 200 ] || failures="$failures admin:$admin"
@@ -43,7 +45,7 @@ if [ -z "$failures" ]; then
   if [ ! -f "$STATE_DIR/healthy-$hour" ]; then
     rm -f "$STATE_DIR"/healthy-* 2>/dev/null || true
     touch "$STATE_DIR/healthy-$hour"
-    log "OK home=$home api=$api admin=$admin wallet=$wallet"
+    log "OK home=$home api=$api admin=$admin wallet=$wallet $backup_status"
   fi
   exit 0
 fi

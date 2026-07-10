@@ -1,0 +1,10 @@
+[Unit]
+Description=OkoZnaniy safe disk housekeeping
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '/usr/bin/docker builder prune -af --filter until=168h; /usr/bin/docker image prune -f; /usr/bin/journalctl --vacuum-time=30d'
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=2h

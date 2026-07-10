@@ -1,0 +1,15 @@
+[Unit]
+Description=Encrypted deduplicated OkoZnaniy backup
+Wants=docker.service network-online.target
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/OkoZnaniy
+ExecStart=/root/OkoZnaniy/scripts/backup.sh
+Nice=15
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+TimeoutStartSec=2h
+StandardOutput=journal
+StandardError=journal

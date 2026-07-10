@@ -225,14 +225,9 @@ def vkid_callback(request):
             defaults={"user": user, "extra_data": profile},
         )
 
-    refresh = RefreshToken.for_user(user)
-    access = str(refresh.access_token)
-    refresh_str = str(refresh)
-
+    from apps.users.oauth_exchange import create_oauth_exchange
+    code = create_oauth_exchange(user)
     frontend = getattr(settings, "FRONTEND_URL", "").rstrip("/") or ""
-    redirect_url = (
-        f"{frontend}/google-callback?access={access}&refresh={refresh_str}"
-        f"&user_id={user.id}&username={user.username}&role={user.role}"
-    )
+    redirect_url = f"{frontend}/google-callback?code={code}"
     logger.info(f"VK ID: login success user={user.username} role={user.role}")
     return redirect(redirect_url)

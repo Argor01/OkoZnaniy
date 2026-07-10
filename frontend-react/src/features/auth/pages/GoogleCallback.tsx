@@ -9,38 +9,33 @@ const GoogleCallback: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const access = searchParams.get('access');
-    const refresh = searchParams.get('refresh');
+    const code = searchParams.get('code');
     const error = searchParams.get('error');
+    let cancelled = false;
 
-    if (error) {
-      navigate(`${ROUTES.login}?error=google_auth_failed`, { replace: true });
+    if (error || !code) {
+      navigate(`${ROUTES.login}?error=${error ? 'oauth_failed' : 'missing_code'}`, { replace: true });
       return;
     }
 
-    if (access && refresh) {
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
+    (async () => {
+      try {
+        const { access, refresh } = await authApi.exchangeOAuthCode(code);
+        if (cancelled) return;
+        localStorage.setItem('access_token', access);
+        localStorage.setItem('refresh_token', refresh);
+        // Remove the one-time code from browser history immediately.
+        window.history.replaceState({}, document.title, '/google-callback');
+        const me = await authApi.getCurrentUser();
+        if (cancelled) return;
+        localStorage.setItem('user', JSON.stringify(me));
+        await redirectByRole(me?.role ?? '', (to) => navigate(to, { replace: true }));
+      } catch (_e) {
+        if (!cancelled) navigate(`${ROUTES.login}?error=oauth_exchange_failed`, { replace: true });
+      }
+    })();
 
-      let cancelled = false;
-
-      (async () => {
-        try {
-          const me = await authApi.getCurrentUser();
-          if (cancelled) return;
-          localStorage.setItem('user', JSON.stringify(me));
-          await redirectByRole(me?.role ?? '', (to) => navigate(to, { replace: true }));
-        } catch (_e) {
-          if (!cancelled) navigate(`${ROUTES.login}?error=me_failed`, { replace: true });
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-      };
-    } else {
-      navigate(`${ROUTES.login}?error=missing_params`, { replace: true });
-    }
+    return () => { cancelled = true; };
   }, [searchParams, navigate]);
 
   return (

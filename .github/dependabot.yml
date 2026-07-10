@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    labels: [dependencies, security]
+  - package-ecosystem: npm
+    directory: /frontend-react
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    labels: [dependencies, security]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    labels: [dependencies]
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: monthly }
+    labels: [dependencies]
+  - package-ecosystem: docker
+    directory: /frontend-react
+    schedule: { interval: monthly }
+    labels: [dependencies]

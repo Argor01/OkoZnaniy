@@ -1573,12 +1573,6 @@ def google_callback(request):
         logger.warning("❌ User not authenticated, redirecting to login")
         return redirect(f"{settings.FRONTEND_URL}/login?error=auth_failed")
     
-    # Генерируем JWT токены
-    refresh = RefreshToken.for_user(user)
-    access_token = str(refresh.access_token)
-    refresh_token = str(refresh)
-    
-    logger.info(f"✅ Tokens generated for user: {user.username}, role: {user.role}")
     
     # Получаем email из Google аккаунта
     try:
@@ -1592,13 +1586,9 @@ def google_callback(request):
     except SocialAccount.DoesNotExist:
         pass
     
-    # Перенаправляем на /google-callback с токенами
-    # GoogleCallback компонент обработает токены и перенаправит на нужную страницу
-    redirect_url = (
-        f"{settings.FRONTEND_URL}/google-callback?"
-        f"access={access_token}&refresh={refresh_token}&"
-        f"user_id={user.id}&username={user.username}&role={user.role}"
-    )
+    from .oauth_exchange import create_oauth_exchange
+    code = create_oauth_exchange(user)
+    redirect_url = f"{settings.FRONTEND_URL}/google-callback?code={code}"
     
     logger.info(f"🔀 Redirecting to: {redirect_url}")
     return redirect(redirect_url)
@@ -1619,17 +1609,10 @@ def vk_callback(request):
         logger.warning("❌ VK: User not authenticated, redirecting to login")
         return redirect(f"{settings.FRONTEND_URL}/login?error=vk_auth_failed")
 
-    refresh = RefreshToken.for_user(user)
-    access_token = str(refresh.access_token)
-    refresh_token = str(refresh)
 
-    logger.info(f"✅ VK tokens generated for user: {user.username}, role: {user.role}")
-
-    redirect_url = (
-        f"{settings.FRONTEND_URL}/google-callback?"
-        f"access={access_token}&refresh={refresh_token}&"
-        f"user_id={user.id}&username={user.username}&role={user.role}"
-    )
+    from .oauth_exchange import create_oauth_exchange
+    code = create_oauth_exchange(user)
+    redirect_url = f"{settings.FRONTEND_URL}/google-callback?code={code}"
 
     logger.info(f"🔀 VK Redirecting to: {redirect_url}")
     return redirect(redirect_url)
@@ -1643,3 +1626,15 @@ def max_auth_status(request, auth_id):
     if auth_data:
         return Response(auth_data, status=status.HTTP_200_OK)
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def oauth_exchange(request):
+    """Exchange a short-lived, single-use OAuth handoff code for JWTs."""
+    from .oauth_exchange import consume_oauth_exchange
+    code = (request.data.get('code') or '').strip()
+    data = consume_oauth_exchange(code)
+    if data is None:
+        return Response({'detail': 'Код авторизации недействителен или истёк'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'access': data['access'], 'refresh': data['refresh']})

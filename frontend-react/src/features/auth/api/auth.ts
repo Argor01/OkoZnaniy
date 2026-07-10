@@ -5,6 +5,11 @@ import { API_ENDPOINTS } from '@/config/endpoints';
 export type { AuthResponse, LoginRequest, RegisterRequest, User };
 
 export const authApi = {
+  exchangeOAuthCode: async (code: string): Promise<{ access: string; refresh: string }> => {
+    const response = await apiClient.post(API_ENDPOINTS.auth.oauthExchange, { code });
+    return response.data;
+  },
+
   
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post(API_ENDPOINTS.auth.login, data);

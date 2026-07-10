@@ -1,0 +1,11 @@
+[Unit]
+Description=Deep integrity check of OkoZnaniy backups
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/okoznaniy-backup.env
+ExecStart=/usr/bin/restic check --read-data-subset=10%%
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=4h

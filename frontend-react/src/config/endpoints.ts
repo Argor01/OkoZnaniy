@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     telegramAuthStatus: (authId: string) => `/users/telegram_auth_status/${authId}/`,
     maxAuthStatus: (authId: string) => `/users/max_auth_status/${authId}/`,
     googleLogin: '/accounts/google/login/?process=login',
+    oauthExchange: '/users/oauth/exchange/',
     vkLogin: '/users/vkid/login/',
     resetPasswordWithCode: '/users/reset_password_with_code/',
     resetPasswordConfirm: '/users/reset_password_confirm/',

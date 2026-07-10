@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly OkoZnaniy disk housekeeping
+
+[Timer]
+OnCalendar=Sun *-*-* 04:30:00 UTC
+RandomizedDelaySec=30m
+Persistent=true
+Unit=okoznaniy-housekeeping.service
+
+[Install]
+WantedBy=timers.target
