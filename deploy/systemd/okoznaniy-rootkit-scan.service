@@ -1,0 +1,9 @@
+[Unit]
+Description=OkoZnaniy weekly rootkit and package-integrity scan
+
+[Service]
+Type=oneshot
+ExecStart=/root/OkoZnaniy/scripts/rootkit_scan.sh
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=4h

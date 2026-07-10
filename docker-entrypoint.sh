@@ -28,6 +28,12 @@ fi
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-# Start Daphne (ASGI server with WebSocket support)
+# Honour a Compose command (for example the Celery worker). The backend
+# service has no explicit command and therefore falls back to Daphne.
+if [ "$#" -gt 0 ]; then
+  echo "Starting custom service: $*"
+  exec "$@"
+fi
+
 echo "Starting Daphne (ASGI server)..."
 exec daphne -b 0.0.0.0 -p 8000 config.asgi:application

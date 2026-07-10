@@ -1,0 +1,11 @@
+[Unit]
+Description=Weekly OkoZnaniy rootkit scan
+
+[Timer]
+OnCalendar=Sat *-*-* 04:15:00 UTC
+RandomizedDelaySec=30m
+Persistent=true
+Unit=okoznaniy-rootkit-scan.service
+
+[Install]
+WantedBy=timers.target
