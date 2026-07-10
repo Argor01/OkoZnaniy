@@ -2,7 +2,11 @@
 :global(html) {
   scroll-behavior: smooth;
 }
-:global(#how),:global(#experts),:global(#reviews),:global(#cta) {
+
+:global(#how),
+:global(#experts),
+:global(#reviews),
+:global(#cta) {
   scroll-margin-top: 96px;
 }
 .page {
@@ -2335,4 +2339,10 @@
   .bpBento { grid-template-columns:1fr; }
   .bpBentoFeatured { min-height:auto; }
   .bpBentoValue { font-size:72px; }
+}
+
+/* cross-landing buttons in topbar */
+.topbarBecome { white-space: nowrap; }
+@media (max-width: 900px) {
+  .topbarBecome { display: none; }
 }
