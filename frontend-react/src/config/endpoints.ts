@@ -4,6 +4,7 @@ export const API_ENDPOINTS = {
     register: '/users/',
     me: '/users/me/',
     refreshToken: '/users/token/refresh/',
+    logout: '/users/token/logout/',
     verifyEmailCode: '/users/verify_email_code/',
     resendVerificationCode: '/users/resend_verification_code/',
     requestPasswordReset: '/users/request_password_reset/',

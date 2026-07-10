@@ -19,7 +19,7 @@ case "$cmd" in
    ;;
  database)
    tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT INT TERM
-   restic restore "$snapshot" --target "$tmp" --include '/stage/database/oko_db.dump'
+   restic restore "$snapshot" --target "$tmp" --include '/var/lib/okoznaniy-backup/stage/database/oko_db.dump'
    dump=$(find "$tmp" -name oko_db.dump -type f | head -1)
    [ -s "$dump" ] || { echo 'Database dump not found' >&2; exit 1; }
    echo "WARNING: this replaces the production oko_db database from snapshot $snapshot."

@@ -1,0 +1,11 @@
+[Unit]
+Description=OkoZnaniy monthly backup restore drill
+After=docker.service okoznaniy-backup.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/OkoZnaniy
+ExecStart=/root/OkoZnaniy/scripts/restore_drill.sh
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=4h

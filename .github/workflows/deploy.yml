@@ -1,0 +1,63 @@
+name: Staging and Production Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose and build artifacts
+        run: |
+          docker compose config -q
+          docker compose build backend frontend
+
+  staging:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Run isolated staging acceptance on server
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /root/OkoZnaniy
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            ./scripts/staging_deploy.sh
+
+  production:
+    needs: staging
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Deploy production after staging passed
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /root/OkoZnaniy
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            docker compose build backend celery frontend max-bot
+            docker compose up -d backend celery frontend nginx max-bot
+            ./scripts/post_deploy_check.sh

@@ -20,10 +20,10 @@ const GoogleCallback: React.FC = () => {
 
     (async () => {
       try {
-        const { access, refresh } = await authApi.exchangeOAuthCode(code);
+        await authApi.exchangeOAuthCode(code);
         if (cancelled) return;
-        localStorage.setItem('access_token', access);
-        localStorage.setItem('refresh_token', refresh);
+        localStorage.setItem('access_token', 'cookie-session');
+        localStorage.removeItem('refresh_token');
         // Remove the one-time code from browser history immediately.
         window.history.replaceState({}, document.title, '/google-callback');
         const me = await authApi.getCurrentUser();

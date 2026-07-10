@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView
 from . import views, vkid
+from .cookie_views import CookieTokenRefreshView, CookieLogoutView
 
 """config URL Configuration
 
@@ -25,7 +25,8 @@ router.register('', views.UserViewSet)
 
 urlpatterns = [
     path('token/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('token/logout/', CookieLogoutView.as_view(), name='token_logout'),
     path('reset-password/', views.UserViewSet.as_view({'post': 'request_password_reset'}), name='user-reset-password'),
     path('reset-password/confirm/', views.UserViewSet.as_view({'post': 'reset_password_with_code'}), name='user-reset-password-confirm'),
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),

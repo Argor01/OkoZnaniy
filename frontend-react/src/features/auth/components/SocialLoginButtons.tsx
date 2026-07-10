@@ -45,8 +45,8 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
         const data = await authApi.checkMaxAuthStatus(authId);
         if (data.authenticated) {
           clearInterval(checkInterval);
-          localStorage.setItem('access_token', data.access);
-          localStorage.setItem('refresh_token', data.refresh);
+          localStorage.setItem('access_token', 'cookie-session');
+          localStorage.removeItem('refresh_token');
           localStorage.setItem('user', JSON.stringify(data.user));
           const user = data.user;
           let redirectUrl: string = ROUTES.dashboard;
@@ -90,8 +90,8 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
           if (debugEnabled) logger.log(`✅ Авторизация подтверждена!`);
           clearInterval(checkInterval);
 
-          localStorage.setItem('access_token', data.access);
-          localStorage.setItem('refresh_token', data.refresh);
+          localStorage.setItem('access_token', 'cookie-session');
+          localStorage.removeItem('refresh_token');
           localStorage.setItem('user', JSON.stringify(data.user));
           if (debugEnabled) logger.log(`💾 Токены сохранены`);
 

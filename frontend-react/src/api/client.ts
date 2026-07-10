@@ -10,6 +10,7 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30000,
+  withCredentials: true,
 });
 
 const AUTH_ENDPOINTS = [
@@ -46,13 +47,9 @@ apiClient.interceptors.request.use((config) => {
     }
   }
 
-  const token = localStorage.getItem('access_token');
   const url = config.url || '';
   const method = (config.method || 'get').toLowerCase();
 
-  if (token && !isAuthEndpoint(url, method)) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
 
   // Dev-mode request logging
   if (import.meta.env.DEV) {
@@ -95,19 +92,8 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refresh_token');
-
-        if (refreshToken) {
-          const response = await axios.post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {
-            refresh: refreshToken,
-          });
-
-          const { access } = response.data;
-          localStorage.setItem('access_token', access);
-
-          originalRequest.headers.Authorization = `Bearer ${access}`;
-          return apiClient(originalRequest);
-        }
+        await axios.post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {}, { withCredentials: true });
+        return apiClient(originalRequest);
       } catch {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');

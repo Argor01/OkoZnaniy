@@ -5,20 +5,15 @@ import { API_ENDPOINTS } from '@/config/endpoints';
 export type { AuthResponse, LoginRequest, RegisterRequest, User };
 
 export const authApi = {
-  exchangeOAuthCode: async (code: string): Promise<{ access: string; refresh: string }> => {
-    const response = await apiClient.post(API_ENDPOINTS.auth.oauthExchange, { code });
-    return response.data;
+  exchangeOAuthCode: async (code: string): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.auth.oauthExchange, { code });
   },
 
   
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await apiClient.post(API_ENDPOINTS.auth.login, data);
-    const { access, refresh, user } = response.data;
-    
-    
-    localStorage.setItem('access_token', access);
-    localStorage.setItem('refresh_token', refresh);
-    
+    const { user } = response.data;
+    localStorage.setItem('access_token', 'cookie-session');
     // Сохраняем роль пользователя
     if (user?.role) {
       localStorage.setItem('user_role', user.role);
@@ -34,10 +29,13 @@ export const authApi = {
   },
 
   
-  logout: () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_role');
+  logout: async () => {
+    try { await apiClient.post(API_ENDPOINTS.auth.logout); } finally {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_role');
+      localStorage.removeItem('user');
+    }
   },
 
   

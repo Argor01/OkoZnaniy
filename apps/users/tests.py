@@ -42,9 +42,12 @@ class AuthenticationTests(APITestCase):
         url = reverse('token_obtain_pair')
         response = self.client.post(url, self.login_data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertNotIn('access', response.data)
+        self.assertNotIn('refresh', response.data)
         self.assertIn('user', response.data)
+        self.assertIn('oko_access', response.cookies)
+        self.assertIn('oko_refresh', response.cookies)
+        self.assertTrue(response.cookies['oko_access']['httponly'])
 
     def test_token_refresh(self):
         """Тест обновления токена"""
@@ -56,12 +59,13 @@ class AuthenticationTests(APITestCase):
         )
         
         response = self.client.post(reverse('token_obtain_pair'), self.login_data)
-        refresh_token = response.data['refresh']
-        
+        self.assertIn('oko_refresh', response.cookies)
+
         url = reverse('token_refresh')
-        response = self.client.post(url, {'refresh': refresh_token})
+        response = self.client.post(url, {})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
+        self.assertNotIn('access', response.data)
+        self.assertIn('oko_access', response.cookies)
 
     def test_password_reset_request(self):
         """Тест запроса на сброс пароля"""
@@ -94,12 +98,11 @@ class AuthenticationTests(APITestCase):
             password=self.user_data['password']
         )
         
-        # Получаем токен
+        # Login stores HttpOnly cookies in the test client.
         response = self.client.post(reverse('token_obtain_pair'), self.login_data)
-        token = response.data['access']
-        
-        # Тестируем эндпоинт me
-        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
+        self.assertIn('oko_access', response.cookies)
+
+        # Test the endpoint using cookie authentication (no JS-visible JWT).
         url = reverse('user-me')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
