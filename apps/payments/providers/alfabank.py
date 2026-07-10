@@ -8,6 +8,16 @@ from ..config import ALFABANK_SETTINGS, PAYMENT_SETTINGS
 from ..models import Payment
 
 
+def _pref(payment):
+    """Human/order reference that works for both order and top-up payments."""
+    return payment.order.id if getattr(payment, 'order_id', None) else payment.payment_id
+
+
+def _purpose(payment):
+    return (f'Оплата заказа #{payment.order.id}' if getattr(payment, 'order_id', None)
+            else 'Пополнение кошелька OkoZnaniy')
+
+
 class AlfaBankClient:
     def __init__(self):
         self.api_url = ALFABANK_SETTINGS['API_URL']
@@ -40,14 +50,14 @@ class AlfaBankClient:
         """
         Регистрирует платеж в системе Альфа-Банка
         """
-        order_number = f"ORDER-{payment.order.id}-{uuid.uuid4().hex[:8]}"
+        order_number = f"ORDER-{_pref(payment)}-{uuid.uuid4().hex[:8]}"
         
         data = {
             'orderNumber': order_number,
             'amount': int(payment.amount * 100),  # Сумма в копейках
             'returnUrl': PAYMENT_SETTINGS['SUCCESS_URL'],
             'failUrl': PAYMENT_SETTINGS['FAIL_URL'],
-            'description': f"Оплата заказа #{payment.order.id}",
+            'description': _purpose(payment),
             'language': 'ru',
             'sessionTimeoutSecs': 24 * 60 * 60,  # 24 часа
         }

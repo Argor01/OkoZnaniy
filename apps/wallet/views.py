@@ -12,8 +12,10 @@ from apps.payments.services import PaymentService
 from .serializers import (
     TopupRequestSerializer, WalletBalanceSerializer,
     WalletStatsSerializer, WalletTransactionSerializer,
+    WithdrawRequestSerializer,
 )
-from .services import WalletService
+from .models import WithdrawalRequest
+from .services import WalletService, InsufficientFunds
 
 
 class WalletViewSet(viewsets.ViewSet):
@@ -62,3 +64,34 @@ class WalletViewSet(viewsets.ViewSet):
             'method': method,
             'payment_url': link,
         })
+
+
+    @action(detail=False, methods=['post'])
+    def withdraw(self, request):
+        ser = WithdrawRequestSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        amount = ser.validated_data['amount']
+        digits = ser.validated_data['card_number']
+        masked = '**** **** **** ' + digits[-4:]
+        try:
+            tx = WalletService.withdraw(
+                request.user, amount,
+                description=f'Вывод на карту {masked}',
+            )
+        except InsufficientFunds as e:
+            return Response({'detail': 'Недостаточно доступных средств'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        wr = WithdrawalRequest.objects.create(
+            user=request.user, amount=amount, card_number=masked,
+            status=WithdrawalRequest.Status.PENDING, transaction=tx,
+        )
+        data = WalletService.get_balance(request.user)
+        return Response({
+            'withdrawal_id': wr.id,
+            'status': wr.status,
+            'amount': str(amount),
+            'card': masked,
+            'balance': WalletBalanceSerializer(data).data,
+        }, status=status.HTTP_201_CREATED)

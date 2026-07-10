@@ -46,6 +46,7 @@ export default function Wallet() {
   const [filter, setFilter] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [showTopup, setShowTopup] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
 
   const reload = async () => {
     try {
@@ -104,6 +105,15 @@ export default function Wallet() {
                   onClick={() => setShowTopup(true)}
                 >
                   Пополнить
+                </Button>
+                <Button
+                  size="large"
+                  icon={<ArrowUpOutlined />}
+                  className={styles.btnWithdraw}
+                  disabled={loading || Number(balance?.available_balance || 0) <= 0}
+                  onClick={() => setShowWithdraw(true)}
+                >
+                  Вывести
                 </Button>
               </div>
             </div>
@@ -185,6 +195,12 @@ export default function Wallet() {
         open={showTopup}
         onClose={() => setShowTopup(false)}
         onDone={() => { setShowTopup(false); reload(); }}
+      />
+      <WithdrawModal
+        open={showWithdraw}
+        available={Number(balance?.available_balance || 0)}
+        onClose={() => setShowWithdraw(false)}
+        onDone={() => { setShowWithdraw(false); reload(); }}
       />
     </div>
   );
@@ -281,6 +297,79 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
         className={styles.topupSubmit}
       >
         Пополнить на {formatMoney(amount)} ₽
+      </Button>
+    </Modal>
+  );
+}
+
+
+function WithdrawModal({ open, available, onClose, onDone }: { open: boolean; available: number; onClose: () => void; onDone: () => void }) {
+  const [amount, setAmount] = useState<number>(0);
+  const [card, setCard] = useState<string>('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => { if (open) { setAmount(0); setCard(''); } }, [open]);
+
+  const submit = async () => {
+    if (!amount || amount < 100) { message.warning('Минимальная сумма вывода — 100 ₽'); return; }
+    if (amount > available) { message.warning('Сумма превышает доступный баланс'); return; }
+    const digits = card.replace(/\D/g, '');
+    if (digits.length < 16 || digits.length > 19) { message.warning('Введите корректный номер карты'); return; }
+    setBusy(true);
+    try {
+      await walletApi.withdraw({ amount, card_number: digits });
+      message.success('Заявка на вывод создана. Средства списаны, выплата поступит на карту.');
+      onDone();
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось создать заявку');
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <Modal
+      title={<><ArrowUpOutlined /> Вывести средства</>}
+      open={open}
+      onCancel={onClose}
+      footer={null}
+      width={520}
+      className={styles.topupModal}
+    >
+      <Paragraph type="secondary" className={styles.topupHint}>
+        Доступно к выводу: <b>{formatMoney(available)} ₽</b>. Средства спишутся сразу, выплата на карту обычно занимает до 3 рабочих дней.
+      </Paragraph>
+
+      <Input
+        size="large"
+        type="number"
+        min={100}
+        max={available}
+        value={amount || undefined}
+        placeholder="Сумма"
+        onChange={(e) => setAmount(Number(e.target.value))}
+        addonAfter="₽"
+        className={styles.topupInput}
+      />
+
+      <Text strong className={styles.topupSectionLabel}>Номер карты</Text>
+      <Input
+        size="large"
+        inputMode="numeric"
+        value={card}
+        placeholder="0000 0000 0000 0000"
+        maxLength={23}
+        onChange={(e) => setCard(e.target.value)}
+        prefix={<CreditCardOutlined />}
+        className={styles.topupInput}
+      />
+
+      <Button
+        type="primary" size="large" block
+        loading={busy}
+        onClick={submit}
+        className={styles.topupSubmit}
+        style={{ marginTop: 16 }}
+      >
+        Вывести {amount ? `${formatMoney(amount)} ₽` : ''}
       </Button>
     </Modal>
   );

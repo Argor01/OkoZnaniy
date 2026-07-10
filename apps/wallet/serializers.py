@@ -37,3 +37,17 @@ class TopupRequestSerializer(serializers.Serializer):
         choices=['sberpay_qr', 'sberbank', 'card', 'sbp'],
         default='sberpay_qr',
     )
+
+
+import re
+
+
+class WithdrawRequestSerializer(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=100)
+    card_number = serializers.CharField(max_length=32)
+
+    def validate_card_number(self, value):
+        digits = re.sub(r'\D', '', value)
+        if len(digits) < 16 or len(digits) > 19:
+            raise serializers.ValidationError('Введите корректный номер карты')
+        return digits

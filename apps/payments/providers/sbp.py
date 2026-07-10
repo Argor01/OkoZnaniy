@@ -11,6 +11,15 @@ from ..config import SBP_SETTINGS, PAYMENT_SETTINGS
 from ..models import Payment
 
 
+def _pref(payment):
+    return payment.order.id if getattr(payment, 'order_id', None) else payment.payment_id
+
+
+def _purpose(payment):
+    return (f'Оплата заказа #{payment.order.id}' if getattr(payment, 'order_id', None)
+            else 'Пополнение кошелька OkoZnaniy')
+
+
 class SBPClient:
     def __init__(self):
         self.api_url = SBP_SETTINGS['API_URL']
@@ -50,7 +59,7 @@ class SBPClient:
         """
         Регистрирует QR-код для оплаты через СБП
         """
-        qr_id = f"QR-{payment.order.id}-{uuid.uuid4().hex[:8]}"
+        qr_id = f"QR-{_pref(payment)}-{uuid.uuid4().hex[:8]}"
         
         data = {
             'qrId': qr_id,
@@ -58,12 +67,12 @@ class SBPClient:
                 'value': str(payment.amount),
                 'currency': 'RUB'
             },
-            'paymentPurpose': f"Оплата заказа #{payment.order.id}",
+            'paymentPurpose': _purpose(payment),
             'merchantId': self.merchant_id,
             'terminalId': 'web',
             'redirectUrl': PAYMENT_SETTINGS['SUCCESS_URL'],
             'metadata': {
-                'order_id': str(payment.order.id),
+                'order_id': str(_pref(payment)),
                 'payment_id': payment.payment_id
             }
         }

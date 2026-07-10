@@ -22,16 +22,28 @@ class PaymentService:
         )
         return payment
 
+    # Map user-facing method aliases to the underlying acquiring rail.
+    _NORMALIZE_METHOD = {
+        'card': 'card', 'sberbank': 'card',
+        'sbp': 'sbp', 'sberpay_qr': 'sbp',
+    }
+
     @staticmethod
     def get_payment_link(payment: Payment) -> str:
+        """Generate a payment link/QR for the chosen method.
+        Works for both order payments and wallet top-ups (order may be None).
         """
-        Генерирует ссылку для оплаты в зависимости от метода
-        """
-        if payment.payment_method == PaymentMethod.CARD:
+        rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
+        if rail is None:
+            raise ValueError(f'Неподдерживаемый метод оплаты: {payment.payment_method}')
+        from .config import ALFABANK_SETTINGS, SBP_SETTINGS
+        if rail == 'card':
+            if not ALFABANK_SETTINGS.get('USERNAME'):
+                raise ValueError('Оплата картой временно недоступна: эквайринг не настроен')
             return PaymentService._get_alfabank_payment_link(payment)
-        elif payment.payment_method == PaymentMethod.SBP:
-            return PaymentService._get_sbp_link(payment)
-        raise ValueError(f"Неподдерживаемый метод оплаты: {payment.payment_method}")
+        if not SBP_SETTINGS.get('MERCHANT_ID'):
+            raise ValueError('Оплата через СБП временно недоступна: мерчант не настроен')
+        return PaymentService._get_sbp_link(payment)
 
     @staticmethod
     def process_payment_callback(payment_id: str, data: Dict[str, Any]) -> bool:
