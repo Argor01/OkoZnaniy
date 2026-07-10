@@ -96,9 +96,6 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     <div className={styles.panelFooter}>
       <div className={styles.socialLoginTitle}>или войти через</div>
       <div className={styles.socialLoginRow}>
-        <a href="#" onClick={handleTelegramAuth} aria-label="Telegram">
-          <img src="/assets/telegram.png" alt="telegram-login" className={styles.socialLoginIcon} />
-        </a>
         <a href={vkHref} aria-label="VK">
           <img src="/assets/vk.svg" alt="vk-login" className={styles.socialLoginIcon} />
         </a>
