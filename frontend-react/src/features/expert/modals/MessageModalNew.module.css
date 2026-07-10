@@ -3043,3 +3043,246 @@
   color: var(--text-secondary, #94a3b8);
 }
 
+
+/* ============================================================
+   MESSAGES VISUAL REFRESH v1  (appended override layer)
+   Modernized surfaces, bubbles, input, sidebar + adaptive.
+   Overrides earlier rules via cascade (same class names).
+   ============================================================ */
+
+/* --- Surfaces --------------------------------------------- */
+.chatMessages {
+  padding: 24px 24px 12px;
+  background:
+    radial-gradient(1200px 400px at 50% -10%, rgba(124, 58, 237, 0.05), transparent 60%),
+    var(--bg-secondary, #f7f7fb);
+  scroll-behavior: smooth;
+}
+
+.chatMessages::-webkit-scrollbar,
+.chatList::-webkit-scrollbar {
+  width: 8px;
+}
+.chatMessages::-webkit-scrollbar-thumb,
+.chatList::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.18);
+  border-radius: 999px;
+}
+.chatMessages::-webkit-scrollbar-thumb:hover,
+.chatList::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.32);
+}
+.chatMessages,
+.chatList {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 58, 237, 0.28) transparent;
+}
+
+.chatMessagesContent {
+  gap: 14px;
+}
+
+/* --- Message bubbles -------------------------------------- */
+.messageBubbleRegular {
+  box-shadow: 0 2px 10px rgba(17, 12, 46, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.messageBubbleRegular:hover {
+  box-shadow: 0 6px 18px rgba(17, 12, 46, 0.1);
+}
+
+.messageBubbleMine {
+  border-radius: 18px 18px 6px 18px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 55%, #6d28d9 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+}
+
+.messageBubbleOther {
+  border-radius: 18px 18px 18px 6px;
+  background: var(--bg-primary, #ffffff);
+  color: var(--text-primary, #1f2937);
+  border: 1px solid rgba(17, 12, 46, 0.06);
+  box-shadow: 0 2px 10px rgba(17, 12, 46, 0.05);
+}
+
+.messageBubbleRegularDesktop {
+  max-width: 68%;
+  padding: 11px 15px;
+}
+.messageBubbleRegularMobile {
+  max-width: 82%;
+  padding: 9px 13px;
+}
+
+.messageText {
+  font-size: 15px;
+  line-height: 1.55;
+  margin-bottom: 3px;
+}
+.messageTextMobile {
+  font-size: 14.5px;
+}
+
+.messageTime {
+  font-size: 11px;
+  letter-spacing: 0.2px;
+  opacity: 0.85;
+}
+
+/* Intro/system bubble */
+.chatIntroBubble {
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  color: var(--text-secondary, #6b7280);
+  box-shadow: 0 1px 6px rgba(17, 12, 46, 0.04);
+}
+
+/* --- Input area ------------------------------------------- */
+.chatInputContainer {
+  padding: 14px 18px 18px;
+  border-top: 1px solid rgba(17, 12, 46, 0.06);
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.015), transparent 40%),
+    var(--bg-primary, #ffffff);
+}
+
+.chatInputRow {
+  gap: 10px;
+  align-items: flex-end;
+  padding: 6px;
+  border-radius: 18px;
+  background: var(--bg-secondary, #f4f4f8);
+  border: 1px solid rgba(17, 12, 46, 0.06);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.chatInputRow:focus-within {
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  background: var(--bg-primary, #ffffff);
+}
+
+.chatInput {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  padding: 8px 10px;
+}
+.chatInput:focus,
+.chatInput:hover {
+  border: none;
+  box-shadow: none;
+}
+
+.chatEmojiButton,
+.chatAttachButton {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #6b7280);
+}
+.chatEmojiButton:hover,
+.chatAttachButton:hover {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+
+.chatSendButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 60%, #6d28d9 100%);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+.chatSendButton:hover {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
+}
+
+/* --- Sidebar / chat list ---------------------------------- */
+.chatListItem {
+  border-radius: 14px;
+  margin: 2px 8px;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.chatListItem:hover {
+  background: rgba(124, 58, 237, 0.06);
+}
+.chatListItemSelected,
+.chatListItemSelected:hover {
+  background: rgba(124, 58, 237, 0.12);
+  box-shadow: inset 3px 0 0 #7c3aed;
+}
+
+.chatSearchInput :global(.ant-input-affix-wrapper),
+.chatSearchInputMobile :global(.ant-input-affix-wrapper) {
+  border-radius: 12px;
+}
+
+/* --- Header ----------------------------------------------- */
+.chatHeader {
+  border-bottom: 1px solid rgba(17, 12, 46, 0.06);
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.02), transparent 60%),
+    var(--bg-primary, #ffffff);
+}
+
+/* ============================================================
+   ADAPTIVE HARDENING
+   ============================================================ */
+
+/* Tablet: keep sidebar slimmer, roomier bubbles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .messageBubbleRegularDesktop { max-width: 78%; }
+  .chatMessages { padding: 20px 18px 10px; }
+}
+
+/* Phones: edge-to-edge, big tap targets, safe-area insets */
+@media (max-width: 768px) {
+  .chatMessages {
+    padding: 14px 12px 8px;
+  }
+  .messageBubbleRegularMobile {
+    max-width: 86%;
+  }
+  .chatInputContainer {
+    padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .chatInputRow {
+    border-radius: 16px;
+  }
+  .chatEmojiButton,
+  .chatAttachButton,
+  .chatSendButton {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+  .messageText { font-size: 14px; }
+  .messageBubbleRegularMobile { max-width: 90%; padding: 8px 11px; }
+  .chatEmojiButton { display: none; }
+}
+
+/* Coarse pointers: bigger hit areas regardless of width */
+@media (pointer: coarse) {
+  .chatListItem { padding-top: 10px; padding-bottom: 10px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .messageBubbleRegular,
+  .chatSendButton,
+  .chatListItem,
+  .chatInputRow {
+    transition: none;
+  }
+  .chatSendButton:hover { transform: none; }
+}
+/* === END MESSAGES VISUAL REFRESH v1 === */
