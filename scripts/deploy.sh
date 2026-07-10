@@ -61,3 +61,11 @@ echo ""
 echo "=== ДЕПЛОЙ ЗАВЕРШЁН УСПЕШНО ==="
 echo "Backend: $(docker compose ps backend --format {{.Status}})"
 echo "Frontend: $(docker compose ps frontend --format {{.Status}})"
+
+# Mandatory post-deploy acceptance gate.
+echo "Running post-deploy acceptance checks..."
+"$(dirname "$0")/post_deploy_check.sh" || {
+  echo "POST-DEPLOY CHECK FAILED"; exit 1;
+}
+echo "Post-deploy checks passed."
+

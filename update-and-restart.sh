@@ -105,3 +105,15 @@ echo "      Админ: admin@test.com / test123"
 echo "   👥 Пользователи:"
 echo "      Клиенты: client1@test.com / test123, client2@test.com / test123"
 echo "      Эксперты: expert1@test.com / test123, expert2@test.com / test123"
+
+# Mandatory post-deploy acceptance gate. A failed deployment exits non-zero.
+echo "Running post-deploy acceptance checks..."
+if ! "$(dirname "$0")/scripts/post_deploy_check.sh" 2>/dev/null; then
+    # scripts/deploy.sh lives one level deeper.
+    if ! "$PWD/scripts/post_deploy_check.sh"; then
+        echo "POST-DEPLOY CHECK FAILED. Inspect: journalctl -u okoznaniy-monitor.service"
+        exit 1
+    fi
+fi
+echo "Post-deploy checks passed."
+

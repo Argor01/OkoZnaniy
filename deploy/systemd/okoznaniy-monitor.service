@@ -1,0 +1,13 @@
+[Unit]
+Description=OkoZnaniy production health monitor
+Wants=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/OkoZnaniy
+ExecStart=/root/OkoZnaniy/scripts/monitor.sh
+TimeoutStartSec=90
+Nice=10
+StandardOutput=journal
+StandardError=journal

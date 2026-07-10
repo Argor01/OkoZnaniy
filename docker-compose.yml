@@ -33,6 +33,12 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+    healthcheck: &backend_health
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.create_connection(('127.0.0.1',8000),5); s.close()\""]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 45s
     volumes:
       - static_files:/app/static
       - media_files:/app/media
@@ -60,6 +66,12 @@ services:
         condition: service_started
     expose:
       - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 20s
     networks:
       - app_network
 
@@ -140,6 +152,12 @@ services:
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q --header='Host: okoznaniy.ru' http://127.0.0.1/health || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 15s
     ports:
       - "80:80"
       - "443:443"
@@ -159,6 +177,12 @@ services:
       - app_network
 
   max-bot:
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"assert b'max_bot/bot.py' in open('/proc/1/cmdline','rb').read()\""]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     build:
       context: .
       dockerfile: Dockerfile.maxbot
