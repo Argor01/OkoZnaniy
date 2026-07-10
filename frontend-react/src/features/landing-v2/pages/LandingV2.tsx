@@ -82,6 +82,8 @@ const TopBar: React.FC = () => (
         <a href="#cta">Заказать</a>
       </nav>
       <div className={styles.topActions}>
+        <Link to="/become-expert" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Стать экспертом</Link>
+        <Link to="/become-partner" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Стать партнёром</Link>
         <Link to="/login" className={styles.btnGhost}>Войти</Link>
         <Link to="/login?tab=register" className={styles.btnPrimary}>Регистрация</Link>
       </div>
