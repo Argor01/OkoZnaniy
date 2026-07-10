@@ -24,6 +24,7 @@ jobs:
 
   staging:
     needs: quality-gate
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -43,6 +44,7 @@ jobs:
 
   production:
     needs: staging
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     environment: production
     steps:
