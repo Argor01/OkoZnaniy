@@ -102,41 +102,95 @@ class User(AbstractUser):
     def is_temporary_block_active(self):
         return bool(not self.is_active and self.unblock_date and self.unblock_date > timezone.now())
 
-    def unban_for_contacts_if_expired(self):
-        """Снимает временный бан за контакты, если его срок истёк.
+    def _contact_ban_scope_reason(self, reason=None):
+        return reason or self.contact_ban_reason or "\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c \u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d \u0437\u0430 \u043e\u0431\u043c\u0435\u043d \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u044b\u043c\u0438 \u0434\u0430\u043d\u043d\u044b\u043c\u0438"
 
-        Возвращает True, если бан был снят, иначе False.
-        Также размораживает чаты и заказы пользователя.
-        """
-        if not self.is_banned_for_contacts:
-            return False
-        if not self.contact_ban_until or self.contact_ban_until > timezone.now():
-            return False
-
-        self.is_banned_for_contacts = False
-        self.contact_ban_reason = None
-        self.contact_ban_date = None
-        self.contact_ban_until = None
-        self.save(update_fields=[
-            'is_banned_for_contacts', 'contact_ban_reason',
-            'contact_ban_date', 'contact_ban_until',
-        ])
-
+    def freeze_contact_scope(self, reason=None):
+        """Freeze all chats and orders involving this user after a contact violation."""
+        stats = {'chats': 0, 'orders': 0}
+        freeze_reason = self._contact_ban_scope_reason(reason)
         try:
             from django.db.models import Q
             from apps.chat.models import Chat as ChatModel
             from apps.orders.models import Order
-            for chat in ChatModel.objects.filter(is_frozen=True).filter(
-                Q(expert=self) | Q(client=self) | Q(participants=self)
-            ).distinct():
-                chat.unfreeze()
-            for order in Order.objects.filter(is_frozen=True).filter(
-                Q(expert=self) | Q(client=self)
-            ).distinct():
-                order.unfreeze()
+
+            chats = ChatModel.objects.filter(
+                Q(expert=self) | Q(client=self) | Q(participants=self),
+                is_frozen=False,
+            ).distinct()
+            for chat in chats:
+                chat.freeze(freeze_reason)
+                stats['chats'] += 1
+
+            orders = Order.objects.filter(
+                Q(expert=self) | Q(client=self),
+                is_frozen=False,
+            ).distinct()
+            for order in orders:
+                order.freeze(freeze_reason)
+                stats['orders'] += 1
         except Exception:
             pass
+        return stats
 
+    def unfreeze_contact_scope(self):
+        """Unfreeze all chats and orders involving this user after contact ban removal."""
+        stats = {'chats': 0, 'orders': 0}
+        try:
+            from django.db.models import Q
+            from apps.chat.models import Chat as ChatModel
+            from apps.orders.models import Order
+
+            chats = ChatModel.objects.filter(is_frozen=True).filter(
+                Q(expert=self) | Q(client=self) | Q(participants=self)
+            ).distinct()
+            for chat in chats:
+                chat.unfreeze()
+                stats['chats'] += 1
+
+            orders = Order.objects.filter(is_frozen=True).filter(
+                Q(expert=self) | Q(client=self)
+            ).distinct()
+            for order in orders:
+                order.unfreeze()
+                stats['orders'] += 1
+        except Exception:
+            pass
+        return stats
+
+    def clear_contact_ban(self, *, unfreeze_related=True):
+        """Clear contact ban fields and optionally unfreeze related chats/orders."""
+        was_banned = bool(self.is_banned_for_contacts)
+        self.is_banned_for_contacts = False
+        self.contact_ban_reason = None
+        self.contact_ban_date = None
+        self.contact_ban_until = None
+        self.banned_by = None
+        self.save(update_fields=[
+            'is_banned_for_contacts', 'contact_ban_reason',
+            'contact_ban_date', 'contact_ban_until', 'banned_by',
+        ])
+        stats = {'chats': 0, 'orders': 0, 'was_banned': was_banned}
+        if unfreeze_related:
+            stats.update(self.unfreeze_contact_scope())
+        return stats
+
+    def is_contact_ban_active(self):
+        """Return True for an active contact ban, auto-clearing expired temporary bans."""
+        if not self.is_banned_for_contacts:
+            return False
+        if self.contact_ban_until and self.contact_ban_until <= timezone.now():
+            self.clear_contact_ban(unfreeze_related=True)
+            return False
+        return True
+
+    def unban_for_contacts_if_expired(self):
+        """Clear an expired temporary contact ban and unfreeze related chats/orders."""
+        if not self.is_banned_for_contacts:
+            return False
+        if not self.contact_ban_until or self.contact_ban_until > timezone.now():
+            return False
+        self.clear_contact_ban(unfreeze_related=True)
         return True
 
     def unblock_if_expired(self):

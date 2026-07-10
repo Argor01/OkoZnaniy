@@ -234,8 +234,15 @@ export const ordersApi = {
   },
 
     deleteOrderFile: async (orderId: number, fileId: number) => {
-    const response = await apiClient.delete(`${API_ENDPOINTS.orders.uploadFile(orderId)}${fileId}/`);
-    return response.data;
+    try {
+      const response = await apiClient.delete(`${API_ENDPOINTS.orders.uploadFile(orderId)}${fileId}/`);
+      return response.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return { deleted: true, already_deleted: true };
+      }
+      throw error;
+    }
   },
 
   freezeOrder: async (id: number, reason?: string) => {

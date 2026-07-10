@@ -173,6 +173,9 @@ def unblock_user(request, user_id):
         except Exception:
             pass
 
+        if hasattr(user, 'clear_contact_ban'):
+            user.clear_contact_ban(unfreeze_related=True)
+
         return Response({'message': 'Пользователь разблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)

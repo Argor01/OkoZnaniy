@@ -26,10 +26,34 @@
   background: var(--v2-bg);
   color: var(--v2-text);
   font-family: 'Jost-Regular', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
 }
 .page * { box-sizing: border-box; }
+
+.page::-webkit-scrollbar {
+  width: 10px;
+}
+
+.page::-webkit-scrollbar-track {
+  background: var(--v2-soft);
+}
+
+.page::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--v2-primary-light), var(--v2-primary));
+  border: 2px solid var(--v2-soft);
+  border-radius: 999px;
+}
+
+.page::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #9f7aea, var(--v2-primary-dark));
+}
 
 .container {
   max-width: 1240px;

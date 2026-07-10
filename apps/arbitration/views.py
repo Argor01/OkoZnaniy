@@ -255,6 +255,8 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 user.save(update_fields=[
                     'is_banned_for_contacts', 'contact_ban_until', 'contact_ban_reason'
                 ])
+                if hasattr(user, 'clear_contact_ban'):
+                    user.clear_contact_ban(unfreeze_related=True)
         except Exception:
             pass
         

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Typography, message } from 'antd';
+import { Modal, Typography, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 import { useDashboard } from '@/contexts/DashboardContext';
@@ -13,6 +13,8 @@ import WorksList from './components/WorksList';
 import styles from './ShopReadyWorks.module.css';
 
 const { Title } = Typography;
+
+const READY_WORK_PURCHASE_WARNING = '\u0413\u043e\u0442\u043e\u0432\u044b\u0435 \u0440\u0430\u0431\u043e\u0442\u044b \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0443 \u043d\u0435 \u043f\u043e\u0434\u043b\u0435\u0436\u0430\u0442, \u0434\u0430\u043b\u044c\u043d\u0435\u0439\u0448\u0438\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u0438\u0440\u043e\u0432\u043a\u0438 \u0438 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 \u0431\u0443\u0434\u0443\u0442 \u0437\u0430 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u0443\u044e \u043f\u043b\u0430\u0442\u0443';
 
 const ShopReadyWorks: React.FC = () => {
   const navigate = useNavigate();
@@ -82,7 +84,7 @@ const ShopReadyWorks: React.FC = () => {
     });
   }, [apiWorks]);
 
-  const handlePurchase = async (id: number) => {
+  const processPurchase = async (id: number) => {
     const work = processedWorks.find((item) => item.id === id);
     const sellerId = work?.author?.id;
     if (!work || !sellerId) {
@@ -102,6 +104,17 @@ const ShopReadyWorks: React.FC = () => {
       const detail = error?.response?.data?.error || error?.response?.data?.detail;
       message.error(detail || 'Не удалось купить работу');
     }
+  };
+
+  const handlePurchase = (id: number) => {
+    Modal.confirm({
+      title: '\u0412\u0430\u0436\u043d\u043e\u0435 \u043f\u0440\u0435\u0434\u0443\u043f\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u0435',
+      content: READY_WORK_PURCHASE_WARNING,
+      okText: '\u042f \u0441\u043e\u0433\u043b\u0430\u0441\u0435\u043d',
+      cancelText: '\u041e\u0442\u043c\u0435\u043d\u0430',
+      centered: true,
+      onOk: () => processPurchase(id),
+    });
   };
 
   const handleDownload = (id: number) => {

@@ -1156,6 +1156,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        for banned_user in User.objects.filter(is_banned_for_contacts=True):
+            if hasattr(banned_user, 'unban_for_contacts_if_expired'):
+                banned_user.unban_for_contacts_if_expired()
         banned_users = User.objects.filter(is_banned_for_contacts=True).select_related('banned_by')
         
         data = []
@@ -1256,6 +1259,8 @@ class UserViewSet(viewsets.ModelViewSet):
         user.contact_violations_count += 1
         user.banned_by = request.user
         user.save()
+        if hasattr(user, 'freeze_contact_scope'):
+            user.freeze_contact_scope(reason)
 
         return Response({
             'message': (

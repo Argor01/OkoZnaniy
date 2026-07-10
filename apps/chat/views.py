@@ -17,6 +17,29 @@ from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
 from decimal import Decimal, InvalidOperation
 
+
+def _contact_ban_response(user, action_detail='\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435'):
+    if not user or not getattr(user, 'is_authenticated', False):
+        return None
+    if getattr(user, 'role', None) in ['admin', 'director']:
+        return None
+    if hasattr(user, 'is_contact_ban_active'):
+        is_banned = user.is_contact_ban_active()
+    else:
+        if hasattr(user, 'unban_for_contacts_if_expired'):
+            user.unban_for_contacts_if_expired()
+        is_banned = getattr(user, 'is_banned_for_contacts', False)
+    if not is_banned:
+        return None
+    return Response(
+        {
+            'detail': f'{action_detail} \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e. \u041f\u0440\u043e\u0444\u0438\u043b\u044c\u0020\u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u0020\u0437\u0430\u0020\u043e\u0431\u043c\u0435\u043d\u0020\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u044b\u043c\u0438\u0020\u0434\u0430\u043d\u043d\u044b\u043c\u0438.',
+            'frozen': True,
+            'frozen_reason': getattr(user, 'contact_ban_reason', None) or '\u041f\u0440\u043e\u0444\u0438\u043b\u044c\u0020\u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u0020\u0437\u0430\u0020\u043e\u0431\u043c\u0435\u043d\u0020\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u044b\u043c\u0438\u0020\u0434\u0430\u043d\u043d\u044b\u043c\u0438',
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
 class ChatViewSet(viewsets.ModelViewSet):
     """
     ViewSet РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±С‹С‡РЅС‹РјРё С‡Р°С‚Р°РјРё РјРµР¶РґСѓ РєР»РёРµРЅС‚Р°РјРё Рё СЌРєСЃРїРµСЂС‚Р°РјРё.
@@ -130,6 +153,10 @@ class ChatViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        blocked = _contact_ban_response(self.request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied(blocked.data.get('detail'))
         chat = serializer.save()
         order = chat.order
         if order and order.client:
@@ -361,6 +388,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def accept_work_offer(self, request, pk=None):
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
@@ -390,6 +420,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reject_work_offer(self, request, pk=None):
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
@@ -418,6 +451,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def deliver_work_offer(self, request, pk=None):
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         if request.user not in chat.participants.all():
             return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -529,6 +565,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def accept_work_delivery(self, request, pk=None):
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
@@ -672,6 +711,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reject_work_delivery(self, request, pk=None):
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
@@ -701,6 +743,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     def accept_offer(self, request, pk=None):
         """РџСЂРёРЅСЏС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ"""
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         
         if not message_id:
@@ -848,6 +893,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     def reject_offer(self, request, pk=None):
         """РћС‚РєР»РѕРЅРёС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ"""
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         message_id = request.data.get('message_id')
         
         if not message_id:
@@ -947,6 +995,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def get_or_create_by_order(self, request):
         """РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СЃРѕР·РґР°С‚СЊ С‡Р°С‚ РїРѕ ID Р·Р°РєР°Р·Р°"""
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         order_id = request.data.get('order_id')
         if not order_id:
             return Response(
@@ -986,6 +1037,9 @@ class ChatViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def get_or_create_by_order_and_user(self, request):
         """РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СЃРѕР·РґР°С‚СЊ С‡Р°С‚ РїРѕ ID Р·Р°РєР°Р·Р° Рё ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (РєРѕРЅС‚РµРєСЃС‚ Р·Р°РєР°Р·Р° РёР· Р»РµРЅС‚С‹)."""
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         from apps.users.models import User
 
         order_id = request.data.get('order_id')
@@ -1084,6 +1138,9 @@ class ChatViewSet(viewsets.ModelViewSet):
         Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ С‡Р°С‚Р° РјРµР¶РґСѓ РїР°СЂРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№:
         СЃРЅР°С‡Р°Р»Р° РёС‰РµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С‡Р°С‚, Рё С‚РѕР»СЊРєРѕ РµСЃР»Рё РЅРµ РЅР°С…РѕРґРёС‚ вЂ” СЃРѕР·РґР°С‘С‚ РЅРѕРІС‹Р№.
         """
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         from apps.users.models import User
         
         user_id = request.data.get('user_id')
@@ -1274,6 +1331,9 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     def create(self, request, *args, **kwargs):
         """РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕРіРѕ С‡Р°С‚Р° РїРѕРґРґРµСЂР¶РєРё"""
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         subject = request.data.get('subject', 'Р’РѕРїСЂРѕСЃ РїРѕ СЂР°Р±РѕС‚Рµ РїР»Р°С‚С„РѕСЂРјС‹')
         priority = request.data.get('priority', 'medium')
         initial_message = request.data.get('message', '')
@@ -1311,6 +1371,9 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     def send_message(self, request, pk=None):
         """РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚ РїРѕРґРґРµСЂР¶РєРё"""
         chat = self.get_object()
+        blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         text = request.data.get('text', '').strip()
         uploaded_file = request.FILES.get('file')
         

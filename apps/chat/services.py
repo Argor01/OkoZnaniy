@@ -201,6 +201,8 @@ class ChatModerationService:
             user.contact_violations_count += 1
             user.banned_by = None
             user.save()
+            if hasattr(user, "freeze_contact_scope"):
+                user.freeze_contact_scope(user.contact_ban_reason)
 
         ChatModerationService._notify_admins_about_violation(violation)
         ChatModerationService._freeze_expert_scope_if_needed(chat, message, violation)
@@ -293,9 +295,12 @@ class ChatModerationService:
 
             if violation.user:
                 user = violation.user
-                user.is_banned_for_contacts = False
-                user.contact_ban_reason = None
-                user.save()
+                if hasattr(user, "clear_contact_ban"):
+                    user.clear_contact_ban(unfreeze_related=True)
+                else:
+                    user.is_banned_for_contacts = False
+                    user.contact_ban_reason = None
+                    user.save()
 
         ChatModerationService._unfreeze_expert_scope_if_possible(chat, violation)
         return violation

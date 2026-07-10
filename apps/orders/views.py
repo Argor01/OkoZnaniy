@@ -14,7 +14,7 @@ from apps.chat.services import ensure_order_chat_started
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 import mimetypes
 import logging
 import json
@@ -33,9 +33,13 @@ def _ensure_not_banned_for_contacts(user, action_detail):
         return None
     if getattr(user, 'role', None) in ('admin', 'director'):
         return None
-    if hasattr(user, 'unban_for_contacts_if_expired'):
-        user.unban_for_contacts_if_expired()
-    if getattr(user, 'is_banned_for_contacts', False):
+    if hasattr(user, 'is_contact_ban_active'):
+        is_contact_banned = user.is_contact_ban_active()
+    else:
+        if hasattr(user, 'unban_for_contacts_if_expired'):
+            user.unban_for_contacts_if_expired()
+        is_contact_banned = getattr(user, 'is_banned_for_contacts', False)
+    if is_contact_banned:
         return Response(
             {
                 'detail': f'{action_detail} недоступно. Пользователь находится на проверке за обмен контактными данными.',
@@ -150,7 +154,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        blocked = _ensure_not_banned_for_contacts(request.user, 'Создание заказа')
+        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         try:
@@ -180,6 +184,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     def available(self, request):
         """Список доступных заказов для исполнителя (новые, без назначенного эксперта)."""
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         if not user.is_staff and getattr(user, 'role', None) != 'expert':
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         queryset = (
@@ -231,7 +238,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         # Не используем get_object(), чтобы не упереться в get_queryset с фильтрацией по пользователю
         order = get_object_or_404(self.serializer_class.Meta.model, pk=pk)
         user = request.user
-        blocked = _ensure_not_banned_for_contacts(user, 'Взятие заказа в работу')
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         # Простейшая проверка роли для MVP
@@ -262,6 +269,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Завершить заказ (эксперт переводит в done)."""
         order = self.get_object()
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         if getattr(user, 'role', None) != 'expert':
             return Response({'detail': 'Только эксперт может завершать заказ.'}, status=status.HTTP_403_FORBIDDEN)
         if order.expert_id != user.id:
@@ -279,7 +289,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Эксперт отправляет работу на проверку: in_progress -> review."""
         order = self.get_object()
         user = request.user
-        blocked = _ensure_not_banned_for_contacts(user, 'Отправка работы на проверку')
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
@@ -367,7 +377,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_bid(self, request, pk=None):
         """Клиент выбирает исполнителя и отправляет приглашение на принятие заказа."""
-        blocked = _ensure_not_banned_for_contacts(request.user, 'Принятие ставки')
+        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         order = self.get_object()
@@ -428,6 +438,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Эксперт принимает приглашение и только после этого заказ стартует."""
         order = self.get_object()
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'awaiting_expert_acceptance':
@@ -470,6 +483,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         """Эксперт отклоняет приглашение на заказ."""
         order = self.get_object()
         user = request.user
+        blocked = _ensure_not_banned_for_contacts(user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            return blocked
         if getattr(user, 'role', None) != 'expert' or order.expert_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'awaiting_expert_acceptance':
@@ -560,7 +576,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def revision(self, request, pk=None):
-        blocked = _ensure_not_banned_for_contacts(request.user, 'Отправка на доработку')
+        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         """Клиент отправляет на доработку: review -> revision."""
@@ -626,7 +642,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def take_order(self, request, pk=None):
-        blocked = _ensure_not_banned_for_contacts(request.user, 'Взятие заказа')
+        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         order = self.get_object()
@@ -1010,6 +1026,9 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         ).select_related('order', 'uploaded_by')
 
     def perform_create(self, serializer):
+        blocked = _ensure_not_banned_for_contacts(self.request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            raise PermissionDenied(blocked.data.get('detail'))
         order = Order.objects.get(id=self.kwargs['order_pk'])
         if not (self.request.user == order.client or self.request.user == order.expert):
             raise PermissionDenied(
@@ -1026,6 +1045,14 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     def perform_destroy(self, instance):
         order = instance.order
         user = self.request.user
@@ -1041,14 +1068,30 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         if not can_delete:
             raise PermissionDenied('Недостаточно прав для удаления файла.')
 
+        instance_id = instance.id
         storage_file = instance.file
+        storage = getattr(storage_file, 'storage', None) if storage_file else None
+        storage_name = getattr(storage_file, 'name', None) if storage_file else None
+
         instance.delete()
-        if storage_file:
-            storage_file.delete(save=False)
+
+        if storage and storage_name:
+            try:
+                storage.delete(storage_name)
+            except Exception:
+                logger.warning(
+                    'Failed to delete order file from storage',
+                    exc_info=True,
+                    extra={
+                        'order_id': getattr(order, 'id', None),
+                        'file_id': instance_id,
+                        'file_name': storage_name,
+                    },
+                )
 
         if was_delivered_work and order.status == 'review':
             has_delivered_files = OrderFile.objects.filter(order=order).filter(
-                Q(file_type__in=['solution', 'revision']) | Q(description__icontains='chat_delivery_message_id:')
+                models.Q(file_type__in=['solution', 'revision']) | models.Q(description__icontains='chat_delivery_message_id:')
             ).exists()
             if not has_delivered_files:
                 order.status = 'in_progress'
@@ -1110,6 +1153,9 @@ class OrderCommentViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
+        blocked = _ensure_not_banned_for_contacts(self.request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
+        if blocked is not None:
+            raise PermissionDenied(blocked.data.get('detail'))
         order = Order.objects.get(id=self.kwargs['order_pk'])
         if not (self.request.user == order.client or self.request.user == order.expert):
             raise PermissionDenied(
@@ -1143,7 +1189,7 @@ class BidViewSet(viewsets.ModelViewSet):
         return Bid.objects.none()
 
     def create(self, request, *args, **kwargs):
-        blocked = _ensure_not_banned_for_contacts(request.user, 'Отклик на заказ')
+        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         # #1: запрет на повторный отклик одного и того же эксперта.
