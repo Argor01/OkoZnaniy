@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Tag, Space, Typography, Rate, Popconfirm, Avatar } from 'antd';
 import { EyeOutlined, ShoppingCartOutlined, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -90,7 +91,7 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onPurchase, onDownloa
 
       <div
         className={styles.description}
-        dangerouslySetInnerHTML={{ __html: work.description }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(work.description || '') }}
       />
 
       {work.author && (

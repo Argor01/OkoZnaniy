@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DOMPurify from 'dompurify';
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -276,7 +277,7 @@ const ShopWorkDetail: React.FC = () => {
               <Title level={4}>Описание работы</Title>
               <div
                 className={styles.description}
-                dangerouslySetInnerHTML={{ __html: work.description || 'Описание отсутствует' }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(work.description || 'Описание отсутствует') }}
               />
             </div>
 

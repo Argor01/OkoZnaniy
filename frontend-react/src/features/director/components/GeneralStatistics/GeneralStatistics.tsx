@@ -116,7 +116,6 @@ const GeneralStatistics: React.FC = () => {
 
       if (format === 'excel') {
         
-        const XLSX = await import('xlsx');
 
         
         const exportData = [
@@ -158,25 +157,27 @@ const GeneralStatistics: React.FC = () => {
           },
         ];
 
-        const wb = XLSX.utils.book_new();
-        
-        
-        const ws = XLSX.utils.json_to_sheet(exportData);
-
-        
-        ws['!cols'] = [
-          { wch: 25 }, 
-          { wch: 20 }, 
-          { wch: 15 }, 
-        ];
-
-        
-        XLSX.utils.book_append_sheet(wb, ws, 'Статистика');
-
-        
-        const fileName = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.xlsx`;
-
-        XLSX.writeFile(wb, fileName);
+        // CSV is deliberately used instead of SheetJS/xlsx: the npm xlsx
+        // package has unresolved prototype-pollution and ReDoS advisories.
+        // UTF-8 BOM + semicolon delimiter opens correctly in Russian Excel.
+        const columns = ['Показатель', 'Значение', 'Изменение'];
+        const escapeCsv = (value: unknown) => {
+          const text = String(value ?? '').replace(/"/g, '""');
+          return `"${text}"`;
+        };
+        const rows = exportData.map((row) =>
+          columns.map((column) => escapeCsv((row as Record<string, unknown>)[column])).join(';')
+        );
+        const csv = '\uFEFF' + [columns.map(escapeCsv).join(';'), ...rows].join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        const href = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = href;
+        link.download = `Статистика_${dateRange[0].format('DD.MM.YYYY')}-${dateRange[1].format('DD.MM.YYYY')}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(href);
 
         message.success({ content: 'Данные успешно экспортированы!', key: 'export', duration: 2 });
       } else if (format === 'pdf') {
