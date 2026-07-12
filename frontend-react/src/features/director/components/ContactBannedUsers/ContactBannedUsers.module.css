@@ -57,6 +57,23 @@
   border-radius: 6px;
 }
 
+:global([data-theme="dark"]) .infoBlock {
+  background: #10141f;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #e5edf7;
+}
+
+:global([data-theme="dark"]) .banInfoBlock {
+  background:
+    linear-gradient(135deg, rgba(69, 26, 26, 0.88) 0%, rgba(45, 27, 18, 0.92) 100%);
+  border: 1px solid rgba(251, 146, 60, 0.34);
+  color: #fed7aa;
+}
+
+:global([data-theme="dark"]) .banInfoBlock strong {
+  color: #ffedd5;
+}
+
 .unbanSection {
   margin-bottom: 16px;
 }

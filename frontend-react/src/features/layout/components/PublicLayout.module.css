@@ -74,6 +74,32 @@
   width: 100%;
 }
 
+:global([data-theme="dark"]) .publicLayout {
+  background: #0f1118;
+}
+
+:global([data-theme="dark"]) .header {
+  background: rgba(15, 17, 24, 0.9);
+  border-bottom-color: rgba(139, 92, 246, 0.18);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .headerInner {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .logo {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .nav a {
+  color: #cbd5e1;
+}
+
+:global([data-theme="dark"]) .nav a:hover {
+  color: #c4b5fd;
+}
+
 @media (max-width: 640px) {
   .nav {
     display: none;

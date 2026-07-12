@@ -67,6 +67,11 @@ class Chat(models.Model):
             self._post_unfreeze_system_message()
 
     def _post_unfreeze_system_message(self):
+        from .services import is_locked_direct_chat
+
+        if is_locked_direct_chat(self):
+            return
+
         from django.contrib.auth import get_user_model
         User = get_user_model()
         system_user, _ = User.objects.get_or_create(

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import SupportChat, SupportMessage, Message, Chat
-from .services import ContactDetectionService, ChatModerationService, violation_type_label
+from .services import ContactDetectionService, ChatModerationService, is_locked_direct_chat, violation_type_label
 from apps.admin_panel.models import SupportRequest, SupportMessage as AdminSupportMessage
 
 
@@ -92,6 +92,18 @@ def notify_vk_on_new_message(sender, instance, created, **kwargs):
                     message_preview=instance.text,
                     order_id=order_id,
                 )
+    except Exception:
+        pass
+
+
+@receiver(post_save, sender=Message)
+def suppress_locked_main_system_unread(sender, instance, created, **kwargs):
+    if not created or instance.message_type != 'system':
+        return
+
+    try:
+        if is_locked_direct_chat(instance.chat) and not instance.is_read:
+            Message.objects.filter(pk=instance.pk, is_read=False).update(is_read=True)
     except Exception:
         pass
 
@@ -227,6 +239,9 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
             
             # Используем transaction.on_commit чтобы избежать рекурсивного вызова сигнала
             def create_system_message():
+                if is_locked_direct_chat(instance.chat):
+                    return
+
                 # Получаем или создаем системного пользователя
                 from django.contrib.auth import get_user_model
                 User = get_user_model()

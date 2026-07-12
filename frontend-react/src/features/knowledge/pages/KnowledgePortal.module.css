@@ -304,15 +304,52 @@
 }
 
 :global([data-theme="dark"]) .container {
-  background: transparent;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(124, 58, 237, 0.1), transparent 30%),
+    linear-gradient(180deg, rgba(17, 20, 31, 0.98) 0%, rgba(12, 14, 22, 0.98) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .headerTitle {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .headerSubtitle {
+  color: #aeb9cc;
 }
 
 :global([data-theme="dark"]) .statItem,
 :global([data-theme="dark"]) .filtersCard,
 :global([data-theme="dark"]) .questionCard {
-  background: var(--color-bg-container) !important;
-  border-color: var(--color-border-base) !important;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28) !important;
+  background: linear-gradient(180deg, rgba(31, 35, 49, 0.96) 0%, rgba(24, 28, 40, 0.96) 100%) !important;
+  border-color: rgba(148, 163, 184, 0.14) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.32) !important;
+}
+
+:global([data-theme="dark"]) .questionCard:hover {
+  border-color: rgba(167, 139, 250, 0.48) !important;
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.42) !important;
+}
+
+:global([data-theme="dark"]) .statLabel {
+  color: #9aa7bb;
+}
+
+:global([data-theme="dark"]) .statValue,
+:global([data-theme="dark"]) .authorName,
+:global([data-theme="dark"]) .questionTitle {
+  color: #f1f5f9;
+}
+
+:global([data-theme="dark"]) .authorTime,
+:global([data-theme="dark"]) .questionDescription,
+:global([data-theme="dark"]) .statBadge {
+  color: #aeb9cc;
+}
+
+:global([data-theme="dark"]) .questionFooter {
+  border-top-color: rgba(148, 163, 184, 0.12);
 }
 
 :global([data-theme="dark"]) .filtersCard :global(.ant-card-body) {
@@ -322,27 +359,39 @@
 :global([data-theme="dark"]) .filtersCard :global(.ant-input-affix-wrapper),
 :global([data-theme="dark"]) .filtersCard :global(.ant-input),
 :global([data-theme="dark"]) .filtersCard :global(.ant-select-selector) {
-  background: var(--color-bg-input) !important;
-  border-color: var(--color-border-base) !important;
-  color: var(--color-text-base) !important;
+  background: rgba(15, 18, 29, 0.98) !important;
+  border-color: rgba(148, 163, 184, 0.16) !important;
+  color: #e5edf7 !important;
+  box-shadow: none !important;
+}
+
+:global([data-theme="dark"]) .filtersCard :global(.ant-input-affix-wrapper:hover),
+:global([data-theme="dark"]) .filtersCard :global(.ant-input-affix-wrapper-focused),
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-focused .ant-select-selector),
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-selector:hover) {
+  border-color: rgba(167, 139, 250, 0.52) !important;
 }
 
 :global([data-theme="dark"]) .filtersCard :global(.ant-input-prefix),
 :global([data-theme="dark"]) .filtersCard :global(.ant-select-arrow),
 :global([data-theme="dark"]) .filtersCard :global(.ant-select-selection-placeholder),
 :global([data-theme="dark"]) .filtersCard :global(.ant-input::placeholder) {
-  color: var(--color-text-tertiary) !important;
+  color: #7f8ba3 !important;
+}
+
+:global([data-theme="dark"]) .filtersCard :global(.ant-select-selection-item) {
+  color: #e5edf7 !important;
 }
 
 :global([data-theme="dark"]) .authorAvatar {
-  background: #23283a;
-  border: 1px solid #30374c;
+  background: #273047;
+  border: 1px solid rgba(167, 139, 250, 0.28);
 }
 
 :global([data-theme="dark"]) .infoChip {
-  background: color-mix(in srgb, var(--primary-blue, #7c3aed) 14%, #171b26 86%);
-  border-color: color-mix(in srgb, var(--primary-blue, #7c3aed) 24%, #2a3142 76%);
-  color: #c4b5fd;
+  background: rgba(124, 58, 237, 0.16);
+  border-color: rgba(167, 139, 250, 0.28);
+  color: #ddd6fe;
 }
 
 :global([data-theme="dark"]) .regularTag {

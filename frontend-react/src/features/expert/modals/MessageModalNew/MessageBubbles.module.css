@@ -211,3 +211,24 @@
   margin-top: 12px;
   font-weight: 500;
 }
+
+:global([data-theme="dark"]) .messageSystemCard {
+  background:
+    linear-gradient(135deg, rgba(69, 26, 26, 0.96) 0%, rgba(31, 22, 32, 0.98) 100%);
+  border-color: rgba(248, 113, 113, 0.52);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+:global([data-theme="dark"]) .messageSystemIcon {
+  color: #fca5a5;
+}
+
+:global([data-theme="dark"]) .messageSystemText {
+  color: #fecaca;
+}
+
+:global([data-theme="dark"]) .messageSystemTime {
+  color: #fca5a5;
+}

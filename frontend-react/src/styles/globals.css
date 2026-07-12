@@ -515,6 +515,35 @@ a {
   animation: fadeInUp 0.25s ease-out;
 }
 
+[data-theme="dark"] .ant-notification-notice {
+  background:
+    linear-gradient(135deg, rgba(31, 35, 49, 0.98) 0%, rgba(20, 24, 36, 0.98) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+}
+
+[data-theme="dark"] .ant-notification-notice-message {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .ant-notification-notice-description,
+[data-theme="dark"] .ant-notification-notice-close {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .ant-message-notice-content {
+  background:
+    linear-gradient(135deg, rgba(31, 35, 49, 0.98) 0%, rgba(20, 24, 36, 0.98) 100%);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  color: #f8fafc;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.38);
+}
+
+[data-theme="dark"] .ant-message-notice-content .anticon,
+[data-theme="dark"] .ant-message-notice-content span {
+  color: inherit;
+}
+
 /* Smooth tooltip */
 .ant-tooltip {
   animation: fadeIn 0.15s ease-out;

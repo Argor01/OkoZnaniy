@@ -277,3 +277,42 @@
   border-color: rgba(102, 126, 234, 0.3);
   color: #7c3aed;
 }
+
+:global([data-theme="dark"]) .applicationModalWrap :global(.ant-modal-content) {
+  background: #171b27;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+:global([data-theme="dark"]) .applicationModalWrap :global(.ant-modal-header),
+:global([data-theme="dark"]) .applicationModalWrap :global(.ant-modal-footer) {
+  background: #171b27;
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+:global([data-theme="dark"]) .applicationModalWrap :global(.ant-modal-title),
+:global([data-theme="dark"]) .applicationModalTitle {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .applicationModalWrap :global(.ant-form-item-label > label),
+:global([data-theme="dark"]) .applicationModalWrap label {
+  color: #f1f5f9 !important;
+}
+
+:global([data-theme="dark"]) .modalEducationRow {
+  background: #10141f;
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+:global([data-theme="dark"]) .modalEducationRow:hover {
+  background: #141a28;
+  border-color: rgba(167, 139, 250, 0.46);
+}
+
+:global([data-theme="dark"]) .modalEducationRow :global(.ant-input),
+:global([data-theme="dark"]) .modalEducationRow :global(.ant-input-number),
+:global([data-theme="dark"]) .modalEducationRow :global(.ant-input-number-input) {
+  background: #181d2b !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  color: #e5edf7 !important;
+}

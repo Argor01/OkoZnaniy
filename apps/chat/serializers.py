@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Chat, Message, SupportChat, SupportMessage, ContactViolationLog, ChatPin
+from .services import readable_messages_for_chat, unread_messages_for_user
 from apps.users.serializers import UserSerializer
 
 
@@ -70,7 +71,7 @@ class ChatListSerializer(serializers.ModelSerializer):
         return obj.frozen_reason
 
     def get_last_message(self, obj):
-        last_message = obj.messages.order_by('-created_at').first()
+        last_message = readable_messages_for_chat(obj).order_by('-created_at').first()
         if last_message:
             return {
                 'text': last_message.text,
@@ -84,7 +85,7 @@ class ChatListSerializer(serializers.ModelSerializer):
     def get_unread_count(self, obj):
         request = self.context.get('request')
         if request and request.user:
-            return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
+            return unread_messages_for_user(obj, request.user).count()
         return 0
     
     def get_is_pinned(self, obj):
@@ -145,7 +146,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     def get_unread_count(self, obj):
         request = self.context.get('request')
         if request and request.user:
-            return obj.messages.filter(is_read=False).exclude(sender=request.user).count()
+            return unread_messages_for_user(obj, request.user).count()
         return 0
 
 

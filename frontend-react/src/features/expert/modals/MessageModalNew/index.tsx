@@ -150,19 +150,41 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const scrollY = window.scrollY;
     const body = document.body;
     const html = document.documentElement;
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+      touchAction: body.style.touchAction,
+      overscrollBehavior: body.style.overscrollBehavior,
+    };
+    const previousHtmlStyles = {
+      overflow: html.style.overflow,
+      overscrollBehavior: html.style.overscrollBehavior,
+    };
+
     body.style.position = 'fixed';
     body.style.top = `-${scrollY}px`;
     body.style.left = '0';
     body.style.right = '0';
     body.style.width = '100%';
     body.style.overflow = 'hidden';
+    body.style.touchAction = 'none';
+    body.style.overscrollBehavior = 'none';
     html.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
 
     const updateVh = () => {
-      const vh = window.visualViewport
-        ? window.visualViewport.height
-        : window.innerHeight;
+      const viewport = window.visualViewport;
+      const vh = viewport ? viewport.height : window.innerHeight;
+      const keyboardOffset = viewport
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+        : 0;
       html.style.setProperty('--app-vh', `${vh}px`);
+      html.style.setProperty('--chat-modal-vh', `${vh}px`);
+      html.style.setProperty('--chat-keyboard-offset', `${keyboardOffset}px`);
     };
 
     updateVh();
@@ -177,7 +199,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     // Предотвращаем скролл на window при фокусе (iOS keyboard fix)
     const preventWindowScroll = () => {
-      window.scrollTo(0, 0);
+      window.scrollTo(0, scrollY);
     };
     window.addEventListener('scroll', preventWindowScroll, { passive: false });
 
@@ -190,15 +212,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }
       window.removeEventListener('scroll', preventWindowScroll);
       html.style.removeProperty('--app-vh');
+      html.style.removeProperty('--chat-modal-vh');
+      html.style.removeProperty('--chat-keyboard-offset');
 
       // Восстанавливаем скролл
-      body.style.position = '';
-      body.style.top = '';
-      body.style.left = '';
-      body.style.right = '';
-      body.style.width = '';
-      body.style.overflow = '';
-      html.style.overflow = '';
+      body.style.position = previousBodyStyles.position;
+      body.style.top = previousBodyStyles.top;
+      body.style.left = previousBodyStyles.left;
+      body.style.right = previousBodyStyles.right;
+      body.style.width = previousBodyStyles.width;
+      body.style.overflow = previousBodyStyles.overflow;
+      body.style.touchAction = previousBodyStyles.touchAction;
+      body.style.overscrollBehavior = previousBodyStyles.overscrollBehavior;
+      html.style.overflow = previousHtmlStyles.overflow;
+      html.style.overscrollBehavior = previousHtmlStyles.overscrollBehavior;
       window.scrollTo(0, scrollY);
     };
   }, [isMobile, isTablet, visible]);
@@ -2376,11 +2403,11 @@ const handleOverdueComplaint = async () => {
   const isChatFrozen = Boolean(selectedChat?.is_frozen || order?.is_frozen);
   const hasActiveConversation = Boolean(selectedChat || isSupportChatSelected);
   const useStackedConversationLayout = isMobile || isTablet;
-  const useCompactSidebar = hasActiveConversation && isDesktop;
+  const useCompactSidebar = false;
   const showSidebar = !useStackedConversationLayout || !hasActiveConversation;
   const showChatPanel = !useStackedConversationLayout || hasActiveConversation;
   const showTabletBackRail = isTablet && hasActiveConversation;
-  const modalWidth = isMobile ? '100%' : (isDesktop ? 'min(1600px, calc(100vw - 48px))' : 'calc(100vw - 32px)');
+  const modalWidth = isMobile ? '100%' : (isDesktop ? 'min(1840px, calc(100vw - 32px))' : 'calc(100vw - 32px)');
   const pageContainerStyle = renderAsPage
     ? {
         maxWidth: modalWidth,
@@ -2454,6 +2481,14 @@ const handleOverdueComplaint = async () => {
                   e.preventDefault();
                   e.stopPropagation();
                 };
+                const openConversation = () => {
+                  setSupportCenterSelected(false);
+                  if (chat.mainChat?.id) {
+                    void loadChatDetail(chat.mainChat.id);
+                  } else {
+                    void loadOrCreateChatWithUser(chat.key);
+                  }
+                };
 
                 return (
                   <Dropdown
@@ -2462,12 +2497,14 @@ const handleOverdueComplaint = async () => {
                     trigger={['contextMenu']}
                   >
                     <div
-                      onClick={() => {
-                        setSupportCenterSelected(false);
-                        if (chat.mainChat?.id) {
-                          void loadChatDetail(chat.mainChat.id);
-                        } else {
-                          void loadOrCreateChatWithUser(chat.key);
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Открыть чат с ${getDisplayUsername(chat.other_user || {})}`}
+                      onClick={openConversation}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          openConversation();
                         }
                       }}
                       onContextMenu={handleContextMenu}
@@ -2479,11 +2516,11 @@ const handleOverdueComplaint = async () => {
                       )}
                       <Badge
                         dot={chat.unread_count > 0}
-                        offset={useCompactSidebar ? [-6, 34] : [-4, 30]}
+                        offset={useCompactSidebar ? [-8, 38] : [-4, 30]}
                         className={`${styles.chatBadge} ${useCompactSidebar ? styles.chatBadgeCompact : ''}`}
                       >
                         <Avatar
-                          size={isMobile ? 36 : useCompactSidebar ? 44 : 40}
+                          size={isMobile ? 36 : useCompactSidebar ? 46 : 40}
                           icon={<UserOutlined />}
                           src={getMediaUrl(chat.other_user?.avatar)}
                           className={`${styles.chatAvatar} ${useCompactSidebar ? styles.chatAvatarCompact : ''}`}
@@ -3675,6 +3712,7 @@ const handleOverdueComplaint = async () => {
       <Modal
         open={expertViolationModalOpen}
         centered
+        className={styles.expertViolationModal}
         onCancel={() => setExpertViolationModalOpen(false)}
         onOk={() => setExpertViolationModalOpen(false)}
         okText="Понятно"

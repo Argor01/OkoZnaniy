@@ -9,7 +9,7 @@ from django.db.models import Q, Max, Count, Prefetch
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
-from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat
+from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat, unread_messages_for_user
 from .websocket_utils import notify_chat_message, notify_typing
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
@@ -982,13 +982,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             Q(context_title__icontains='С‚РµС…РїРѕРґРґРµСЂР¶РєР°')
         )
 
-        count = Message.objects.filter(
-            chat__in=visible_chats
-        ).exclude(
-            sender=user
-        ).filter(
-            is_read=False
-        ).count()
+        count = sum(unread_messages_for_user(chat, user).count() for chat in visible_chats)
         
         return Response({'unread_count': count})
 

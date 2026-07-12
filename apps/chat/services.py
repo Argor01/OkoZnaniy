@@ -26,9 +26,43 @@ VIOLATION_TYPE_LABELS = {
     "multiple": "несколько типов контактов",
 }
 
+CLOSED_ORDER_STATUSES = {"completed", "cancelled", "canceled", "done"}
+
 
 def violation_type_label(violation_type: str) -> str:
     return VIOLATION_TYPE_LABELS.get(violation_type, violation_type)
+
+
+def is_locked_direct_chat(chat: Chat) -> bool:
+    """A direct chat is locked when active order chats exist for the same pair."""
+    if not chat or getattr(chat, "order_id", None):
+        return False
+
+    client_id = getattr(chat, "client_id", None)
+    expert_id = getattr(chat, "expert_id", None)
+    if not client_id or not expert_id:
+        return False
+
+    return (
+        Chat.objects.filter(
+            order__isnull=False,
+            client_id=client_id,
+            expert_id=expert_id,
+        )
+        .exclude(order__status__in=CLOSED_ORDER_STATUSES)
+        .exists()
+    )
+
+
+def readable_messages_for_chat(chat: Chat):
+    queryset = chat.messages.all()
+    if is_locked_direct_chat(chat):
+        queryset = queryset.exclude(message_type="system")
+    return queryset
+
+
+def unread_messages_for_user(chat: Chat, user):
+    return readable_messages_for_chat(chat).filter(is_read=False).exclude(sender=user)
 
 
 class ContactDetectionService:
@@ -307,6 +341,9 @@ class ChatModerationService:
 
     @staticmethod
     def _post_unfreeze_system_message(chat):
+        if is_locked_direct_chat(chat):
+            return
+
         from django.contrib.auth import get_user_model
 
         User = get_user_model()
