@@ -10,6 +10,7 @@ from django.utils.dateparse import parse_datetime
 from datetime import timedelta
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid, BidStatus
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
+from .services import OrderActionService
 from apps.chat.services import ensure_order_chat_started
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
@@ -49,6 +50,17 @@ def _ensure_not_banned_for_contacts(user, action_detail):
             status=status.HTTP_400_BAD_REQUEST,
         )
     return None
+
+
+def _is_order_action_allowed(order, user, action_name):
+    return OrderActionService.for_user(order, user).get(action_name, False)
+
+
+def _order_action_unavailable():
+    return Response(
+        {'detail': 'Action is not available for the current order state.'},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -193,7 +205,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             self.queryset.filter(status='new', expert__isnull=True)
             .exclude(self._inactive_unassigned_filter())
             .select_related('subject', 'topic', 'work_type', 'complexity', 'client')
-            .prefetch_related('files__uploaded_by')
+            .prefetch_related('files__uploaded_by', 'bids')
             .annotate(responses_count=models.Count('bids', distinct=True))
         )
         
@@ -298,6 +310,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Отправить на проверку можно только из статусов in_progress или revision.'}, status=status.HTTP_400_BAD_REQUEST)
         if order.deadline and order.deadline <= timezone.now():
             return Response({'detail': 'Срок сдачи истёк.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_order_action_allowed(order, user, 'can_submit_work'):
+            return _order_action_unavailable()
         with transaction.atomic():
             order.status = 'review'
             order.save(update_fields=['status', 'updated_at'])
@@ -316,6 +330,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Продлить дедлайн можно только для заказа в работе.'}, status=status.HTTP_400_BAD_REQUEST)
         if not order.deadline or order.deadline > timezone.now():
             return Response({'detail': 'Заказ не просрочен.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not _is_order_action_allowed(order, user, 'can_extend_deadline'):
+            return _order_action_unavailable()
 
         new_deadline_raw = request.data.get('deadline')
         new_deadline = parse_datetime(new_deadline_raw) if isinstance(new_deadline_raw, str) else None
@@ -356,6 +373,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not order.deadline or order.deadline > timezone.now():
             return Response({'detail': 'Заказ не просрочен.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not _is_order_action_allowed(order, user, 'can_cancel_overdue'):
+            return _order_action_unavailable()
+
         old_status = order.status
         order.status = 'cancelled'
         order.save(update_fields=['status', 'updated_at'])
@@ -395,6 +415,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.warning(f"accept_bid: Недостаточно прав для user={user.id}, role={user_role}")
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         
+        if not _is_order_action_allowed(order, user, 'can_accept_bid'):
+            return _order_action_unavailable()
+
         bid_id = request.data.get('bid_id')
         if not bid_id:
             return Response({'bid_id': 'Не указан ID ставки'}, status=status.HTTP_400_BAD_REQUEST)
@@ -446,6 +469,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         if order.status != 'awaiting_expert_acceptance':
             return Response({'detail': 'Заказ не ожидает подтверждения исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if not _is_order_action_allowed(order, user, 'can_accept_assignment'):
+            return _order_action_unavailable()
+
         bid = Bid.objects.filter(order=order, expert=user, status=BidStatus.INVITED).first()
         if not bid:
             return Response({'detail': 'Для этого заказа не найдено активное приглашение.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -490,6 +516,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'awaiting_expert_acceptance':
             return Response({'detail': 'Заказ не ожидает подтверждения исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not _is_order_action_allowed(order, user, 'can_decline_assignment'):
+            return _order_action_unavailable()
 
         bid = Bid.objects.filter(order=order, expert=user, status=BidStatus.INVITED).first()
         if not bid:
@@ -547,6 +576,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         except Bid.DoesNotExist:
              return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
 
+        if not _is_order_action_allowed(order, user, 'can_cancel_bid'):
+            return _order_action_unavailable()
+
         bid.status = 'cancelled'
         bid.save(update_fields=['status'])
         return Response(OrderSerializer(order).data)
@@ -560,6 +592,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'Принять можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_order_action_allowed(order, user, 'can_approve_work'):
+            return _order_action_unavailable()
+
         order.status = 'completed'
         order.save(update_fields=['status', 'updated_at'])
         if order.expert_id:
@@ -600,6 +635,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'На доработку можно отправить только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         if not revision_comment:
             return Response({'detail': 'Комментарий для доработки обязателен.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_order_action_allowed(order, user, 'can_request_revision'):
+            return _order_action_unavailable()
+
         order.status = 'revision'
         order.save(update_fields=['status', 'updated_at'])
         if order.expert_id and order.client_id:
@@ -633,6 +671,9 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
         if order.status != 'review':
             return Response({'detail': 'Отклонить можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_order_action_allowed(order, user, 'can_reject_work'):
+            return _order_action_unavailable()
+
         old_status = order.status
         order.status = 'cancelled'
         order.save(update_fields=['status', 'updated_at'])
@@ -728,6 +769,9 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        if not _is_order_action_allowed(order, user, 'can_open_dispute'):
+            return _order_action_unavailable()
+
         reason = request.data.get('reason', '').strip()
         if not reason:
             return Response(
@@ -781,6 +825,9 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        if not _is_order_action_allowed(order, user, 'can_create_review'):
+            return _order_action_unavailable()
+
         rating = request.data.get('rating')
         comment = request.data.get('comment', '').strip()
         
@@ -1034,6 +1081,10 @@ class OrderFileViewSet(viewsets.ModelViewSet):
             raise PermissionDenied(
                 'Только клиент и эксперт могут добавлять файлы'
             )
+        action_name = 'can_upload_task_files' if self.request.user == order.client else 'can_upload_work'
+        if not _is_order_action_allowed(order, self.request.user, action_name):
+            raise PermissionDenied('Action is not available for the current order state.')
+
         order_file = serializer.save(
             order_id=self.kwargs['order_pk'],
             uploaded_by=self.request.user
@@ -1234,6 +1285,9 @@ class BidViewSet(viewsets.ModelViewSet):
             raise PermissionDenied('У заказа уже есть назначенный эксперт. Заказчик должен выбрать исполнителя вручную.')
         
         # Создаем или обновляем ставку
+        if not _is_order_action_allowed(order, user, 'can_bid'):
+            raise PermissionDenied('Action is not available for the current order state.')
+
         bid, created = Bid.objects.get_or_create(
             order=order, 
             expert=user, 
@@ -1242,6 +1296,7 @@ class BidViewSet(viewsets.ModelViewSet):
         if not created:
             for attr, value in serializer.validated_data.items():
                 setattr(bid, attr, value)
+            bid.status = BidStatus.ACTIVE
             bid.save()
 
         try:

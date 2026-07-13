@@ -1,4 +1,5 @@
 import type { ChatListItem, ChatDetail, Message } from '@/features/support/api/chat';
+import type { OrderAvailableActions } from '@/features/orders/types/orders';
 import type { Dayjs } from 'dayjs';
 
 export interface MessageModalProps {
@@ -54,6 +55,7 @@ export type OrderForChat = {
   work_type?: { name?: string | null } | null;
   custom_subject?: string | null;
   custom_work_type?: string | null;
+  available_actions?: OrderAvailableActions;
   files?: Array<{ id: number; file_name: string; file_url: string; file_type?: string }>;
 };
 

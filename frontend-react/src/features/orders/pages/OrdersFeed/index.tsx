@@ -552,6 +552,10 @@ const OrdersFeed: React.FC = () => {
                       ? true
                       : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
                 : false;
+            const canBid =
+              typeof order.available_actions?.can_bid === 'boolean'
+                ? order.available_actions.can_bid
+                : userProfile?.role === 'expert' && !hasMyBid && order.client?.id !== userProfile?.id;
             return (
               <OrderCard
                 key={order.id}
@@ -569,6 +573,7 @@ const OrdersFeed: React.FC = () => {
                 onClick={(id) => navigate(`/orders/${id}`)}
                 onDownloadFile={handleDownloadOrderFile}
                 hasMyBid={hasMyBid}
+                canBid={canBid}
                 checkingMyBid={checkingMyBid}
                 isMobile={isMobile}
               />

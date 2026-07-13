@@ -54,6 +54,28 @@ export interface Bid {
   expert_rating: number;
 }
 
+export interface OrderAvailableActions {
+  can_view?: boolean;
+  can_edit?: boolean;
+  can_delete?: boolean;
+  can_bid?: boolean;
+  can_cancel_bid?: boolean;
+  can_accept_bid?: boolean;
+  can_accept_assignment?: boolean;
+  can_decline_assignment?: boolean;
+  can_upload_task_files?: boolean;
+  can_upload_work?: boolean;
+  can_submit_work?: boolean;
+  can_approve_work?: boolean;
+  can_request_revision?: boolean;
+  can_reject_work?: boolean;
+  can_extend_deadline?: boolean;
+  can_cancel_overdue?: boolean;
+  can_open_dispute?: boolean;
+  can_create_review?: boolean;
+  can_open_order_chat?: boolean;
+}
+
 export interface Order {
   id: number;
   title: string;
@@ -88,6 +110,7 @@ export interface Order {
     resolved: boolean;
   };
   client_note?: string;
+  available_actions?: OrderAvailableActions;
 }
 
 export interface CreateOrderRequest {

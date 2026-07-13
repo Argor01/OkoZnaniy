@@ -69,6 +69,7 @@ interface OrderCardProps {
   onClick?: (id: number) => void;
   onDownloadFile?: (orderId: number, file: any) => void;
   hasMyBid?: boolean;
+  canBid?: boolean;
   checkingMyBid?: boolean;
   isMobile?: boolean;
 }
@@ -81,6 +82,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   onClick,
   onDownloadFile,
   hasMyBid = false,
+  canBid,
   checkingMyBid = false,
   isMobile = false,
 }) => {
@@ -115,6 +117,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
     return <FileOutlined className={styles.fileIconDefault} />;
   };
   const isOwner = isOrderOwner(order);
+  const canShowBidAction = canBid ?? !hasMyBid;
+  const isBidDisabled = hasMyBid || checkingMyBid || !canShowBidAction;
 
   return (
     <AppCard
@@ -261,12 +265,12 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         ) : userProfile?.role === 'expert' ? (
           <AppButton 
             variant={hasMyBid ? 'secondary' : 'primary'}
-            disabled={hasMyBid || checkingMyBid}
+            disabled={isBidDisabled}
             size={isMobile ? 'middle' : 'large'}
             className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
             onClick={(e) => {
               e.stopPropagation();
-              if (hasMyBid || checkingMyBid) return;
+              if (isBidDisabled) return;
               onBid?.(order);
             }}
           >

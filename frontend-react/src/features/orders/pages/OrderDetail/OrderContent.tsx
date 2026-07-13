@@ -17,6 +17,7 @@ const { Title, Text, Paragraph } = Typography;
 
 interface OrderContentProps {
   order: Order;
+  availableActions?: Order['available_actions'];
   isMobile: boolean;
   isOrderOwner: boolean;
   isOrderExpert: boolean;
@@ -37,6 +38,7 @@ interface OrderContentProps {
 
 const OrderContent: React.FC<OrderContentProps> = ({
   order,
+  availableActions,
   isOrderOwner,
   isOrderExpert,
   canSeeDeliveredWorkBlock,
@@ -139,11 +141,12 @@ const OrderContent: React.FC<OrderContentProps> = ({
   }, [order?.files]);
 
   const canUploadDeliveredWork = useMemo(() => {
+    if (typeof availableActions?.can_upload_work === 'boolean') return availableActions.can_upload_work;
     if (!isOrderExpert) return false;
     if (order.status === 'in_progress' || order.status === 'revision') return true;
     if (order.status === 'review' && deliveredWorkFiles.length === 0) return true;
     return false;
-  }, [deliveredWorkFiles.length, isOrderExpert, order.status]);
+  }, [availableActions?.can_upload_work, deliveredWorkFiles.length, isOrderExpert, order.status]);
 
   const attachedOrderFiles = useMemo(() => {
     if (!Array.isArray(order?.files)) return [];
@@ -163,9 +166,10 @@ const OrderContent: React.FC<OrderContentProps> = ({
   }, [order?.files, deliveredWorkFiles]);
 
   const canUploadTaskFiles = useMemo(() => {
+    if (typeof availableActions?.can_upload_task_files === 'boolean') return availableActions.can_upload_task_files;
     if (!isOrderOwner) return false;
     return !['completed', 'cancelled', 'canceled'].includes(String(order.status || '').toLowerCase());
-  }, [isOrderOwner, order.status]);
+  }, [availableActions?.can_upload_task_files, isOrderOwner, order.status]);
 
   const handleTileDownload = useCallback((file: any, keyPrefix: string) => {
     onDownloadFile(file);

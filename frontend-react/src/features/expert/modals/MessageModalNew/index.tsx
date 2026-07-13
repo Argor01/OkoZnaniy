@@ -1219,6 +1219,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return status === 'in_progress' || status === 'revision';
   }, [isOrderExpert, isClosedOrder, order]);
 
+  const canUploadWorkAction = order?.available_actions?.can_upload_work ?? showExpertUploadButton;
+  const canExtendOverdueOrder = order?.available_actions?.can_extend_deadline ?? canOverdueClientActions;
+  const canCancelOverdueOrder = order?.available_actions?.can_cancel_overdue ?? canOverdueClientActions;
+  const canApproveWork = order?.available_actions?.can_approve_work ?? (isOrderClient && order?.status === 'review');
+  const canRequestRevisionWork = order?.available_actions?.can_request_revision ?? (isOrderClient && order?.status === 'review');
+
   const remainingLabel = useMemo(() => {
     void deadlineTick;
     if (isClosedOrder) return '';
@@ -2865,7 +2871,7 @@ const handleOverdueComplaint = async () => {
                               >
                                 Перейти в заказ
                               </Button>
-                              {showExpertUploadButton && (
+                              {canUploadWorkAction && (
                                 <Button
                                   type="primary"
                                   icon={<UploadOutlined />}
@@ -2882,11 +2888,11 @@ const handleOverdueComplaint = async () => {
                               )}
                              </div>
                              
-                             {canOverdueClientActions && (
+                             {canOverdueClientActions && (canExtendOverdueOrder || canCancelOverdueOrder) && (
                                 <div className={styles.secondaryActions}>
                                   <Button
                                     size="small"
-                                    disabled={overdueCancelling}
+                                    disabled={overdueCancelling || !canExtendOverdueOrder}
                                     loading={overdueExtending}
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -2898,7 +2904,7 @@ const handleOverdueComplaint = async () => {
                                   <Button
                                     danger
                                     size="small"
-                                    disabled={overdueExtending}
+                                    disabled={overdueExtending || !canCancelOverdueOrder}
                                     loading={overdueCancelling}
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -3009,10 +3015,9 @@ const handleOverdueComplaint = async () => {
                         return withoutPrefix;
                       })()
                     : '';
-                  const canReviewOrder = isOrderClient;
                   const showWorkActions =
                     isWorkDelivery &&
-                    canReviewOrder &&
+                    (canApproveWork || canRequestRevisionWork) &&
                     !!effectiveOrderId &&
                     order?.status === 'review' &&
                     !msg.is_mine &&
@@ -3158,11 +3163,12 @@ const handleOverdueComplaint = async () => {
                                   type="primary"
                                   className={styles.buttonSuccess}
                                   onClick={handleApproveOrder}
+                                  disabled={!canApproveWork}
                                   block
                                 >
                                   Принять
                                 </Button>
-                                <Button danger onClick={handleRequestRevision} block>
+                                <Button danger onClick={handleRequestRevision} disabled={!canRequestRevisionWork} block>
                                   На доработку
                                 </Button>
                               </div>
@@ -3197,11 +3203,12 @@ const handleOverdueComplaint = async () => {
                                 type="primary"
                                 className={styles.buttonSuccess}
                                 onClick={handleApproveOrder}
+                                disabled={!canApproveWork}
                                 block
                               >
                                 Принять
                               </Button>
-                              <Button danger onClick={handleRequestRevision} block>
+                              <Button danger onClick={handleRequestRevision} disabled={!canRequestRevisionWork} block>
                                 На доработку
                               </Button>
                             </div>

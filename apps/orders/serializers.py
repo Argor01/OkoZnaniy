@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
+from .services import OrderActionService
 from apps.catalog.models import Subject, Topic, WorkType, Complexity
 from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTypeSerializer, ComplexitySerializer
 from apps.catalog.services import PricingService
@@ -106,13 +107,15 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
     files = OrderFileSerializer(many=True, read_only=True)
     responses_count = serializers.IntegerField(read_only=True)
     user_has_bid = serializers.SerializerMethodField()
+    available_actions = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = [
             'id', 'title', 'description', 'budget', 'deadline', 'status', 'created_at',
             'subject', 'topic', 'work_type', 'complexity', 'custom_subject', 'custom_work_type',
-            'additional_requirements', 'client', 'files', 'responses_count', 'user_has_bid'
+            'additional_requirements', 'client', 'files', 'responses_count', 'user_has_bid',
+            'available_actions'
         ]
 
     def get_user_has_bid(self, obj):
@@ -120,7 +123,17 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
         user = getattr(request, 'user', None)
         if not user or getattr(user, 'role', None) != 'expert':
             return False
+        try:
+            if hasattr(obj, '_prefetched_objects_cache') and 'bids' in obj._prefetched_objects_cache:
+                return any(getattr(bid, 'expert_id', None) == user.id for bid in obj.bids.all())
+        except Exception:
+            pass
         return Bid.objects.filter(order=obj, expert=user).exists()
+
+    def get_available_actions(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        return OrderActionService.for_user(obj, user)
 
 class OrderSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
@@ -136,6 +149,7 @@ class OrderSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     user_has_bid = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
+    available_actions = serializers.SerializerMethodField()
     
     # Явно указываем budget как FloatField для корректной сериализации
     budget = serializers.FloatField(required=False, allow_null=True)
@@ -168,7 +182,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at',
-            'client_note'
+            'client_note', 'available_actions'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -258,6 +272,11 @@ class OrderSerializer(serializers.ModelSerializer):
             return obj.deadline <= timezone.now()
         except Exception:
             return False
+
+    def get_available_actions(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        return OrderActionService.for_user(obj, user)
 
     def create(self, validated_data):
         request = self.context.get('request')

@@ -26,6 +26,7 @@ const { Title, Text } = Typography;
 
 interface OrderHeaderProps {
   order: Order;
+  availableActions?: Order['available_actions'];
   orderId: string;
   isMobile: boolean;
   isOrderOwner: boolean;
@@ -38,6 +39,7 @@ interface OrderHeaderProps {
 
 const OrderHeader: React.FC<OrderHeaderProps> = ({
   order,
+  availableActions,
   orderId,
   isMobile,
   isOrderOwner,
@@ -48,6 +50,8 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   onEditOrder,
 }) => {
   const navigate = useNavigate();
+  const canEditOrder = availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'));
+  const canCancelOrder = (availableActions?.can_delete ?? order.status === 'new') && order.status === 'new';
 
   return (
     <>
@@ -162,7 +166,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
               icon={<EditOutlined />}
               size={isMobile ? 'middle' : 'large'}
               onClick={onEditOrder}
-              disabled={!!order.expert && order.status !== 'new'}
+              disabled={!canEditOrder}
             >
               Редактировать заказ
             </AppButton>
@@ -171,7 +175,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
               icon={<CloseOutlined />}
               size={isMobile ? 'middle' : 'large'}
               danger
-              disabled={order.status !== 'new'}
+              disabled={!canCancelOrder}
               onClick={() => {
                 Modal.confirm({
                   title: 'Отмена заказа',

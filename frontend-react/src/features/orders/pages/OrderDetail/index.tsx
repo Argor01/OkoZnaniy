@@ -100,10 +100,22 @@ const OrderDetail: React.FC = () => {
   const orderExpertId = Number(order.expert?.id ?? (order as any)?.expert_id ?? 0);
   const isOrderOwner = currentUserId > 0 && currentUserId === orderClientId;
   const isOrderExpert = currentUserId > 0 && currentUserId === orderExpertId;
+  const availableActions = order.available_actions;
   const openedFromChat = (location.state as any)?.source === 'order-chat';
   const canSeeDeliveredWorkBlock = currentUserId > 0 && (isOrderOwner || currentUserId === orderExpertId);
   const isAwaitingExpertDecision = order.status === 'awaiting_expert_acceptance';
-  const canRespondToAssignment = isOrderExpert && isAwaitingExpertDecision && currentUserBid?.status === 'invited';
+  const canRespondToAssignment =
+    availableActions?.can_accept_assignment ??
+    (isOrderExpert && isAwaitingExpertDecision && currentUserBid?.status === 'invited');
+  const canReviewWork = availableActions?.can_approve_work ?? (isOrderOwner && order.status === 'review');
+  const canRequestRevision = availableActions?.can_request_revision ?? (isOrderOwner && order.status === 'review');
+  const canRejectWork = availableActions?.can_reject_work ?? (isOrderOwner && order.status === 'review');
+  const canBid = availableActions?.can_bid ?? (
+    userProfile?.role === 'expert' &&
+    !order.expert &&
+    !userHasBid &&
+    order.client?.id !== userProfile?.id
+  );
   const deliveredWorkReviewed = deliveredFileIds.length === 0
     ? true
     : deliveredFileIds.every((id) => viewedDeliveredIds.has(id));
@@ -180,6 +192,7 @@ const OrderDetail: React.FC = () => {
           <Space direction="vertical" size={0} className={`${styles.fullWidth} ${styles.orderContent}`}>
             <OrderHeader
               order={order}
+              availableActions={availableActions}
               orderId={orderId!}
               isMobile={isMobile}
               isOrderOwner={isOrderOwner}
@@ -192,6 +205,7 @@ const OrderDetail: React.FC = () => {
 
             <OrderContent
               order={order}
+              availableActions={availableActions}
               isMobile={isMobile}
               isOrderOwner={isOrderOwner}
               isOrderExpert={isOrderExpert}
@@ -210,7 +224,7 @@ const OrderDetail: React.FC = () => {
               onDeliveredFileViewed={handleDeliveredFileViewed}
             />
 
-            {isOrderOwner && order.status === 'review' ? (
+            {(canReviewWork || canRequestRevision || canRejectWork) ? (
               <div className={styles.sectionBlock}>
                 {!deliveredWorkReviewed && (
                   <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
@@ -221,7 +235,7 @@ const OrderDetail: React.FC = () => {
                   <AppButton
                     variant="success"
                     loading={reviewActionLoading === 'approve'}
-                    disabled={!deliveredWorkReviewed}
+                    disabled={!canReviewWork || !deliveredWorkReviewed}
                     onClick={() => setReviewModalOpen(true)}
                   >
                     Принять
@@ -229,7 +243,7 @@ const OrderDetail: React.FC = () => {
                   <AppButton
                     variant="secondary"
                     loading={reviewActionLoading === 'revision'}
-                    disabled={!deliveredWorkReviewed}
+                    disabled={!canRequestRevision || !deliveredWorkReviewed}
                     onClick={() => setRevisionModalOpen(true)}
                   >
                     На доработку
@@ -237,7 +251,7 @@ const OrderDetail: React.FC = () => {
                   <AppButton
                     variant="danger"
                     loading={reviewActionLoading === 'reject'}
-                    disabled={!deliveredWorkReviewed}
+                    disabled={!canRejectWork || !deliveredWorkReviewed}
                     onClick={handleRejectFromCard}
                   >
                     Отклонить
@@ -265,10 +279,7 @@ const OrderDetail: React.FC = () => {
               </Space>
             ) : null}
 
-            {userProfile?.role === 'expert' &&
-             !order.expert &&
-             !userHasBid &&
-             order.client?.id !== userProfile?.id && (
+            {canBid && (
               <div className={`${styles.bidAction} ${styles.sectionBlock}`}>
                 <AppButton
                   variant="primary"
