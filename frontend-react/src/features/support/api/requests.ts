@@ -115,9 +115,21 @@ export const supportRequestsApi = {
     return response.data;
   },
 
-  async sendMessage(type: SupportConversationType, id: number, message: string) {
+  async sendMessage(type: SupportConversationType, id: number, message: string, files: File[] = []) {
     if (type === 'arbitration_case') {
       const response = await apiClient.post(`/arbitration/cases/${id}/send-message/`, { message });
+      return response.data;
+    }
+
+    if (type === 'support_request' && files.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message);
+      files.forEach((file) => formData.append('files', file));
+      const response = await apiClient.post(
+        `/admin-panel/${endpointSegment(type)}/${id}/send_message/`,
+        formData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
       return response.data;
     }
 

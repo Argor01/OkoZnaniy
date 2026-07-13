@@ -42,6 +42,7 @@ import { useSupportChats, useSupportActions } from '@/features/admin/hooks';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import { logger } from '@/utils/logger';
 import supportStyles from '@/features/support/Support.module.css';
+import { getMediaUrl } from '@/config/api';
 
 const { Text, Title } = Typography;
 const { TextArea } = Input;
@@ -50,6 +51,12 @@ const { Option } = Select;
 interface SupportChatMessage {
   id: number;
   text: string;
+  attachments?: Array<{
+    name: string;
+    url: string;
+    size?: number;
+    type?: string;
+  }>;
   sender: {
     id: number;
     first_name: string;
@@ -116,8 +123,8 @@ export const SupportChatsSection: React.FC = () => {
   const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
   const sendMessage = async () => {
-    if (!messageText.trim()) {
-      antMessage.warning('Введите сообщение. Файлы добавим на следующем этапе поддержки.');
+    if (!messageText.trim() && attachedFiles.length === 0) {
+      antMessage.warning('Добавьте сообщение или файл');
       return;
     }
 
@@ -128,11 +135,7 @@ export const SupportChatsSection: React.FC = () => {
 
     setSending(true);
     try {
-      await sendChatMessage(selectedChat.id, messageText);
-      
-      if (attachedFiles.length > 0) {
-        antMessage.warning('Файлы пока не отправлены: вложения запланированы на 3-й этап.');
-      }
+      await sendChatMessage(selectedChat.id, messageText, attachedFiles);
       
       setMessageText('');
       setAttachedFiles([]);
@@ -469,6 +472,21 @@ export const SupportChatsSection: React.FC = () => {
                         className={`supportChatsMessageBubble ${message.sender.is_admin ? 'supportChatsMessageBubbleAdmin' : 'supportChatsMessageBubbleUser'} ${isMobile ? 'supportChatsMessageBubbleMobile' : 'supportChatsMessageBubbleDesktop'}`}
                       >
                         <div className={supportStyles.supportChatsMessageText}>{message.text}</div>
+                        {message.attachments && message.attachments.length > 0 && (
+                          <div className={supportStyles.supportChatsAttachmentsRow}>
+                            {message.attachments.map((file, index) => (
+                              <a
+                                key={`${file.url}-${index}`}
+                                href={getMediaUrl(file.url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={supportStyles.supportChatsAttachmentLink}
+                              >
+                                <FileOutlined /> {file.name}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                         <div 
                           className={`supportChatsMessageTime ${message.sender.is_admin ? 'supportChatsMessageTimeAdmin' : 'supportChatsMessageTimeUser'} ${isMobile ? 'supportChatsMessageTimeMobile' : 'supportChatsMessageTimeDesktop'}`}
                         >
@@ -531,7 +549,7 @@ export const SupportChatsSection: React.FC = () => {
                       icon={<SendOutlined />}
                       onClick={sendMessage}
                       loading={sending}
-                      disabled={!messageText.trim()}
+                      disabled={!messageText.trim() && attachedFiles.length === 0}
                       className={supportStyles.supportChatsSendButton}
                     />
                   </div>

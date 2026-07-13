@@ -278,6 +278,19 @@
   padding: 4px 12px;
   margin-bottom: 4px;
 }
+.supportChatsAttachmentLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 10px;
+  margin: 4px 6px 0 0;
+  border-radius: 10px;
+  background: rgba(99, 53, 165, 0.12);
+  color: #6435a5;
+  font-weight: 600;
+  word-break: break-word;
+}
 .supportChatsComposerRow {
   display: flex;
   gap: 8px;

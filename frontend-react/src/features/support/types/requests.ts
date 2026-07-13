@@ -41,6 +41,12 @@ export interface SupportFeedItem {
   source?: 'ticket' | 'chat' | 'order_chat';
   activity_type?: string;
   meta?: Record<string, unknown>;
+  attachments?: Array<{
+    name: string;
+    url: string;
+    size?: number;
+    type?: string;
+  }>;
   sender?: {
     id: number;
     first_name: string;

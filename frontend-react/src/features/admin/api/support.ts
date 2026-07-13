@@ -59,7 +59,17 @@ export const supportApi = {
     return response.data;
   },
 
-  sendSupportMessage: async (requestId: number, message: string) => {
+  sendSupportMessage: async (requestId: number, message: string, files: File[] = []) => {
+    if (files.length > 0) {
+      const formData = new FormData();
+      formData.append('message', message);
+      files.forEach((file) => formData.append('files', file));
+      const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.sendMessage(requestId), formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    }
+
     const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.sendMessage(requestId), { message });
     return response.data;
   },

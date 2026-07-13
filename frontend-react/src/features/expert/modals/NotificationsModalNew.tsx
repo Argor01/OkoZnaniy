@@ -115,6 +115,10 @@ const extractOrderId = (notification: Notification): number | null => {
 };
 
 const resolveNotificationTarget = (notification: Notification): string | null => {
+  if (typeof notification.data?.target === 'string' && notification.data.target.trim()) {
+    return notification.data.target;
+  }
+
   if (
     ['support_request', 'claim', 'arbitration_case'].includes(notification.related_object_type || '') ||
     ['support_request', 'claim', 'arbitration_case'].includes(String(notification.data?.ticket_type || ''))
@@ -181,6 +185,24 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
   const statusFromData = String(notification.data?.new_status || notification.data?.status || '').toLowerCase();
   const actionRequired = String(notification.data?.action_required || '').toLowerCase();
   const isClaim = notification.type === 'complaint_filed' || notification.related_object_type === 'arbitration_case';
+  const ticketType = String(notification.data?.ticket_type || notification.related_object_type || '');
+  const ticketId = getDataNumber(notification, 'ticket_id') || notification.related_object_id;
+  const dataTarget = typeof notification.data?.target === 'string' && notification.data.target.trim()
+    ? notification.data.target
+    : null;
+  const actionLabel = typeof notification.data?.action_label === 'string' && notification.data.action_label.trim()
+    ? notification.data.action_label
+    : null;
+
+  if (ticketType === 'support_request') {
+    actions.push({
+      key: 'open-support-request',
+      label: actionLabel || 'Открыть обращение',
+      target: dataTarget || `/support?ticketType=support_request&ticketId=${ticketId || ''}`,
+      primary: true,
+    });
+    return actions;
+  }
 
   if (isClaim) {
     actions.push({ key: 'answer-claim', label: 'Ответить на претензию', target: '/messages?support=1', primary: true });

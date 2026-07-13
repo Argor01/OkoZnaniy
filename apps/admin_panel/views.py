@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Count
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
@@ -16,20 +17,71 @@ from apps.director.models import DirectorChatRoom, DirectorChatMessage
 from apps.director.serializers import DirectorChatRoomSerializer, DirectorChatMessageSerializer
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
+from apps.chat.websocket_utils import notify_user
 from apps.users.serializers import UserSerializer
 from apps.orders.models import Order
 from apps.orders.serializers import OrderSerializer
 
 User = get_user_model()
 
+SUPPORT_STAFF_ROLES = ['admin', 'director']
+SUPPORT_FILE_SIZE_LIMIT = 50 * 1024 * 1024
+
+
+def is_support_staff(user):
+    return getattr(user, 'role', None) in SUPPORT_STAFF_ROLES
+
 
 def can_access_ticket(user, ticket):
     """Доступ к обращению есть у администратора и владельца обращения."""
     if not getattr(user, 'is_authenticated', False):
         return False
-    if getattr(user, 'role', None) == 'admin':
+    if is_support_staff(user):
         return True
-    return getattr(ticket, 'user_id', None) == user.id
+    if getattr(ticket, 'user_id', None) == user.id:
+        return True
+    if getattr(ticket, 'admin_id', None) == user.id:
+        return True
+    assigned_users = getattr(ticket, 'assigned_users', None)
+    return bool(assigned_users and assigned_users.filter(id=user.id).exists())
+
+
+def _support_request_payload(support_request, event):
+    return {
+        'event': event,
+        'ticket_type': 'support_request',
+        'ticket_id': support_request.id,
+        'ticket_number': support_request.ticket_number,
+        'status': support_request.status,
+        'updated_at': timezone.now().isoformat(),
+    }
+
+
+def _notify_support_watchers(support_request, event, exclude_user_id=None):
+    recipient_ids = set(
+        User.objects.filter(role__in=SUPPORT_STAFF_ROLES, is_active=True).values_list('id', flat=True)
+    )
+    if support_request.user_id:
+        recipient_ids.add(support_request.user_id)
+    if support_request.admin_id:
+        recipient_ids.add(support_request.admin_id)
+    recipient_ids.update(support_request.assigned_users.values_list('id', flat=True))
+    recipient_ids.discard(exclude_user_id)
+
+    payload = _support_request_payload(support_request, event)
+    for user_id in recipient_ids:
+        notify_user(user_id, 'support_request_update', payload)
+
+
+def _support_message_attachments(message):
+    if not getattr(message, 'file', None):
+        return []
+    return [{
+        'name': message.file_name or message.file.name.rsplit('/', 1)[-1],
+        'url': message.file.url,
+        'size': message.file_size,
+        'type': 'file',
+    }]
 
 
 def _normalize_tags(tags):
@@ -87,7 +139,7 @@ def _serialize_admin_user(user):
 class IsAdminUser(IsAuthenticated):
     """Проверка прав администратора"""
     def has_permission(self, request, view):
-        return super().has_permission(request, view) and request.user.role == 'admin'
+        return super().has_permission(request, view) and is_support_staff(request.user)
 
 
 # ============= УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ =============
@@ -253,15 +305,68 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
             'assigned_users',
             'messages__sender',
         )
-        if self.request.user.role != 'admin':
-            return queryset.filter(user=self.request.user)
+        if not is_support_staff(self.request.user):
+            return queryset.filter(
+                Q(user=self.request.user) |
+                Q(admin=self.request.user) |
+                Q(assigned_users=self.request.user)
+            ).distinct()
         status_filter = self.request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+        user_role = self.request.query_params.get('user_role')
+        if user_role:
+            queryset = queryset.filter(user__role=user_role)
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        support_request = serializer.save(user=self.request.user)
+        log_activity(self.request.user, 'created', 'Обращение создано', support_request=support_request)
+        for admin in User.objects.filter(role__in=SUPPORT_STAFF_ROLES, is_active=True):
+            NotificationService.create_notification(
+                recipient=admin,
+                type=NotificationType.NEW_CONTACT,
+                title=f"Новое обращение #{support_request.ticket_number}",
+                message=f"{self.request.user.get_full_name() or self.request.user.username} создал обращение: {support_request.subject}",
+                related_object_id=support_request.id,
+                related_object_type='support_request',
+                data={
+                    'ticket_type': 'support_request',
+                    'ticket_id': support_request.id,
+                    'ticket_number': support_request.ticket_number,
+                    'action': 'open_support_request',
+                    'action_label': 'Открыть в админке',
+                    'target': f'/admin?supportRequestId={support_request.id}',
+                }
+            )
+        _notify_support_watchers(support_request, 'created', exclude_user_id=self.request.user.id)
+
+    def perform_create(self, serializer):
+        support_request = serializer.save(user=self.request.user)
+        log_activity(
+            self.request.user,
+            'created',
+            '\u041e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435 \u0441\u043e\u0437\u0434\u0430\u043d\u043e',
+            support_request=support_request,
+        )
+        for admin in User.objects.filter(role__in=SUPPORT_STAFF_ROLES, is_active=True):
+            NotificationService.create_notification(
+                recipient=admin,
+                type=NotificationType.NEW_CONTACT,
+                title=f"\u041d\u043e\u0432\u043e\u0435 \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435 #{support_request.ticket_number}",
+                message=f"{self.request.user.get_full_name() or self.request.user.username} \u0441\u043e\u0437\u0434\u0430\u043b \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435: {support_request.subject}",
+                related_object_id=support_request.id,
+                related_object_type='support_request',
+                data={
+                    'ticket_type': 'support_request',
+                    'ticket_id': support_request.id,
+                    'ticket_number': support_request.ticket_number,
+                    'action': 'open_support_request',
+                    'action_label': '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0432 \u0430\u0434\u043c\u0438\u043d\u043a\u0435',
+                    'target': f'/admin?supportRequestId={support_request.id}',
+                }
+            )
+        _notify_support_watchers(support_request, 'created', exclude_user_id=self.request.user.id)
 
     @action(detail=True, methods=['post'], url_path='assign')
     def assign_admin(self, request, pk=None):
@@ -280,7 +385,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         support_request = self.get_object()
         support_request.admin = request.user
         support_request.status = 'in_progress'
-        support_request.save()
+        support_request.save(update_fields=['admin', 'status', 'updated_at'])
         log_activity(request.user, 'status_change', f'Статус изменён на «В работе»',
                      meta={'new': 'in_progress'}, support_request=support_request)
         return Response({'message': 'Запрос взят в работу'})
@@ -379,6 +484,103 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
                 }
             )
         serializer = SupportMessageSerializer(message)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def send_message(self, request, pk=None):
+        """Send a support-request message with optional attachments."""
+        support_request = self.get_object()
+        msg_text = (request.data.get('message') or '').strip()
+        files = []
+        files.extend(request.FILES.getlist('files'))
+        files.extend(request.FILES.getlist('file'))
+
+        if not msg_text and not files:
+            return Response({'error': '\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435 \u0438\u043b\u0438 \u0444\u0430\u0439\u043b \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u044c\u043d\u044b'}, status=400)
+
+        for file_obj in files:
+            if file_obj.size > SUPPORT_FILE_SIZE_LIMIT:
+                return Response({'error': f'\u0424\u0430\u0439\u043b {file_obj.name} \u0431\u043e\u043b\u044c\u0448\u0435 50 \u041c\u0411'}, status=400)
+
+        sender_is_staff = is_support_staff(request.user)
+        read_by_admin = sender_is_staff
+        read_by_user = not sender_is_staff
+        created_messages = []
+        message_files = files or [None]
+
+        for index, file_obj in enumerate(message_files):
+            text = msg_text if index == 0 else ''
+            if not text and file_obj:
+                text = file_obj.name
+            created_messages.append(SupportMessage.objects.create(
+                request=support_request,
+                sender=request.user,
+                message=text,
+                file=file_obj,
+                file_name=getattr(file_obj, 'name', '') if file_obj else '',
+                file_size=getattr(file_obj, 'size', 0) if file_obj else 0,
+                is_admin=sender_is_staff,
+                read_by_admin=read_by_admin,
+                read_by_user=read_by_user,
+            ))
+
+        update_fields = ['updated_at']
+        if sender_is_staff and support_request.first_response_at is None:
+            support_request.first_response_at = timezone.now()
+            update_fields.append('first_response_at')
+        if sender_is_staff and support_request.status == 'open':
+            support_request.status = 'in_progress'
+            update_fields.append('status')
+        support_request.save(update_fields=update_fields)
+
+        log_activity(
+            request.user,
+            'message',
+            msg_text or '\u041f\u0440\u0438\u043a\u0440\u0435\u043f\u043b\u0435\u043d \u0444\u0430\u0439\u043b',
+            meta={'attachments_count': len(files)},
+            support_request=support_request,
+        )
+
+        if sender_is_staff and support_request.user_id:
+            NotificationService.create_notification(
+                recipient=support_request.user,
+                type=NotificationType.NEW_COMMENT,
+                title=f"\u041e\u0442\u0432\u0435\u0442 \u043f\u043e \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u044e #{support_request.ticket_number}",
+                message="\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430 \u043e\u0441\u0442\u0430\u0432\u0438\u043b\u0430 \u043d\u043e\u0432\u044b\u0439 \u043e\u0442\u0432\u0435\u0442 \u043f\u043e \u0432\u0430\u0448\u0435\u043c\u0443 \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u044e.",
+                related_object_id=support_request.id,
+                related_object_type='support_request',
+                data={
+                    'ticket_type': 'support_request',
+                    'ticket_id': support_request.id,
+                    'ticket_number': support_request.ticket_number,
+                    'action': 'open_support_request',
+                    'action_label': '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0435',
+                    'target': f'/support?ticketType=support_request&ticketId={support_request.id}',
+                    'attachments_count': len(files),
+                }
+            )
+        elif not sender_is_staff:
+            for admin in User.objects.filter(role__in=SUPPORT_STAFF_ROLES, is_active=True):
+                NotificationService.create_notification(
+                    recipient=admin,
+                    type=NotificationType.NEW_COMMENT,
+                    title=f"\u041d\u043e\u0432\u044b\u0439 \u043e\u0442\u0432\u0435\u0442 \u0432 \u043e\u0431\u0440\u0430\u0449\u0435\u043d\u0438\u0438 #{support_request.ticket_number}",
+                    message=f"{request.user.get_full_name() or request.user.username} \u0434\u043e\u0431\u0430\u0432\u0438\u043b \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435.",
+                    related_object_id=support_request.id,
+                    related_object_type='support_request',
+                    data={
+                        'ticket_type': 'support_request',
+                        'ticket_id': support_request.id,
+                        'ticket_number': support_request.ticket_number,
+                        'action': 'open_support_request',
+                        'action_label': '\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u0432 \u0430\u0434\u043c\u0438\u043d\u043a\u0435',
+                        'target': f'/admin?supportRequestId={support_request.id}',
+                        'attachments_count': len(files),
+                    }
+                )
+
+        _notify_support_watchers(support_request, 'message', exclude_user_id=request.user.id)
+        serializer = SupportMessageSerializer(created_messages[0], context={'request': request})
         return Response(serializer.data)
 
     @action(detail=True, methods=['post'])
@@ -1358,6 +1560,9 @@ def get_ticket_activity(request, ticket_type, pk):
                 'text': m.message,
                 'is_admin': m.is_admin,
                 'source': 'ticket',
+                'attachments': _support_message_attachments(m),
+                'read_by_user': getattr(m, 'read_by_user', True),
+                'read_by_admin': getattr(m, 'read_by_admin', True),
                 'created_at': m.created_at.isoformat(),
             }
             for m in ticket.messages.select_related('sender').all()

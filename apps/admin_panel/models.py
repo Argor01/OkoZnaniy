@@ -41,6 +41,7 @@ class SupportRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    first_response_at = models.DateTimeField(null=True, blank=True)
     
     class Meta:
         db_table = 'support_requests'
@@ -85,6 +86,9 @@ class SupportMessage(models.Model):
     request = models.ForeignKey(SupportRequest, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(verbose_name='Сообщение')
+    file = models.FileField(upload_to='support_messages/', null=True, blank=True)
+    file_name = models.CharField(max_length=255, blank=True)
+    file_size = models.PositiveIntegerField(default=0)
     is_admin = models.BooleanField(default=False)
     read_by_user = models.BooleanField(default=True)
     read_by_admin = models.BooleanField(default=True)

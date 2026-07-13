@@ -37,6 +37,16 @@ const mapRequestToSupportChat = (request: any) => {
     messages: messages.map((item: any) => ({
       id: item.id,
       text: item.message || item.text || '',
+      attachments: Array.isArray(item.attachments)
+        ? item.attachments
+        : item.file
+          ? [{
+              name: item.file_name || 'file',
+              url: item.file,
+              size: item.file_size || 0,
+              type: 'file',
+            }]
+          : [],
       sender: {
         id: item.sender?.id,
         username: item.sender?.username || userDisplayName(item.sender),
@@ -85,8 +95,8 @@ export const useSupportActions = () => {
   const queryClient = useQueryClient();
 
   const { mutateAsync: sendChatMessage } = useMutation({
-    mutationFn: ({ chatId, message }: { chatId: number; message: string }) =>
-      adminPanelApi.sendSupportMessage(chatId, message),
+    mutationFn: ({ chatId, message, files = [] }: { chatId: number; message: string; files?: File[] }) =>
+      adminPanelApi.sendSupportMessage(chatId, message, files),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_SUPPORT_CHATS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_SUPPORT_REQUESTS() });
@@ -103,7 +113,7 @@ export const useSupportActions = () => {
   });
 
   return {
-    sendChatMessage: (chatId: number, message: string) => sendChatMessage({ chatId, message }),
+    sendChatMessage: (chatId: number, message: string, files?: File[]) => sendChatMessage({ chatId, message, files }),
     sendSupportChatMessage: sendChatMessage,
     markChatRead,
   };
