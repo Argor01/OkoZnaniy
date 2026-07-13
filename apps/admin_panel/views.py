@@ -249,7 +249,10 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
         return [IsAdminUser()]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related('user', 'admin', 'support_chat').prefetch_related(
+            'assigned_users',
+            'messages__sender',
+        )
         if self.request.user.role != 'admin':
             return queryset.filter(user=self.request.user)
         status_filter = self.request.query_params.get('status')

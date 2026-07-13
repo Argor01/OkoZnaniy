@@ -77,7 +77,7 @@ interface SupportChat {
     last_name: string;
     role: string;
   };
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  status: 'open' | 'in_progress' | 'completed' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   subject: string;
   messages: SupportChatMessage[];
@@ -116,8 +116,8 @@ export const SupportChatsSection: React.FC = () => {
   const isTablet = windowWidth >= 768 && windowWidth < 1024;
 
   const sendMessage = async () => {
-    if (!messageText.trim() && attachedFiles.length === 0) {
-      antMessage.warning('Введите сообщение или прикрепите файл');
+    if (!messageText.trim()) {
+      antMessage.warning('Введите сообщение. Файлы добавим на следующем этапе поддержки.');
       return;
     }
 
@@ -130,9 +130,8 @@ export const SupportChatsSection: React.FC = () => {
     try {
       await sendChatMessage(selectedChat.id, messageText);
       
-      // Note: File upload is not yet supported by the API
       if (attachedFiles.length > 0) {
-        antMessage.warning('Загрузка файлов пока не поддерживается');
+        antMessage.warning('Файлы пока не отправлены: вложения запланированы на 3-й этап.');
       }
       
       setMessageText('');
@@ -185,6 +184,7 @@ export const SupportChatsSection: React.FC = () => {
     const colors = {
       open: 'orange',
       in_progress: 'purple',
+      completed: 'green',
       resolved: 'green',
       closed: 'gray',
     };
@@ -195,6 +195,7 @@ export const SupportChatsSection: React.FC = () => {
     const texts = {
       open: 'Открыт',
       in_progress: 'В работе',
+      completed: 'Завершено',
       resolved: 'Решен',
       closed: 'Закрыт',
     };
@@ -223,6 +224,18 @@ export const SupportChatsSection: React.FC = () => {
   
   
   const chatsData = chats as unknown as SupportChat[];
+
+  useEffect(() => {
+    if (!selectedChat) return;
+    const updatedChat = chatsData.find(chat => chat.id === selectedChat.id);
+    if (
+      updatedChat &&
+      (updatedChat.updated_at !== selectedChat.updated_at ||
+        updatedChat.messages.length !== selectedChat.messages.length)
+    ) {
+      setSelectedChat(updatedChat);
+    }
+  }, [chatsData, selectedChat]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -301,8 +314,7 @@ export const SupportChatsSection: React.FC = () => {
                 <Option value="all">Все статусы</Option>
                 <Option value="open">Открыт</Option>
                 <Option value="in_progress">В работе</Option>
-                <Option value="resolved">Решен</Option>
-                <Option value="closed">Закрыт</Option>
+                <Option value="completed">Завершено</Option>
               </Select>
               
               <Select
@@ -512,7 +524,7 @@ export const SupportChatsSection: React.FC = () => {
                       icon={<SendOutlined />}
                       onClick={sendMessage}
                       loading={sending}
-                      disabled={!messageText.trim() && attachedFiles.length === 0}
+                      disabled={!messageText.trim()}
                       className={supportStyles.supportChatsSendButton}
                     />
                   </div>

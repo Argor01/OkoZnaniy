@@ -25,12 +25,40 @@ class SupportRequestSerializer(serializers.ModelSerializer):
     messages = SupportMessageSerializer(many=True, read_only=True)
     support_chat_id = serializers.IntegerField(source='support_chat.id', read_only=True)
     tags_list = serializers.ListField(source='get_tags_list', read_only=True)
+    last_message = serializers.SerializerMethodField()
+    last_message_at = serializers.SerializerMethodField()
+    messages_count = serializers.SerializerMethodField()
+    unread_count = serializers.SerializerMethodField()
     
     class Meta:
         model = SupportRequest
         fields = ['id', 'ticket_number', 'user', 'admin', 'assigned_users', 'assigned_user_ids', 
                   'support_chat_id', 'subject', 'description', 'status', 'priority', 'tags', 'tags_list',
-                  'auto_created', 'created_at', 'updated_at', 'completed_at', 'messages']
+                  'auto_created', 'created_at', 'updated_at', 'completed_at', 'messages',
+                  'last_message', 'last_message_at', 'messages_count', 'unread_count']
+
+    def get_last_message(self, obj):
+        message = obj.messages.order_by('-created_at').first()
+        if not message:
+            return None
+        return {
+            'text': message.message,
+            'created_at': message.created_at,
+            'sender_id': message.sender_id,
+            'is_admin': message.is_admin,
+        }
+
+    def get_last_message_at(self, obj):
+        message = obj.messages.order_by('-created_at').first()
+        return message.created_at if message else None
+
+    def get_messages_count(self, obj):
+        return obj.messages.count()
+
+    def get_unread_count(self, obj):
+        # Stage 1 exposes a stable field for the admin inbox. Real per-side read
+        # tracking is planned in docs/ADMIN_SUPPORT_COMMUNICATION_PLAN.md stage 2.
+        return 0
     
     def update(self, instance, validated_data):
         assigned_user_ids = validated_data.pop('assigned_user_ids', None)
