@@ -14,6 +14,7 @@ import OrderHeader from './OrderHeader';
 import OrderContent from './OrderContent';
 import { formatUserName } from '@/utils/formatters';
 import OrderBids from './OrderBids';
+import OrderTimeline from '@/features/orders/components/OrderTimeline';
 import styles from '../OrderDetail.module.css';
 
 const { Title, Text } = Typography;
@@ -202,6 +203,10 @@ const OrderDetail: React.FC = () => {
               onBack={() => navigate(-1)}
               onEditOrder={() => setEditOrderModalVisible(true)}
             />
+
+            <div className={styles.sectionBlock}>
+              <OrderTimeline order={order} />
+            </div>
 
             <OrderContent
               order={order}

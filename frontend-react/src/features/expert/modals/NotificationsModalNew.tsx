@@ -161,6 +161,53 @@ const resolveNotificationTarget = (notification: Notification): string | null =>
   return '/expert';
 };
 
+type NotificationAction = {
+  key: string;
+  label: string;
+  target: string;
+  primary?: boolean;
+};
+
+const getDataNumber = (notification: Notification, key: string): number | null => {
+  const raw = notification.data?.[key];
+  const value = typeof raw === 'number' ? raw : typeof raw === 'string' ? Number(raw) : NaN;
+  return Number.isFinite(value) && value > 0 ? value : null;
+};
+
+const resolveNotificationActions = (notification: Notification): NotificationAction[] => {
+  const actions: NotificationAction[] = [];
+  const orderId = getDataNumber(notification, 'order_id') || extractOrderId(notification);
+  const source = `${notification.title || ''} ${notification.message || ''}`.toLowerCase();
+  const statusFromData = String(notification.data?.new_status || notification.data?.status || '').toLowerCase();
+  const actionRequired = String(notification.data?.action_required || '').toLowerCase();
+  const isClaim = notification.type === 'complaint_filed' || notification.related_object_type === 'arbitration_case';
+
+  if (isClaim) {
+    actions.push({ key: 'answer-claim', label: 'Ответить на претензию', target: '/messages?support=1', primary: true });
+  }
+
+  if (orderId) {
+    const requiresExpertDecision = notification.type === 'expert_invitation' || actionRequired === 'expert_assignment_response';
+    if (requiresExpertDecision) {
+      return [
+        { key: 'open-order', label: 'Открыть заказ', target: `/orders/${orderId}`, primary: true },
+      ];
+    }
+
+    actions.push({ key: 'order-chat', label: 'Открыть чат заказа', target: `/messages?orderId=${orderId}`, primary: actions.length === 0 });
+
+    if (notification.type === 'file_uploaded' || source.includes('провер') || source.includes('работ')) {
+      actions.push({ key: 'review-work', label: 'Проверить работу', target: `/orders/${orderId}` });
+    }
+
+    if (notification.type === 'status_changed' && (statusFromData === 'waiting_payment' || source.includes('оплат') || source.includes('waiting_payment'))) {
+      actions.push({ key: 'pay-order', label: 'Оплатить', target: `/orders/${orderId}` });
+    }
+  }
+
+  return actions.slice(0, 3);
+};
+
 const NotificationsModal: React.FC<NotificationsModalProps> = ({
   visible,
   onClose,
@@ -293,6 +340,19 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     navigate(target);
   };
 
+  const handleNotificationActionClick = async (
+    event: React.MouseEvent,
+    notification: Notification,
+    action: NotificationAction,
+  ) => {
+    event.stopPropagation();
+    if (!notification.is_read) {
+      await handleMarkAsRead(notification);
+    }
+    onClose();
+    navigate(action.target);
+  };
+
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsApi.markAllAsRead();
@@ -312,7 +372,24 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
   };
 
   const safeNotifications = Array.isArray(notifications) ? notifications : [];
-  const filteredNotifications = safeNotifications
+  const dedupedNotifications = Array.from(
+    safeNotifications.reduce((map, notification) => {
+      const key = [
+        notification.type,
+        notification.title,
+        notification.message,
+        notification.related_object_type || '',
+        notification.related_object_id || '',
+        notification.data?.order_id || '',
+        notification.data?.case_id || '',
+      ].join('|');
+      if (!map.has(key)) {
+        map.set(key, notification);
+      }
+      return map;
+    }, new Map<string, Notification>()).values()
+  );
+  const filteredNotifications = dedupedNotifications
     .filter(notification => !['new_message', 'message', 'chat_message', 'private_message'].includes(notification.type))
     .filter(notification => {
     if (notificationTab === 'all') return true;
@@ -404,7 +481,9 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
               </Text>
             </div>
           ) : (
-            filteredNotifications.map((notification) => (
+            filteredNotifications.map((notification) => {
+              const actions = resolveNotificationActions(notification);
+              return (
               <div
                 key={notification.id}
                 onClick={() => void handleNotificationClick(notification)}
@@ -432,9 +511,25 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
                     <ClockCircleOutlined className={styles.notificationsModalItemTimeIcon} />
                     {formatTimestamp(notification.created_at)}
                   </Text>
+                  {actions.length > 0 && (
+                    <div className={styles.notificationsModalActionRow}>
+                      {actions.map((action) => (
+                        <Button
+                          key={action.key}
+                          size="small"
+                          type={action.primary ? 'primary' : 'default'}
+                          className={`${styles.notificationsModalActionButton} ${action.primary ? styles.notificationsModalActionButtonPrimary : ''}`}
+                          onClick={(event) => void handleNotificationActionClick(event, notification, action)}
+                        >
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

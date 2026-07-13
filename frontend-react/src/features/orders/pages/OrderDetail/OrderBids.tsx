@@ -80,19 +80,28 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                     ? `${prepaymentPercent}%`
                     : formatCurrency((bidAmount * prepaymentPercent) / 100);
                   const hasValidPrice = Number.isFinite(bidAmount) && bidAmount > 0;
+                  const bidStatus = bid.status || 'active';
+                  const isAssignedBid = bidStatus === 'accepted' || (
+                    order.expert?.id === bid.expert.id &&
+                    ['awaiting_expert_acceptance', 'in_progress', 'review', 'revision', 'completed'].includes(order.status)
+                  );
+                  const canAssignBid = isOrderOwner && bidStatus === 'active' && !isAssignedBid && (
+                    !order.expert ||
+                    ['new', 'open', 'published'].includes(order.status)
+                  );
 
                   return (
                     <List.Item
                       key={bid.id}
-                      className={order.expert?.id === bid.expert.id ? styles.bidItemSelected : styles.bidItem}
+                      className={isAssignedBid ? styles.bidItemSelected : styles.bidItem}
                       actions={
                         bid.status === 'accepted'
                           ? [<Tag color="success" icon={<CheckCircleOutlined />}>Принял заказ</Tag>]
                           : bid.status === 'invited'
                             ? [<Tag color="blue" icon={<CheckCircleOutlined />}>Ожидается ответ</Tag>]
-                            : order.expert?.id === bid.expert.id
+                            : isAssignedBid
                               ? [<Tag color="success" icon={<CheckCircleOutlined />}>Выбран</Tag>]
-                            : isOrderOwner && hasValidPrice && !order.expert
+                            : canAssignBid
                             ? [
                                 <AppButton
                                   size={isMobile ? 'small' : 'middle'}

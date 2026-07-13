@@ -9,7 +9,7 @@ from django.db.models import Q, Max, Count, Prefetch
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
-from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat, unread_messages_for_user
+from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat, readable_messages_for_chat, unread_messages_for_user
 from .websocket_utils import notify_chat_message, notify_typing
 from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
@@ -939,7 +939,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # РћС‚РјРµС‡Р°РµРј РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ
-        chat.messages.exclude(sender=request.user).update(is_read=False)
+        readable_messages_for_chat(chat).exclude(sender=request.user).update(is_read=False)
         
         return Response({'status': 'success'})
 

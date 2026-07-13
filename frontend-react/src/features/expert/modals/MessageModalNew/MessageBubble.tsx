@@ -11,7 +11,6 @@ import {
   CloseCircleOutlined,
   CheckOutlined,
   UploadOutlined,
-  StopOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { truncateFileName, getFileIconByName } from './utils/fileHelpers';
@@ -142,16 +141,25 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       );
     }
+    const systemText = String(msg.text || '');
+    const systemTextLower = systemText.toLowerCase();
+    const isDangerSystemEvent = /наруш|контакт|заморож|нельзя|блок|violation|blocked/.test(systemTextLower);
+    const isSuccessSystemEvent = /принят|разморож|заверш|оплачен|назнач|accepted|completed|paid/.test(systemTextLower);
+    const SystemEventIcon = isDangerSystemEvent
+      ? ExclamationCircleOutlined
+      : isSuccessSystemEvent
+        ? CheckCircleOutlined
+        : FileTextOutlined;
     return (
       <div className={styles.messageRowSystem}>
         <div className={styles.messageBubbleSystem}>
-          <div className={styles.messageSystemCard}>
-            <StopOutlined className={styles.messageSystemIcon} />
+          <div className={`${styles.messageSystemCard} ${styles.messageSystemCardEvent} ${isDangerSystemEvent ? styles.messageSystemCardDanger : isSuccessSystemEvent ? styles.messageSystemCardSuccess : styles.messageSystemCardInfo}`}>
+            <SystemEventIcon className={styles.messageSystemIcon} />
             <Text className={`${styles.messageSystemText} ${isMobile ? styles.messageSystemTextMobile : ''}`}>
-              {msg.text}
+              {systemText}
             </Text>
             <div className={styles.messageSystemTime}>
-              Система безопасности • {formatMessageTime(msg.created_at)}
+              Событие заказа • {formatMessageTime(msg.created_at)}
             </div>
           </div>
         </div>

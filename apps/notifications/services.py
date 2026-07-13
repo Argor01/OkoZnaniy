@@ -14,6 +14,33 @@ class NotificationService:
 
     @staticmethod
     def create_notification(recipient, type, title, message, related_object_id=None, related_object_type=None, expires_in=None, data=None):
+        payload = data or {}
+        now = timezone.now()
+        duplicate = (
+            Notification.objects
+            .filter(
+                recipient=recipient,
+                type=type,
+                title=title,
+                message=message,
+                related_object_id=related_object_id,
+                related_object_type=related_object_type,
+                is_read=False,
+                created_at__gte=now - timedelta(minutes=10),
+            )
+            .order_by('-created_at')
+            .first()
+        )
+        if duplicate:
+            update_fields = ['created_at', 'data']
+            duplicate.created_at = now
+            duplicate.data = {**(duplicate.data or {}), **payload}
+            if expires_in:
+                duplicate.expires_at = now + expires_in
+                update_fields.append('expires_at')
+            duplicate.save(update_fields=update_fields)
+            return duplicate
+
         notification = Notification.objects.create(
             recipient=recipient,
             type=type,
@@ -21,11 +48,11 @@ class NotificationService:
             message=message,
             related_object_id=related_object_id,
             related_object_type=related_object_type,
-            data=data or {}
+            data=payload
         )
         
         if expires_in:
-            notification.expires_at = timezone.now() + expires_in
+            notification.expires_at = now + expires_in
             notification.save(update_fields=['expires_at'])
 
         # WebSocket уведомление
@@ -169,7 +196,12 @@ class NotificationService:
                 title="Изменен статус заказа",
                 message=f"Статус заказа {NotificationService._order_ref(order)} изменен с '{old_status}' на '{order.get_status_display()}'",
                 related_object_id=order.id,
-                related_object_type='order'
+                related_object_type='order',
+                data={
+                    'order_id': order.id,
+                    'old_status': old_status,
+                    'new_status': order.status,
+                }
             )
 
     @staticmethod

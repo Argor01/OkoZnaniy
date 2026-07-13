@@ -93,6 +93,7 @@ export const ROUTES = {
   createOrder: '/create-order',
   becomeExpert: '/become-expert',
   becomePartner: '/become-partner',
+  partners: '/partners',
   expert: {
     root: '/expert',
     clientOrders: '/expert/client-orders',

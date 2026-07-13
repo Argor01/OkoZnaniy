@@ -149,3 +149,34 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["id"], self.order_chat.id)
         self.assertEqual(response.json()["order_id"], self.order.id)
+
+    def test_locked_direct_chat_hides_system_messages_from_unread_and_detail(self):
+        system_user = User.objects.create_user(
+            username="chat_routing_system",
+            email="chat_routing_system@example.com",
+            password="pwd",
+            role="admin",
+        )
+        hidden_message = Message.objects.create(
+            chat=self.direct_chat,
+            sender=system_user,
+            text="Hidden system event",
+            message_type="system",
+            is_read=False,
+        )
+
+        detail_response = self.api_client.get(f"/api/chat/chats/{self.direct_chat.id}/")
+        self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
+        detail = detail_response.json()
+        self.assertEqual(detail["unread_count"], 0)
+        self.assertNotIn(hidden_message.id, [message["id"] for message in detail["messages"]])
+
+        count_response = self.api_client.get("/api/chat/chats/unread_count/")
+        self.assertEqual(count_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(count_response.json()["unread_count"], 0)
+
+        Message.objects.filter(pk=hidden_message.pk).update(is_read=True)
+        mark_response = self.api_client.post(f"/api/chat/chats/{self.direct_chat.id}/mark_as_unread/")
+        self.assertEqual(mark_response.status_code, status.HTTP_200_OK)
+        hidden_message.refresh_from_db()
+        self.assertTrue(hidden_message.is_read)

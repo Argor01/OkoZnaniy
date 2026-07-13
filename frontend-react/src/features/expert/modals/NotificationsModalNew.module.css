@@ -541,6 +541,27 @@
   font-size: 12px;
 }
 
+.notificationsModalActionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.notificationsModalActionButton {
+  border-radius: 999px;
+  font-weight: 700;
+  height: 30px;
+  padding: 0 12px;
+}
+
+.notificationsModalActionButtonPrimary {
+  background: var(--color-brand-purple-600, #7c3aed);
+  border-color: var(--color-brand-purple-600, #7c3aed);
+  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.18);
+}
+
 .notificationsModalItemTimeMobile {
   font-size: 13px;
 }
@@ -834,6 +855,12 @@
 
 :global([data-theme="dark"]) .notificationsModalItemTime {
   color: var(--color-text-tertiary, #64748b);
+}
+
+:global([data-theme="dark"]) .notificationsModalActionButton:not(.notificationsModalActionButtonPrimary) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #e5e7eb;
 }
 
 :global([data-theme="dark"]) .notificationsModalItemIconUnread {

@@ -24,7 +24,6 @@ import {
   CloseCircleOutlined,
   UploadOutlined,
   ExclamationCircleOutlined,
-  StopOutlined,
   MoreOutlined,
   BookOutlined,
   ClockCircleOutlined,
@@ -48,6 +47,7 @@ import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
+import OrderTimeline from '@/features/orders/components/OrderTimeline';
 import { expertsApi } from '@/features/expert/api/experts';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
 import { supportRequestsApi } from '@/features/support/api/requests';
@@ -859,11 +859,35 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         return;
       }
 
+      if (selectedOrderId && !selectedUserId) {
+        const openOrderChat = async () => {
+          try {
+            const orderData = await ordersApi.getById(selectedOrderId);
+            const currentIdRaw = Number((userProfile as { id?: unknown } | undefined)?.id);
+            const currentId = Number.isFinite(currentIdRaw) && currentIdRaw > 0 ? currentIdRaw : 0;
+            const clientId = toPositiveNumber((orderData as { client?: { id?: unknown } | null; client_id?: unknown })?.client?.id)
+              ?? toPositiveNumber((orderData as { client_id?: unknown })?.client_id);
+            const expertId = toPositiveNumber((orderData as { expert?: { id?: unknown } | null; expert_id?: unknown })?.expert?.id)
+              ?? toPositiveNumber((orderData as { expert_id?: unknown })?.expert_id);
+            const otherUserId = currentId && clientId === currentId ? expertId : clientId;
+            if (otherUserId) {
+              await loadOrCreateChatByOrderAndUser(selectedOrderId, otherUserId);
+            } else {
+              setActiveOrderId(selectedOrderId);
+            }
+          } catch {
+            antMessage.error('Не удалось открыть чат заказа');
+          }
+        };
+        void openOrderChat();
+        return;
+      }
+
       if (selectedUserId) {
         loadOrCreateChatWithUser(selectedUserId);
       }
     }
-  }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser]);
+  }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser, toPositiveNumber, userProfile]);
 
     // Initial load of chat detail
   useEffect(() => {
@@ -2863,6 +2887,8 @@ const handleOverdueComplaint = async () => {
                             </div>
                           </div>
 
+                          <OrderTimeline order={order} compact className={styles.orderTimelineInChat} />
+
                           <div className={styles.orderActionsBar}>
                              <div className={styles.primaryActionsRow}>
                               <Button 
@@ -3083,19 +3109,28 @@ const handleOverdueComplaint = async () => {
                         </div>
                       );
                     }
+                    const systemText = String(msg.text || '');
+                    const systemTextLower = systemText.toLowerCase();
+                    const isDangerSystemEvent = /наруш|контакт|заморож|нельзя|блок|violation|blocked/.test(systemTextLower);
+                    const isSuccessSystemEvent = /принят|разморож|заверш|оплачен|назнач|accepted|completed|paid/.test(systemTextLower);
+                    const SystemEventIcon = isDangerSystemEvent
+                      ? ExclamationCircleOutlined
+                      : isSuccessSystemEvent
+                        ? CheckCircleOutlined
+                        : FileDoneOutlined;
                     return (
                       <div
                         key={msg.id}
                         className={styles.messageRowSystem}
                       >
                         <div className={styles.messageBubbleSystem}>
-                          <div className={styles.messageSystemCard}>
-                            <StopOutlined className={styles.messageSystemIcon} />
+                          <div className={`${styles.messageSystemCard} ${styles.messageSystemCardEvent} ${isDangerSystemEvent ? styles.messageSystemCardDanger : isSuccessSystemEvent ? styles.messageSystemCardSuccess : styles.messageSystemCardInfo}`}>
+                            <SystemEventIcon className={styles.messageSystemIcon} />
                             <Text className={`${styles.messageSystemText} ${isMobile ? styles.messageSystemTextMobile : ''}`}>
-                              {msg.text}
+                              {systemText}
                             </Text>
                             <div className={styles.messageSystemTime}>
-                              Система безопасности • {formatMessageTime(msg.created_at)}
+                              Событие заказа • {formatMessageTime(msg.created_at)}
                             </div>
                           </div>
                         </div>

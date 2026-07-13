@@ -12,7 +12,7 @@ export interface MessageModalProps {
   selectedOrderId?: number;
   chatContextTitle?: string;
   supportUserId?: number;
-  userProfile?: { role?: string };
+  userProfile?: { id?: number | string; role?: string };
   renderAsPage?: boolean;
 }
 
@@ -55,8 +55,10 @@ export type OrderForChat = {
   work_type?: { name?: string | null } | null;
   custom_subject?: string | null;
   custom_work_type?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   available_actions?: OrderAvailableActions;
-  files?: Array<{ id: number; file_name: string; file_url: string; file_type?: string }>;
+  files?: Array<{ id: number; file_name?: string; filename?: string; file_url?: string; file_type?: string; description?: string | null; created_at?: string | null }>;
 };
 
 export type DeviceEmojiFamily = 'ios' | 'android' | 'windows' | 'mac' | 'linux' | 'other';

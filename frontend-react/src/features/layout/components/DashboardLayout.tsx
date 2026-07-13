@@ -422,6 +422,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isClient = userProfile?.role === 'client';
   const shouldShowHeader = isExpert || isClient;
   const shouldPollMessages = Boolean(userProfile && shouldShowHeader);
+  const isMessagesPage = location.pathname.startsWith(ROUTES.messages);
 
   React.useEffect(() => {
     if (!shouldShowHeader) return;
@@ -503,13 +504,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             />
           )}
           
-          <Layout className={styles.mainLayoutContent}>
+          <Layout className={`${styles.mainLayoutContent} ${isMessagesPage ? styles.mainLayoutContentMessages : ''}`}>
             <Content className={contentClassName}>
               {children}
             </Content>
           </Layout>
           
-          {!isCompact && (
+          {!isCompact && !isMessagesPage && (
             <RightSidebar />
           )}
         </div>

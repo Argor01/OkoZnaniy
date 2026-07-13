@@ -1897,13 +1897,13 @@
 }
 
 .messageSystemCard {
-  background: linear-gradient(135deg, #fff2f0 0%, #ffebe8 100%);
-  border: 2px solid #ff4d4f;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 16px;
   padding: 20px;
   text-align: center;
   position: relative;
-  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.15);
+  box-shadow: 0 10px 28px rgba(79, 70, 229, 0.1);
 }
 
 .messageSystemCard::before {
@@ -1911,14 +1911,14 @@
 }
 
 .messageSystemIcon {
-  color: #ff4d4f;
+  color: #7c3aed;
   font-size: 24px;
   margin-bottom: 12px;
   display: block;
 }
 
 .messageSystemText {
-  color: #ff4d4f;
+  color: #1f2937;
   font-weight: 600;
   font-size: 14px;
   line-height: 1.5;
@@ -1931,28 +1931,90 @@
 }
 
 .messageSystemTime {
-  color: #ff7875;
+  color: #64748b;
   font-size: 11px;
   margin-top: 12px;
   font-weight: 500;
 }
 
+.messageSystemCardEvent {
+  min-width: min(520px, 90vw);
+}
+
+.messageSystemCardDanger {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffebe8 100%);
+  border-color: rgba(239, 68, 68, 0.42);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.12);
+}
+
+.messageSystemCardDanger .messageSystemIcon,
+.messageSystemCardDanger .messageSystemText {
+  color: #dc2626;
+}
+
+.messageSystemCardDanger .messageSystemTime {
+  color: #ef4444;
+}
+
+.messageSystemCardSuccess {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border-color: rgba(16, 185, 129, 0.32);
+}
+
+.messageSystemCardSuccess .messageSystemIcon,
+.messageSystemCardSuccess .messageSystemText {
+  color: #047857;
+}
+
+.messageSystemCardSuccess .messageSystemTime {
+  color: #059669;
+}
+
+.messageSystemCardInfo {
+  background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%);
+  border-color: rgba(99, 102, 241, 0.24);
+}
+
 :global([data-theme="dark"]) .messageSystemCard {
-  background: linear-gradient(135deg, rgba(69, 10, 10, 0.92) 0%, rgba(127, 29, 29, 0.88) 100%);
-  border-color: #f87171;
-  box-shadow: 0 10px 30px rgba(248, 113, 113, 0.18);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.92) 0%, rgba(31, 27, 55, 0.92) 100%);
+  border-color: rgba(167, 139, 250, 0.24);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
 }
 
 :global([data-theme="dark"]) .messageSystemIcon {
-  color: #fca5a5;
+  color: #c4b5fd;
 }
 
 :global([data-theme="dark"]) .messageSystemText {
-  color: #ffe4e6;
+  color: #f8fafc;
 }
 
 :global([data-theme="dark"]) .messageSystemTime {
-  color: #fda4af;
+  color: #a7b0c0;
+}
+
+:global([data-theme="dark"]) .messageSystemCardDanger {
+  background: linear-gradient(135deg, rgba(69, 26, 26, 0.96) 0%, rgba(31, 22, 32, 0.98) 100%);
+  border-color: rgba(248, 113, 113, 0.52);
+}
+
+:global([data-theme="dark"]) .messageSystemCardDanger .messageSystemIcon,
+:global([data-theme="dark"]) .messageSystemCardDanger .messageSystemText {
+  color: #fecaca;
+}
+
+:global([data-theme="dark"]) .messageSystemCardDanger .messageSystemTime {
+  color: #fca5a5;
+}
+
+:global([data-theme="dark"]) .messageSystemCardSuccess {
+  background: linear-gradient(135deg, rgba(5, 46, 22, 0.9) 0%, rgba(20, 83, 45, 0.74) 100%);
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+:global([data-theme="dark"]) .messageSystemCardSuccess .messageSystemIcon,
+:global([data-theme="dark"]) .messageSystemCardSuccess .messageSystemText {
+  color: #bbf7d0;
 }
 
 .simpleModalContent {
@@ -2178,6 +2240,10 @@
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.orderTimelineInChat {
+  margin-bottom: 18px;
 }
 
 @media (max-width: 640px) {
@@ -3514,3 +3580,486 @@
   .chatSendButton:hover { transform: none; }
 }
 /* === END MESSAGES VISUAL REFRESH v1 === */
+
+/* ============================================================
+   CHAT COMPOSITION POLISH v2
+   Makes order chats feel like a messenger, not an embedded page.
+   ============================================================ */
+
+@media (min-width: 1025px) {
+  .chatModalWrapDesktop :global(.ant-modal) {
+    width: min(1360px, calc(100vw - 56px)) !important;
+    max-width: min(1360px, calc(100vw - 56px));
+  }
+
+  .chatModalWrapDesktop :global(.ant-modal-content) {
+    height: min(880px, calc(100dvh - 56px));
+    border-radius: 26px;
+  }
+
+  .chatSidebarDesktop {
+    width: clamp(280px, 24vw, 360px);
+    flex-basis: clamp(280px, 24vw, 360px);
+  }
+}
+
+.chatPanel {
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.025), transparent 160px),
+    var(--bg-secondary, #f7f8fb);
+}
+
+.chatHeader {
+  min-height: 82px;
+  padding-inline: 24px;
+}
+
+.chatHeaderPaddingDesktopActive,
+.chatHeaderPaddingDesktopEmpty {
+  padding: 14px 24px;
+}
+
+.chatHeaderMain {
+  gap: 14px;
+}
+
+.chatHeaderTitle {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.chatHeaderSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #667085);
+}
+
+.orderTabsHeader {
+  padding: 0 24px;
+  background: var(--bg-primary, #ffffff);
+}
+
+.orderSummaryHeader {
+  padding: 13px 24px;
+  background: color-mix(in srgb, var(--bg-primary, #ffffff) 94%, var(--color-brand-purple-500, #7c3aed) 6%);
+}
+
+.orderSummaryDetails {
+  padding: 18px 24px 20px;
+  background:
+    radial-gradient(720px 180px at 50% 0, rgba(124, 58, 237, 0.055), transparent 70%),
+    var(--bg-primary, #ffffff);
+}
+
+.orderGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto 16px;
+}
+
+.orderGridItem {
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.orderGridItem:hover {
+  transform: translateY(-1px);
+}
+
+.gridIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+.gridLabel {
+  font-size: 10px;
+}
+
+.gridValue {
+  font-size: 14px;
+}
+
+.orderTimelineInChat {
+  max-width: 760px;
+  margin: 0 auto 16px;
+}
+
+.orderActionsBar {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.goToOrderButton {
+  min-width: 210px;
+  height: 42px;
+  border-radius: 999px;
+}
+
+.chatMessages {
+  padding: 22px 24px 14px;
+  background:
+    radial-gradient(980px 320px at 50% 0, rgba(124, 58, 237, 0.045), transparent 64%),
+    var(--bg-secondary, #f7f8fb);
+}
+
+.chatMessagesContent {
+  gap: 12px;
+}
+
+.messageBubbleCardDesktop {
+  max-width: min(620px, 86%);
+}
+
+.messageCardDesktop,
+.messageCard {
+  width: min(560px, calc(100vw - 72px));
+}
+
+.offerCard {
+  border: 1px solid rgba(124, 58, 237, 0.12);
+  border-radius: 22px;
+  box-shadow: 0 14px 34px rgba(17, 12, 46, 0.08);
+}
+
+.offerCard :global(.ant-card-body) {
+  padding: 0;
+}
+
+.offerCardHeader {
+  padding: 18px 22px 14px;
+  background:
+    linear-gradient(135deg, rgba(124, 58, 237, 0.055), transparent 58%),
+    var(--bg-primary, #ffffff);
+}
+
+.offerCardHeaderIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.offerCardTitle {
+  font-size: 17px;
+  letter-spacing: 0.1px;
+}
+
+.offerCardBody {
+  padding: 16px 22px 20px;
+}
+
+.offerGrid {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.offerGridItem {
+  min-height: 60px;
+  padding: 10px;
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+.offerGridIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+}
+
+.offerValue {
+  font-size: 13px;
+}
+
+.offerDescription {
+  margin-bottom: 14px;
+  border-radius: 14px;
+  box-shadow: none;
+  max-height: 110px;
+  overflow: auto;
+}
+
+:global([data-theme="dark"]) .chatPanel {
+  background:
+    radial-gradient(900px 280px at 50% 0, rgba(124, 58, 237, 0.12), transparent 70%),
+    #11141d;
+}
+
+:global([data-theme="dark"]) .orderSummaryHeader,
+:global([data-theme="dark"]) .orderTabsHeader,
+:global([data-theme="dark"]) .orderSummaryDetails,
+:global([data-theme="dark"]) .chatHeader {
+  background: rgba(24, 28, 40, 0.96);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+:global([data-theme="dark"]) .orderGridItem,
+:global([data-theme="dark"]) .offerCard,
+:global([data-theme="dark"]) .offerCardHeader,
+:global([data-theme="dark"]) .offerCardBody,
+:global([data-theme="dark"]) .offerGridItem,
+:global([data-theme="dark"]) .offerDescription {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+:global([data-theme="dark"]) .offerCard {
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+}
+
+@media (max-width: 1024px) {
+  .chatHeader {
+    min-height: 72px;
+    padding-inline: 16px;
+  }
+
+  .orderSummaryHeader,
+  .orderSummaryDetails,
+  .orderTabsHeader {
+    padding-inline: 16px;
+  }
+
+  .orderGrid,
+  .orderTimelineInChat,
+  .orderActionsBar {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .chatHeader {
+    min-height: 64px;
+    padding-inline: 12px;
+  }
+
+  .orderSummaryDetails {
+    padding: 14px 12px 16px;
+  }
+
+  .orderGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .messageCard,
+  .messageCardMobile,
+  .messageCardDesktop {
+    width: 100%;
+  }
+
+  .offerCardHeader,
+  .offerCardBody {
+    padding-inline: 14px;
+  }
+
+  .offerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   CHAT SIDEBAR SLIM v3
+   Keep the chat list readable, but give the conversation priority.
+   ============================================================ */
+
+@media (min-width: 1025px) {
+  .chatModalWrapDesktop :global(.ant-modal) {
+    width: min(1480px, calc(100vw - 40px)) !important;
+    max-width: min(1480px, calc(100vw - 40px));
+  }
+
+  .chatSidebarDesktop {
+    width: clamp(246px, 18vw, 300px);
+    flex: 0 0 clamp(246px, 18vw, 300px);
+  }
+
+  .chatSearchHeader {
+    padding: 12px 12px 8px;
+  }
+
+  .chatSearchInput :global(.ant-input-affix-wrapper) {
+    height: 42px;
+    border-radius: 15px;
+    padding-inline: 12px;
+  }
+
+  .chatList {
+    padding: 4px 6px 12px;
+  }
+
+  .chatListItem {
+    min-height: 76px;
+    margin: 6px 6px;
+    padding: 10px;
+    border: 1px solid transparent;
+    border-radius: 18px;
+    box-shadow: none;
+  }
+
+  .chatListItem:hover {
+    border-color: rgba(124, 58, 237, 0.12);
+    transform: translateY(-1px);
+  }
+
+  .chatListItemSelected,
+  .chatListItemSelected:hover {
+    border-color: rgba(124, 58, 237, 0.22);
+    box-shadow: inset 3px 0 0 #7c3aed, 0 10px 24px rgba(124, 58, 237, 0.08);
+  }
+
+  .chatListItem :global(.ant-avatar) {
+    width: 38px !important;
+    height: 38px !important;
+    line-height: 38px !important;
+    font-size: 18px !important;
+  }
+
+  .chatListContent {
+    margin-left: 10px;
+  }
+
+  .chatListHeaderRow {
+    margin-bottom: 4px;
+  }
+
+  .chatListName {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+
+  .chatListTime {
+    font-size: 12px;
+    margin-left: 6px;
+  }
+
+  .chatListPreview {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+
+  .chatListPreviewDesktop {
+    max-width: 150px;
+  }
+
+  .orderGrid,
+  .orderTimelineInChat,
+  .orderActionsBar {
+    max-width: 860px;
+  }
+
+  .messageBubbleCardDesktop {
+    max-width: min(660px, 88%);
+  }
+
+  .messageCardDesktop,
+  .messageCard {
+    width: min(600px, calc(100vw - 72px));
+  }
+}
+
+@media (min-width: 1280px) {
+  .chatSidebarDesktop {
+    width: 286px;
+    flex-basis: 286px;
+  }
+}
+
+/* ============================================================
+   CHAT OVERFLOW FIX v4
+   Cards must size from the message column, not from the viewport.
+   ============================================================ */
+
+.chatMessages,
+.chatMessagesContent {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.messageRow {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.messageBubble,
+.messageBubbleCard,
+.messageBubbleCardDesktop,
+.messageBubbleCardMobile {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.messageBubbleCard {
+  max-width: 100%;
+}
+
+.messageBubbleCardDesktop {
+  width: min(560px, calc(100% - 24px));
+  max-width: min(560px, calc(100% - 24px));
+}
+
+.messageBubbleCardMobile {
+  width: 100%;
+  max-width: 100%;
+}
+
+.messageCard,
+.messageCardDesktop,
+.messageCardMobile {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.offerCard {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.offerGrid {
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+}
+
+.offerGridItem {
+  min-width: 0;
+}
+
+.offerValue,
+.offerDescription,
+.offerCardTitle {
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1025px) {
+  .messageBubbleCardDesktop {
+    width: min(560px, calc(100% - 28px));
+    max-width: min(560px, calc(100% - 28px));
+  }
+
+  .messageCardDesktop,
+  .messageCard {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .messageBubbleCardDesktop,
+  .messageBubbleCardMobile,
+  .messageBubbleCard {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .offerGrid {
+    grid-template-columns: 1fr;
+  }
+}

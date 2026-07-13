@@ -9,6 +9,7 @@ const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedire
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const BecomeExpert = lazy(() => import('@/features/expert/pages/BecomeExpert'));
 const BecomePartner = lazy(() => import('@/features/partner/pages/BecomePartner'));
+const PartnersMap = lazy(() => import('@/features/partner/pages/PartnersMap'));
 const LandingV2 = lazy(() => import('@/features/landing-v2/pages/LandingV2'));
 
 export const authRoutes = (
@@ -25,6 +26,7 @@ export const authRoutes = (
     <Route path="/r/:code" element={<ReferralRedirect />} />
     <Route path={ROUTES.becomeExpert} element={<BecomeExpert />} />
     <Route path={ROUTES.becomePartner} element={<BecomePartner />} />
+    <Route path={ROUTES.partners} element={<PartnersMap />} />
   </>
 );
 

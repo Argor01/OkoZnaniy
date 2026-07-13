@@ -172,6 +172,13 @@
 .serviceChip {
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.serviceChip:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .copyright {

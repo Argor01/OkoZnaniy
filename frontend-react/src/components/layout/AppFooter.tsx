@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import { authApi } from '@/features/auth/api/auth';
+import { ROUTES } from '@/utils/constants';
 import styles from './AppFooter.module.css';
 
 const { Footer } = Layout;
@@ -107,6 +108,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>О проекте</h3>
             <div className={styles.linksInline}>
+              <a href={ROUTES.partners} className={styles.link}>Партнерская компания</a>
               <a href="/#about" className={styles.link}>О компании</a>
               <a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a>
               <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a>
@@ -126,9 +128,11 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>Услуги</h3>
             <div className={styles.servicesInline}>
+              <a href={ROUTES.createOrder} className={styles.serviceChip}>Услуги</a>
             {services.map((service) => (
-              <span key={service} className={styles.serviceChip}>{service}</span>
+              <a key={service} href={ROUTES.createOrder} className={styles.serviceChip}>{service}</a>
             ))}
+              <a href={ROUTES.shop.readyWorks} className={styles.serviceChip}>Готовые работы</a>
             </div>
           </div>
 

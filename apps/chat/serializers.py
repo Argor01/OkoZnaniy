@@ -99,7 +99,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
     client = UserSerializer(read_only=True)
     expert = UserSerializer(read_only=True)
     participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
+    messages = serializers.SerializerMethodField()
     order_id = serializers.IntegerField(read_only=True)
     unread_count = serializers.SerializerMethodField()
     other_user = serializers.SerializerMethodField()
@@ -148,6 +148,14 @@ class ChatDetailSerializer(serializers.ModelSerializer):
         if request and request.user:
             return unread_messages_for_user(obj, request.user).count()
         return 0
+
+    def get_messages(self, obj):
+        request = self.context.get('request')
+        return MessageSerializer(
+            readable_messages_for_chat(obj),
+            many=True,
+            context={'request': request},
+        ).data
 
 
 class SupportMessageSerializer(serializers.ModelSerializer):
