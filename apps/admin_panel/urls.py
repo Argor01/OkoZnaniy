@@ -22,6 +22,9 @@ urlpatterns = [
     path('orders/', views.get_all_orders, name='get-all-orders'),
     path('orders/problems/', views.get_problem_orders, name='get-problem-orders'),
     path('orders/<int:order_id>/change-status/', views.change_order_status, name='change-order-status'),
+    path('works/', views.get_ready_works, name='admin-ready-works'),
+    path('works/<int:work_id>/approve/', views.approve_ready_work, name='admin-approve-ready-work'),
+    path('works/<int:work_id>/reject/', views.reject_ready_work, name='admin-reject-ready-work'),
     
     # Чаты с техподдержкой
     path('support-chats/', views.get_support_chats, name='get-support-chats'),
@@ -29,6 +32,7 @@ urlpatterns = [
     
     # Переписки пользователей
     path('user-chats/', views.get_user_chats, name='get-user-chats'),
+    path('platform-conversations/', views.get_user_chats, name='platform-conversations'),
     path('messages/<int:message_id>/report/', views.report_message, name='report-message'),
     
     # Статистика
@@ -36,6 +40,7 @@ urlpatterns = [
     
     # История пользователя
     path('users/<int:user_id>/history/', views.get_user_history, name='user-history'),
+    path('audit-log/', views.get_audit_log, name='admin-audit-log'),
 
     # Лента активности тикета
     path('<str:ticket_type>/<int:pk>/activity/', views.get_ticket_activity, name='ticket-activity'),

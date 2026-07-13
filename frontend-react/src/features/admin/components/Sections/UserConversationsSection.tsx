@@ -8,13 +8,14 @@ import {
   Typography, 
   Input,
   message as antMessage,
-  Tooltip,
   Spin,
   Empty
 } from 'antd';
 import { 
   MessageOutlined,
-  SearchOutlined
+  SearchOutlined,
+  FilterOutlined,
+  ReloadOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -29,6 +30,12 @@ dayjs.locale('ru');
 const { Text, Title } = Typography;
 const { Search } = Input;
 
+interface ConversationFilters {
+  orderId: string;
+  username: string;
+  orderTitle: string;
+}
+
 interface Message {
   id: number;
   text: string;
@@ -41,6 +48,7 @@ interface Message {
     username: string;
     first_name: string;
     last_name: string;
+    email?: string;
     role: string;
   };
   is_read: boolean;
@@ -68,6 +76,7 @@ interface UserChat {
     first_name: string;
     last_name: string;
     email: string;
+    role?: string;
   } | null;
   expert?: {
     id: number;
@@ -75,13 +84,18 @@ interface UserChat {
     first_name: string;
     last_name: string;
     email: string;
+    role?: string;
   } | null;
   messages: Message[];
   last_message?: {
     text: string;
     sender: {
+      id?: number;
+      username?: string;
       first_name: string;
       last_name: string;
+      email?: string;
+      role?: string;
     };
     created_at: string;
   } | null;
@@ -90,10 +104,32 @@ interface UserChat {
   updated_at: string;
 }
 
+type AccountLike = {
+  id?: number;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  role?: string;
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  client: 'Клиент',
+  expert: 'Эксперт',
+  admin: 'Админ',
+  director: 'Директор',
+  system: 'Система',
+};
+
 export const UserConversationsSection: React.FC = () => {
   const [chats, setChats] = useState<UserChat[]>([]);
   const [selectedChat, setSelectedChat] = useState<UserChat | null>(null);
   const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState<ConversationFilters>({
+    orderId: '',
+    username: '',
+    orderTitle: '',
+  });
   const [loading, setLoading] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -109,21 +145,39 @@ export const UserConversationsSection: React.FC = () => {
 
   const isMobile = windowWidth < 768;
 
-  const fetchChats = async () => {
+  const fetchChats = async (nextFilters: ConversationFilters = filters) => {
     setLoading(true);
     try {
-      const response = await apiClient.get('admin-panel/user-chats/');
+      const response = await apiClient.get('admin-panel/platform-conversations/', {
+        params: {
+          order_id: nextFilters.orderId || undefined,
+          username: nextFilters.username || undefined,
+          order_title: nextFilters.orderTitle || undefined,
+        },
+      });
       const data = response.data;
+      const nextChats: UserChat[] = Array.isArray(data)
+        ? data
+        : data && typeof data === 'object' && Array.isArray(data.results)
+          ? data.results
+          : data && typeof data === 'object' && Array.isArray(data.data)
+            ? data.data
+            : [];
+
       if (Array.isArray(data)) {
-        setChats(data);
+        setChats(nextChats);
       } else if (data && typeof data === 'object' && Array.isArray(data.results)) {
-        setChats(data.results);
+        setChats(nextChats);
       } else if (data && typeof data === 'object' && Array.isArray(data.data)) {
-        setChats(data.data);
+        setChats(nextChats);
       } else {
         setChats([]);
         logger.error('Unexpected data format for chats:', data);
       }
+      setSelectedChat((current) => {
+        if (!current) return null;
+        return nextChats.find((chat) => chat.id === current.id) ?? null;
+      });
     } catch (error) {
       logger.error('Ошибка загрузки чатов:', error);
       antMessage.error('Не удалось загрузить переписки');
@@ -133,15 +187,72 @@ export const UserConversationsSection: React.FC = () => {
     }
   };
 
+  const handleFilterChange = (key: keyof ConversationFilters, value: string) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const resetFilters = () => {
+    const emptyFilters = { orderId: '', username: '', orderTitle: '' };
+    setFilters(emptyFilters);
+    setSearchText('');
+    fetchChats(emptyFilters);
+  };
+
+  const getDisplayName = (account?: AccountLike | null) => {
+    if (!account) return 'Не указан';
+    const fullName = `${account.first_name || ''} ${account.last_name || ''}`.trim();
+    return fullName || account.username || account.email || `Пользователь #${account.id || '—'}`;
+  };
+
+  const getAccountMeta = (account?: AccountLike | null) => {
+    if (!account) return '';
+    if (account.username && account.email) return `@${account.username} • ${account.email}`;
+    if (account.username) return `@${account.username}`;
+    return account.email || '';
+  };
+
+  const getRoleLabel = (role?: string, fallback?: string) => {
+    if (!role) return fallback || 'Пользователь';
+    return ROLE_LABELS[role] || role;
+  };
+
+  const getInitials = (account?: AccountLike | null) => {
+    const name = getDisplayName(account);
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const getParticipantsLine = (chat: UserChat) => {
+    const client = chat.client ? `Клиент: ${getDisplayName(chat.client)}` : '';
+    const expert = chat.expert ? `Эксперт: ${getDisplayName(chat.expert)}` : '';
+    return [client, expert].filter(Boolean).join(' • ');
+  };
+
+  const getMessagePreview = (message: Message) => {
+    if (message.text) return message.text;
+    if (message.file_name) return `Файл: ${message.file_name}`;
+    if (message.message_type === 'offer') return 'Индивидуальное предложение';
+    if (message.message_type === 'work_offer') return 'Предложение готовой работы';
+    if (message.message_type === 'work_delivery') return 'Готовая работа';
+    return 'Системное событие';
+  };
+
   const filteredChats = chats.filter(chat => {
     const searchLower = searchText.toLowerCase();
-    const clientName = chat.client ? `${chat.client.first_name || ''} ${chat.client.last_name || ''}`.toLowerCase() : '';
-    const expertName = chat.expert ? `${chat.expert.first_name || ''} ${chat.expert.last_name || ''}`.toLowerCase() : '';
+    const clientName = chat.client
+      ? `${chat.client.username || ''} ${chat.client.email || ''} ${chat.client.first_name || ''} ${chat.client.last_name || ''}`.toLowerCase()
+      : '';
+    const expertName = chat.expert
+      ? `${chat.expert.username || ''} ${chat.expert.email || ''} ${chat.expert.first_name || ''} ${chat.expert.last_name || ''}`.toLowerCase()
+      : '';
+    const orderId = String(chat.order_id || '');
     const orderTitle = chat.order_title?.toLowerCase() || '';
     const contextTitle = chat.context_title?.toLowerCase() || '';
     
     return clientName.includes(searchLower) || 
            expertName.includes(searchLower) || 
+           orderId.includes(searchLower) ||
            orderTitle.includes(searchLower) ||
            contextTitle.includes(searchLower);
   });
@@ -150,7 +261,7 @@ export const UserConversationsSection: React.FC = () => {
     if (chat.order_title) return chat.order_title;
     if (chat.context_title) return chat.context_title;
     if (chat.client && chat.expert) {
-      return `${chat.client.first_name} ${chat.client.last_name} ↔ ${chat.expert.first_name} ${chat.expert.last_name}`;
+      return `${getDisplayName(chat.client)} ↔ ${getDisplayName(chat.expert)}`;
     }
     return `Чат #${chat.id}`;
   };
@@ -176,8 +287,60 @@ export const UserConversationsSection: React.FC = () => {
             <Tag color="purple">{chats.length}</Tag>
           </div>
           
+          <div className={styles.filtersGrid}>
+            <Input
+              placeholder="ID заказа"
+              value={filters.orderId}
+              onChange={(e) => handleFilterChange('orderId', e.target.value.replace(/[^\d]/g, ''))}
+              onPressEnter={() => fetchChats()}
+              className={styles.filterInput}
+              prefix={<SearchOutlined />}
+              allowClear
+            />
+            <Input
+              placeholder="Никнейм или email"
+              value={filters.username}
+              onChange={(e) => handleFilterChange('username', e.target.value)}
+              onPressEnter={() => fetchChats()}
+              className={styles.filterInput}
+              prefix={<SearchOutlined />}
+              allowClear
+            />
+            <Input
+              placeholder="Название заказа"
+              value={filters.orderTitle}
+              onChange={(e) => handleFilterChange('orderTitle', e.target.value)}
+              onPressEnter={() => fetchChats()}
+              className={styles.filterInput}
+              prefix={<SearchOutlined />}
+              allowClear
+            />
+          </div>
+
+          <div className={styles.filterActions}>
+            <Button
+              type="primary"
+              icon={<FilterOutlined />}
+              onClick={() => fetchChats()}
+              loading={loading}
+            >
+              Найти
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={resetFilters}
+              disabled={loading}
+            >
+              Сбросить
+            </Button>
+          </div>
+
+          <div className={styles.chatListHint}>
+            Показываются переписки между клиентами и экспертами.
+          </div>
+
           <Search
-            placeholder="Поиск по участникам или заказу"
+            placeholder="Быстрый поиск в загруженных результатах"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className={styles.chatListSearch}
@@ -220,12 +383,15 @@ export const UserConversationsSection: React.FC = () => {
                         <div className={styles.chatRoomDescription}>
                           {getChatDescription(chat)}
                         </div>
+                        <div className={styles.chatRoomAccounts}>
+                          {getParticipantsLine(chat)}
+                        </div>
                         {chat.last_message && (
                           <div className={styles.chatRoomLastMessage}>
                             <span>
-                              {chat.last_message.sender.first_name}: {chat.last_message.text.length > 30 
-                                ? `${chat.last_message.text.substring(0, 30)}...` 
-                                : chat.last_message.text
+                              {getDisplayName(chat.last_message.sender)}: {chat.last_message.text.length > 30
+                                ? `${chat.last_message.text.substring(0, 30)}...`
+                                : chat.last_message.text || 'Событие'
                               }
                             </span>
                           </div>
@@ -261,7 +427,7 @@ export const UserConversationsSection: React.FC = () => {
                   {getChatTitle(selectedChat)}
                 </Title>
                 <Text type="secondary" className={styles.chatHeaderSubtitle}>
-                  {selectedChat.participants.length} участников • {selectedChat.message_count} сообщений
+                  {getParticipantsLine(selectedChat) || `${selectedChat.participants.length} участников`} • {selectedChat.message_count} сообщений
                 </Text>
               </div>
             </div>
@@ -274,21 +440,30 @@ export const UserConversationsSection: React.FC = () => {
           </div>
 
           <div className={styles.chatParticipantsBar}>
-            <div className={styles.chatParticipantsRow}>
-              {selectedChat.participants.map(participant => (
-                <Tooltip 
-                  key={participant.id}
-                  title={`${participant.first_name} ${participant.last_name} (${participant.role})`}
-                >
-                  <div className={[
-                    styles.participantAvatar,
-                    participant.online ? styles.participantOnline : styles.participantOffline
-                  ].filter(Boolean).join(' ')}>
-                    {participant.first_name[0]}{participant.last_name[0]}
-                  </div>
-                </Tooltip>
-              ))}
-            </div>
+            {selectedChat.client && (
+              <div className={styles.accountCard}>
+                <div className={`${styles.participantAvatar} ${styles.participantClient}`}>
+                  {getInitials(selectedChat.client)}
+                </div>
+                <div className={styles.accountInfo}>
+                  <div className={styles.accountRole}>Клиент</div>
+                  <div className={styles.accountName}>{getDisplayName(selectedChat.client)}</div>
+                  <div className={styles.accountMeta}>{getAccountMeta(selectedChat.client)}</div>
+                </div>
+              </div>
+            )}
+            {selectedChat.expert && (
+              <div className={styles.accountCard}>
+                <div className={`${styles.participantAvatar} ${styles.participantExpert}`}>
+                  {getInitials(selectedChat.expert)}
+                </div>
+                <div className={styles.accountInfo}>
+                  <div className={styles.accountRole}>Эксперт</div>
+                  <div className={styles.accountName}>{getDisplayName(selectedChat.expert)}</div>
+                  <div className={styles.accountMeta}>{getAccountMeta(selectedChat.expert)}</div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className={styles.chatMessagesArea}>
@@ -298,17 +473,17 @@ export const UserConversationsSection: React.FC = () => {
                 className={styles.messageRow}
               >
                 <div className={styles.messageAvatar}>
-                  {msg.sender.first_name[0]}{msg.sender.last_name[0]}
+                  {getInitials(msg.sender)}
                 </div>
                 
                 <div className={styles.messageContent}>
                   <div className={styles.messageHeaderRow}>
                     <Text strong className={styles.messageSenderName}>
-                      {msg.sender.first_name} {msg.sender.last_name}
+                      {getDisplayName(msg.sender)}
                     </Text>
                     {!isMobile && (
                       <Tag color="purple" className={styles.messageRoleTag}>
-                        {msg.sender.role}
+                        {getRoleLabel(msg.sender.role)}
                       </Tag>
                     )}
                     <Text type="secondary" className={styles.messageTime}>
@@ -318,7 +493,7 @@ export const UserConversationsSection: React.FC = () => {
                 
                   <div className={styles.messageBubble}>
                     <Text className={styles.messageText}>
-                      {msg.text}
+                      {getMessagePreview(msg)}
                     </Text>
                     {msg.file && (
                       <div className={styles.messageFile}>

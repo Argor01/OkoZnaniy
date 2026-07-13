@@ -39,7 +39,7 @@ export const WorksModerationSection: React.FC = () => {
   const { approveWork, rejectWork } = useWorkActions();
 
   const [searchText, setSearchText] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('pending');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const dataSource = works;
   const filteredData = dataSource.filter((work: Work) => 
@@ -180,7 +180,7 @@ export const WorksModerationSection: React.FC = () => {
               />
             </Tooltip>
           </Space>
-          {record.moderation_status === 'pending' && (
+          {record.moderation_status && (
             <Space size={4}>
               <Tooltip title="Одобрить">
                 <Button 
@@ -260,7 +260,7 @@ export const WorksModerationSection: React.FC = () => {
             className={styles.worksModerationSearch}
           />
           <Select
-            defaultValue="pending"
+            defaultValue="all"
             onChange={(value) => setStatusFilter(value)}
             className="worksModerationSelect"
           >

@@ -497,7 +497,6 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 'approved_refund_amount': str(approved_refund_amount) if approved_refund_amount else None
             }
         )
-        
         return Response({
             'message': 'Решение принято',
             'case': ArbitrationCaseSerializer(case).data
@@ -527,6 +526,19 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 'refund_amount': str(refund_amount) if refund_amount else None
             }
         )
+        try:
+            from apps.admin_panel.views import log_admin_action
+            log_admin_action(
+                request.user,
+                'arbitration_refund_processed',
+                f'Processed arbitration refund {refund_percentage}% for case {case.case_number}',
+                target_user=getattr(case, 'plaintiff', None),
+                object_type='arbitration_case',
+                object_id=case.id,
+                meta={'refund_percentage': refund_percentage, 'refund_amount': refund_amount},
+            )
+        except Exception:
+            pass
         
         return Response({
             'message': f'Возврат {refund_percentage}% оформлен',

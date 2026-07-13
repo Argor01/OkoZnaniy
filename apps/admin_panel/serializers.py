@@ -1,7 +1,16 @@
 from rest_framework import serializers
 from django.utils import timezone
 from datetime import timedelta
-from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
+from .models import (
+    SupportRequest,
+    SupportMessage,
+    Claim,
+    ClaimMessage,
+    AdminChatRoom,
+    AdminChatMessage,
+    TicketActivity,
+    AdminActionLog,
+)
 from apps.users.serializers import UserSerializer
 from apps.orders.serializers import OrderSerializer
 
@@ -193,3 +202,22 @@ class TicketActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = TicketActivity
         fields = ['id', 'actor', 'activity_type', 'text', 'meta', 'created_at']
+
+
+class AdminActionLogSerializer(serializers.ModelSerializer):
+    actor = UserSerializer(read_only=True)
+    target_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = AdminActionLog
+        fields = [
+            'id',
+            'actor',
+            'target_user',
+            'action',
+            'object_type',
+            'object_id',
+            'description',
+            'meta',
+            'created_at',
+        ]

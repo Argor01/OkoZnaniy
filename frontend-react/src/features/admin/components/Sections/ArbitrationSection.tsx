@@ -210,14 +210,14 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
     }
     
     try {
-      const values = await refundForm.validateFields();
+      await refundForm.validateFields();
       setRefundProcessing(true);
       
       const orderAmount = detailData.order.amount || 0;
       const refundAmount = Math.round((orderAmount * refundPercentage) / 100);
       
       // Здесь должен быть вызов API для возврата средств
-      // await arbitrationApi.processRefund(detailData.id, { amount: refundAmount, percentage: refundPercentage, reason: values.reason });
+      await arbitrationApi.processRefund(detailData.id, refundPercentage, refundAmount);
       
       message.success(`Возврат ${refundAmount.toLocaleString()} ₽ (${refundPercentage}%) оформлен`);
       await refreshSelectedCase();

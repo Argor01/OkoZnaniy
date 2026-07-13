@@ -50,6 +50,34 @@
   width: 100%;
 }
 
+.filtersGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filterInput {
+  width: 100%;
+}
+
+.filterActions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.filterActions :global(.ant-btn) {
+  flex: 1;
+}
+
+.chatListHint {
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
 .chatListScroll {
   flex: 1;
   overflow: auto;
@@ -117,6 +145,16 @@
   color: #666;
 }
 
+.chatRoomAccounts {
+  color: #8c8c8c;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .chatRoomLastMessageUnread {
   font-weight: 700;
 }
@@ -178,18 +216,53 @@
 }
 
 .chatParticipantsBar {
-  padding: 8px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
-  background-color: #fff;
-  overflow-x: auto;
-  white-space: nowrap;
-  display: flex;
-  justify-content: center;
+  background: linear-gradient(135deg, #fbf7ff 0%, #fff 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.chatParticipantsRow {
-  display: inline-flex;
-  gap: 8px;
+.accountCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #eadcff;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 20px rgba(100, 53, 165, 0.08);
+}
+
+.accountInfo {
+  min-width: 0;
+}
+
+.accountRole {
+  color: #8b5cf6;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.accountName {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountMeta {
+  color: #8c8c8c;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .participantAvatar {
@@ -203,6 +276,14 @@
   font-size: 12px;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.participantClient {
+  background: linear-gradient(135deg, #6435a5, #8b5cf6);
+}
+
+.participantExpert {
+  background: linear-gradient(135deg, #0ea5e9, #22c55e);
 }
 
 .participantOnline {
@@ -249,6 +330,8 @@
   justify-content: center;
   color: #fff;
   font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6435a5, #8b5cf6);
   flex-shrink: 0;
 }
 
@@ -534,10 +617,19 @@
 
   .chatParticipantsBar {
     padding: 6px 12px;
+    grid-template-columns: 1fr;
   }
 
-  .chatParticipantsRow {
-    gap: 6px;
+  .accountCard {
+    padding: 8px 10px;
+  }
+
+  .accountName {
+    font-size: 13px;
+  }
+
+  .accountMeta {
+    font-size: 11px;
   }
 
   .chatMessagesArea {

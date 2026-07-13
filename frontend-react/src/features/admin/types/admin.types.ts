@@ -82,12 +82,14 @@ export type MenuKey =
   | 'contact_bans'
   | 'user_roles'
   | 'orders_management'
+  | 'works_moderation'
   | 'new_claims'
   | 'in_progress_claims'
   | 'completed_claims'
   | 'pending_approval'
   | 'user_conversations'
   | 'knowledge_base'
+  | 'audit_log'
   | 'faq';
 
 

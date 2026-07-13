@@ -258,6 +258,38 @@ class TicketActivity(models.Model):
         return f"{self.activity_type} at {self.created_at}"
 
 
+class AdminActionLog(models.Model):
+    actor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='admin_action_logs',
+    )
+    target_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='admin_targeted_action_logs',
+    )
+    action = models.CharField(max_length=80)
+    object_type = models.CharField(max_length=80, blank=True)
+    object_id = models.CharField(max_length=80, blank=True)
+    description = models.TextField(blank=True)
+    meta = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'admin_action_logs'
+        ordering = ['-created_at']
+        verbose_name = 'Admin action log'
+        verbose_name_plural = 'Admin action logs'
+
+    def __str__(self):
+        return f"{self.action} by {self.actor_id or 'system'} at {self.created_at}"
+
+
 class AdminChatRoom(models.Model):
     """Комнаты чатов администраторов"""
     name = models.CharField(max_length=255)

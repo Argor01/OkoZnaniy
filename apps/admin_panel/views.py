@@ -8,10 +8,20 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from .models import SupportRequest, SupportMessage, Claim, ClaimMessage, AdminChatRoom, AdminChatMessage, TicketActivity
+from .models import (
+    SupportRequest,
+    SupportMessage,
+    Claim,
+    ClaimMessage,
+    AdminChatRoom,
+    AdminChatMessage,
+    TicketActivity,
+    AdminActionLog,
+)
 from .serializers import (
     SupportRequestSerializer, SupportMessageSerializer,
-    ClaimSerializer, ClaimMessageSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer
+    ClaimSerializer, ClaimMessageSerializer, AdminChatRoomSerializer, AdminChatMessageSerializer,
+    AdminActionLogSerializer,
 )
 from apps.director.models import DirectorChatRoom, DirectorChatMessage
 from apps.director.serializers import DirectorChatRoomSerializer, DirectorChatMessageSerializer
@@ -115,6 +125,21 @@ def log_activity(actor, activity_type, text, meta=None, support_request=None, cl
     )
 
 
+def log_admin_action(actor, action, description='', target_user=None, object_type='', object_id='', meta=None):
+    try:
+        AdminActionLog.objects.create(
+            actor=actor if getattr(actor, 'is_authenticated', False) else None,
+            target_user=target_user,
+            action=action,
+            object_type=object_type or '',
+            object_id=str(object_id or ''),
+            description=description or '',
+            meta=meta or {},
+        )
+    except Exception:
+        pass
+
+
 def _release_expired_blocks():
     for user in User.objects.filter(is_active=False, unblock_date__isnull=False):
         user.unblock_if_expired()
@@ -184,6 +209,15 @@ def block_user(request, user_id):
         user.unblock_date = unblock_date
         user.blocked_by = request.user
         user.save(update_fields=['is_active', 'blocked_at', 'block_reason', 'unblock_date', 'blocked_by'])
+        log_admin_action(
+            request.user,
+            'user_blocked',
+            f'Blocked user {user.username}',
+            target_user=user,
+            object_type='user',
+            object_id=user.id,
+            meta={'reason': user.block_reason, 'unblock_date': unblock_date_raw or None},
+        )
         return Response({'message': 'Пользователь заблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)
@@ -228,6 +262,15 @@ def unblock_user(request, user_id):
         if hasattr(user, 'clear_contact_ban'):
             user.clear_contact_ban(unfreeze_related=True)
 
+        log_admin_action(
+            request.user,
+            'user_unblocked',
+            f'Unblocked user {user.username}',
+            target_user=user,
+            object_type='user',
+            object_id=user.id,
+        )
+
         return Response({'message': 'Пользователь разблокирован', 'user': _serialize_admin_user(user)})
     except User.DoesNotExist:
         return Response({'error': 'Пользователь не найден'}, status=404)
@@ -241,8 +284,18 @@ def change_user_role(request, user_id):
         user = User.objects.get(id=user_id)
         new_role = request.data.get('role')
         if new_role in ['client', 'expert', 'partner', 'admin', 'director']:
+            old_role = user.role
             user.role = new_role
             user.save()
+            log_admin_action(
+                request.user,
+                'user_role_changed',
+                f'Changed role for {user.username}: {old_role} -> {new_role}',
+                target_user=user,
+                object_type='user',
+                object_id=user.id,
+                meta={'old_role': old_role, 'new_role': new_role},
+            )
             return Response({'message': f'Роль изменена на {new_role}'})
         return Response({'error': 'Недопустимая роль'}, status=400)
     except User.DoesNotExist:
@@ -271,6 +324,98 @@ def get_problem_orders(request):
     ).select_related('client', 'expert').order_by('-created_at')
     serializer = OrderSerializer(problem_orders, many=True)
     return Response(serializer.data)
+
+
+def _ready_work_status(work):
+    return 'approved' if getattr(work, 'is_active', False) else 'rejected'
+
+
+def _serialize_ready_work(work):
+    author = getattr(work, 'author', None)
+    files = list(getattr(work, 'files', []).all()) if hasattr(work, 'files') else []
+    first_file = files[0] if files else None
+    rating = getattr(author, 'rating', None) or getattr(work, 'author_rating', None) or 0
+    works_count = getattr(author, 'ready_works', None).count() if author and hasattr(author, 'ready_works') else 0
+
+    return {
+        'id': work.id,
+        'title': work.title,
+        'description': work.description,
+        'price': float(work.price or 0),
+        'moderation_status': _ready_work_status(work),
+        'created_at': work.created_at.isoformat() if work.created_at else None,
+        'subject': getattr(getattr(work, 'subject', None), 'name', '') or '',
+        'work_type': getattr(getattr(work, 'work_type', None), 'name', '') or '',
+        'pages_count': getattr(work, 'pages_count', 0) or 0,
+        'words_count': getattr(work, 'words_count', 0) or 0,
+        'author': {
+            'id': getattr(author, 'id', None),
+            'username': getattr(author, 'username', ''),
+            'first_name': getattr(author, 'first_name', ''),
+            'last_name': getattr(author, 'last_name', ''),
+            'rating': float(rating or 0),
+            'works_count': works_count,
+        },
+        'file_url': first_file.file.url if first_file and getattr(first_file, 'file', None) else None,
+        'preview_url': work.preview.url if getattr(work, 'preview', None) else None,
+    }
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_ready_works(request):
+    from apps.shop.models import ReadyWork
+
+    status_filter = request.GET.get('status')
+    search = (request.GET.get('search') or '').strip()
+
+    works = ReadyWork.objects.select_related('author', 'subject', 'work_type').prefetch_related('files')
+    if status_filter == 'approved':
+        works = works.filter(is_active=True)
+    elif status_filter == 'rejected':
+        works = works.filter(is_active=False)
+    if search:
+        works = works.filter(Q(title__icontains=search) | Q(description__icontains=search))
+
+    return Response([_serialize_ready_work(work) for work in works.order_by('-created_at')])
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def approve_ready_work(request, work_id):
+    from apps.shop.models import ReadyWork
+
+    work = get_object_or_404(ReadyWork.objects.select_related('author'), id=work_id)
+    work.is_active = True
+    work.save(update_fields=['is_active', 'updated_at'])
+    log_admin_action(
+        request.user,
+        'ready_work_approved',
+        f'Approved ready work "{work.title}"',
+        target_user=work.author,
+        object_type='ready_work',
+        object_id=work.id,
+    )
+    return Response(_serialize_ready_work(work))
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def reject_ready_work(request, work_id):
+    from apps.shop.models import ReadyWork
+
+    work = get_object_or_404(ReadyWork.objects.select_related('author'), id=work_id)
+    work.is_active = False
+    work.save(update_fields=['is_active', 'updated_at'])
+    log_admin_action(
+        request.user,
+        'ready_work_rejected',
+        f'Rejected ready work "{work.title}"',
+        target_user=work.author,
+        object_type='ready_work',
+        object_id=work.id,
+    )
+    return Response(_serialize_ready_work(work))
 
 
 @api_view(['POST'])
@@ -838,6 +983,15 @@ class ClaimViewSet(viewsets.ModelViewSet):
             meta={'refund_percentage': refund_percentage, 'refund_amount': refund_amount},
             claim=claim
         )
+        log_admin_action(
+            request.user,
+            'claim_refund_processed',
+            f'Processed claim refund {refund_percentage}% for claim {claim.ticket_number}',
+            target_user=claim.user,
+            object_type='claim',
+            object_id=claim.id,
+            meta={'refund_percentage': refund_percentage, 'refund_amount': refund_amount},
+        )
         return Response({'message': f'Возврат {refund_percentage}% оформлен'})
 
     @action(detail=True, methods=['post'])
@@ -1340,26 +1494,59 @@ def send_support_chat_message(request, chat_id):
 @permission_classes([IsAdminUser])
 def get_user_chats(request):
     """Получить все переписки пользователей на платформе"""
-    from apps.chat.models import Chat, Message
+    from apps.chat.models import Chat
     from django.db.models import Max, Count, Q
 
-    # Фильтрация по order_id (если указан)
     order_id = request.GET.get('order_id')
+    username = (request.GET.get('username') or '').strip()
+    order_title = (request.GET.get('order_title') or '').strip()
 
-    # Получаем все чаты с аннотациями
+    # Показываем только диалоги клиент-эксперт, без техподдержки и внутренних чатов.
     chats = Chat.objects.annotate(
         last_message_time=Max('messages__created_at'),
-        message_count=Count('messages')
+        message_count=Count('messages', distinct=True)
     ).filter(
-        message_count__gt=0  # Только чаты с сообщениями
+        message_count__gt=0,
+        client__isnull=False,
+        expert__isnull=False,
     ).select_related(
-        'order', 'client', 'expert'
+        'order', 'order__subject', 'client', 'expert'
     ).prefetch_related(
         'participants', 'messages', 'messages__sender'
     ).order_by('-last_message_time')
 
     if order_id:
+        try:
+            order_id = int(order_id)
+        except (TypeError, ValueError):
+            return Response({'error': 'order_id must be an integer'}, status=400)
         chats = chats.filter(order_id=order_id)
+
+    if username:
+        chats = chats.filter(
+            Q(client__username__icontains=username) |
+            Q(client__first_name__icontains=username) |
+            Q(client__last_name__icontains=username) |
+            Q(client__email__icontains=username) |
+            Q(expert__username__icontains=username) |
+            Q(expert__first_name__icontains=username) |
+            Q(expert__last_name__icontains=username) |
+            Q(expert__email__icontains=username) |
+            Q(participants__username__icontains=username) |
+            Q(participants__first_name__icontains=username) |
+            Q(participants__last_name__icontains=username) |
+            Q(participants__email__icontains=username)
+        )
+
+    if order_title:
+        chats = chats.filter(
+            Q(order__title__icontains=order_title) |
+            Q(order__custom_topic__icontains=order_title) |
+            Q(order__subject__name__icontains=order_title) |
+            Q(context_title__icontains=order_title)
+        )
+
+    chats = chats.distinct()
 
     # Формируем ответ
     result = []
@@ -1394,6 +1581,7 @@ def get_user_chats(request):
                     'username': msg.sender.username,
                     'first_name': msg.sender.first_name,
                     'last_name': msg.sender.last_name,
+                    'email': msg.sender.email,
                     'role': msg.sender.role,
                 },
                 'is_read': msg.is_read,
@@ -1412,6 +1600,7 @@ def get_user_chats(request):
                 'first_name': chat.client.first_name,
                 'last_name': chat.client.last_name,
                 'email': chat.client.email,
+                'role': chat.client.role,
             } if chat.client else None,
             'expert': {
                 'id': chat.expert.id,
@@ -1419,13 +1608,18 @@ def get_user_chats(request):
                 'first_name': chat.expert.first_name,
                 'last_name': chat.expert.last_name,
                 'email': chat.expert.email,
+                'role': chat.expert.role,
             } if chat.expert else None,
             'messages': messages,
             'last_message': {
                 'text': last_message.text if last_message else '',
                 'sender': {
+                    'id': last_message.sender.id,
+                    'username': last_message.sender.username,
                     'first_name': last_message.sender.first_name,
                     'last_name': last_message.sender.last_name,
+                    'email': last_message.sender.email,
+                    'role': last_message.sender.role,
                 } if last_message else None,
                 'created_at': last_message.created_at.isoformat() if last_message else '',
             } if last_message else None,
@@ -1486,6 +1680,32 @@ def get_user_history(request, user_id):
             'total_orders': Order.objects.filter(Q(client=user) | Q(expert=user)).count(),
         }
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_audit_log(request):
+    action = (request.GET.get('action') or '').strip()
+    search = (request.GET.get('search') or '').strip()
+    target_user_id = request.GET.get('target_user_id')
+
+    logs = AdminActionLog.objects.select_related('actor', 'target_user').order_by('-created_at')
+    if action:
+        logs = logs.filter(action=action)
+    if target_user_id:
+        logs = logs.filter(target_user_id=target_user_id)
+    if search:
+        logs = logs.filter(
+            Q(description__icontains=search) |
+            Q(action__icontains=search) |
+            Q(object_type__icontains=search) |
+            Q(object_id__icontains=search) |
+            Q(actor__username__icontains=search) |
+            Q(target_user__username__icontains=search)
+        )
+
+    serializer = AdminActionLogSerializer(logs[:300], many=True)
+    return Response(serializer.data)
 
 
 @api_view(['POST'])

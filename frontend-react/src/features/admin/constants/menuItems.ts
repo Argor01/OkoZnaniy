@@ -1,13 +1,15 @@
 import {
-  TeamOutlined,
-  DollarOutlined,
-  FileTextOutlined,
-  MessageOutlined,
-  ShoppingOutlined,
-  StopOutlined,
   AuditOutlined,
   BookOutlined,
+  DollarOutlined,
+  FileProtectOutlined,
+  FileTextOutlined,
+  HistoryOutlined,
+  MessageOutlined,
   QuestionCircleOutlined,
+  ShoppingOutlined,
+  StopOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import type { MenuKey } from '@/features/admin/types/admin.types';
 
@@ -45,6 +47,11 @@ export const menuItems: MenuItem[] = [
     label: 'Управление заказами',
   },
   {
+    key: 'works_moderation',
+    icon: FileProtectOutlined,
+    label: 'Модерация работ',
+  },
+  {
     key: 'tickets',
     icon: FileTextOutlined,
     label: 'Обращения',
@@ -60,9 +67,19 @@ export const menuItems: MenuItem[] = [
     label: 'Коммуникация',
   },
   {
+    key: 'user_conversations',
+    icon: MessageOutlined,
+    label: 'Переписки',
+  },
+  {
     key: 'knowledge_base',
     icon: BookOutlined,
-    label: 'База Знаний',
+    label: 'База знаний',
+  },
+  {
+    key: 'audit_log',
+    icon: HistoryOutlined,
+    label: 'Аудит действий',
   },
   {
     key: 'faq',
@@ -79,6 +96,7 @@ export const titleMap: Record<MenuKey, string> = {
   contact_bans: 'Баны за контакты',
   user_roles: 'Роли пользователей',
   orders_management: 'Управление заказами',
+  works_moderation: 'Модерация работ',
   support_open: 'Открытые запросы поддержки',
   support_in_progress: 'Запросы поддержки в работе',
   support_completed: 'Завершенные запросы поддержки',
@@ -92,8 +110,9 @@ export const titleMap: Record<MenuKey, string> = {
   in_progress_claims: 'Заявки в работе',
   completed_claims: 'Завершенные заявки',
   pending_approval: 'Ожидают подтверждения',
-  user_conversations: 'Диалоги пользователей',
-  knowledge_base: 'База Знаний',
+  user_conversations: 'Переписки пользователей',
+  knowledge_base: 'База знаний',
+  audit_log: 'Аудит действий',
   faq: 'FAQ по ЛК',
 };
 

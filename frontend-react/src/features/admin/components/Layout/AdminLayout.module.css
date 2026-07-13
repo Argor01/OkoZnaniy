@@ -29,6 +29,109 @@
   overflow-x: auto;
 }
 
+/* Единая компактная геометрия фильтров и поиска в админке. */
+.adminLayout :global(.ant-input),
+.adminLayout :global(.ant-input-affix-wrapper),
+.adminLayout :global(.ant-select-selector),
+.adminLayout :global(.ant-picker) {
+  min-height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.adminLayout :global(.ant-input-affix-wrapper) {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+}
+
+.adminLayout :global(input.ant-input) {
+  height: 44px;
+  padding: 0 14px;
+  line-height: 42px;
+}
+
+.adminLayout :global(.ant-input-affix-wrapper > input.ant-input) {
+  height: 42px;
+  min-height: 0;
+  padding: 0;
+  line-height: 42px;
+}
+
+.adminLayout :global(.ant-input-affix-wrapper .ant-input-prefix),
+.adminLayout :global(.ant-input-affix-wrapper .ant-input-suffix) {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-tertiary, #94a3b8);
+}
+
+.adminLayout :global(.ant-input::placeholder),
+.adminLayout :global(.ant-input-affix-wrapper input::placeholder) {
+  line-height: normal;
+  color: var(--color-text-placeholder, #aeb6c4);
+}
+
+.adminLayout :global(.ant-input-search .ant-input-group) {
+  display: flex;
+}
+
+.adminLayout :global(.ant-input-search .ant-input-group .ant-input-affix-wrapper) {
+  flex: 1;
+  height: 44px;
+}
+
+.adminLayout :global(.ant-input-search .ant-input-group-addon) {
+  display: inline-flex;
+  width: 48px;
+}
+
+.adminLayout :global(.ant-input-search .ant-input-search-button) {
+  height: 44px;
+  min-height: 44px;
+  width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 12px 12px 0;
+}
+
+.adminLayout :global(.ant-input-search .ant-input-group .ant-input-affix-wrapper:not(:last-child)) {
+  border-radius: 12px 0 0 12px;
+}
+
+.adminLayout :global(.ant-select-single) {
+  height: 44px;
+}
+
+.adminLayout :global(.ant-select-single .ant-select-selector) {
+  display: flex;
+  align-items: center;
+  height: 44px !important;
+  padding: 0 14px !important;
+}
+
+.adminLayout :global(.ant-select-single .ant-select-selection-item),
+.adminLayout :global(.ant-select-single .ant-select-selection-placeholder) {
+  line-height: 42px !important;
+}
+
+.adminLayout :global(.ant-select-single .ant-select-arrow) {
+  top: 50%;
+  margin-top: 0;
+  transform: translateY(-50%);
+}
+
+.adminLayout :global(.ant-picker) {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.adminLayout :global(.ant-picker-input > input) {
+  height: 42px;
+  line-height: 42px;
+}
+
 /* Адаптивность для планшетов */
 @media (max-width: 1024px) {
   .contentInner {

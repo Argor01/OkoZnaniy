@@ -37,6 +37,8 @@ const UserConversationsSection = lazy(() => import('@/features/admin/components/
 const BlockingSection = lazy(() => import('@/features/admin/components/Sections/BlockingSection').then(m => ({ default: m.BlockingSection })));
 const ContactBannedUsersSection = lazy(() => import('@/features/director/components/ContactBannedUsers').then(m => ({ default: m.default })));
 const KnowledgeBaseSection = lazy(() => import('@/features/admin/components/Sections/KnowledgeBaseSection').then(m => ({ default: m.KnowledgeBaseSection })));
+const WorksModerationSection = lazy(() => import('@/features/admin/components/Sections/WorksModerationSection').then(m => ({ default: m.WorksModerationSection })));
+const AdminAuditLogSection = lazy(() => import('@/features/admin/components/Sections/AdminAuditLogSection').then(m => ({ default: m.AdminAuditLogSection })));
 
 const PartnerModal = lazy(() => import('@/features/admin/components/Modals/PartnerModal').then(m => ({ default: m.PartnerModal })));
 const DisputeModal = lazy(() => import('@/features/admin/components/Modals/DisputeModal').then(m => ({ default: m.DisputeModal })));
@@ -202,6 +204,10 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
           <AllOrdersSection />
         );
 
+      case 'works_moderation':
+        return (
+          <WorksModerationSection />
+        );
 
 
 
@@ -255,6 +261,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       case 'knowledge_base':
         return (
           <KnowledgeBaseSection />
+        );
+
+      case 'audit_log':
+        return (
+          <AdminAuditLogSection />
         );
     }
   };
