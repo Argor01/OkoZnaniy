@@ -70,6 +70,8 @@ class ReadyWorkCreationRegressionTests(TestCase):
         self.assertEqual(work.price, Decimal("199.99"))
         self.assertEqual(work.subject_id, self.subject.id)
         self.assertEqual(work.work_type_id, self.work_type.id)
+        self.assertEqual(work.moderation_status, ReadyWork.ModerationStatus.PENDING)
+        self.assertFalse(work.is_active)
 
     def test_html_description_is_sanitised(self):
         """Rich-text HTML must be sanitised on the server — strips tags and

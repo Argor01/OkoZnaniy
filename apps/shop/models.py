@@ -6,6 +6,11 @@ from apps.orders.models import Order
 
 
 class ReadyWork(models.Model):
+    class ModerationStatus(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+
     title = models.CharField("Название", max_length=200)
     description = models.TextField("Описание")
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
@@ -32,7 +37,13 @@ class ReadyWork(models.Model):
         null=True,
     )
     execution_days = models.PositiveIntegerField("Срок выполнения в днях", default=7)
-    is_active = models.BooleanField("Активна", default=True)
+    moderation_status = models.CharField(
+        max_length=20,
+        choices=ModerationStatus.choices,
+        default=ModerationStatus.PENDING,
+        db_index=True,
+    )
+    is_active = models.BooleanField("Активна", default=False)
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
 

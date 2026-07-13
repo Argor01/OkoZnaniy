@@ -327,6 +327,9 @@ def get_problem_orders(request):
 
 
 def _ready_work_status(work):
+    status_value = getattr(work, 'moderation_status', None)
+    if status_value:
+        return status_value
     return 'approved' if getattr(work, 'is_active', False) else 'rejected'
 
 
@@ -370,10 +373,12 @@ def get_ready_works(request):
     search = (request.GET.get('search') or '').strip()
 
     works = ReadyWork.objects.select_related('author', 'subject', 'work_type').prefetch_related('files')
-    if status_filter == 'approved':
-        works = works.filter(is_active=True)
-    elif status_filter == 'rejected':
-        works = works.filter(is_active=False)
+    if status_filter in [
+        ReadyWork.ModerationStatus.PENDING,
+        ReadyWork.ModerationStatus.APPROVED,
+        ReadyWork.ModerationStatus.REJECTED,
+    ]:
+        works = works.filter(moderation_status=status_filter)
     if search:
         works = works.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
@@ -386,8 +391,9 @@ def approve_ready_work(request, work_id):
     from apps.shop.models import ReadyWork
 
     work = get_object_or_404(ReadyWork.objects.select_related('author'), id=work_id)
+    work.moderation_status = ReadyWork.ModerationStatus.APPROVED
     work.is_active = True
-    work.save(update_fields=['is_active', 'updated_at'])
+    work.save(update_fields=['moderation_status', 'is_active', 'updated_at'])
     log_admin_action(
         request.user,
         'ready_work_approved',
@@ -405,8 +411,9 @@ def reject_ready_work(request, work_id):
     from apps.shop.models import ReadyWork
 
     work = get_object_or_404(ReadyWork.objects.select_related('author'), id=work_id)
+    work.moderation_status = ReadyWork.ModerationStatus.REJECTED
     work.is_active = False
-    work.save(update_fields=['is_active', 'updated_at'])
+    work.save(update_fields=['moderation_status', 'is_active', 'updated_at'])
     log_admin_action(
         request.user,
         'ready_work_rejected',

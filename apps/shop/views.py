@@ -26,7 +26,10 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = ReadyWork.objects.filter(is_active=True).select_related('subject', 'work_type', 'author').order_by('-created_at')
+        queryset = ReadyWork.objects.filter(
+            is_active=True,
+            moderation_status=ReadyWork.ModerationStatus.APPROVED,
+        ).select_related('subject', 'work_type', 'author').order_by('-created_at')
         user = self.request.user
 
         if user.is_authenticated:
@@ -116,7 +119,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def my_works(self, request):
-        works = ReadyWork.objects.filter(author=request.user, is_active=True).select_related('subject', 'work_type')
+        works = ReadyWork.objects.filter(author=request.user).select_related('subject', 'work_type')
         serializer = self.get_serializer(works, many=True)
         return Response(serializer.data)
 

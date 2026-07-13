@@ -6,8 +6,9 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from apps.arbitration.models import ArbitrationActivity, ArbitrationCase, ArbitrationMessage
+from apps.arbitration.models import ArbitrationActivity, ArbitrationCase, ArbitrationMessage, Complaint
 from apps.catalog.models import Subject, WorkType
+from apps.chat.models import Message as ChatMessage
 from apps.orders.models import Order
 
 User = get_user_model()
@@ -86,6 +87,19 @@ class ArbitrationCaseAPITests(TestCase):
         }
         defaults.update(overrides)
         return ArbitrationCase.objects.create(**defaults)
+
+    def _create_complaint(self, **overrides):
+        defaults = {
+            'plaintiff': self.client_user,
+            'defendant': self.expert_user,
+            'order': self.order,
+            'complaint_type': 'poor_quality',
+            'financial_requirement': 'no_refund',
+            'description': 'Complaint description',
+            'status': 'open',
+        }
+        defaults.update(overrides)
+        return Complaint.objects.create(**defaults)
 
     def test_submit_claim_creates_submitted_case_and_freezes_order(self):
         self.client_user.is_banned_for_contacts = True
@@ -187,6 +201,25 @@ class ArbitrationCaseAPITests(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_complaint_send_message_creates_order_chat_message(self):
+        complaint = self._create_complaint()
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(
+            f'/api/arbitration/complaints/{complaint.id}/send-message/',
+            {'message': 'Complaint comment'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(
+            ChatMessage.objects.filter(
+                chat__order=self.order,
+                sender=self.client_user,
+                text='Complaint comment',
+            ).exists()
+        )
 
     def test_take_in_work_requires_admin(self):
         case = self._create_case()

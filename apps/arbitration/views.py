@@ -19,10 +19,12 @@ from .serializers import (
 )
 from apps.orders.models import Order
 from apps.chat.models import Chat, Message as ChatMessage
+from apps.chat.services import get_or_create_order_chat
 from apps.chat.websocket_utils import (
     notify_arbitration_message,
     notify_arbitration_status,
     notify_arbitration_activity,
+    notify_chat_message,
 )
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
@@ -740,6 +742,23 @@ class ComplaintViewSet(viewsets.ModelViewSet):
     serializer_class = ComplaintSerializer
     permission_classes = [IsAuthenticated]
 
+    def _serialize_complaint_chat_message(self, msg):
+        return {
+            'id': msg.id,
+            'sender': {
+                'id': msg.sender.id,
+                'username': msg.sender.username,
+                'first_name': msg.sender.first_name,
+                'last_name': msg.sender.last_name,
+                'role': getattr(msg.sender, 'role', ''),
+            },
+            'text': msg.text or '',
+            'message_type': msg.message_type,
+            'file_name': msg.file_name,
+            'file_url': msg.file.url if msg.file else None,
+            'created_at': msg.created_at.isoformat(),
+        }
+
     def _get_review_for_admin_action(self, complaint, user):
         if user.role != 'admin':
             return None, Response(
@@ -954,26 +973,53 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         # Получаем сообщения из чата
         messages = ChatMessage.objects.filter(chat=chat).select_related('sender').order_by('created_at')
         
-        messages_data = [
-            {
-                'id': msg.id,
-                'sender': {
-                    'id': msg.sender.id,
-                    'first_name': msg.sender.first_name,
-                    'last_name': msg.sender.last_name,
-                    'role': getattr(msg.sender, 'role', ''),
-                },
-                'text': msg.text or '',
-                'message_type': msg.message_type,
-                'file_name': msg.file_name,
-                'file_url': msg.file.url if msg.file else None,
-                'created_at': msg.created_at.isoformat(),
-            }
-            for msg in messages
-        ]
+        messages_data = [self._serialize_complaint_chat_message(msg) for msg in messages]
         
         return Response({
             'chat_id': chat.id,
             'chat_context_title': chat.context_title,
             'messages': messages_data,
         })
+
+    @action(detail=True, methods=['post'], url_path='send-message')
+    def send_message(self, request, pk=None):
+        complaint = self.get_object()
+        text = (request.data.get('message') or request.data.get('text') or '').strip()
+
+        if not text:
+            return Response({'detail': 'Сообщение не может быть пустым'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if complaint.status in ['closed', 'resolved']:
+            return Response({'detail': 'Претензия уже закрыта'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        is_participant = user.id in [complaint.plaintiff_id, complaint.defendant_id]
+        is_admin = getattr(user, 'role', None) == 'admin'
+        if not (is_participant or is_admin):
+            return Response({'detail': 'Недостаточно прав'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not complaint.order_id or not complaint.order:
+            return Response({'detail': 'Чат заказа недоступен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            chat = get_or_create_order_chat(complaint.order)
+        except ValueError:
+            chat = Chat.objects.filter(order_id=complaint.order_id).order_by('-created_at').first()
+
+        if not chat:
+            return Response({'detail': 'Чат заказа не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        message = ChatMessage.objects.create(
+            chat=chat,
+            sender=user,
+            text=text,
+            message_type='text',
+        )
+        data = self._serialize_complaint_chat_message(message)
+
+        try:
+            notify_chat_message(chat.id, data)
+        except Exception:
+            pass
+
+        return Response(data, status=status.HTTP_201_CREATED)

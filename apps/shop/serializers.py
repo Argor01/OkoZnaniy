@@ -60,9 +60,9 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
             'execution_days', 'subject_name', 'work_type_name', 'author',
             'author_name', 'author_avatar', 'preview', 'rating',
             'reviewsCount', 'viewsCount', 'purchasesCount', 'is_favorite',
-            'is_active', 'created_at', 'updated_at', 'files',
+            'moderation_status', 'is_active', 'created_at', 'updated_at', 'files',
         ]
-        read_only_fields = ['author', 'created_at', 'updated_at']
+        read_only_fields = ['author', 'moderation_status', 'created_at', 'updated_at']
 
     def get_is_favorite(self, obj):
         request = self.context.get('request')
@@ -131,6 +131,8 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         work_files = validated_data.pop('work_files', [])
         validated_data['author'] = self.context['request'].user
+        validated_data['moderation_status'] = ReadyWork.ModerationStatus.PENDING
+        validated_data['is_active'] = False
 
         work = ReadyWork.objects.create(**validated_data)
 

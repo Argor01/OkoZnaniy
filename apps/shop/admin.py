@@ -9,8 +9,8 @@ class ReadyWorkFileInline(admin.TabularInline):
 
 @admin.register(ReadyWork)
 class ReadyWorkAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'subject', 'work_type', 'price', 'is_active', 'created_at']
-    list_filter = ['subject', 'work_type', 'is_active', 'created_at']
+    list_display = ['title', 'author', 'subject', 'work_type', 'price', 'moderation_status', 'is_active', 'created_at']
+    list_filter = ['moderation_status', 'subject', 'work_type', 'is_active', 'created_at']
     search_fields = ['title', 'description', 'author__username']
     inlines = [ReadyWorkFileInline]
     readonly_fields = ['created_at', 'updated_at']

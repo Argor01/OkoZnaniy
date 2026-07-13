@@ -75,6 +75,28 @@ export interface UpdateComplaintRequest {
   resolution?: string;
 }
 
+export interface ComplaintChatMessage {
+  id: number;
+  sender?: {
+    id: number;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+    role?: string;
+  };
+  text: string;
+  message_type?: string;
+  file_name?: string;
+  file_url?: string;
+  created_at: string;
+}
+
+export interface ComplaintChatResponse {
+  chat_id: number | null;
+  chat_context_title?: string;
+  messages: ComplaintChatMessage[];
+}
+
 class ComplaintsApi {
   private baseUrl = '/arbitration/complaints/';
 
@@ -132,8 +154,13 @@ class ComplaintsApi {
     return response.data;
   }
 
-  async getChat(complaintId: number) {
+  async getChat(complaintId: number): Promise<ComplaintChatResponse> {
     const response = await apiClient.get(`${this.baseUrl}${complaintId}/chat/`);
+    return response.data;
+  }
+
+  async sendMessage(complaintId: number, message: string): Promise<ComplaintChatMessage> {
+    const response = await apiClient.post(`${this.baseUrl}${complaintId}/send-message/`, { message });
     return response.data;
   }
 }

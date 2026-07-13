@@ -12,7 +12,7 @@ import {
   FileTextOutlined, FileImageOutlined, FileZipOutlined, DollarOutlined, BookOutlined, ClockCircleOutlined,
   DownloadOutlined, MessageOutlined, SendOutlined, PaperClipOutlined, NumberOutlined, ReadOutlined, DatabaseOutlined
 } from '@ant-design/icons';
-import { complaintsApi, Complaint } from '@/features/arbitration/api/complaints';
+import { complaintsApi, Complaint, ComplaintChatMessage } from '@/features/arbitration/api/complaints';
 import { ordersApi } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { AppButton, AppCard } from '@/components/ui';
@@ -57,6 +57,25 @@ interface ChatMessage {
   is_mine: boolean;
 }
 
+const normalizeComplaintChatMessage = (
+  message: ComplaintChatMessage,
+  currentUserId?: number,
+): ChatMessage => {
+  const sender = message.sender;
+  const senderName = [sender?.first_name, sender?.last_name].filter(Boolean).join(' ').trim()
+    || sender?.username
+    || (message.message_type === 'system' ? 'Система' : 'Пользователь');
+
+  return {
+    id: message.id,
+    sender_id: sender?.id || 0,
+    sender_name: senderName,
+    text: message.text || message.file_name || '',
+    created_at: message.created_at,
+    is_mine: Boolean(currentUserId && sender?.id === currentUserId),
+  };
+};
+
 const ComplaintDetails: React.FC = () => {
   const { complaintId } = useParams<{ complaintId: string }>();
   const navigate = useNavigate();
@@ -83,6 +102,7 @@ const ComplaintDetails: React.FC = () => {
   }, [chatMessages]);
 
   const {data: userProfile} = useCurrentUser();
+  const currentUserId = userProfile?.id;
 
   const { data: complaint, isLoading, error, isError } = useQuery<Complaint>({
     queryKey: ['complaint', complaintId],
@@ -101,6 +121,20 @@ const ComplaintDetails: React.FC = () => {
     enabled: !!complaintId,
     retry: 1,
   });
+
+  const { data: complaintChat, isLoading: isChatLoading } = useQuery({
+    queryKey: ['complaint-chat', complaintId],
+    queryFn: () => complaintsApi.getChat(Number(complaintId)),
+    enabled: !!complaintId,
+    retry: 1,
+  });
+
+  useEffect(() => {
+    if (!complaintChat?.messages) return;
+    setChatMessages(
+      complaintChat.messages.map((message) => normalizeComplaintChatMessage(message, currentUserId)),
+    );
+  }, [complaintChat, currentUserId]);
 
   // Заказ уже приходит в данных претензии, отдельный запрос не нужен
   const order = complaint?.order;
@@ -156,7 +190,6 @@ const ComplaintDetails: React.FC = () => {
     });
   };
 
-  const currentUserId = userProfile?.id;
   const isPlaintiff = currentUserId === complaint?.plaintiff_id;
   const isDefendant = currentUserId === complaint?.defendant_id;
   const canClose = (isPlaintiff || isDefendant) && complaint?.status === 'open';
@@ -197,18 +230,10 @@ const ComplaintDetails: React.FC = () => {
     
     setSendingMessage(true);
     try {
-      // TODO: Реализовать отправку сообщения через API
-      const newMessage: ChatMessage = {
-        id: Date.now(),
-        sender_id: userProfile?.id || 0,
-        sender_name: userProfile?.username || 'Вы',
-        text: chatInput.trim(),
-        created_at: new Date().toISOString(),
-        is_mine: true,
-      };
-      setChatMessages(prev => [...prev, newMessage]);
+      const sentMessage = await complaintsApi.sendMessage(complaint.id, chatInput.trim());
+      setChatMessages(prev => [...prev, normalizeComplaintChatMessage(sentMessage, currentUserId)]);
       setChatInput('');
-      antMessage.success('Сообщение отправлено');
+      queryClient.invalidateQueries({ queryKey: ['complaint-chat', complaintId] });
     } catch (err: any) {
       antMessage.error(err?.response?.data?.detail || 'Не удалось отправить сообщение');
     } finally {
@@ -547,7 +572,11 @@ const ComplaintDetails: React.FC = () => {
             </div>
 
             <div className={styles.chatMessages}>
-              {chatMessages.length === 0 ? (
+              {isChatLoading ? (
+                <div className={styles.centered}>
+                  <Spin />
+                </div>
+              ) : chatMessages.length === 0 ? (
                 <Empty 
                   description="Сообщений пока нет. Начните обсуждение претензии." 
                   image={Empty.PRESENTED_IMAGE_SIMPLE}

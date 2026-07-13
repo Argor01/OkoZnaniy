@@ -44,6 +44,7 @@ export interface Work {
   created_at?: string;
   updated_at?: string;
   is_favorite?: boolean;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
   is_active?: boolean;
   isLocal?: boolean;
 }

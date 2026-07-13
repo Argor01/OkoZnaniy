@@ -14,7 +14,8 @@ import {
   Statistic,
   Row,
   Col,
-  Alert
+  Alert,
+  Descriptions
 } from 'antd';
 import { 
   EyeOutlined,
@@ -40,6 +41,7 @@ export const WorksModerationSection: React.FC = () => {
 
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedWork, setSelectedWork] = useState<Work | null>(null);
 
   const dataSource = works;
   const filteredData = dataSource.filter((work: Work) => 
@@ -65,6 +67,20 @@ export const WorksModerationSection: React.FC = () => {
     } catch (error) {
       message.error('Ошибка при отклонении работы');
     }
+  };
+
+  const handleDownload = (work: Work) => {
+    if (!work.file_url) {
+      message.warning('Файл работы не прикреплен');
+      return;
+    }
+
+    window.open(work.file_url, '_blank', 'noopener,noreferrer');
+  };
+
+  const getAuthorName = (work: Work) => {
+    const fullName = `${work.author.first_name || ''} ${work.author.last_name || ''}`.trim();
+    return fullName || work.author.username;
   };
 
   const getModerationStatusLabel = (status: string) => {
@@ -171,12 +187,15 @@ export const WorksModerationSection: React.FC = () => {
               <Button 
                 size="small" 
                 icon={<EyeOutlined />}
+                onClick={() => setSelectedWork(record)}
               />
             </Tooltip>
             <Tooltip title="Скачать">
               <Button 
                 size="small" 
                 icon={<DownloadOutlined />}
+                disabled={!record.file_url}
+                onClick={() => handleDownload(record)}
               />
             </Tooltip>
           </Space>
@@ -287,6 +306,64 @@ export const WorksModerationSection: React.FC = () => {
           size="small"
         />
       </Card>
+
+      <Modal
+        open={Boolean(selectedWork)}
+        title={selectedWork ? `Работа: ${selectedWork.title}` : 'Детали работы'}
+        onCancel={() => setSelectedWork(null)}
+        width={760}
+        footer={
+          <Space>
+            {selectedWork?.file_url && (
+              <Button icon={<DownloadOutlined />} onClick={() => handleDownload(selectedWork)}>
+                Скачать файл
+              </Button>
+            )}
+            <Button type="primary" onClick={() => setSelectedWork(null)}>
+              Закрыть
+            </Button>
+          </Space>
+        }
+      >
+        {selectedWork && (
+          <Space direction="vertical" size={16} style={{ width: '100%' }}>
+            {selectedWork.preview_url && (
+              <img
+                src={selectedWork.preview_url}
+                alt={selectedWork.title}
+                style={{ maxWidth: '100%', borderRadius: 12 }}
+              />
+            )}
+
+            <Descriptions bordered size="small" column={1}>
+              <Descriptions.Item label="Автор">{getAuthorName(selectedWork)}</Descriptions.Item>
+              <Descriptions.Item label="Предмет">{selectedWork.subject || 'Не указан'}</Descriptions.Item>
+              <Descriptions.Item label="Тип работы">{selectedWork.work_type || 'Не указан'}</Descriptions.Item>
+              <Descriptions.Item label="Цена">
+                {Number(selectedWork.price || 0).toLocaleString('ru-RU')} ₽
+              </Descriptions.Item>
+              <Descriptions.Item label="Объем">
+                {selectedWork.pages_count || 0} стр. · {Number(selectedWork.words_count || 0).toLocaleString('ru-RU')} слов
+              </Descriptions.Item>
+              <Descriptions.Item label="Статус">
+                <Tag color={getModerationStatusColor(selectedWork.moderation_status)}>
+                  {getModerationStatusLabel(selectedWork.moderation_status)}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Дата подачи">
+                {dayjs(selectedWork.created_at).format('DD.MM.YYYY HH:mm')}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <div>
+              <Text strong>Описание</Text>
+              <div style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>
+                {selectedWork.description || 'Описание не заполнено'}
+              </div>
+            </div>
+          </Space>
+        )}
+      </Modal>
     </div>
   );
 };
