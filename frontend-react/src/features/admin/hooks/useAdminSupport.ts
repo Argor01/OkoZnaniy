@@ -94,8 +94,17 @@ export const useSupportActions = () => {
     onError: () => message.error('Ошибка при отправке сообщения'),
   });
 
+  const { mutateAsync: markChatRead } = useMutation({
+    mutationFn: (chatId: number) => adminPanelApi.markSupportRequestRead(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_SUPPORT_CHATS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_SUPPORT_REQUESTS() });
+    },
+  });
+
   return {
     sendChatMessage: (chatId: number, message: string) => sendChatMessage({ chatId, message }),
     sendSupportChatMessage: sendChatMessage,
+    markChatRead,
   };
 };

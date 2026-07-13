@@ -18,6 +18,7 @@ const normalizeSupportRequest = (item: any): SupportConversation => ({
   created_at: item.created_at,
   updated_at: item.updated_at,
   completed_at: item.completed_at,
+  unread_count: item.unread_count ?? 0,
   order: null,
 });
 
@@ -124,6 +125,15 @@ export const supportRequestsApi = {
       `/admin-panel/${endpointSegment(type)}/${id}/send_message/`,
       { message }
     );
+    return response.data;
+  },
+
+  async markRead(type: SupportConversationType, id: number) {
+    if (type !== 'support_request') {
+      return null;
+    }
+
+    const response = await apiClient.post(`/admin-panel/support-requests/${id}/mark_read/`);
     return response.data;
   },
 

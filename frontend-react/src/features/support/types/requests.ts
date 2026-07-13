@@ -25,6 +25,7 @@ export interface SupportConversation {
   created_at: string;
   updated_at: string;
   completed_at?: string | null;
+  unread_count?: number;
   order?: {
     id: number;
     title?: string;

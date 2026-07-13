@@ -94,7 +94,7 @@ export const SupportChatsSection: React.FC = () => {
   const { user } = useAdminAuth();
   const currentUserId = user?.id || 1;
   const { chats = [], loading, refetch } = useSupportChats(true);
-  const { sendChatMessage } = useSupportActions();
+  const { sendChatMessage, markChatRead } = useSupportActions();
 
   const [selectedChat, setSelectedChat] = useState<SupportChat | null>(null);
   const [messageText, setMessageText] = useState('');
@@ -225,6 +225,13 @@ export const SupportChatsSection: React.FC = () => {
   
   const chatsData = chats as unknown as SupportChat[];
 
+  const handleSelectChat = (chat: SupportChat) => {
+    setSelectedChat(chat);
+    if (chat.unread_count > 0) {
+      void markChatRead(chat.id);
+    }
+  };
+
   useEffect(() => {
     if (!selectedChat) return;
     const updatedChat = chatsData.find(chat => chat.id === selectedChat.id);
@@ -349,7 +356,7 @@ export const SupportChatsSection: React.FC = () => {
                 renderItem={(chat) => (
                   <List.Item
                     className={selectedChat?.id === chat.id ? 'supportChatsListItem supportChatsListItemSelected' : 'supportChatsListItem'}
-                    onClick={() => setSelectedChat(chat)}
+                    onClick={() => handleSelectChat(chat)}
                   >
                     <List.Item.Meta
                       avatar={

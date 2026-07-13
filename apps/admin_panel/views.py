@@ -244,7 +244,7 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
-        if self.action in ['create', 'list', 'retrieve', 'send_message']:
+        if self.action in ['create', 'list', 'retrieve', 'send_message', 'mark_read']:
             return [IsAuthenticated()]
         return [IsAdminUser()]
 
@@ -359,7 +359,9 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
             request=support_request,
             sender=request.user,
             message=msg_text,
-            is_admin=(request.user.role in ['admin', 'director'])
+            is_admin=(request.user.role in ['admin', 'director']),
+            read_by_admin=(request.user.role in ['admin', 'director']),
+            read_by_user=(request.user.role not in ['admin', 'director']),
         )
         log_activity(request.user, 'message', msg_text, support_request=support_request)
         if request.user.role in ['admin', 'director'] and support_request.user_id:
@@ -378,6 +380,28 @@ class SupportRequestViewSet(viewsets.ModelViewSet):
             )
         serializer = SupportMessageSerializer(message)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        """Mark support request messages as read for the current side."""
+        support_request = self.get_object()
+
+        if request.user.role in ['admin', 'director']:
+            updated = support_request.messages.filter(
+                is_admin=False,
+                read_by_admin=False,
+            ).update(read_by_admin=True)
+        else:
+            updated = support_request.messages.filter(
+                is_admin=True,
+                read_by_user=False,
+            ).update(read_by_user=True)
+
+        serializer = self.get_serializer(support_request)
+        return Response({
+            'marked_read': updated,
+            'unread_count': serializer.data.get('unread_count', 0),
+        })
 
     @action(detail=True, methods=['post'])
     def transfer_to_arbitration(self, request, pk=None):

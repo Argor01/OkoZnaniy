@@ -9,7 +9,7 @@ class SupportMessageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = SupportMessage
-        fields = ['id', 'sender', 'message', 'is_admin', 'created_at']
+        fields = ['id', 'sender', 'message', 'is_admin', 'read_by_user', 'read_by_admin', 'created_at']
 
 
 class SupportRequestSerializer(serializers.ModelSerializer):
@@ -56,8 +56,14 @@ class SupportRequestSerializer(serializers.ModelSerializer):
         return obj.messages.count()
 
     def get_unread_count(self, obj):
-        # Stage 1 exposes a stable field for the admin inbox. Real per-side read
-        # tracking is planned in docs/ADMIN_SUPPORT_COMMUNICATION_PLAN.md stage 2.
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        role = getattr(user, 'role', None)
+
+        if role in ['admin', 'director']:
+            return obj.messages.filter(is_admin=False, read_by_admin=False).count()
+        if getattr(user, 'is_authenticated', False) and obj.user_id == user.id:
+            return obj.messages.filter(is_admin=True, read_by_user=False).count()
         return 0
     
     def update(self, instance, validated_data):

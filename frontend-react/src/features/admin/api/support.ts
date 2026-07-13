@@ -64,6 +64,11 @@ export const supportApi = {
     return response.data;
   },
 
+  markSupportRequestRead: async (requestId: number) => {
+    const response = await apiClient.post(`${API_ENDPOINTS.admin.support.requests.detail(requestId)}mark_read/`);
+    return response.data;
+  },
+
   transferToArbitration: async (requestId: number) => {
     const response = await apiClient.post(`${API_ENDPOINTS.admin.support.requests.detail(requestId)}transfer_to_arbitration/`);
     return response.data;

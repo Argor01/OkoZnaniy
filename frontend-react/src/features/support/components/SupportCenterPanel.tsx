@@ -143,6 +143,15 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     setSelectedItem(item);
     setReply('');
     setDetailsOpen(true);
+
+    if (item.type === 'support_request' && item.unread_count && item.unread_count > 0) {
+      setItems((prev) => prev.map((entry) =>
+        entry.type === item.type && entry.id === item.id
+          ? { ...entry, unread_count: 0 }
+          : entry
+      ));
+      void supportRequestsApi.markRead(item.type, item.id);
+    }
   };
 
   const closeDetails = () => {
@@ -314,6 +323,9 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
 
                           <Space wrap>
                             <Tag color={status.color}>{status.label}</Tag>
+                            {item.unread_count && item.unread_count > 0 ? (
+                              <Tag color="purple">Новых: {item.unread_count}</Tag>
+                            ) : null}
                             {item.order?.id ? <Tag icon={<MessageOutlined />}>Заказ #{item.order.id}</Tag> : null}
                           </Space>
 

@@ -86,6 +86,8 @@ class SupportMessage(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(verbose_name='Сообщение')
     is_admin = models.BooleanField(default=False)
+    read_by_user = models.BooleanField(default=True)
+    read_by_admin = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
