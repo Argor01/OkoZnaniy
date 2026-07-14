@@ -121,15 +121,28 @@ const ROLE_LABELS: Record<string, string> = {
   system: 'Система',
 };
 
+const getInitialFilters = (): ConversationFilters => {
+  const fallback = { orderId: '', username: '', orderTitle: '' };
+  try {
+    const raw = sessionStorage.getItem('adminPlatformConversationsFilters');
+    if (!raw) return fallback;
+    sessionStorage.removeItem('adminPlatformConversationsFilters');
+    const parsed = JSON.parse(raw) as Partial<ConversationFilters>;
+    return {
+      orderId: parsed.orderId || '',
+      username: parsed.username || '',
+      orderTitle: parsed.orderTitle || '',
+    };
+  } catch {
+    return fallback;
+  }
+};
+
 export const UserConversationsSection: React.FC = () => {
   const [chats, setChats] = useState<UserChat[]>([]);
   const [selectedChat, setSelectedChat] = useState<UserChat | null>(null);
   const [searchText, setSearchText] = useState('');
-  const [filters, setFilters] = useState<ConversationFilters>({
-    orderId: '',
-    username: '',
-    orderTitle: '',
-  });
+  const [filters, setFilters] = useState<ConversationFilters>(getInitialFilters);
   const [loading, setLoading] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 

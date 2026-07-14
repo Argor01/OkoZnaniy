@@ -563,6 +563,116 @@
   transform: scale(0.95);
 }
 
+:global([data-theme="dark"]) .chatContainer {
+  color: #e5e7eb;
+}
+
+:global([data-theme="dark"]) .chatListCard,
+:global([data-theme="dark"]) .chatMainCard,
+:global([data-theme="dark"]) .chatEmptyCard {
+  background: #171b27;
+  border-color: #293145;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+
+:global([data-theme="dark"]) .chatListHeader,
+:global([data-theme="dark"]) .chatHeader,
+:global([data-theme="dark"]) .chatComposer {
+  background: #171b27;
+  border-color: #293145;
+}
+
+:global([data-theme="dark"]) .chatListTitle,
+:global([data-theme="dark"]) .chatHeaderTitle,
+:global([data-theme="dark"]) .chatRoomTitleRow,
+:global([data-theme="dark"]) .messageSenderName,
+:global([data-theme="dark"]) .messageText {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .chatListHint,
+:global([data-theme="dark"]) .chatHeaderSubtitle,
+:global([data-theme="dark"]) .chatRoomDescription,
+:global([data-theme="dark"]) .chatRoomAccounts,
+:global([data-theme="dark"]) .chatRoomLastMessage,
+:global([data-theme="dark"]) .chatRoomMeta,
+:global([data-theme="dark"]) .messageTime,
+:global([data-theme="dark"]) .accountMeta {
+  color: #a7b0c3;
+}
+
+:global([data-theme="dark"]) .chatRoomItem {
+  border-color: #252d3f;
+}
+
+:global([data-theme="dark"]) .chatRoomItem:hover {
+  background-color: #202638;
+}
+
+:global([data-theme="dark"]) .chatRoomItemActive {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.26), rgba(32, 38, 56, 0.96));
+  border-left-color: #8b5cf6;
+}
+
+:global([data-theme="dark"]) .chatParticipantsBar {
+  background: linear-gradient(135deg, #171b27 0%, #202638 100%);
+  border-color: #293145;
+}
+
+:global([data-theme="dark"]) .accountCard {
+  background: rgba(24, 29, 42, 0.94);
+  border-color: rgba(139, 92, 246, 0.32);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+:global([data-theme="dark"]) .accountName {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .chatMessagesArea {
+  background: #111520;
+}
+
+:global([data-theme="dark"]) .messageBubble {
+  background: #1d2333;
+  border-color: #30394f;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+}
+
+:global([data-theme="dark"]) .messageBubble:hover {
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+}
+
+:global([data-theme="dark"]) .messageBubbleSystem {
+  background-color: #242b3c;
+}
+
+:global([data-theme="dark"]) .messageTextSystem {
+  color: #cbd5e1;
+}
+
+:global([data-theme="dark"]) .messageFile a {
+  color: #b794ff;
+}
+
+:global([data-theme="dark"]) .chatInput,
+:global([data-theme="dark"]) .chatUploadButton {
+  background: #111520;
+  border-color: #30394f;
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .chatInput::placeholder {
+  color: #6f7a91;
+}
+
+:global([data-theme="dark"]) .chatEmptyState,
+:global([data-theme="dark"]) .roomCreatedInfo,
+:global([data-theme="dark"]) .participantMore {
+  background-color: #202638;
+  color: #a7b0c3;
+}
+
 
 @media (max-width: 768px) {
   .chatContainer {

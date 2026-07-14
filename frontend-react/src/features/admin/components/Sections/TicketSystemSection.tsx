@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
+  Alert,
   Button,
   Card,
   DatePicker,
@@ -21,18 +22,23 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
+  LinkOutlined,
+  MessageOutlined,
   ReloadOutlined,
   SearchOutlined,
   SendOutlined,
+  StarOutlined,
   StopOutlined,
   UnlockOutlined,
   UserOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import dayjs, { Dayjs } from 'dayjs';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import apiClient from '@/api/client';
 import { useTicket, useTicketActions, useTickets } from '@/features/admin/hooks';
+import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import styles from './TicketSystemSection.module.css';
 
 const { Text, Title, Paragraph } = Typography;
@@ -59,6 +65,8 @@ interface TicketRow {
 interface TicketDetail extends TicketRow {
   description?: string;
   reason?: string;
+  support_chat_id?: number | null;
+  order_id?: number | null;
   defendant?: { id?: number; first_name?: string; last_name?: string } | null;
   messages?: Array<{
     id: number;
@@ -70,6 +78,11 @@ interface TicketDetail extends TicketRow {
     is_admin?: boolean;
     created_at: string;
   }>;
+}
+
+interface ReviewAppealInfo {
+  reviewId: number;
+  reason: string;
 }
 
 export const TicketSystemSection: React.FC = () => {
@@ -84,6 +97,11 @@ export const TicketSystemSection: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [contextActionLoading, setContextActionLoading] = useState(false);
+  const [reviewAppeal, setReviewAppeal] = useState<ReviewAppealInfo | null>(null);
+  const [reviewAppealData, setReviewAppealData] = useState<ExpertReview | null>(null);
+  const [reviewAppealLoading, setReviewAppealLoading] = useState(false);
+  const [reviewActionLoading, setReviewActionLoading] = useState(false);
 
   const [contactActionLoading, setContactActionLoading] = useState(false);
   const [contactBanPeriodModalVisible, setContactBanPeriodModalVisible] = useState(false);
@@ -93,8 +111,57 @@ export const TicketSystemSection: React.FC = () => {
   const selectedTicket = rawTicket as TicketDetail | undefined;
 
   useEffect(() => {
+    const text = [selectedTicket?.description, selectedTicket?.subject, ...(selectedTicket?.tags_list ?? [])]
+      .filter(Boolean)
+      .join('\n');
+    const reviewIdMatch = text.match(/review_id=(\d+)/i);
+    const reasonMatch = text.match(/Причина:\s*([\s\S]*?)(?:\n\s*\n|$)/i);
+
+    if (!reviewIdMatch) {
+      setReviewAppeal(null);
+      setReviewAppealData(null);
+      return;
+    }
+
+    setReviewAppeal({
+      reviewId: Number(reviewIdMatch[1]),
+      reason: reasonMatch?.[1]?.trim() || '',
+    });
+  }, [selectedTicket?.description, selectedTicket?.subject, selectedTicket?.tags_list]);
+
+  useEffect(() => {
+    if (!reviewAppeal?.reviewId) return;
+
+    let cancelled = false;
+    setReviewAppealLoading(true);
+
+    expertsApi.getReview(reviewAppeal.reviewId)
+      .then((data) => {
+        if (!cancelled) {
+          setReviewAppealData(data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setReviewAppealData(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setReviewAppealLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reviewAppeal?.reviewId]);
+
+  useEffect(() => {
     if (!detailsOpen) {
       setReplyText('');
+      setReviewAppeal(null);
+      setReviewAppealData(null);
     }
   }, [detailsOpen]);
 
@@ -150,6 +217,33 @@ export const TicketSystemSection: React.FC = () => {
     }
   };
 
+  const extractId = (text: string, patterns: RegExp[]) => {
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match?.[1]) {
+        const value = Number(match[1]);
+        if (Number.isFinite(value) && value > 0) return value;
+      }
+    }
+    return null;
+  };
+
+  const openAdminSection = (section: string) => {
+    localStorage.setItem('adminDashboard_selectedMenu', section);
+    window.location.href = '/admin';
+  };
+
+  const openConversations = (filters?: { orderId?: number | null; username?: string }) => {
+    if (filters?.orderId || filters?.username) {
+      sessionStorage.setItem('adminPlatformConversationsFilters', JSON.stringify({
+        orderId: filters.orderId ? String(filters.orderId) : '',
+        username: filters.username || '',
+        orderTitle: '',
+      }));
+    }
+    openAdminSection('user_conversations');
+  };
+
   const filteredTickets = tickets.filter((ticket) => {
     if (ticket.type === 'claim') return false;
 
@@ -201,6 +295,57 @@ export const TicketSystemSection: React.FC = () => {
       message.error('Не удалось обновить статус');
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const handleTransferToArbitration = async () => {
+    if (!selectedTicket) return;
+
+    Modal.confirm({
+      title: 'Передать обращение в арбитраж?',
+      content: 'Будет создано арбитражное дело, а текущее обращение удалится из списка поддержки.',
+      okText: 'Передать',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setContextActionLoading(true);
+        try {
+          await apiClient.post(`/admin-panel/support-requests/${selectedTicket.id}/transfer_to_arbitration/`);
+          message.success('Обращение передано в арбитраж');
+          closeTicket();
+          await refetch();
+        } catch (error: any) {
+          message.error(error?.response?.data?.detail || 'Не удалось передать обращение в арбитраж');
+        } finally {
+          setContextActionLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleReviewAppealDecision = async (decision: 'keep' | 'remove') => {
+    if (!reviewAppeal?.reviewId) return;
+
+    setReviewActionLoading(true);
+    try {
+      const updated = await expertsApi.resolveReviewAppeal(
+        reviewAppeal.reviewId,
+        decision,
+        decision === 'remove'
+          ? 'Администратор удовлетворил жалобу и убрал отзыв.'
+          : 'Администратор отклонил жалобу и вернул отзыв.'
+      );
+      setReviewAppealData(updated);
+      await Promise.all([refetch(), refetchTicket()]);
+      message.success(
+        decision === 'remove'
+          ? 'Жалоба удовлетворена, отзыв скрыт'
+          : 'Жалоба отклонена, отзыв возвращён'
+      );
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось изменить состояние отзыва');
+    } finally {
+      setReviewActionLoading(false);
     }
   };
 
@@ -311,6 +456,66 @@ export const TicketSystemSection: React.FC = () => {
       null
     );
   }, [selectedTicket, isContactViolation]);
+
+  const ticketContext = useMemo(() => {
+    if (!selectedTicket) {
+      return {
+        labels: [] as string[],
+        orderId: null as number | null,
+        chatId: null as number | null,
+        articleId: null as number | null,
+        questionId: null as number | null,
+        isPayment: false,
+        isKnowledge: false,
+        isOrder: false,
+        isReview: false,
+        isContact: false,
+      };
+    }
+
+    const text = [
+      selectedTicket.subject,
+      selectedTicket.description,
+      selectedTicket.reason,
+      ...(selectedTicket.tags_list ?? []),
+    ].filter(Boolean).join('\n');
+    const normalized = text.toLowerCase();
+    const orderId = selectedTicket.order_id ?? extractId(text, [
+      /order_id[:=\s]+(\d+)/i,
+      /заказ(?:у|а|ом)?\s*[#№]?\s*(\d+)/i,
+      /order\s*[#№]?\s*(\d+)/i,
+    ]);
+    const chatId = selectedTicket.support_chat_id ?? extractId(text, [
+      /chat_id[:=\s]+(\d+)/i,
+      /чат(?:е|а)?\s*[#№]?\s*(\d+)/i,
+      /\/admin\/chat\/(\d+)/i,
+    ]);
+    const articleId = extractId(text, [
+      /article_id[:=\s]+(\d+)/i,
+      /стать[ьяюи]\s*[#№]?\s*(\d+)/i,
+    ]);
+    const questionId = extractId(text, [
+      /question_id[:=\s]+(\d+)/i,
+      /вопрос(?:у|а|ом)?\s*[#№]?\s*(\d+)/i,
+    ]);
+
+    const isReview = Boolean(reviewAppeal) || /review-appeal|review_id|отзыв/.test(normalized);
+    const isContact = isContactViolation;
+    const isPayment = /оплат|плат[её]ж|возврат|выплат|баланс|деньг|кошел|payout|refund/.test(normalized);
+    const isKnowledge = /article|question|стать|вопрос|база знаний|knowledge/.test(normalized);
+    const isOrder = Boolean(orderId) || /заказ|срок|дедлайн|качество|готов[а-я\s]+работ|доработ/.test(normalized);
+
+    const labels: string[] = [];
+    if (isContact) labels.push('Нарушение контактов');
+    if (isReview) labels.push('Обжалование отзыва');
+    if (isOrder) labels.push('Заказ');
+    if (isPayment) labels.push('Оплата / возврат');
+    if (isKnowledge) labels.push('База знаний');
+    if (chatId) labels.push(`Чат #${chatId}`);
+    if (labels.length === 0) labels.push('Общее обращение');
+
+    return { labels, orderId, chatId, articleId, questionId, isPayment, isKnowledge, isOrder, isReview, isContact };
+  }, [selectedTicket, reviewAppeal, isContactViolation]);
 
   const refreshAll = async () => {
     await Promise.all([refetch(), refetchTicket()]);
@@ -440,6 +645,134 @@ export const TicketSystemSection: React.FC = () => {
               <Tag color={getStatusColor(selectedTicket.status)} icon={getStatusIcon(selectedTicket.status)}>{getStatusText(selectedTicket.status)}</Tag>
             </Space>
 
+            <Card size="small" title="Как отрегулировать проблему">
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                <Space wrap>
+                  {ticketContext.labels.map((label) => (
+                    <Tag key={label} color="purple">{label}</Tag>
+                  ))}
+                </Space>
+
+                <Alert
+                  type="info"
+                  showIcon
+                  message="Быстрые действия подобраны по тегам, теме и описанию обращения."
+                  description="Если действие меняет состояние, оно выполнится сразу после подтверждения. Если нужно больше контекста, кнопка откроет нужный раздел админки."
+                />
+
+                <Space wrap>
+                  {selectedTicket.status !== 'in_progress' && selectedTicket.status !== 'completed' ? (
+                    <Button
+                      icon={<ClockCircleOutlined />}
+                      onClick={() => handleStatusChange('in_progress')}
+                      loading={updatingStatus}
+                    >
+                      Взять в работу
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.isContact && contactViolationUserId ? (
+                    <>
+                      <Button
+                        danger
+                        icon={<StopOutlined />}
+                        loading={contactActionLoading}
+                        onClick={handlePermanentContactBan}
+                      >
+                        Заблокировать за контакты
+                      </Button>
+                      <Button
+                        icon={<UnlockOutlined />}
+                        loading={contactActionLoading}
+                        onClick={handleUnbanContactUser}
+                      >
+                        Разблокировать
+                      </Button>
+                      <Button
+                        loading={contactActionLoading}
+                        onClick={() => setContactBanPeriodModalVisible(true)}
+                      >
+                        Блокировка на период
+                      </Button>
+                    </>
+                  ) : null}
+
+                  {ticketContext.orderId ? (
+                    <Button
+                      icon={<LinkOutlined />}
+                      onClick={() => window.open(`/orders/${ticketContext.orderId}`, '_blank')}
+                    >
+                      Открыть заказ #{ticketContext.orderId}
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.isOrder ? (
+                    <Button icon={<FileTextOutlined />} onClick={() => openAdminSection('orders_management')}>
+                      Управление заказами
+                    </Button>
+                  ) : null}
+
+                  {(ticketContext.isOrder || ticketContext.chatId || ticketContext.isContact) ? (
+                    <Button
+                      icon={<MessageOutlined />}
+                      onClick={() => openConversations({
+                        orderId: ticketContext.orderId,
+                        username: selectedTicket.user?.username || selectedTicket.user?.email,
+                      })}
+                    >
+                      Смотреть переписку
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.isPayment ? (
+                    <Button icon={<WalletOutlined />} onClick={() => openAdminSection('earnings')}>
+                      Начисления / выплаты
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.isKnowledge ? (
+                    <Button icon={<SearchOutlined />} onClick={() => openAdminSection('knowledge_base')}>
+                      Жалобы и споры базы знаний
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.articleId ? (
+                    <Button icon={<LinkOutlined />} onClick={() => window.open(`/knowledge-base/${ticketContext.articleId}`, '_blank')}>
+                      Открыть статью #{ticketContext.articleId}
+                    </Button>
+                  ) : null}
+
+                  {ticketContext.questionId ? (
+                    <Button icon={<LinkOutlined />} onClick={() => window.open(`/knowledge/${ticketContext.questionId}`, '_blank')}>
+                      Открыть вопрос #{ticketContext.questionId}
+                    </Button>
+                  ) : null}
+
+                  {!ticketContext.isReview && selectedTicket.status !== 'completed' ? (
+                    <Button
+                      danger
+                      icon={<ExclamationCircleOutlined />}
+                      loading={contextActionLoading}
+                      onClick={handleTransferToArbitration}
+                    >
+                      Передать в арбитраж
+                    </Button>
+                  ) : null}
+
+                  {selectedTicket.status !== 'completed' ? (
+                    <Button
+                      type="primary"
+                      icon={<CheckCircleOutlined />}
+                      onClick={() => handleStatusChange('completed')}
+                      loading={updatingStatus}
+                    >
+                      Закрыть обращение
+                    </Button>
+                  ) : null}
+                </Space>
+              </Space>
+            </Card>
+
             <Descriptions size="small" column={1} bordered>
               <Descriptions.Item label="Описание">
                 <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{selectedTicket.description || 'Описание не заполнено'}</Paragraph>
@@ -451,6 +784,72 @@ export const TicketSystemSection: React.FC = () => {
                 </Descriptions.Item>
               ) : null}
             </Descriptions>
+
+            {reviewAppeal ? (
+              <Card size="small" title="Обжалование отзыва">
+                {reviewAppealLoading ? (
+                  <div style={{ padding: 16, textAlign: 'center' }}><Spin size="small" /></div>
+                ) : reviewAppealData ? (
+                  <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                    <Descriptions size="small" column={1} bordered>
+                      <Descriptions.Item label="Отзыв">#{reviewAppealData.id}</Descriptions.Item>
+                      <Descriptions.Item label="Оценка">
+                        <Space>
+                          <StarOutlined style={{ color: '#faad14' }} />
+                          <span>{reviewAppealData.rating}/5</span>
+                        </Space>
+                      </Descriptions.Item>
+                      <Descriptions.Item label="Статус отзыва">
+                        <Tag color={reviewAppealData.is_published ? 'green' : 'red'}>
+                          {reviewAppealData.is_published ? 'Опубликован' : 'Скрыт'}
+                        </Tag>
+                      </Descriptions.Item>
+                      {reviewAppeal.reason ? (
+                        <Descriptions.Item label="Причина жалобы">{reviewAppeal.reason}</Descriptions.Item>
+                      ) : null}
+                      <Descriptions.Item label="Текст отзыва">
+                        <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
+                          {reviewAppealData.comment || 'Без текста'}
+                        </Paragraph>
+                      </Descriptions.Item>
+                    </Descriptions>
+
+                    <Alert
+                      type="info"
+                      showIcon
+                      message="Выберите решение по обжалованию"
+                      description="Если жалоба удовлетворена, отзыв будет скрыт. Если жалоба отклонена, отзыв вернётся в публичный профиль."
+                    />
+
+                    <Space wrap>
+                      <Button
+                        danger
+                        loading={reviewActionLoading}
+                        disabled={reviewAppealData.is_published === false}
+                        onClick={() => handleReviewAppealDecision('remove')}
+                      >
+                        Удовлетворить жалобу: убрать отзыв
+                      </Button>
+                      <Button
+                        type="primary"
+                        loading={reviewActionLoading}
+                        disabled={reviewAppealData.is_published === true}
+                        onClick={() => handleReviewAppealDecision('keep')}
+                      >
+                        Отклонить жалобу: вернуть отзыв
+                      </Button>
+                    </Space>
+                  </Space>
+                ) : (
+                  <Alert
+                    type="warning"
+                    showIcon
+                    message="Связанный отзыв не найден"
+                    description="Проверьте, что в обращении указан корректный review_id."
+                  />
+                )}
+              </Card>
+            ) : null}
 
             <Card size="small" title="Переписка">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
