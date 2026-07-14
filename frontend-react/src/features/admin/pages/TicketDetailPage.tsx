@@ -337,11 +337,11 @@ export const TicketDetailPage: React.FC = () => {
         reviewAppeal.reviewId,
         decision,
         decision === 'remove'
-          ? 'Администратор убрал отзыв по результатам рассмотрения обращения.'
-          : 'Администратор вернул отзыв после рассмотрения обращения.'
+          ? 'Администратор удовлетворил жалобу и убрал отзыв.'
+          : 'Администратор отклонил жалобу и вернул отзыв.'
       );
       setReviewAppealData(updated);
-      message.success(decision === 'remove' ? 'Отзыв скрыт' : 'Отзыв возвращён');
+      message.success(decision === 'remove' ? 'Жалоба удовлетворена, отзыв скрыт' : 'Жалоба отклонена, отзыв возвращён');
       doRefetch();
     } catch (error: any) {
       message.error(error?.response?.data?.detail || 'Не удалось изменить состояние отзыва');
@@ -648,7 +648,7 @@ export const TicketDetailPage: React.FC = () => {
                         disabled={reviewAppealData.is_published === false}
                         onClick={() => handleReviewAppealDecision('remove')}
                       >
-                        Убрать отзыв
+                        Удовлетворить жалобу: убрать отзыв
                       </Button>
                       <Button
                         block
@@ -657,7 +657,7 @@ export const TicketDetailPage: React.FC = () => {
                         disabled={reviewAppealData.is_published === true}
                         onClick={() => handleReviewAppealDecision('keep')}
                       >
-                        Вернуть отзыв
+                        Отклонить жалобу: вернуть отзыв
                       </Button>
                     </Space>
                   </Space>

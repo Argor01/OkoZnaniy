@@ -108,7 +108,7 @@ const extractOrderId = (notification: Notification): number | null => {
     return notification.related_object_id;
   }
   const source = `${notification.title || ''} ${notification.message || ''}`;
-  const match = source.match(/#(\d+)/);
+  const match = source.match(/(?:#|№)\s*(\d+)/);
   if (!match) return null;
   const value = Number(match[1]);
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -194,6 +194,12 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
     ? notification.data.action_label
     : null;
 
+  if (notification.type === 'review_request') {
+    return [
+      { key: 'leave-review', label: 'Оставить отзыв', target: orderId ? `/orders/${orderId}` : '/dashboard?tab=pending-reviews', primary: true },
+    ];
+  }
+
   if (ticketType === 'support_request') {
     actions.push({
       key: 'open-support-request',
@@ -209,6 +215,12 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
   }
 
   if (orderId) {
+    if (notification.type === 'new_bid') {
+      return [
+        { key: 'open-order', label: 'Открыть заказ', target: `/orders/${orderId}`, primary: true },
+      ];
+    }
+
     const requiresExpertDecision = notification.type === 'expert_invitation' || actionRequired === 'expert_assignment_response';
     if (requiresExpertDecision) {
       return [
@@ -370,6 +382,10 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     event.stopPropagation();
     if (!notification.is_read) {
       await handleMarkAsRead(notification);
+    }
+    if (notification.type === 'review_request' && action.key === 'leave-review') {
+      await handleReviewNotificationClick(notification);
+      return;
     }
     onClose();
     navigate(action.target);

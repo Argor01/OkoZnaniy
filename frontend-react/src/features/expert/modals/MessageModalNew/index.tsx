@@ -727,12 +727,24 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       const hasUnreadIncomingMessages = Array.isArray(data.messages)
         ? data.messages.some((msg) => !msg.is_mine && !msg.is_read)
         : false;
+      const peerId = toPositiveNumber(data.other_user?.id);
+      const relatedChatIds = new Set<number>([chatId]);
+      if (peerId) {
+        chatList.forEach((chat) => {
+          if (toPositiveNumber(chat.other_user?.id) === peerId) {
+            relatedChatIds.add(chat.id);
+          }
+        });
+      }
+      const hasUnreadInConversation =
+        hasUnreadIncomingMessages ||
+        chatList.some((chat) => relatedChatIds.has(chat.id) && (chat.unread_count || 0) > 0);
 
-      if (hasUnreadIncomingMessages) {
+      if (hasUnreadInConversation) {
         await chatApi.markAsRead(chatId);
         queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
         setSelectedChat((prev) =>
-          prev && prev.id === chatId
+          prev && relatedChatIds.has(prev.id)
             ? {
                 ...prev,
                 unread_count: 0,
@@ -747,7 +759,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         setChatList((prev) => {
           let changed = false;
           const next = prev.map((chat) => {
-            if (chat.id !== chatId || chat.unread_count === 0) return chat;
+            if (!relatedChatIds.has(chat.id) || chat.unread_count === 0) return chat;
             changed = true;
             return { ...chat, unread_count: 0 };
           });
@@ -759,7 +771,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       antMessage.error('Не удалось загрузить чат');
       return null;
     }
-  }, [hydrateClosedOrdersForChat, syncChatListItemFromDetail]);
+  }, [chatList, hydrateClosedOrdersForChat, queryClient, syncChatListItemFromDetail, toPositiveNumber]);
 
   const loadOrCreateChatByOrderAndUser = useCallback(async (orderId: number, userId: number) => {
     setLoading(true);
@@ -3029,11 +3041,14 @@ const handleOverdueComplaint = async () => {
                   const isWorkDelivery = msg.message_type === 'work_delivery' && (!!msg.file_url || workDeliveryFiles.length > 0);
                   const isSystemMessage = msg.message_type === 'system';
                   const revisionSystemPrefix = 'Клиент вернул работу на доработку';
-                  const isRevisionSystemMessage = String(msg.text || '').startsWith(revisionSystemPrefix);
+                  const structuredRevisionComment = String(msg.offer_data?.revision_comment || '').trim();
+                  const isRevisionSystemMessage = isSystemMessage && (
+                    !!structuredRevisionComment ||
+                    String(msg.text || '').startsWith(revisionSystemPrefix)
+                  );
                   const revisionCommentText = isRevisionSystemMessage
                     ? (() => {
-                        const structuredComment = String(msg.offer_data?.revision_comment || '').trim();
-                        if (structuredComment) return structuredComment;
+                        if (structuredRevisionComment) return structuredRevisionComment;
                         const rawText = String(msg.text || '').replace(/\r\n/g, '\n').trim();
                         const explicitCommentMatch = rawText.match(/Комментарий:\s*([\s\S]*)$/);
                         if (explicitCommentMatch?.[1]) return explicitCommentMatch[1].trim();
@@ -3197,14 +3212,10 @@ const handleOverdueComplaint = async () => {
                                 <Button
                                   type="primary"
                                   className={styles.buttonSuccess}
-                                  onClick={handleApproveOrder}
-                                  disabled={!canApproveWork}
+                                  onClick={handleGoToOrder}
                                   block
                                 >
-                                  Принять
-                                </Button>
-                                <Button danger onClick={handleRequestRevision} disabled={!canRequestRevisionWork} block>
-                                  На доработку
+                                  Перейти в заказ
                                 </Button>
                               </div>
                             ) : null}
@@ -3237,14 +3248,10 @@ const handleOverdueComplaint = async () => {
                               <Button
                                 type="primary"
                                 className={styles.buttonSuccess}
-                                onClick={handleApproveOrder}
-                                disabled={!canApproveWork}
+                                  onClick={handleGoToOrder}
                                 block
                               >
-                                Принять
-                              </Button>
-                              <Button danger onClick={handleRequestRevision} disabled={!canRequestRevisionWork} block>
-                                На доработку
+                                Перейти в заказ
                               </Button>
                             </div>
                             <div className={styles.messageCardTime}>
@@ -3496,14 +3503,10 @@ const handleOverdueComplaint = async () => {
                               <div className={styles.messageActions}>
                                 <Button
                                   type="primary"
-                                  className={styles.buttonSuccess}
-                                  onClick={handleApproveOrder}
+                                  onClick={handleGoToOrder}
                                   block
                                 >
-                                  Принять заказ
-                                </Button>
-                                <Button danger onClick={handleRequestRevision} block>
-                                  На доработку
+                                  Перейти в заказ
                                 </Button>
                               </div>
                             ) : null}

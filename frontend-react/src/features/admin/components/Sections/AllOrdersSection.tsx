@@ -16,15 +16,11 @@ import {
   Col,
   Descriptions,
   Tabs,
-  List,
-  Avatar,
   Empty
 } from 'antd';
 import {
   EyeOutlined,
   SearchOutlined,
-  MessageOutlined,
-  UserOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
@@ -58,19 +54,6 @@ const getEntityLabel = (value: unknown): string => {
   return '';
 };
 
-interface ChatMessage {
-  id: number;
-  sender: {
-    id: number;
-    username: string;
-    first_name: string;
-    last_name: string;
-  };
-  text: string;
-  created_at: string;
-  message_type: string;
-}
-
 interface OrderChatParticipant {
   id: number;
   username: string;
@@ -84,79 +67,7 @@ interface OrderChatThread {
   id: number;
   order_id: number | null;
   participants?: OrderChatParticipant[];
-  messages?: ChatMessage[];
-}
-
-interface OrderChatProps {
-  orderId: number;
-}
-
-const OrderChat: React.FC<OrderChatProps> = ({ orderId }) => {
-  const { data: orderChats = [], isLoading } = useQuery<OrderChatThread[]>({
-    queryKey: ['order-chat', orderId],
-    queryFn: async () => {
-      try {
-        const chatResponse = await apiClient.get(`/admin-panel/user-chats/?order_id=${orderId}`);
-        const payload = chatResponse.data;
-        const chats = Array.isArray(payload)
-          ? payload
-          : Array.isArray(payload?.results)
-            ? payload.results
-            : Array.isArray(payload?.data)
-              ? payload.data
-              : [];
-
-        return chats;
-      } catch (error) {
-        logger.error('Error loading chat:', error);
-        return [];
-      }
-    },
-    enabled: !!orderId,
-  });
-
-  const messages = orderChats
-    .flatMap((chat) => chat.messages || [])
-    .sort((a, b) => dayjs(a.created_at).valueOf() - dayjs(b.created_at).valueOf());
-
-  if (isLoading) {
-    return <div style={{ textAlign: 'center', padding: '20px' }}>Загрузка переписки...</div>;
-  }
-
-  if (messages.length === 0) {
-    return (
-      <Empty
-        description="Сообщений в переписке нет"
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-      />
-    );
-  }
-
-  return (
-    <List
-      dataSource={messages}
-      renderItem={(msg) => (
-        <List.Item key={msg.id}>
-          <List.Item.Meta
-            avatar={<Avatar icon={<UserOutlined />} />}
-            title={
-              <div>
-                <Text strong>{msg.sender.first_name} {msg.sender.last_name}</Text>
-                <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
-                  @{msg.sender.username}
-                </Text>
-                <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
-                  {dayjs(msg.created_at).format('DD.MM.YYYY HH:mm')}
-                </Text>
-              </div>
-            }
-            description={msg.text}
-          />
-        </List.Item>
-      )}
-      style={{ maxHeight: 400, overflow: 'auto' }}
-    />
-  );
+  messages?: unknown[];
 };
 
 interface OrderParticipantsProps {
@@ -580,15 +491,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
                 key: 'participants',
                 label: 'Участники',
                 children: <OrderParticipants order={selectedOrder} />,
-              },
-              {
-                key: 'chat',
-                label: (
-                  <span>
-                    <MessageOutlined /> Переписка
-                  </span>
-                ),
-                children: <OrderChat orderId={selectedOrder.id} />,
               },
             ]}
           />

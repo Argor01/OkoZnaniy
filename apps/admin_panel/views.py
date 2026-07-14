@@ -394,6 +394,20 @@ def approve_ready_work(request, work_id):
     work.moderation_status = ReadyWork.ModerationStatus.APPROVED
     work.is_active = True
     work.save(update_fields=['moderation_status', 'is_active', 'updated_at'])
+    if work.author_id:
+        NotificationService.create_notification(
+            recipient=work.author,
+            type=NotificationType.STATUS_CHANGED,
+            title='Готовая работа одобрена',
+            message=f'Ваша готовая работа "{work.title}" прошла модерацию и опубликована в магазине.',
+            related_object_id=work.id,
+            related_object_type='ready_work',
+            data={
+                'ready_work_id': work.id,
+                'moderation_status': work.moderation_status,
+                'action': 'open_ready_work',
+            },
+        )
     log_admin_action(
         request.user,
         'ready_work_approved',
@@ -414,6 +428,20 @@ def reject_ready_work(request, work_id):
     work.moderation_status = ReadyWork.ModerationStatus.REJECTED
     work.is_active = False
     work.save(update_fields=['moderation_status', 'is_active', 'updated_at'])
+    if work.author_id:
+        NotificationService.create_notification(
+            recipient=work.author,
+            type=NotificationType.STATUS_CHANGED,
+            title='Готовая работа отклонена',
+            message=f'Ваша готовая работа "{work.title}" не прошла модерацию. Проверьте требования и загрузите исправленную версию.',
+            related_object_id=work.id,
+            related_object_type='ready_work',
+            data={
+                'ready_work_id': work.id,
+                'moderation_status': work.moderation_status,
+                'action': 'open_my_works',
+            },
+        )
     log_admin_action(
         request.user,
         'ready_work_rejected',

@@ -35,6 +35,11 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
     }
 
     const token = localStorage.getItem('access_token');
+    const hasJwtToken = !!token && token !== 'cookie-session' && token.split('.').length === 3;
+    if (!hasJwtToken) {
+      setIsConnected(false);
+      return;
+    }
     const wsUrl = API_BASE_URL.replace('http', 'ws').replace('https', 'wss');
     const url = `${wsUrl}/ws/chat/${chatId}/?token=${token}`;
 

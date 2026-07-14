@@ -65,11 +65,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const isWorkDelivery = msg.message_type === 'work_delivery' && (!!msg.file_url || workDeliveryFiles.length > 0);
   const isSystemMessage = msg.message_type === 'system';
   const revisionSystemPrefix = 'Клиент вернул работу на доработку';
-  const isRevisionSystemMessage = String(msg.text || '').startsWith(revisionSystemPrefix);
+  const structuredRevisionComment = String(msg.offer_data?.revision_comment || '').trim();
+  const isRevisionSystemMessage = isSystemMessage && (
+    !!structuredRevisionComment ||
+    String(msg.text || '').startsWith(revisionSystemPrefix)
+  );
   const revisionCommentText = isRevisionSystemMessage
     ? (() => {
-        const structuredComment = String(msg.offer_data?.revision_comment || '').trim();
-        if (structuredComment) return structuredComment;
+        if (structuredRevisionComment) return structuredRevisionComment;
         const rawText = String(msg.text || '').replace(/\r\n/g, '\n').trim();
         const explicitCommentMatch = rawText.match(/Комментарий:\s*([\s\S]*)$/);
         if (explicitCommentMatch?.[1]) return explicitCommentMatch[1].trim();
@@ -109,6 +112,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     isOrderExpert &&
     workOfferStatus === 'accepted' &&
     workDeliveryStatus === 'awaiting_upload';
+  const goToOrder = () => {
+    if (!effectiveOrderId) return;
+    window.location.assign(`/orders/${effectiveOrderId}`);
+  };
 
   // System messages
   if (isSystemMessage || isRevisionSystemMessage) {
@@ -216,8 +223,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             </div>
             {showWorkActions ? (
               <div className={styles.messageCardActions}>
-                <Button type="primary" className={styles.buttonSuccess} onClick={onApproveOrder} block>Принять</Button>
-                <Button danger onClick={onRequestRevision} block>На доработку</Button>
+                <Button type="primary" onClick={goToOrder} block>Перейти в заказ</Button>
               </div>
             ) : null}
             <div className={styles.messageCardTime}>
@@ -237,8 +243,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             </div>
             <div className={styles.messageCardInfo}>Работа отправлена, ожидает решения заказчика</div>
             <div className={styles.messageCardActions}>
-              <Button type="primary" className={styles.buttonSuccess} onClick={onApproveOrder} block>Принять</Button>
-              <Button danger onClick={onRequestRevision} block>На доработку</Button>
+              <Button type="primary" onClick={goToOrder} block>Перейти в заказ</Button>
             </div>
             <div className={styles.messageCardTime}>
               <Text type="secondary" className={styles.messageCardTimeText}>{formatMessageTime(msg.created_at)}</Text>
@@ -417,8 +422,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             ) : null}
             {showWorkActions ? (
               <div className={styles.messageActions}>
-                <Button type="primary" className={styles.buttonSuccess} onClick={onApproveOrder} block>Принять заказ</Button>
-                <Button danger onClick={onRequestRevision} block>На доработку</Button>
+                <Button type="primary" onClick={goToOrder} block>Перейти в заказ</Button>
               </div>
             ) : null}
             <Text className={`${styles.messageTime} ${isMobile ? styles.messageTimeMobile : ''} ${msg.is_mine ? styles.messageTimeMine : styles.messageTimeOther}`}>

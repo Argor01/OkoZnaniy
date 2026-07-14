@@ -74,7 +74,8 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const getWebSocketUrl = useCallback((path: string) => {
     const token = localStorage.getItem('access_token');
     const separator = path.includes('?') ? '&' : '?';
-    const tokenParam = token ? `${separator}token=${token}` : '';
+    const hasJwtToken = !!token && token !== 'cookie-session' && token.split('.').length === 3;
+    const tokenParam = hasJwtToken ? `${separator}token=${token}` : '';
     const wsUrl = WS_BASE_URL || (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host;
     return `${wsUrl}${path}${tokenParam}`;
   }, []);
@@ -111,6 +112,13 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   const connect = useCallback(() => {
     if (!enabled) return;
+    const token = localStorage.getItem('access_token');
+    const hasJwtToken = !!token && token !== 'cookie-session' && token.split('.').length === 3;
+    if (!hasJwtToken) {
+      logger.log('[WS] Skipped: JWT token is not available for WebSocket auth');
+      setIsConnected(false);
+      return;
+    }
 
     // Закрываем существующее соединение
     if (wsRef.current) {

@@ -28,6 +28,7 @@ interface OrderTimelineProps {
   order: TimelineOrder;
   compact?: boolean;
   className?: string;
+  onReviewClick?: () => void;
 }
 
 const statusRank: Record<string, number> = {
@@ -81,9 +82,12 @@ const getNextStep = (order: TimelineOrder) => {
   return 'Ожидайте откликов или выберите эксперта';
 };
 
-const OrderTimeline: React.FC<OrderTimelineProps> = ({ order, compact = false, className }) => {
+const OrderTimeline: React.FC<OrderTimelineProps> = ({ order, compact = false, className, onReviewClick }) => {
   const status = String(order.status || 'new');
   const rank = statusRank[status] ?? 0;
+  const actions = order.available_actions || {};
+  const nextStep = getNextStep(order);
+  const canOpenReview = Boolean(actions.can_create_review && onReviewClick);
   const delivered = hasDeliveredWork(order);
   const expertSelected = Boolean(order.expert || order.expert_id || rank >= 1);
   const accepted = rank >= 2;
@@ -115,10 +119,15 @@ const OrderTimeline: React.FC<OrderTimelineProps> = ({ order, compact = false, c
           <div className={styles.title}>Таймлайн заказа</div>
           <div className={styles.subtitle}>Видно, что уже произошло и какой следующий шаг.</div>
         </div>
-        <div className={styles.nextStep}>
+        <button
+          type="button"
+          className={`${styles.nextStep} ${canOpenReview ? styles.nextStepButton : ''}`}
+          onClick={canOpenReview ? onReviewClick : undefined}
+          disabled={!canOpenReview}
+        >
           <ClockCircleOutlined className={styles.nextStepIcon} />
-          {getNextStep(order)}
-        </div>
+          {nextStep}
+        </button>
       </div>
       <div className={styles.steps}>
         {steps.map((step) => (

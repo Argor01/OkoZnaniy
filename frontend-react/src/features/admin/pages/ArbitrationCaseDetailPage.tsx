@@ -8,7 +8,7 @@ import {
 import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
   CheckCircleOutlined, CloseCircleOutlined, DollarOutlined,
-  ClockCircleOutlined, MessageOutlined, HistoryOutlined,
+  ClockCircleOutlined, MessageOutlined,
   ExclamationCircleOutlined, LinkOutlined
 } from '@ant-design/icons';
 import { AdminLayout } from '@/features/admin/components/Layout';
@@ -269,6 +269,8 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
     return labels[role || ''] || role || 'Участник';
   };
 
+  const conversationFeed = feed.filter((item) => item.kind === 'message');
+
   if (loading) {
     return (
       <AdminLayout user={user} selectedMenu="arbitration" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
@@ -501,7 +503,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
           {/* Правая колонка - Переписка */}
           <Col xs={24} lg={16}>
             <Card
-              title={<><MessageOutlined /> Переписка и история</>}
+              title={<><MessageOutlined /> Переписка</>}
               className="messages-card"
             >
               {/* Описание проблемы */}
@@ -516,13 +518,28 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
 
               <Divider />
 
-              {/* Лента сообщений и активностей */}
+              <div className="case-status-strip">
+                <Space wrap size={10}>
+                  <ClockCircleOutlined style={{ color: '#6435a5' }} />
+                  <Text strong>Статус арбитража</Text>
+                  <Tag color={getStatusColor(caseData.status)}>{caseData.status_display}</Tag>
+                  {caseData.assigned_admin ? (
+                    <Text type="secondary">
+                      Ответственный: {caseData.assigned_admin.first_name} {caseData.assigned_admin.last_name}
+                    </Text>
+                  ) : (
+                    <Text type="secondary">Ответственный не назначен</Text>
+                  )}
+                </Space>
+              </div>
+
+              {/* Лента сообщений */}
               <div className="feed-container">
-                {feed.length === 0 ? (
+                {conversationFeed.length === 0 ? (
                   <Empty description="Нет сообщений" />
                 ) : (
                   <Timeline mode="left">
-                    {feed.map((item) => {
+                    {conversationFeed.map((item) => {
                       if (item.kind === 'message') {
                         const isAdmin = item.message_type === 'admin';
                         const isOrderChatMessage = item.source === 'order_chat';
@@ -583,25 +600,8 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                             </div>
                           </Timeline.Item>
                         );
-                      } else {
-                        return (
-                          <Timeline.Item
-                            key={item.id}
-                            color="gray"
-                            dot={<HistoryOutlined />}
-                          >
-                            <div className="feed-activity">
-                              <Text type="secondary" style={{ fontSize: 13 }}>
-                                {item.description}
-                              </Text>
-                              <br />
-                              <Text type="secondary" style={{ fontSize: 12 }}>
-                                {new Date(item.created_at).toLocaleString('ru-RU')}
-                              </Text>
-                            </div>
-                          </Timeline.Item>
-                        );
                       }
+                      return null;
                     })}
                   </Timeline>
                 )}

@@ -10,6 +10,7 @@
   flex-direction: column;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: fadeInUp 0.4s ease-out both;
+  overflow: hidden;
 }
 
 .workCard:nth-child(1) { animation-delay: 0.05s; }
@@ -24,6 +25,14 @@
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
+.workCardMuted {
+  cursor: default;
+}
+
+.workCardMuted:hover {
+  transform: none;
+}
+
 .workCard :global(.ant-tag) {
   font-weight: 300;
 }
@@ -35,10 +44,59 @@
   border-radius: 8px 8px 0 0;
 }
 
+.workCardPlaceholder {
+  height: 200px;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2f5;
+  color: #bfbfbf;
+}
+
 .workCardContent {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.workStatusRow {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.workStatusRow :global(.ant-tag) {
+  margin-inline-end: 0;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-weight: 600;
+}
+
+.moderationNotice {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  border-radius: 12px;
+  background: rgba(255, 251, 235, 0.92);
+  color: #92400e;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+:global(.dark-theme) .moderationNotice,
+:global([data-theme='dark']) .moderationNotice,
+:global(body.dark) .moderationNotice {
+  border-color: rgba(251, 191, 36, 0.36);
+  background: rgba(69, 45, 15, 0.72);
+  color: #fde68a;
+}
+
+:global([data-theme='dark']) .workCardPlaceholder {
+  background: #202636;
+  color: #64748b;
 }
 
 .workCardTitle {

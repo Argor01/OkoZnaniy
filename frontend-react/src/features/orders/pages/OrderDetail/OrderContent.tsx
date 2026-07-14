@@ -30,7 +30,7 @@ interface OrderContentProps {
   onFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onTaskFileDrop: (e: React.DragEvent) => void;
   onTaskFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onDownloadFile: (file: any) => void;
+  onDownloadFile: (file: any) => Promise<boolean> | boolean;
   onDeleteOrderFile: (file: any) => void;
   onDeliveredFilesResolved?: (ids: number[]) => void;
   onDeliveredFileViewed?: (id: number) => void;
@@ -171,9 +171,9 @@ const OrderContent: React.FC<OrderContentProps> = ({
     return !['completed', 'cancelled', 'canceled'].includes(String(order.status || '').toLowerCase());
   }, [availableActions?.can_upload_task_files, isOrderOwner, order.status]);
 
-  const handleTileDownload = useCallback((file: any, keyPrefix: string) => {
-    onDownloadFile(file);
-    if (keyPrefix === 'delivered' && onDeliveredFileViewed && file?.id != null) {
+  const handleTileDownload = useCallback(async (file: any, keyPrefix: string) => {
+    const downloaded = await onDownloadFile(file);
+    if (downloaded && keyPrefix === 'delivered' && onDeliveredFileViewed && file?.id != null) {
       onDeliveredFileViewed(Number(file.id));
     }
   }, [onDownloadFile, onDeliveredFileViewed]);

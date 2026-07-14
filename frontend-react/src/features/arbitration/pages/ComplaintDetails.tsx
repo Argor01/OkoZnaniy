@@ -164,7 +164,7 @@ const ComplaintDetails: React.FC = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['complaint', complaintId] });
       queryClient.invalidateQueries({ queryKey: ['complaints'] });
-      antMessage.success(variables.action === 'remove' ? 'Отзыв скрыт' : 'Отзыв возвращен');
+      antMessage.success(variables.action === 'remove' ? 'Жалоба удовлетворена, отзыв скрыт' : 'Жалоба отклонена, отзыв возвращен');
       setReviewAction(null);
       setReviewResolution('');
     },
@@ -271,7 +271,7 @@ const ComplaintDetails: React.FC = () => {
                 onClick={() => setReviewAction(isReviewPublished ? 'remove' : 'restore')}
                 loading={reviewModerationMutation.isPending}
               >
-                {isReviewPublished ? 'Убрать отзыв' : 'Вернуть отзыв'}
+                {isReviewPublished ? 'Удовлетворить жалобу: убрать отзыв' : 'Отклонить жалобу: вернуть отзыв'}
               </AppButton>
             )}
           </Space>
@@ -490,7 +490,7 @@ const ComplaintDetails: React.FC = () => {
                             disabled={!complaint.review.is_published}
                             loading={reviewModerationMutation.isPending && reviewAction === 'remove'}
                           >
-                            Убрать отзыв
+                            Удовлетворить жалобу: убрать отзыв
                           </AppButton>
                           <AppButton
                             variant="secondary"
@@ -498,7 +498,7 @@ const ComplaintDetails: React.FC = () => {
                             disabled={complaint.review.is_published}
                             loading={reviewModerationMutation.isPending && reviewAction === 'restore'}
                           >
-                            Вернуть отзыв
+                            Отклонить жалобу: вернуть отзыв
                           </AppButton>
                         </Space>
                       )}
@@ -673,7 +673,7 @@ const ComplaintDetails: React.FC = () => {
         </Modal>
 
         <Modal
-          title={reviewAction === 'remove' ? 'Убрать отзыв' : 'Вернуть отзыв'}
+          title={reviewAction === 'remove' ? 'Удовлетворить жалобу на отзыв' : 'Отклонить жалобу на отзыв'}
           open={!!reviewAction}
           onCancel={() => {
             setReviewAction(null);
@@ -691,8 +691,8 @@ const ComplaintDetails: React.FC = () => {
           <div style={{ padding: '16px 0' }}>
             <Typography.Paragraph>
               {reviewAction === 'remove'
-                ? `После подтверждения отзыв по жалобе №${complaint?.id} будет скрыт.`
-                : `После подтверждения отзыв по жалобе №${complaint?.id} снова станет опубликованным.`}
+                ? `После подтверждения жалоба №${complaint?.id} будет удовлетворена, а отзыв скрыт.`
+                : `После подтверждения жалоба №${complaint?.id} будет отклонена, а отзыв снова станет опубликованным.`}
             </Typography.Paragraph>
             <Typography.Text strong>Комментарий администратора:</Typography.Text>
             <Input.TextArea

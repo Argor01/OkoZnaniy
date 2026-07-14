@@ -1,18 +1,18 @@
 import React from 'react';
-import { Space, Button, Avatar, Typography, Dropdown } from 'antd';
+import { Space, Button, Avatar, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeftOutlined,
   CustomerServiceOutlined,
+  MessageOutlined,
   UserOutlined,
   FileTextOutlined,
   UploadOutlined,
   ExclamationCircleOutlined,
-  MoreOutlined,
 } from '@ant-design/icons';
 import { getMediaUrl } from '../../../../config/api';
 import { getDisplayUsername } from '@/utils/formatters';
-import type { ChatDetail, WorkOfferData } from './types';
+import type { ChatDetail } from './types';
 import styles from '../MessageModalNew.module.css';
 
 const { Text } = Typography;
@@ -55,25 +55,41 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   uploadableWorkOffer,
   workOfferUploading,
   workOfferFileInputRef,
-  deletingChat,
-  hasActiveOffersInSelectedChat,
   onClose,
   onBack,
   onSetWorkOfferModalOpen,
   onSetOfferModalOpen,
-  onDeleteSelectedChat,
   supportAvatarSrc,
 }) => {
   const navigate = useNavigate();
 
+  const openProfile = () => {
+    if (isSupportChatSelected || !selectedChat?.other_user?.username) return;
+
+    onClose();
+    const role = selectedChat.other_user.role || 'user';
+    const profilePath = role === 'expert'
+      ? `/expert/${selectedChat.other_user.username}`
+      : `/user/${selectedChat.other_user.username}`;
+    navigate(profilePath);
+  };
+
   if (!selectedChat && !isSupportChatSelected) {
     return (
       <div className={`${styles.chatHeader} ${styles.chatHeaderEmpty} ${isMobile ? styles.chatHeaderPaddingMobileEmpty : styles.chatHeaderPaddingDesktopEmpty}`}>
-        <Space>
-          <Text className={`${styles.chatHeaderEmptyText} ${isMobile ? styles.chatHeaderEmptyTextMobile : ''}`}>
-            Выберите чат
-          </Text>
-        </Space>
+        <div className={styles.chatHeaderEmptyBox}>
+          <span className={styles.chatHeaderEmptyIcon}>
+            <MessageOutlined />
+          </span>
+          <div>
+            <Text className={`${styles.chatHeaderEmptyText} ${isMobile ? styles.chatHeaderEmptyTextMobile : ''}`}>
+              Выберите переписку
+            </Text>
+            <Text className={styles.chatHeaderEmptyHint}>
+              Сообщения и детали заказа появятся справа
+            </Text>
+          </div>
+        </div>
       </div>
     );
   }
@@ -99,31 +115,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           src={isSupportChatSelected ? supportAvatarSrc : getMediaUrl(selectedChat?.other_user?.avatar)}
           className={isSupportChatSelected ? 'support-avatar' : styles.chatHeaderAvatar}
           style={!isSupportChatSelected ? { cursor: 'pointer' } : undefined}
-          onClick={() => {
-            if (!isSupportChatSelected && selectedChat?.other_user?.username) {
-              onClose();
-              const role = selectedChat.other_user.role || 'user';
-              const profilePath = role === 'expert'
-                ? `/expert/${selectedChat.other_user.username}`
-                : `/user/${selectedChat.other_user.username}`;
-              navigate(profilePath);
-            }
-          }}
+          onClick={openProfile}
         />
         <div>
           <Text
             className={`${styles.chatHeaderTitle} ${isMobile ? styles.chatHeaderTitleMobile : ''}`}
             style={!isSupportChatSelected ? { cursor: 'pointer' } : undefined}
-            onClick={() => {
-              if (!isSupportChatSelected && selectedChat?.other_user?.username) {
-                onClose();
-                const role = selectedChat.other_user.role || 'user';
-                const profilePath = role === 'expert'
-                  ? `/expert/${selectedChat.other_user.username}`
-                  : `/user/${selectedChat.other_user.username}`;
-                navigate(profilePath);
-              }
-            }}
+            onClick={openProfile}
           >
             {isSupportChatSelected ? 'Центр обращений' : getDisplayUsername(selectedChat?.other_user || {})}
           </Text>
@@ -148,12 +146,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         ref={workOfferFileInputRef}
         type="file"
         className={styles.hiddenInput}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) {
-            // Trigger callback from parent through ref
-          }
-        }}
       />
       {canUseExpertOfferButtons && !isSupportChatSelected ? (
         headerContextTitle ? (
@@ -171,10 +163,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             }}
             className={styles.buttonSuccess}
           >
-            {(() => {
-              if (uploadableWorkOffer) return isMobile ? 'Работа' : 'Отправить работу';
-              return isMobile ? 'Работа' : 'Предложить работу';
-            })()}
+            {uploadableWorkOffer
+              ? (isMobile ? 'Работа' : 'Отправить работу')
+              : (isMobile ? 'Работа' : 'Предложить работу')}
           </Button>
         ) : !isChatInitiator ? (
           <Button

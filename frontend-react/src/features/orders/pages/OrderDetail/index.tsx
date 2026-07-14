@@ -205,7 +205,7 @@ const OrderDetail: React.FC = () => {
             />
 
             <div className={styles.sectionBlock}>
-              <OrderTimeline order={order} />
+              <OrderTimeline order={order} onReviewClick={() => setReviewModalOpen(true)} />
             </div>
 
             <OrderContent
@@ -233,7 +233,7 @@ const OrderDetail: React.FC = () => {
               <div className={styles.sectionBlock}>
                 {!deliveredWorkReviewed && (
                   <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-                    Скачайте и просмотрите готовую работу, чтобы принять, отправить на доработку или отклонить заказ.
+                    Скачайте работу и проверьте результат. После успешного скачивания станут доступны кнопки принятия, доработки и отклонения.
                   </Text>
                 )}
                 <Space className={styles.reviewActionsRow} wrap>

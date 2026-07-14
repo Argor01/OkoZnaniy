@@ -41,6 +41,14 @@
   margin-bottom: 16px;
 }
 
+.case-status-strip {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(100, 53, 165, 0.08), rgba(100, 53, 165, 0.02));
+  border: 1px solid rgba(100, 53, 165, 0.16);
+  border-radius: 10px;
+}
+
 .feed-container {
   max-height: 600px;
   overflow-y: auto;

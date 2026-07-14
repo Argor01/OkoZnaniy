@@ -331,14 +331,14 @@ export function useOrderDetail(orderId?: string) {
     }
   }, [orderId, refreshOrderWithLists]);
 
-  const handleDownloadFile = useCallback(async (file: any) => {
+  const handleDownloadFile = useCallback(async (file: any): Promise<boolean> => {
     try {
       const orderIdNum = Number(orderId);
       const fileIdNum = Number(file?.id);
       const filename = file?.filename || file?.file_name || 'file';
       if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
         message.error('Не удалось скачать файл');
-        return;
+        return false;
       }
       const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
       const blobUrl = window.URL.createObjectURL(blob);
@@ -349,6 +349,7 @@ export function useOrderDetail(orderId?: string) {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(blobUrl);
+      return true;
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 401) {
@@ -356,6 +357,7 @@ export function useOrderDetail(orderId?: string) {
       } else {
         message.error('Ошибка при скачивании файла');
       }
+      return false;
     }
   }, [orderId]);
 

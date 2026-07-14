@@ -924,9 +924,17 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # РћС‚РјРµС‡Р°РµРј РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ, РєРѕС‚РѕСЂС‹Рµ РЅРµ РѕС‚ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
-        chat.messages.exclude(sender=request.user).update(is_read=True)
+        related_chats = Chat.objects.filter(participants=request.user).exclude(hidden_for_users=request.user)
+        if chat.client_id and chat.expert_id:
+            related_chats = related_chats.filter(client_id=chat.client_id, expert_id=chat.expert_id)
+        else:
+            related_chats = related_chats.filter(pk=chat.pk)
+
+        updated = 0
+        for related_chat in related_chats.distinct():
+            updated += readable_messages_for_chat(related_chat).exclude(sender=request.user).filter(is_read=False).update(is_read=True)
         
-        return Response({'status': 'success'})
+        return Response({'status': 'success', 'updated': updated})
 
     @action(detail=True, methods=['post'])
     def mark_as_unread(self, request, pk=None):

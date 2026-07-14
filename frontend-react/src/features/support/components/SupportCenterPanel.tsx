@@ -11,7 +11,6 @@ import {
   Spin,
   Tag,
   Typography,
-  Upload,
   message,
   Input,
 } from 'antd';
@@ -21,7 +20,6 @@ import {
   ExclamationCircleOutlined,
   FileOutlined,
   MessageOutlined,
-  PaperClipOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -72,7 +70,6 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
   const [activity, setActivity] = React.useState<SupportActivityResponse | null>(null);
   const [activityLoading, setActivityLoading] = React.useState(false);
   const [reply, setReply] = React.useState('');
-  const [attachedFiles, setAttachedFiles] = React.useState<File[]>([]);
   const [sending, setSending] = React.useState(false);
 
   const loadItems = React.useCallback(async () => {
@@ -147,7 +144,6 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
   const openDetails = (item: SupportConversation) => {
     setSelectedItem(item);
     setReply('');
-    setAttachedFiles([]);
     setDetailsOpen(true);
 
     if (item.type === 'support_request' && item.unread_count && item.unread_count > 0) {
@@ -163,26 +159,10 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
   const closeDetails = () => {
     setDetailsOpen(false);
     setReply('');
-    setAttachedFiles([]);
-  };
-
-  const handleFileSelect = (file: File) => {
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
-      message.error('Размер файла не должен превышать 50 МБ');
-      return false;
-    }
-    setAttachedFiles((prev) => [...prev, file]);
-    return false;
-  };
-
-  const removeAttachedFile = (fileToRemove: File) => {
-    setAttachedFiles((prev) => prev.filter((file) => file !== fileToRemove));
   };
 
   const handleSendReply = async () => {
-    const canAttachFiles = selectedItem?.type === 'support_request';
-    if (!selectedItem || (!reply.trim() && (!canAttachFiles || attachedFiles.length === 0))) {
+    if (!selectedItem || !reply.trim()) {
       return;
     }
 
@@ -192,10 +172,9 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
         selectedItem.type,
         selectedItem.id,
         reply,
-        canAttachFiles ? attachedFiles : []
+        []
       );
       setReply('');
-      setAttachedFiles([]);
       await loadActivity(selectedItem);
       await loadItems();
       message.success('Сообщение отправлено');
@@ -216,7 +195,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     }
 
     const feedItems = activity?.feed?.filter(
-      (item) => !(item.kind === 'activity' && item.activity_type === 'message')
+      (item) => !(item.kind === 'activity' && ['message', 'message_sent'].includes(String(item.activity_type || '')))
     ) ?? [];
 
       if (!feedItems.length) {
@@ -446,33 +425,12 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                   autoSize={{ minRows: 4, maxRows: 8 }}
                   placeholder="Если нужно, оставьте уточнение для поддержки прямо в обращении."
                 />
-                {selectedItem.type === 'support_request' ? (
-                  <Space direction="vertical" size={8} style={{ width: '100%' }}>
-                    {attachedFiles.length > 0 ? (
-                      <Space wrap size={6}>
-                        {attachedFiles.map((file, index) => (
-                          <Tag
-                            key={`${file.name}-${index}`}
-                            closable
-                            onClose={() => removeAttachedFile(file)}
-                            icon={<PaperClipOutlined />}
-                          >
-                            {file.name}
-                          </Tag>
-                        ))}
-                      </Space>
-                    ) : null}
-                    <Upload beforeUpload={handleFileSelect} showUploadList={false} multiple>
-                      <Button icon={<PaperClipOutlined />}>Прикрепить файл или скрин</Button>
-                    </Upload>
-                  </Space>
-                ) : null}
                 <div>
                   <Button
                     type="primary"
                     onClick={handleSendReply}
                     loading={sending}
-                    disabled={!reply.trim() && (selectedItem.type !== 'support_request' || attachedFiles.length === 0)}
+                    disabled={!reply.trim()}
                   >
                     Отправить сообщение
                   </Button>

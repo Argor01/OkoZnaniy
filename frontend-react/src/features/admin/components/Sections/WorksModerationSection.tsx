@@ -121,9 +121,6 @@ export const WorksModerationSection: React.FC = () => {
           <Text type="secondary" className={styles.worksModerationMetaText}>
             {record.subject} • {record.work_type}
           </Text>
-          <div className={styles.worksModerationMetaSubtext}>
-            📄 {record.pages_count} стр. • 📝 {record.words_count.toLocaleString()} слов
-          </div>
         </div>
       ),
     },
@@ -341,9 +338,6 @@ export const WorksModerationSection: React.FC = () => {
               <Descriptions.Item label="Тип работы">{selectedWork.work_type || 'Не указан'}</Descriptions.Item>
               <Descriptions.Item label="Цена">
                 {Number(selectedWork.price || 0).toLocaleString('ru-RU')} ₽
-              </Descriptions.Item>
-              <Descriptions.Item label="Объем">
-                {selectedWork.pages_count || 0} стр. · {Number(selectedWork.words_count || 0).toLocaleString('ru-RU')} слов
               </Descriptions.Item>
               <Descriptions.Item label="Статус">
                 <Tag color={getModerationStatusColor(selectedWork.moderation_status)}>

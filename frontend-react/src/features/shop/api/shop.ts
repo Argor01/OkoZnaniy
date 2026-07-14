@@ -14,6 +14,11 @@ export const shopApi = {
     return response.data;
   },
 
+  getMyWorks: async (): Promise<Work[]> => {
+    const response = await apiClient.get('/shop/works/my_works/');
+    return response.data.results || response.data;
+  },
+
   toggleFavorite: async (id: number): Promise<{ status: string; is_favorite: boolean }> => {
     const response = await apiClient.post(`/shop/works/${id}/toggle_favorite/`);
     return response.data;

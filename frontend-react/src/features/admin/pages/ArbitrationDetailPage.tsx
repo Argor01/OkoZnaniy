@@ -9,7 +9,7 @@ import {
   ArrowLeftOutlined, UserOutlined, SendOutlined, FileTextOutlined,
   LinkOutlined, CheckCircleOutlined, CloseCircleOutlined, DollarOutlined,
   MessageOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
-  TeamOutlined, HistoryOutlined, SwapOutlined, StarOutlined, EyeOutlined,
+  TeamOutlined, SwapOutlined, StarOutlined, EyeOutlined,
   TagOutlined, PlusOutlined, UndoOutlined, CustomerServiceOutlined
 } from '@ant-design/icons';
 import { formatDistanceToNow } from 'date-fns';
@@ -102,6 +102,9 @@ export const ArbitrationDetailPage: React.FC = () => {
   const ticket = rawTicket as unknown as TicketDetail | null;
   const { feed, loading: feedLoading, refetch: refetchFeed } = useTicketActivity(ticket?.id ?? null, ticket?.type ?? null);
   const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus } = useTicketActions();
+  const conversationFeed = Array.isArray(feed)
+    ? feed.filter((item: any) => item.kind === 'message')
+    : [];
 
   const handleMenuSelect = (key: MenuKey) => {
     try {
@@ -364,19 +367,10 @@ export const ArbitrationDetailPage: React.FC = () => {
                   <div style={{ textAlign: 'center', padding: 40 }}>
                     <Spin size="large" />
                   </div>
-                ) : feed.length === 0 ? (
+                ) : conversationFeed.length === 0 ? (
                   <Empty description="Нет сообщений" style={{ padding: 40 }} />
                 ) : (
-                  feed.map((item: any) => 
-                    item.kind === 'message' 
-                      ? renderMessage(item, item.is_admin)
-                      : (
-                          <div key={item.id} style={{ textAlign: 'center', padding: 8, color: '#8c8c8c', fontSize: 12 }}>
-                            <HistoryOutlined style={{ marginRight: 4 }} />
-                            {item.text}
-                          </div>
-                        )
-                  )
+                  conversationFeed.map((item: any) => renderMessage(item, item.is_admin))
                 )}
                 <div ref={feedEndRef} />
               </div>
