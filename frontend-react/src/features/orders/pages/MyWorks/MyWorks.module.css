@@ -390,6 +390,7 @@
 
 .filterSelect {
   border-radius: 8px;
+  margin-top: 10px;
 }
 
 .filterSelect .ant-select-selector {
@@ -721,7 +722,6 @@
 }
 
 .orderIdInput {
-  flex: 0 1 160px;
   min-width: 140px;
 }
 
@@ -808,11 +808,12 @@
 @media (max-width: 768px) {
   .filtersRowTop {
     gap: 14px;
+  } 
+
+  .filtersToggleRow {
+    margin-top: 10px;
   }
 
-  .filterSelect + .filterSelect {
-    margin-top: 4px;
-  }
 }
 
 /* codex mobile budget row fix */
