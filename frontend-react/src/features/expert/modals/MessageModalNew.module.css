@@ -3390,3 +3390,85 @@
   .chatSendButton:hover { transform: none; }
 }
 /* === END MESSAGES VISUAL REFRESH v1 === */
+
+
+/* ===================================================================
+   Adaptive + visual refresh ??? appended 2026-07 (reversible block).
+   Targets existing MessageModalNew classes only. Safe to delete
+   this whole block to fully revert the visual/adaptive tweaks.
+   =================================================================== */
+
+/* Guard against horizontal overflow of the whole chat shell */
+.chatModalContainer {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Smooth, contained, momentum scrolling for the message area & list */
+.chatMessages,
+.chatMessagesMobile,
+.chatList {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 53, 165, 0.35) transparent;
+}
+
+/* Refined thin scrollbars (WebKit) */
+.chatMessages::-webkit-scrollbar,
+.chatList::-webkit-scrollbar {
+  width: 8px;
+}
+.chatMessages::-webkit-scrollbar-thumb,
+.chatList::-webkit-scrollbar-thumb {
+  background: rgba(100, 53, 165, 0.25);
+  border-radius: 8px;
+}
+.chatMessages::-webkit-scrollbar-thumb:hover,
+.chatList::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 53, 165, 0.45);
+}
+
+/* Chat list rows: smooth hover + clear selected accent (brand purple) */
+.chatListItem {
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+}
+.chatListItemSelected {
+  box-shadow: inset 3px 0 0 #6435a5;
+}
+
+/* Message bubbles: subtle depth + smooth state changes */
+.messageBubble {
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+}
+.messageBubbleMine,
+.messageBubbleOther {
+  box-shadow: 0 1px 2px rgba(16, 12, 32, 0.08);
+}
+
+/* Mobile: honour safe-area (notch / home indicator) around the composer */
+@media (max-width: 840px) {
+  .chatInputContainer,
+  .chatInputContainerMobile {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  }
+  .chatInputRow,
+  .chatInputRowMobile {
+    gap: 8px;
+  }
+}
+
+/* Touch devices: comfortable tap targets */
+@media (pointer: coarse) {
+  .chatSendButton,
+  .chatAttachButton,
+  .chatEmojiButton {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .chatListItem {
+    min-height: 60px;
+  }
+}
+
