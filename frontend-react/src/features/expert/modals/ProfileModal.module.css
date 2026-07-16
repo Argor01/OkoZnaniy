@@ -342,16 +342,11 @@
 /* codex mobile modal polish */
 @media (max-width: 575px) {
   .profileModalWrapMobile :global(.ant-modal) {
-    width: calc(100vw - 16px) !important;
-    max-width: calc(100vw - 16px) !important;
     margin: 8px auto;
     padding-bottom: 0;
   }
   .profileModalWrapMobile :global(.ant-modal-content) {
     border-radius: 20px;
-    max-height: calc(100vh - 16px);
-    max-height: calc(100dvh - 16px);
-    max-height: calc(var(--app-vh, 100dvh) - 16px);
   }
   .profileModalWrapMobile :global(.ant-modal-header) {
     padding: 18px 20px 14px;

@@ -126,8 +126,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       open={visible}
       onCancel={onClose}
       onOk={() => form.submit()}
-      width={isMobile ? 'calc(100vw - 16px)' : 750}
-      style={isMobile ? { top: 8, paddingBottom: 8 } : { top: 20 }}
+      width={isMobile ? '100%' : 750}
+      height={isMobile ? '100%' : 'none'}
+      style={isMobile ? { top: 8, paddingBottom: 8, margin: 'auto' } : { margin: 'auto' }}
       okText={TEXT.save}
       cancelText={TEXT.cancel}
       okButtonProps={{
