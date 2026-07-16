@@ -599,19 +599,6 @@ const OrdersFeed: React.FC = () => {
         </div>
       )}
 
-            
-            {isMobile && (
-              <AppButton 
-                variant="primary" 
-                size="large"
-                block
-                onClick={() => navigate('/create-order')}
-                className={styles.mobileCreateButton}
-              >
-                Создать заказ
-              </AppButton>
-            )}
-
       {selectedOrderForBid && (
         <BidModal
           visible={bidModalVisible}
