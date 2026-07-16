@@ -1,4 +1,7 @@
 from decimal import Decimal
+import uuid
+
+from django.conf import settings as dj_settings
 
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -16,6 +19,18 @@ from .serializers import (
 )
 from .models import WithdrawalRequest
 from .services import WalletService, InsufficientFunds
+
+
+def _sandbox_topup_allowed(user) -> bool:
+    """Instant no-acquirer top-ups are allowed only when PAYMENTS_SANDBOX
+    is enabled AND the account is staff or a @okoznaniy.test test user.
+    This keeps sandbox credits out of reach of real end users."""
+    if not getattr(dj_settings, 'PAYMENTS_SANDBOX', False):
+        return False
+    if getattr(user, 'is_staff', False):
+        return True
+    email = (getattr(user, 'email', '') or '').lower()
+    return email.endswith('@okoznaniy.test')
 
 
 class WalletViewSet(viewsets.ViewSet):
@@ -50,8 +65,24 @@ class WalletViewSet(viewsets.ViewSet):
             status=PaymentStatus.PENDING,
             purpose=Payment.Purpose.TOPUP,
             user=request.user,
-            payment_id=f'topup-{request.user.pk}-{int(timezone.now().timestamp())}',
+            payment_id=f'topup-{request.user.pk}-{uuid.uuid4().hex}',
         )
+        if _sandbox_topup_allowed(request.user):
+            # Sandbox/test top-up: no real acquirer required. Complete the
+            # payment instantly so the wallet is fully usable for testing.
+            payment.status = PaymentStatus.COMPLETED
+            payment.paid_at = timezone.now()
+            payment.save(update_fields=['status', 'paid_at'])  # signal credits wallet
+            bal = WalletService.get_balance(request.user)
+            return Response({
+                'payment_id': payment.payment_id,
+                'amount': str(amount),
+                'method': method,
+                'sandbox': True,
+                'status': 'completed',
+                'payment_url': '/payment/success/',
+                'balance': WalletBalanceSerializer(bal).data,
+            })
         try:
             link = PaymentService.get_payment_link(payment)
         except Exception as e:  # noqa: BLE001
