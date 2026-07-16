@@ -60,6 +60,7 @@ const WalletBadge: React.FC<Props> = ({ compact = false }) => {
   return (
     <Tooltip title={title} placement="bottom">
       <button
+        style={{marginTop: '16px'}}
         type="button"
         className={`${styles.badge} ${compact ? styles.badgeCompact : ''}`}
         onClick={() => navigate('/wallet')}

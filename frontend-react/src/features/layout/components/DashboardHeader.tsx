@@ -25,7 +25,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ThemeToggle } from '@/components/ui';
 import styles from './DashboardHeader.module.css';
-import { ROUTES } from '@/utils/constants';
 import { getDisplayUsername } from '@/utils/formatters';
 import WalletBadge from '@/features/wallet/components/WalletBadge';
 
