@@ -314,7 +314,6 @@
 
 .specializationModalGridMobile {
   grid-template-columns: 1fr;
-  gap: 12px;
 }
 
 .specializationModalGridDesktop {
@@ -342,6 +341,7 @@
 @media (max-width: 768px) {
   .specializationModalWrap :global(.ant-form-item) {
     margin-bottom: 16px;
+    margin-top: 12px;
   }
 
   .specializationModalWrapMobile :global(.ant-modal-footer) {

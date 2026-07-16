@@ -197,6 +197,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           label="Специализация"
           name="subject_id"
           rules={[{ required: true, message: 'Выберите специализацию' }]}
+          style={{ marginTop: 10 }}
         >
           <Select
             size={isMobile ? 'middle' : 'large'}
@@ -228,6 +229,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               </>
             )}
           />
+          <div style={{ height: 10}} />
         </Form.Item>
 
         <Form.Item

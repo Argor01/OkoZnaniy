@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, message } from 'antd';
+import { Tabs, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '@/features/auth/api/auth';
 import EmailVerificationModal from '../../components/EmailVerificationModal';
@@ -12,6 +12,7 @@ import { logger } from '@/utils/logger';
 import styles from '@/features/auth/Login.module.css';
 
 const Login: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('register');
   const { navigate, isAdminLogin, isDirectorLogin, navigateByRole } = useAuthNavigation();
