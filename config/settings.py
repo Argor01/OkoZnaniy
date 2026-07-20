@@ -471,6 +471,10 @@ SBP_MERCHANT_ID = os.getenv('SBP_MERCHANT_ID')
 SBP_API_KEY = os.getenv('SBP_API_KEY')
 SBP_TEST_MODE = os.getenv('SBP_TEST_MODE', 'True') == 'True'
 
+# Sandbox top-ups: instant wallet credit without a real acquirer.
+# Safe only on test/staging; gated to staff/@okoznaniy.test in the wallet view.
+PAYMENTS_SANDBOX = os.getenv('PAYMENTS_SANDBOX', 'False') == 'True'
+
 # URL для обработки платежей
 PAYMENT_SUCCESS_URL = os.getenv('PAYMENT_SUCCESS_URL')
 PAYMENT_FAIL_URL = os.getenv('PAYMENT_FAIL_URL')

@@ -2501,7 +2501,7 @@ const handleOverdueComplaint = async () => {
         maxWidth: modalWidth,
         width: '100%',
         margin: '0 auto',
-        minHeight: isMobile ? 'calc(100vh - 32px)' : 'calc(100vh - 48px)',
+        minHeight: isMobile ? 'calc(100dvh - 32px)' : 'calc(100vh - 48px)',
       }
     : undefined;
 

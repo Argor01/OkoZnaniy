@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -6,6 +6,15 @@ import { authApi } from '@/features/auth/api/auth';
 import MessageModalNew from '@/features/expert/modals/MessageModalNew';
 import { BREAKPOINTS, ROUTES } from '@/utils/constants';
 import { CURRENT_USER_KEY } from '@/hooks/queries';
+
+const computeViewport = () => {
+  const width = typeof window !== 'undefined' ? window.innerWidth : 1280;
+  return {
+    isMobile: width <= 840,
+    isTablet: width > 840 && width <= BREAKPOINTS.TABLET,
+    isDesktop: width > BREAKPOINTS.TABLET,
+  };
+};
 
 const MessagesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,12 +25,35 @@ const MessagesPage: React.FC = () => {
     queryFn: () => authApi.getCurrentUser(),
   });
 
-  const viewport = useMemo(() => {
-    const width = window.innerWidth;
-    return {
-      isMobile: width <= 840,
-      isTablet: width > 840 && width <= BREAKPOINTS.TABLET,
-      isDesktop: width > BREAKPOINTS.TABLET,
+  // Reactive viewport: recompute on resize / orientation change so the
+  // messages page switches between desktop / tablet / mobile layouts live.
+  const [viewport, setViewport] = useState(computeViewport);
+
+  useEffect(() => {
+    let frame = 0;
+    const handleResize = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        setViewport((prev) => {
+          const next = computeViewport();
+          if (
+            prev.isMobile === next.isMobile &&
+            prev.isTablet === next.isTablet &&
+            prev.isDesktop === next.isDesktop
+          ) {
+            return prev;
+          }
+          return next;
+        });
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
     };
   }, []);
 
@@ -94,3 +126,4 @@ const MessagesPage: React.FC = () => {
 };
 
 export default MessagesPage;
+

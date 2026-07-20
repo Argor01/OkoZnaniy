@@ -14,6 +14,7 @@ import { partnerRoutes } from './partnerRoutes';
 import { shopRoutes } from './shopRoutes';
 import { supportRoutes } from './supportRoutes';
 import { knowledgeRoutes } from './knowledgeRoutes';
+import { walletRoutes } from './walletRoutes';
 
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
@@ -52,6 +53,9 @@ export const AppRoutes: React.FC = () => {
 
       {/* Knowledge Routes */}
       {knowledgeRoutes}
+
+      {/* Wallet Routes */}
+      {walletRoutes}
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
