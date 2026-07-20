@@ -531,17 +531,39 @@ a {
   color: #cbd5e1 !important;
 }
 
+html[data-theme="dark"] .ant-message-notice-content,
+html[data-theme="dark"] body .ant-message-notice-content,
 [data-theme="dark"] .ant-message-notice-content {
   background:
-    linear-gradient(135deg, rgba(31, 35, 49, 0.98) 0%, rgba(20, 24, 36, 0.98) 100%);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  color: #f8fafc;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.38);
+    linear-gradient(135deg, rgba(31, 35, 49, 0.98) 0%, rgba(16, 19, 29, 0.98) 100%) !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42) !important;
 }
 
+html[data-theme="dark"] .ant-message-notice-content .anticon,
+html[data-theme="dark"] .ant-message-notice-content span,
+html[data-theme="dark"] .ant-message-notice-content .ant-typography,
 [data-theme="dark"] .ant-message-notice-content .anticon,
-[data-theme="dark"] .ant-message-notice-content span {
-  color: inherit;
+[data-theme="dark"] .ant-message-notice-content span,
+[data-theme="dark"] .ant-message-notice-content .ant-typography {
+  color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+html[data-theme="dark"] .ant-message-success .anticon,
+[data-theme="dark"] .ant-message-success .anticon {
+  color: #22c55e !important;
+}
+
+html[data-theme="dark"] .ant-message-error .anticon,
+[data-theme="dark"] .ant-message-error .anticon {
+  color: #fb7185 !important;
+}
+
+html[data-theme="dark"] .ant-message-warning .anticon,
+[data-theme="dark"] .ant-message-warning .anticon {
+  color: #f59e0b !important;
 }
 
 /* Smooth tooltip */

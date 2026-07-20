@@ -160,6 +160,59 @@
   color: #6b7280;
 }
 
+:global([data-theme="dark"]) .notificationModal :global(.ant-modal-content),
+:global([data-theme="dark"]) .notificationModal :global(.ant-modal-header),
+:global([data-theme="dark"]) .notificationModal :global(.ant-modal-body) {
+  background: #191d29 !important;
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .modalHeader,
+:global([data-theme="dark"]) .settingsTitle,
+:global([data-theme="dark"]) .settingItem :global(.ant-typography),
+:global([data-theme="dark"]) .notificationTitle {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .tabs :global(.ant-tabs-nav) {
+  background: #191d29;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+:global([data-theme="dark"]) .notificationList,
+:global([data-theme="dark"]) .settingsPanel {
+  background: #151923;
+}
+
+:global([data-theme="dark"]) .notificationItem {
+  background: #212634;
+  border-color: rgba(148, 163, 184, 0.16);
+}
+
+:global([data-theme="dark"]) .notificationItem:hover {
+  background: #262c3b;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+:global([data-theme="dark"]) .notificationItem.unread {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(31, 38, 55, 0.98));
+  border-color: rgba(124, 58, 237, 0.42);
+}
+
+:global([data-theme="dark"]) .notificationIcon,
+:global([data-theme="dark"]) .notificationItem.unread .notificationIcon {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .notificationMessage,
+:global([data-theme="dark"]) .settingsDescription {
+  color: #cbd5e1 !important;
+}
+
+:global([data-theme="dark"]) .notificationTime {
+  color: #94a3b8 !important;
+}
+
 
 @media (max-width: 840px) {
   .notificationModal :global(.ant-modal) {

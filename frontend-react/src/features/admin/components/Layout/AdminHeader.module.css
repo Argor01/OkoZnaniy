@@ -70,11 +70,16 @@
   gap: 8px;
   transition: all 0.2s;
   min-width: 44px;
+  color: var(--color-text-base, #334155) !important;
 }
 
 .userButton:hover {
   background: var(--color-bg-hover, #f1f5f9) !important;
   border-color: var(--color-border-base, #cbd5e1) !important;
+}
+
+.userButton :global(.anticon) {
+  color: currentColor !important;
 }
 
 .avatar {
@@ -178,6 +183,10 @@
     height: 32px !important;
     padding: 0 8px !important;
     min-width: 32px !important;
+    justify-content: center;
+    background: rgba(100, 53, 165, 0.1) !important;
+    border-color: rgba(100, 53, 165, 0.18) !important;
+    color: #6435a5 !important;
   }
 
   .username {
@@ -227,10 +236,11 @@
   }
 
   .userButton {
-    height: 28px !important;
-    width: 28px !important;
-    min-width: 28px !important;
+    height: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
     padding: 0 !important;
+    border-radius: 14px !important;
   }
 
   .avatar {
@@ -251,10 +261,14 @@
 /* Улучшения для сенсорных устройств */
 @media (hover: none) and (pointer: coarse) {
   .menuButton,
-  .userButton,
   .logoutButton {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  .userButton {
+    min-height: 38px;
+    min-width: 38px;
   }
   
   .menuButton:active,
@@ -262,6 +276,17 @@
   .logoutButton:active {
     transform: scale(0.95);
   }
+}
+
+:global([data-theme="dark"]) .userButton {
+  background: rgba(124, 58, 237, 0.18) !important;
+  border-color: rgba(167, 139, 250, 0.28) !important;
+  color: #e9d5ff !important;
+}
+
+:global([data-theme="dark"]) .userButton:hover {
+  background: rgba(124, 58, 237, 0.28) !important;
+  border-color: rgba(196, 181, 253, 0.38) !important;
 }
 
 /* Стили для выпадающего меню */

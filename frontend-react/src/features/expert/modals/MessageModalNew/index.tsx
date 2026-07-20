@@ -486,6 +486,38 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const headerContextWorkId = useMemo(() => headerContextMeta.workId, [headerContextMeta.workId]);
 
+  const toChatListItem = useCallback((detail: ChatDetail, previous?: ChatListItem): ChatListItem => {
+    const messages = Array.isArray(detail.messages) ? detail.messages : [];
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+
+    return {
+      id: detail.id,
+      order: detail.order,
+      order_id: detail.order_id,
+      order_title: detail.order_title ?? previous?.order_title ?? null,
+      context_title: detail.context_title ?? previous?.context_title ?? null,
+      client: detail.client ?? previous?.client ?? null,
+      expert: detail.expert ?? previous?.expert ?? null,
+      participants: detail.participants ?? previous?.participants ?? [],
+      other_user: detail.other_user ?? previous?.other_user,
+      last_message: lastMessage
+        ? {
+            text: lastMessage.text,
+            sender_id: lastMessage.sender_id,
+            created_at: lastMessage.created_at,
+            file_name: lastMessage.file_name ?? null,
+            file_url: lastMessage.file_url ?? null,
+          }
+        : previous?.last_message ?? null,
+      last_message_time: lastMessage?.created_at ?? previous?.last_message_time ?? '',
+      unread_count: detail.unread_count ?? previous?.unread_count ?? 0,
+      is_frozen: detail.is_frozen,
+      frozen_reason: detail.frozen_reason,
+      is_pinned: previous?.is_pinned,
+      is_read: previous?.is_read,
+    };
+  }, []);
+
     const loadChats = useCallback(async (silent: boolean = false) => {
       if (!silent) setLoading(true);
       try {
@@ -581,63 +613,45 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   });
 
   const syncChatListItemFromDetail = useCallback((detail: ChatDetail) => {
-    const lastMessage = Array.isArray(detail.messages) && detail.messages.length > 0
-      ? detail.messages[detail.messages.length - 1]
-      : null;
-
     setChatList((prev) => {
       let changed = false;
+      let found = false;
       const next = prev.map((chat) => {
         if (chat.id !== detail.id) return chat;
+        found = true;
 
-        const nextLastMessage = lastMessage
-          ? {
-              text: lastMessage.text,
-              sender_id: lastMessage.sender_id,
-              created_at: lastMessage.created_at,
-              file_name: lastMessage.file_name ?? null,
-              file_url: lastMessage.file_url ?? null,
-            }
-          : null;
-
-        const nextLastMessageTime = lastMessage?.created_at || chat.last_message_time;
-        const nextUnread = detail.unread_count ?? chat.unread_count;
-        const nextOrderId = detail.order_id ?? chat.order_id;
-        const nextOrder = detail.order ?? chat.order;
+        const nextItem = toChatListItem(detail, chat);
 
         const isSameLastMessage =
-          chat.last_message?.created_at === nextLastMessage?.created_at &&
-          chat.last_message?.text === nextLastMessage?.text &&
-          chat.last_message?.sender_id === nextLastMessage?.sender_id &&
-          (chat.last_message?.file_name ?? null) === (nextLastMessage?.file_name ?? null) &&
-          (chat.last_message?.file_url ?? null) === (nextLastMessage?.file_url ?? null);
+          chat.last_message?.created_at === nextItem.last_message?.created_at &&
+          chat.last_message?.text === nextItem.last_message?.text &&
+          chat.last_message?.sender_id === nextItem.last_message?.sender_id &&
+          (chat.last_message?.file_name ?? null) === (nextItem.last_message?.file_name ?? null) &&
+          (chat.last_message?.file_url ?? null) === (nextItem.last_message?.file_url ?? null);
 
         const isSameChat =
-          chat.unread_count === nextUnread &&
-          chat.last_message_time === nextLastMessageTime &&
-          chat.order_id === nextOrderId &&
-          chat.order === nextOrder &&
-          chat.is_frozen === detail.is_frozen &&
-          chat.frozen_reason === detail.frozen_reason &&
+          chat.unread_count === nextItem.unread_count &&
+          chat.last_message_time === nextItem.last_message_time &&
+          chat.order_id === nextItem.order_id &&
+          chat.order === nextItem.order &&
+          chat.context_title === nextItem.context_title &&
+          chat.order_title === nextItem.order_title &&
+          chat.is_frozen === nextItem.is_frozen &&
+          chat.frozen_reason === nextItem.frozen_reason &&
           isSameLastMessage;
 
         if (isSameChat) return chat;
         changed = true;
-        return {
-          ...chat,
-          unread_count: nextUnread,
-          order_id: nextOrderId,
-          order: nextOrder,
-          is_frozen: detail.is_frozen,
-          frozen_reason: detail.frozen_reason,
-          last_message: nextLastMessage,
-          last_message_time: nextLastMessageTime,
-        };
+        return nextItem;
       });
+
+      if (!found) {
+        return [toChatListItem(detail), ...prev];
+      }
 
       return changed ? next : prev;
     });
-  }, []);
+  }, [toChatListItem]);
 
   const loadChatDetail = useCallback(async (chatId: number) => {
     try {
@@ -836,12 +850,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         });
       }
       await loadChats();
+      syncChatListItemFromDetail(chatData);
     } catch (error: unknown) {
       antMessage.error('Не удалось открыть чат по заказу');
     } finally {
       setLoading(false);
     }
-  }, [hydrateClosedOrdersForChat, loadChats]);
+  }, [hydrateClosedOrdersForChat, loadChats, syncChatListItemFromDetail, toPositiveNumber]);
 
   const loadOrCreateChatWithUser = useCallback(async (userId: number) => {
     logger.log('🔧 loadOrCreateChatWithUser called with userId:', userId, 'chatContextTitle:', chatContextTitle);
@@ -854,13 +869,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       setActiveOrderId(toPositiveNumber(chatData.order_id) ?? null);
       logger.log('🔧 Selected chat set to:', chatData);
       await loadChats();
+      syncChatListItemFromDetail(chatData);
     } catch (error: unknown) {
       logger.error('🔧 Error in loadOrCreateChatWithUser:', error);
       antMessage.error('Не удалось открыть чат с пользователем');
     } finally {
       setLoading(false);
     }
-  }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats]);
+  }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats, syncChatListItemFromDetail, toPositiveNumber]);
 
   useEffect(() => {
     if (visible) {
@@ -2293,11 +2309,41 @@ const handleOverdueComplaint = async () => {
     });
   }, [closedOrderStatuses, orderStatusById, selectedConversationGroup, toPositiveNumber]);
 
-  const tabsOrderIds = useMemo(() => (
-    selectedConversationOrderChats
-      .map((chat) => toPositiveNumber(chat.order_id ?? chat.order))
-      .filter((id): id is number => Boolean(id))
-  ), [selectedConversationOrderChats, toPositiveNumber]);
+  const tabsOrderIds = useMemo(() => {
+    if (!selectedConversationGroup) return [];
+
+    const ids: number[] = [];
+    const addOrderId = (raw: unknown) => {
+      const id = toPositiveNumber(raw);
+      if (!id || ids.includes(id)) return;
+      const knownStatus = orderStatusById[id];
+      if (knownStatus && closedOrderStatuses.has(knownStatus)) return;
+      ids.push(id);
+    };
+
+    selectedConversationOrderChats.forEach((chat) => addOrderId(chat.order_id ?? chat.order));
+
+    selectedConversationGroup.chats.forEach((chat) => {
+      addOrderId(chat.order_id ?? chat.order);
+      (orderIdsByChatId[chat.id] || []).forEach(addOrderId);
+    });
+
+    const selectedPeerId = toPositiveNumber(selectedChat?.other_user?.id);
+    if (selectedPeerId && selectedPeerId === selectedConversationGroup.key) {
+      computedOrderIds.forEach(addOrderId);
+    }
+
+    return ids;
+  }, [
+    closedOrderStatuses,
+    computedOrderIds,
+    orderIdsByChatId,
+    orderStatusById,
+    selectedChat?.other_user?.id,
+    selectedConversationGroup,
+    selectedConversationOrderChats,
+    toPositiveNumber,
+  ]);
 
   const primaryOrderChatId = useMemo(() => {
     const directMatch = selectedConversationOrderChats.find(
@@ -3615,11 +3661,12 @@ const handleOverdueComplaint = async () => {
                 
                 <div className={`${styles.chatInputActions} ${isMobile ? styles.chatInputActionsMobile : ''}`}>
                   <Popover
+                    overlayClassName={styles.chatEmojiPopover}
                     content={
                       <EmojiPicker
                         onEmojiClick={handleEmojiClick}
-                        width={isMobile ? 280 : 320}
-                        height={380}
+                        width={isMobile && typeof window !== 'undefined' ? Math.min(336, Math.max(280, window.innerWidth - 32)) : 320}
+                        height={isMobile ? 320 : 380}
                         emojiVersion={emojiVersion as any}
                         theme={isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
                       />
@@ -3627,8 +3674,8 @@ const handleOverdueComplaint = async () => {
                     trigger="click"
                     open={emojiPickerOpen}
                     onOpenChange={setEmojiPickerOpen}
-                    placement="topRight"
-                    getPopupContainer={(triggerNode) => triggerNode.closest('.ant-modal-body') || document.body}
+                    placement={isMobile ? 'top' : 'topRight'}
+                    getPopupContainer={() => document.body}
                     zIndex={1060}
                   >
                     <Button

@@ -360,7 +360,7 @@
 .chatComposerRow {
   display: flex;
   gap: 10px;
-  align-items: flex-end;
+  align-items: center;
   width: 100%;
 }
 
@@ -375,6 +375,7 @@
   font-size: 15px;
   padding: 10px 14px;
   resize: none;
+  min-height: 44px;
 }
 
 .chatComposerActions {
@@ -513,21 +514,33 @@
   }
 
   .chatComposer {
-    padding: 12px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
   }
 
   .chatComposerRow {
-    gap: 6px;
+    gap: 8px;
+    align-items: center;
   }
 
   .chatInput {
     border-radius: 8px;
     font-size: 14px;
     padding: 8px 12px;
+    min-height: 42px;
   }
 
   .chatComposerActions {
     gap: 4px;
+  }
+
+  .chatUploadButton,
+  .chatComposerActions :global(.ant-btn) {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 

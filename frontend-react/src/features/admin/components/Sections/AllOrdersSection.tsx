@@ -435,6 +435,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       <Modal
         title={`Заказ #${selectedOrder?.id}`}
         open={orderModalVisible}
+        className={styles.orderDetailsModal}
         onCancel={() => {
           setOrderModalVisible(false);
           setSelectedOrder(null);

@@ -4134,3 +4134,50 @@
     grid-template-columns: 1fr;
   }
 }
+
+.chatEmojiPopover {
+  max-width: calc(100vw - 24px);
+}
+
+.chatEmojiPopover :global(.ant-popover-inner) {
+  padding: 0;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.chatEmojiPopover :global(.EmojiPickerReact) {
+  max-width: calc(100vw - 24px) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 640px) {
+  .chatEmojiPopover {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none;
+  }
+
+  .chatEmojiPopover :global(.ant-popover-content),
+  .chatEmojiPopover :global(.ant-popover-inner),
+  .chatEmojiPopover :global(.EmojiPickerReact) {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .chatEmojiPopover :global(.ant-popover-arrow) {
+    display: none;
+  }
+
+  .chatEmojiPopover :global(.epr-body) {
+    max-height: 210px;
+  }
+}
+
+:global([data-theme="dark"]) .chatEmojiPopover :global(.ant-popover-inner) {
+  background: #1f232f;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+}

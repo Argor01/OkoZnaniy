@@ -94,11 +94,12 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
         <div className={`${styles.chatInputActions} ${isMobile ? styles.chatInputActionsMobile : ''}`}>
           <Popover
+            overlayClassName={styles.chatEmojiPopover}
             content={
               <EmojiPicker
                 onEmojiClick={onEmojiClick}
-                width={isMobile ? 280 : 320}
-                height={380}
+                width={isMobile && typeof window !== 'undefined' ? Math.min(336, Math.max(280, window.innerWidth - 32)) : 320}
+                height={isMobile ? 320 : 380}
                 emojiVersion={emojiVersion as any}
                 theme={isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
               />
@@ -106,8 +107,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
             trigger="click"
             open={emojiPickerOpen}
             onOpenChange={onEmojiPickerOpenChange}
-            placement="topRight"
-            getPopupContainer={(triggerNode) => triggerNode.closest('.ant-modal-body') || document.body}
+            placement={isMobile ? 'top' : 'topRight'}
+            getPopupContainer={() => document.body}
             zIndex={1060}
           >
             <Button

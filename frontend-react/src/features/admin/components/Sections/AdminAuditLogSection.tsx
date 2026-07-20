@@ -3,6 +3,7 @@ import { Card, Empty, Input, Select, Space, Table, Tag, Typography, message } fr
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { apiClient } from '@/api/client';
+import styles from './AdminAuditLogSection.module.css';
 
 const { Search } = Input;
 const { Text, Title } = Typography;
@@ -143,9 +144,9 @@ export const AdminAuditLogSection: React.FC = () => {
   ];
 
   return (
-    <Card>
-      <Space direction="vertical" size={18} style={{ width: '100%' }}>
-        <div>
+    <Card className={styles.auditCard}>
+      <Space className={styles.auditStack} direction="vertical" size={18}>
+        <div className={styles.auditHeader}>
           <Title level={4} style={{ marginBottom: 4 }}>
             Аудит действий
           </Title>
@@ -154,24 +155,25 @@ export const AdminAuditLogSection: React.FC = () => {
           </Text>
         </div>
 
-        <Space wrap>
+        <Space className={styles.auditFilters} wrap>
           <Search
+            className={styles.auditSearch}
             allowClear
             placeholder="Поиск по описанию, пользователю или объекту"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             onSearch={loadLogs}
-            style={{ width: 420 }}
           />
           <Select
+            className={styles.auditSelect}
             value={action || ''}
             options={actionOptions}
             onChange={(value) => setAction(value || undefined)}
-            style={{ width: 240 }}
           />
         </Space>
 
         <Table
+          className={styles.auditTable}
           columns={columns}
           dataSource={logs}
           rowKey="id"

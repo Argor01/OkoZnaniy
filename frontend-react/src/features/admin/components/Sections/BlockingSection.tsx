@@ -259,6 +259,7 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
           : `Разблокировать пользователя ${selectedUser?.username}`
         }
         open={actionModalVisible}
+        className={styles.blockedUsersActionModal}
         onOk={handleActionConfirm}
         onCancel={() => {
           setActionModalVisible(false);

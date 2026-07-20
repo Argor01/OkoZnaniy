@@ -113,12 +113,20 @@
 }
 
 @media (max-width: 575px) {
+  body .ant-modal-root .ant-modal-wrap:has(.ant-modal.logoutModal) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    overflow: hidden;
+  }
+
   body .ant-modal-root .ant-modal-wrap .ant-modal.logoutModal {
     width: calc(100vw - 24px) !important;
     max-width: 360px !important;
-    margin: 0 auto;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
+    margin: 0 !important;
+    top: auto !important;
+    transform: none !important;
     padding-bottom: 0;
   }
 

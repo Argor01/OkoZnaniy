@@ -86,6 +86,29 @@
   min-width: 200px;
 }
 
+.orderDetailsModal :global(.ant-modal-content) {
+  max-height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
+}
+
+.orderDetailsModal :global(.ant-modal-body) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.orderDetailsModal :global(.ant-modal-footer) {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.orderDetailsModal :global(.ant-modal-footer .ant-btn) {
+  margin-inline-start: 0 !important;
+}
+
 /* Адаптивность для планшетов */
 @media (max-width: 1024px) {
   .allOrdersFiltersRow {
@@ -229,38 +252,77 @@
   }
   
   /* Модальное окно */
-  :global(.ant-modal) {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+  .orderDetailsModal {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    margin: 12px auto !important;
     top: 0 !important;
   }
   
-  :global(.ant-modal-content) {
-    border-radius: 0 !important;
-    height: 100vh !important;
+  .orderDetailsModal :global(.ant-modal-content) {
+    border-radius: 18px !important;
+    height: auto !important;
+    max-height: calc(100dvh - 24px);
   }
   
-  :global(.ant-modal-body) {
-    height: calc(100vh - 110px) !important;
+  .orderDetailsModal :global(.ant-modal-body) {
+    height: auto !important;
+    max-height: calc(100dvh - 132px) !important;
     overflow-y: auto !important;
-    padding: 16px !important;
+    overflow-x: hidden !important;
+    padding: 12px !important;
   }
   
-  :global(.ant-modal-header) {
-    padding: 16px !important;
+  .orderDetailsModal :global(.ant-modal-header) {
+    padding: 14px 16px 10px !important;
   }
   
-  :global(.ant-modal-footer) {
-    padding: 12px 16px !important;
+  .orderDetailsModal :global(.ant-modal-footer) {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom)) !important;
   }
   
-  :global(.ant-descriptions-item-label) {
+  .orderDetailsModal :global(.ant-tabs-nav) {
+    margin-bottom: 10px !important;
+    overflow: hidden;
+  }
+
+  .orderDetailsModal :global(.ant-descriptions-view) {
+    overflow: hidden !important;
+  }
+
+  .orderDetailsModal :global(.ant-descriptions-row) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .orderDetailsModal :global(.ant-descriptions-item) {
+    display: grid !important;
+    grid-template-columns: minmax(92px, 36%) 1fr !important;
+    width: 100% !important;
+  }
+
+  .orderDetailsModal :global(.ant-descriptions-item-label) {
     font-size: 12px !important;
+    padding: 8px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
   }
   
-  :global(.ant-descriptions-item-content) {
+  .orderDetailsModal :global(.ant-descriptions-item-content) {
     font-size: 12px !important;
+    min-width: 0 !important;
+    padding: 8px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .orderDetailsModal :global(.ant-btn-sm.ant-btn-icon-only) {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
 }
 
@@ -315,23 +377,23 @@
     font-size: 9px;
   }
   
-  :global(.ant-modal-header) {
+  .orderDetailsModal :global(.ant-modal-header) {
     padding: 12px !important;
   }
   
-  :global(.ant-modal-body) {
+  .orderDetailsModal :global(.ant-modal-body) {
     padding: 12px !important;
   }
   
-  :global(.ant-modal-footer) {
+  .orderDetailsModal :global(.ant-modal-footer) {
     padding: 10px 12px !important;
   }
   
-  :global(.ant-descriptions-item-label) {
+  .orderDetailsModal :global(.ant-descriptions-item-label) {
     font-size: 11px !important;
   }
   
-  :global(.ant-descriptions-item-content) {
+  .orderDetailsModal :global(.ant-descriptions-item-content) {
     font-size: 11px !important;
   }
 }

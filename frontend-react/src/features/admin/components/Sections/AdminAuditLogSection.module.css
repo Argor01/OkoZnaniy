@@ -1,0 +1,107 @@
+.auditCard {
+  width: 100%;
+  min-width: 0;
+}
+
+.auditStack {
+  width: 100%;
+}
+
+.auditHeader {
+  max-width: 760px;
+}
+
+.auditFilters {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.auditSearch {
+  flex: 1 1 420px;
+  max-width: 520px;
+}
+
+.auditSelect {
+  width: 240px;
+}
+
+.auditTable {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .auditCard {
+    border-radius: 18px;
+  }
+
+  .auditCard :global(.ant-card-body) {
+    padding: 16px !important;
+  }
+
+  .auditHeader :global(.ant-typography) {
+    line-height: 1.35;
+  }
+
+  .auditHeader :global(h4.ant-typography) {
+    font-size: 22px;
+  }
+
+  .auditFilters {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .auditSearch,
+  .auditSelect,
+  .auditFilters :global(.ant-input-search),
+  .auditFilters :global(.ant-input-group-wrapper),
+  .auditFilters :global(.ant-input-wrapper) {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: none;
+  }
+
+  .auditFilters :global(.ant-input-affix-wrapper),
+  .auditFilters :global(.ant-input-search .ant-input),
+  .auditFilters :global(.ant-input-search-button),
+  .auditFilters :global(.ant-select-selector) {
+    min-height: 48px !important;
+    box-sizing: border-box;
+    border-radius: 14px !important;
+  }
+
+  .auditFilters :global(.ant-input),
+  .auditFilters :global(.ant-select-selection-placeholder),
+  .auditFilters :global(.ant-select-selection-item) {
+    min-width: 0;
+    font-size: 15px;
+  }
+
+  .auditFilters :global(.ant-input-group-addon) {
+    width: 52px;
+    flex: 0 0 52px;
+  }
+
+  .auditTable {
+    overflow: hidden;
+  }
+
+  .auditTable :global(.ant-table-container) {
+    overflow-x: auto;
+  }
+
+  .auditTable :global(.ant-table) {
+    min-width: 720px;
+  }
+
+  .auditTable :global(.ant-table-thead > tr > th),
+  .auditTable :global(.ant-table-tbody > tr > td) {
+    padding: 12px 10px !important;
+    vertical-align: top;
+  }
+}

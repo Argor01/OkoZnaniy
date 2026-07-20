@@ -44,6 +44,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import {useSubjects, useWorkTypes } from '@/hooks/queries';
+import styles from './KnowledgeBaseSection.module.css';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -521,38 +522,38 @@ export const KnowledgeBaseSection: React.FC = () => {
 
   const renderArticlesList = () => (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      <div className={styles.articlesToolbar}>
         <Title level={4} style={{ marginBottom: 0 }}>Статьи</Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setView('create')}>
+        <Button className={styles.writeButton} type="primary" icon={<PlusOutlined />} onClick={() => setView('create')}>
           Написать статью
         </Button>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+      <div className={styles.filtersRow}>
         <Search
+          className={styles.searchInput}
           placeholder="Поиск..."
           allowClear
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          style={{ flex: '1 1 300px', minWidth: 250, maxWidth: 500 }}
         />
         <Select
+          className={styles.filterSelect}
           placeholder="Тип работы"
           allowClear
           value={selectedWorkType}
           onChange={setSelectedWorkType}
-          style={{ width: 180 }}
         >
           {workTypes.map((wt) => (
             <Select.Option key={wt.id} value={wt.name}>{wt.name}</Select.Option>
           ))}
         </Select>
         <Select
+          className={styles.filterSelect}
           placeholder="Предмет"
           allowClear
           value={selectedSubject}
           onChange={setSelectedSubject}
-          style={{ width: 180 }}
           showSearch
           filterOption={(input, option) =>
             (option?.children as unknown as string)?.toLowerCase().includes(input.toLowerCase()) ?? false
@@ -574,8 +575,8 @@ export const KnowledgeBaseSection: React.FC = () => {
         articles.map((article) => (
           <Card
             key={article.id}
+            className={styles.articleCard}
             hoverable
-            style={{ marginBottom: 12, borderRadius: 8, cursor: 'pointer' }}
             onClick={() => openArticleDetail(article.id)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -586,10 +587,10 @@ export const KnowledgeBaseSection: React.FC = () => {
             tabIndex={0}
             role="button"
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
+            <div className={styles.articleCardInner}>
+              <div className={styles.articleBody}>
                 <Title level={5} style={{ marginBottom: 4 }}>{article.title}</Title>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 13, color: '#888', marginBottom: 8 }}>
+                <div className={styles.articleMeta}>
                   <span><UserOutlined /> {getAuthorName(article.author)}</span>
                   <span><ClockCircleOutlined /> {dayjs(article.created_at).fromNow()}</span>
                   <span><EyeOutlined /> {article.views_count}</span>
@@ -598,11 +599,12 @@ export const KnowledgeBaseSection: React.FC = () => {
                 <Text type="secondary" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {article.description}
                 </Text>
-                <div style={{ marginTop: 8, display: 'flex', gap: 6 }}>
+                <div className={styles.articleTags}>
                   {article.work_type && <Tag color="purple">{article.work_type}</Tag>}
                   {article.subject && <Tag color="green">{article.subject}</Tag>}
                 </div>
               </div>
+              <div className={styles.articleActions}>
               <Button
                 type="default"
                 size="small"
@@ -610,7 +612,6 @@ export const KnowledgeBaseSection: React.FC = () => {
                   e.stopPropagation();
                   openArticleDetail(article.id);
                 }}
-                style={{ marginRight: 8 }}
               >
                 Открыть
               </Button>
@@ -624,6 +625,7 @@ export const KnowledgeBaseSection: React.FC = () => {
                   setDeleteModalOpen(true);
                 }}
               />
+              </div>
             </div>
           </Card>
         ))
@@ -763,7 +765,7 @@ export const KnowledgeBaseSection: React.FC = () => {
   );
 
   return (
-    <div>
+    <div className={styles.knowledgeSection}>
       <Title level={3} style={{ marginBottom: 20 }}>База Знаний</Title>
 
       <Tabs

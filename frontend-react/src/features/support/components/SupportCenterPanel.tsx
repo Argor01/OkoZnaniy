@@ -383,7 +383,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
         open={detailsOpen}
         onCancel={closeDetails}
         footer={null}
-        width={compact ? '92vw' : 860}
+        width={compact ? 'min(92vw, 860px)' : 'min(860px, calc(100vw - 24px))'}
         centered
         destroyOnClose={false}
       >
