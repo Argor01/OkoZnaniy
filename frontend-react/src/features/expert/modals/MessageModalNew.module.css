@@ -4049,15 +4049,6 @@
 .chatMessages,
 .chatMessagesContent {
   min-width: 0;
-
-/* ===================================================================
-   Adaptive + visual refresh ??? appended 2026-07 (reversible block).
-   Targets existing MessageModalNew classes only. Safe to delete
-   this whole block to fully revert the visual/adaptive tweaks.
-   =================================================================== */
-
-/* Guard against horizontal overflow of the whole chat shell */
-.chatModalContainer {
   max-width: 100%;
   overflow-x: hidden;
 }
@@ -4190,6 +4181,20 @@
   border: 1px solid rgba(148, 163, 184, 0.18);
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
 }
+
+
+/* ===================================================================
+   Adaptive + visual refresh ??? appended 2026-07 (reversible block).
+   Targets existing MessageModalNew classes only. Safe to delete
+   this whole block to fully revert the visual/adaptive tweaks.
+   =================================================================== */
+
+/* Guard against horizontal overflow of the whole chat shell */
+.chatModalContainer {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* Smooth, contained, momentum scrolling for the message area & list */
 .chatMessages,
 .chatMessagesMobile,
