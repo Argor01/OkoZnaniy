@@ -379,7 +379,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={12}>
             <AppInput
               size="large"
               placeholder="Номер заказа"
@@ -389,7 +389,7 @@ const OrdersFeed: React.FC = () => {
               allowClear
             />
           </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={12}>
             <AppSelect
               size="large"
               placeholder="Предмет"
@@ -406,7 +406,7 @@ const OrdersFeed: React.FC = () => {
               ))}
             </AppSelect>
           </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
+          <Col xs={24} sm={12} md={12} lg={12}>
             <AppSelect
               size="large"
               placeholder="Тип работы"
@@ -436,7 +436,7 @@ const OrdersFeed: React.FC = () => {
         </div>
 
         {showFilters && (
-          <Row gutter={[24, 16]}>
+          <Row gutter={[24, 16]} className={styles.expandedFilters}>
             <Col xs={24} sm={24} md={8}>
               <div className={styles.filterLabel}>
                 <Text strong>Бюджет</Text>
@@ -445,7 +445,7 @@ const OrdersFeed: React.FC = () => {
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>От</Text>
                   <AppInput.Number
-                    size="middle"
+                    size="large"
                     min={0}
                     max={budgetRange[1]}
                     value={budgetRange[0]}
@@ -463,7 +463,7 @@ const OrdersFeed: React.FC = () => {
                 <div className={styles.budgetInputGroup}>
                   <Text className={styles.nowrap}>До</Text>
                   <AppInput.Number
-                    size="middle"
+                    size="large"
                     min={budgetRange[0]}
                     max={100000}
                     value={budgetRange[1]}
@@ -488,6 +488,7 @@ const OrdersFeed: React.FC = () => {
                 size="large"
                 placeholder="Все заказы"
                 className={styles.fullWidth}
+                popupClassName={styles.responsesPopup}
                 value={responsesFilter}
                 onChange={setResponsesFilter}
               >

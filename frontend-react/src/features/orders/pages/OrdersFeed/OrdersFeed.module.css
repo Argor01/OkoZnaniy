@@ -86,6 +86,56 @@
   margin-top: 10px;
   margin-left: 0 !important;
   margin-right: 0 !important;
+  font-size: 14px;
+}
+
+.filtersGrid :global(.ant-input-affix-wrapper) {
+  height: 40px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+
+.filtersGrid :global(.ant-input-affix-wrapper) :global(.ant-input) {
+  height: 38px !important;
+  font-size: 14px !important;
+}
+
+.filtersGrid :global(.ant-input)::placeholder,
+.filtersGrid :global(.ant-input-affix-wrapper) :global(.ant-input)::placeholder {
+  font-size: 14px !important;
+}
+
+.filtersGrid :global(.ant-select-selector) {
+  height: 40px !important;
+}
+
+.filtersGrid :global(.ant-select-selection-placeholder) {
+  font-size: 14px !important;
+}
+
+.filtersGrid :global(.ant-select-selection-item) {
+  font-size: 14px !important;
+}
+
+.filtersGrid :global(.ant-select-selection-search-input) {
+  font-size: 14px !important;
+}
+
+.filtersGrid :global(.ant-input-number) {
+  height: 40px !important;
+}
+
+.filtersGrid :global(.ant-input-number-input-wrap) {
+  height: 40px !important;
+}
+
+.filtersGrid :global(.ant-input-number-input) {
+  height: 38px !important;
+  line-height: 38px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  font-size: 14px !important;
 }
 
 .filterLabel {
@@ -106,15 +156,62 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  height: 40px;
 }
 
 .nowrap {
   white-space: nowrap;
+  line-height: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.expandedFilters :global(.ant-select-selector) {
+  height: 40px !important;
+}
+
+.expandedFilters :global(.ant-select-selection-placeholder),
+.expandedFilters :global(.ant-select-selection-item),
+.expandedFilters :global(.ant-select-selection-search-input) {
+  font-size: 14px !important;
+}
+
+.responsesPopup :global(.ant-select-item) {
+  font-size: 14px !important;
+}
+
+.responsesPopup :global(.ant-select-item-option-selected) {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--primary-blue) !important;
+  font-weight: 500 !important;
+}
+
+.responsesPopup :global(.ant-select-item-option-active) {
+  background-color: var(--bg-secondary) !important;
 }
 
 .budgetInput {
-  width: 100px;
-  min-width: 80px;
+  width: 140px;
+  min-width: 100px;
+}
+
+.budgetInput:global(.ant-input-number) {
+  height: 40px;
+}
+
+.budgetInput:global(.ant-input-number) :global(.ant-input-number-input-wrap) {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+}
+
+.budgetInput:global(.ant-input-number) :global(.ant-input-number-input) {
+  height: 100%;
+  padding: 0;
+  line-height: 40px;
 }
 
 @media (max-width: 576px) {
@@ -125,6 +222,49 @@
 
   .filtersGrid {
     padding-inline: 8px;
+  }
+
+  .filtersGrid :global(.ant-input-affix-wrapper) {
+    height: 44px !important;
+  }
+
+  .filtersGrid :global(.ant-input-affix-wrapper) :global(.ant-input) {
+    height: 42px !important;
+    font-size: 14px !important;
+  }
+
+  .filtersGrid :global(.ant-input)::placeholder,
+  .filtersGrid :global(.ant-input-affix-wrapper) :global(.ant-input)::placeholder {
+    font-size: 14px !important;
+  }
+
+  .filtersGrid :global(.ant-select-selector) {
+    height: 44px !important;
+  }
+
+  .filtersGrid :global(.ant-select-selection-placeholder) {
+    font-size: 14px !important;
+  }
+
+  .filtersGrid :global(.ant-select-selection-item) {
+    font-size: 14px !important;
+  }
+
+  .filtersGrid :global(.ant-select-selection-search-input) {
+    font-size: 14px !important;
+  }
+
+  .filtersGrid :global(.ant-input-number) {
+    height: 44px !important;
+  }
+
+  .filtersGrid :global(.ant-input-number-input-wrap) {
+    height: 44px !important;
+  }
+
+  .filtersGrid :global(.ant-input-number-input) {
+    height: 42px !important;
+    line-height: 42px !important;
   }
 
   .budgetRow {
@@ -159,6 +299,26 @@
     font-size: 14px;
     padding-left: 10px;
     padding-right: 10px;
+  }
+
+  .expandedFilters :global(.ant-select-selector) {
+    height: 44px !important;
+  }
+
+  .expandedFilters :global(.ant-select-selection-placeholder),
+  .expandedFilters :global(.ant-select-selection-item),
+  .expandedFilters :global(.ant-select-selection-search-input) {
+    font-size: 14px !important;
+  }
+
+  .responsesPopup :global(.ant-select-item) {
+    font-size: 14px !important;
+  }
+
+  .responsesPopup :global(.ant-select-item-option-selected) {
+    background-color: var(--primary-blue) !important;
+    color: white !important;
+    font-weight: 600 !important;
   }
 }
 
@@ -264,24 +424,6 @@
 .orderCard:nth-child(5) { animation-delay: 0.25s; }
 .orderCard:nth-child(6) { animation-delay: 0.3s; }
 
-/* codex budget input alignment */
-.budgetInput:global(.ant-input-number) {
-  min-height: 40px;
-}
-
-.budgetInput:global(.ant-input-number) :global(.ant-input-number-input-wrap) {
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-
-.budgetInput:global(.ant-input-number) :global(.ant-input-number-input) {
-  height: 100%;
-  padding-top: 0;
-  padding-bottom: 0;
-  line-height: 1.4;
-}
-
 @media (max-width: 576px) {
   .budgetRow {
     display: flex;
@@ -307,14 +449,19 @@
   }
 
   .budgetInput:global(.ant-input-number) {
-    min-height: 44px;
+    height: 44px;
+  }
+
+  .budgetInput:global(.ant-input-number) :global(.ant-input-number-input-wrap) {
+    height: 44px;
+    padding: 0 10px;
   }
 
   .budgetInput:global(.ant-input-number) :global(.ant-input-number-input) {
+    height: 100%;
     line-height: 44px;
     font-size: 14px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 0;
   }
 }
 

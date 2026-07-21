@@ -305,7 +305,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
                   controls={false}
                   className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`}
-                  size="large"
+                  size={isMobile ? 'middle' : 'large'}
                   placeholder="0"
                   onKeyPress={(event) => {
                     if (!/[0-9]/.test(event.key)) {
@@ -334,7 +334,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
                   formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
                   controls={false}
                   className={`${styles.inputNumberField} ${styles.profileModalFullWidth}`}
-                  size="large"
+                  size={isMobile ? 'middle' : 'large'}
                   placeholder="0"
                   onKeyPress={(event) => {
                     if (!/[0-9]/.test(event.key)) {
@@ -358,7 +358,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
             </Form.Item>
 
             <Form.Item label={TEXT.portfolio} name="portfolio_url">
-              <Input placeholder="https://example.com/portfolio" className={styles.inputField} size="large" />
+              <Input placeholder="https://example.com/portfolio" className={styles.inputField} size={isMobile ? 'middle' : 'large'} />
             </Form.Item>
           </>
         )}
