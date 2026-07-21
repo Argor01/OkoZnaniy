@@ -68,6 +68,7 @@ const Filters: React.FC<FiltersProps> = ({ filters, onFilterChange, subjects, wo
             value={filters.sortBy}
             onChange={(value) => onFilterChange({ ...filters, sortBy: value as FiltersType['sortBy'] })}
             className={styles.select}
+            popupClassName={styles.sortPopup}
             defaultValue="newness"
           >
             <Option value="newness">Новые</Option>
