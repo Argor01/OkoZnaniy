@@ -25,7 +25,7 @@ dj-rest-auth==7.0.0
 django-extensions==3.2.3
 django-hijack==3.4.5
 werkzeug==3.1.6
-django-cors-headers==4.3.1
+django-cors-headers==4.9.0
 django-filter==25.1
 django-redis==5.4.0
 djangorestframework==3.16.0
