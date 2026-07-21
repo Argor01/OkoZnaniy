@@ -329,6 +329,7 @@ const ArbitratorDashboard: React.FC = () => {
         width={400}
         closable={false}
         className={logoutStyles.logoutModal}
+        wrapClassName={logoutStyles.logoutModalWrap}
       >
         <div className={logoutStyles.logoutModalBody}>
           <div className={logoutStyles.logoutModalIcon}>

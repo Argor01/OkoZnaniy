@@ -1,4 +1,8 @@
-﻿.logoutModal .ant-modal-content {
+﻿:global(body) :global(.ant-modal-root) :global(.ant-modal-wrap).logoutModalWrap {
+  z-index: 2001 !important;
+}
+
+.logoutModal:global(.ant-modal) :global(.ant-modal-content) {
   border-radius: 20px !important;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -113,27 +117,38 @@
 }
 
 @media (max-width: 575px) {
-  body .ant-modal-root .ant-modal-wrap:has(.ant-modal.logoutModal) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    overflow: hidden;
-  }
-
-  body .ant-modal-root .ant-modal-wrap .ant-modal.logoutModal {
-    width: calc(100vw - 24px) !important;
-    max-width: 360px !important;
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).logoutModal {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 360px !important;
+    max-width: calc(100vw - 24px) !important;
     margin: 0 !important;
-    top: auto !important;
-    transform: none !important;
-    padding-bottom: 0;
+    padding: 0 !important;
+    transform: translate(-50%, -50%) !important;
   }
 
-  body .ant-modal-root .ant-modal-wrap .ant-modal.logoutModal .ant-modal-content {
-    width: 100%;
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).logoutModal :global(.ant-modal-content) {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     border-radius: 20px !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    display: block !important;
+    position: static !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    background: #fff !important;
+  }
+
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).logoutModal :global(.ant-modal-content) :global(.ant-modal-body) {
+    padding: 0 !important;
+    flex: none !important;
+    height: auto !important;
+    overflow-y: visible !important;
+    min-height: auto !important;
+    background: #fff !important;
   }
 
   .logoutModalBody {

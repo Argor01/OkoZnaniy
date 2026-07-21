@@ -573,6 +573,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         width={400}
         closable={false}
         className={logoutStyles.logoutModal}
+        wrapClassName={logoutStyles.logoutModalWrap}
       >
         <div className={logoutStyles.logoutModalBody}>
           <div className={logoutStyles.logoutModalIcon}>
