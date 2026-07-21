@@ -952,13 +952,23 @@
   }
 
   .filterInput,
+  .filterInput :global(.ant-input-affix-wrapper),
+  .filtersGrid :global(.ant-input-affix-wrapper),
   .chatListSearch,
   .chatListSearch :global(.ant-input-search),
   .chatListSearch :global(.ant-input-group-wrapper),
-  .chatListSearch :global(.ant-input-wrapper) {
+  .chatListSearch :global(.ant-input-wrapper),
+  .chatListSearch :global(.ant-input-group),
+  .chatListSearch :global(.ant-input-affix-wrapper) {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+  }
+
+  .filtersGrid :global(.ant-input-affix-wrapper),
+  .chatListSearch :global(.ant-input-affix-wrapper) {
+    padding: 0 14px;
+    overflow: hidden;
   }
 
   .chatListHeader :global(.ant-input-affix-wrapper),
@@ -978,6 +988,22 @@
     min-width: 0;
     height: auto;
     font-size: 15px;
+  }
+
+  .chatListHeader :global(.ant-input-affix-wrapper > input.ant-input),
+  .chatListHeader :global(.ant-input-affix-wrapper .ant-input) {
+    min-height: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .chatListHeader :global(.ant-input-prefix),
+  .chatListHeader :global(.ant-input-suffix) {
+    flex: 0 0 auto;
   }
 
   .chatListHeader :global(.ant-input-group-addon) {

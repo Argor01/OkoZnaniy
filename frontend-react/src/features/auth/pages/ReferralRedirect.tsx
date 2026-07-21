@@ -8,11 +8,7 @@ const ReferralRedirect: React.FC = () => {
 
   useEffect(() => {
     if (code) {
-      // Сохраняем реферальный код в localStorage
-      localStorage.setItem('referral_code', code);
-      
       // Перенаправляем на страницу входа/регистрации с параметром ref
-      // Это гарантирует, что код будет сохранен даже если localStorage не сработает
       navigate(`/login?ref=${code}`, { replace: true });
     } else {
       // Если кода нет, просто на страницу входа

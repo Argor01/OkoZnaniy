@@ -29,13 +29,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     }
   }, [referralCode, form]);
 
-  useEffect(() => {
-    const savedReferralCode = localStorage.getItem('referral_code');
-    if (savedReferralCode) {
-      form.setFieldsValue({ referral_code: savedReferralCode });
-    }
-  }, [form]);
-
   return (
     <>
       {referralCode && (

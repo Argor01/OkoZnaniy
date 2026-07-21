@@ -38,6 +38,11 @@ const Login: React.FC = () => {
 
   const [referralCode, setReferralCode] = useState<string>('');
 
+  const clearStoredReferralCode = () => {
+    localStorage.removeItem('referral_code');
+    sessionStorage.removeItem('referral_code');
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
@@ -48,6 +53,8 @@ const Login: React.FC = () => {
     if (refCode) {
       setReferralCode(refCode);
       setActiveTab('register');
+    } else {
+      clearStoredReferralCode();
     }
     const token = localStorage.getItem('access_token');
     if (token) {
@@ -115,6 +122,14 @@ const Login: React.FC = () => {
       } as RegisterRequest;
       if (debugEnabled) logger.log('[Registration] Sending data:', cleanValues);
       await authApi.register(cleanValues);
+      clearStoredReferralCode();
+      setReferralCode('');
+      const params = new URLSearchParams(location.search);
+      if (params.has('ref')) {
+        params.delete('ref');
+        const nextSearch = params.toString();
+        window.history.replaceState(null, '', `${location.pathname}${nextSearch ? `?${nextSearch}` : ''}`);
+      }
       if (values.email) {
         message.success('Регистрация успешна! Мы отправили вам код на email.');
         setVerificationEmail(values.email);

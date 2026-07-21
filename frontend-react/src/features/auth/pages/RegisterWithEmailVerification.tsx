@@ -85,6 +85,14 @@ const RegisterWithEmailVerification: React.FC = () => {
         newsletter_subscription: newsletter
       };
       const response = await apiClient.post('/users/', payload);
+      localStorage.removeItem('referral_code');
+      sessionStorage.removeItem('referral_code');
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('ref')) {
+        params.delete('ref');
+        const nextSearch = params.toString();
+        window.history.replaceState(null, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}`);
+      }
       
       
       if (response.data.email_verification_required) {

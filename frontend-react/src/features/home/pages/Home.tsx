@@ -27,8 +27,6 @@ const Home: React.FC = () => {
   useEffect(() => {
     const refCode = searchParams.get('ref');
     if (refCode) {
-      // Сохраняем реферальный код в localStorage
-      localStorage.setItem('referral_code', refCode);
       setReferralCode(refCode);
       
       // Показываем уведомление
