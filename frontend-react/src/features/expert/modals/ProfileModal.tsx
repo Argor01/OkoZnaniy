@@ -61,34 +61,23 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
   const { updateUserInCache } = useUserUpdate();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const isExpert = userProfile?.role === 'expert';
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 575);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
-    if (visible) {
+    if (visible && isMobile) {
+      const originalStyle = window.getComputedStyle(document.body).overflow;
       document.body.style.overflow = 'hidden';
-      const style = document.createElement('style');
-      style.id = 'hide-scrollbar-style-profile';
-      style.innerHTML = `
-        ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-      `;
-      document.head.appendChild(style);
-    } else {
-      document.body.style.overflow = '';
-      document.getElementById('hide-scrollbar-style-profile')?.remove();
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
     }
-
-    return () => {
-      document.body.style.overflow = '';
-      document.getElementById('hide-scrollbar-style-profile')?.remove();
-    };
-  }, [visible]);
+  }, [visible, isMobile]);
 
   useEffect(() => {
     if (visible && profile) {
@@ -127,8 +116,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
       onCancel={onClose}
       onOk={() => form.submit()}
       width={isMobile ? '100%' : 750}
-      height={isMobile ? '100%' : 'none'}
-      style={isMobile ? { top: 8, paddingBottom: 8, margin: 'auto' } : { margin: 'auto' }}
       okText={TEXT.save}
       cancelText={TEXT.cancel}
       okButtonProps={{
@@ -281,7 +268,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
           ]}
           extra={TEXT.usernameExtra}
         >
-          <Input className={styles.inputField} size="large" placeholder={TEXT.usernamePlaceholder} />
+          <Input className={styles.inputField} size={isMobile ? 'middle' : 'large'} placeholder={TEXT.usernamePlaceholder} />
         </Form.Item>
 
         <Form.Item label={TEXT.bio} name="bio">
@@ -299,7 +286,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ visible, onClose, profile, 
               <p className={styles.profileModalExpertText}>{TEXT.expertInfoText}</p>
             </div>
 
-            <div className={`${styles.profileModalExpertGrid} ${isMobile ? styles.profileModalExpertGridMobile : ''}`}>
+            <div className={`${styles.profileModalExpertGrid} ${isMobile ? styles.profileModalExpertGridMobile : styles.profileModalExpertGridDesktop}`}>
               <Form.Item
                 label={TEXT.experience}
                 name="experience_years"

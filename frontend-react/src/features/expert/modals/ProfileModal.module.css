@@ -109,11 +109,10 @@
 
 .profileModalWrapMobile :global(.ant-modal) {
   padding: 0;
-  top: 0;
 }
 
 .profileModalWrapDesktop :global(.ant-modal) {
-  top: 20px;
+  top: 24px;
 }
 
 .profileModalWrap :global(.ant-modal-content) {
@@ -132,14 +131,26 @@
 }
 
 .profileModalWrapMobile :global(.ant-modal-content) {
-  border-radius: 0;
-  background: var(--bg-primary, #ffffff);
-  backdrop-filter: none;
-  margin: 0;
+  border-radius: 16px;
+  margin: 8px;
+  max-width: calc(100% - 16px);
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
+  max-height: calc(var(--app-vh, 100dvh) - 16px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .profileModalWrapDesktop :global(.ant-modal-content) {
   border-radius: 24px;
+  max-width: 750px;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  max-height: calc(var(--app-vh, 100dvh) - 40px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .profileModalWrap :global(.ant-modal-content) ::-webkit-scrollbar {
@@ -155,52 +166,59 @@
   background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   backdrop-filter: blur(10px);
   padding: 24px 32px;
+  margin-bottom: 0;
   border-bottom: 1px solid var(--border-color, rgba(102, 126, 234, 0.1));
   border-radius: 24px 24px 0 0;
   flex-shrink: 0;
 }
 
 .profileModalWrapMobile :global(.ant-modal-header) {
-  background: var(--bg-primary, #ffffff);
-  backdrop-filter: none;
   padding: 16px 20px;
-  border-radius: 0;
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
 }
 
 .profileModalWrap :global(.ant-modal-body) {
   padding: 32px;
   background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   overflow-y: auto;
-  flex: 1;
+  max-height: calc(100vh - 200px);
+  max-height: calc(100dvh - 200px);
+  max-height: calc(var(--app-vh, 100dvh) - 200px);
 }
 
 .profileModalWrapMobile :global(.ant-modal-body) {
-  padding: 20px 24px;
-  background: var(--bg-primary, #ffffff);
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  max-height: calc(100vh - 140px);
+  max-height: calc(100dvh - 140px);
+  max-height: calc(var(--app-vh, 100dvh) - 140px);
 }
 
 .profileModalWrap :global(.ant-modal-footer) {
+  padding: 24px 32px;
+  background: var(--color-modal-bg, rgba(255, 255, 255, 0.95));
   margin-top: 0;
-  padding: 16px 32px 24px;
   border-top: 1px solid var(--border-color, rgba(102, 126, 234, 0.1));
+  border-radius: 0 0 24px 24px;
   flex-shrink: 0;
 }
 
 .profileModalWrapMobile :global(.ant-modal-footer) {
   padding: 16px 20px;
-  background: var(--bg-primary, #ffffff);
-  border-radius: 0;
+  border-radius: 0 0 16px 16px;
+  flex-shrink: 0;
 }
 
 .profileModalTitle {
-  font-size: 24px;
   font-weight: 600;
   color: var(--text-primary, #1f2937);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  font-family: 'Jost-SemiBold', sans-serif;
 }
 
 .profileModalExpertTitle {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
   font-size: 12px;
   margin: 0 0 8px 0;
   color: #0369a1;
@@ -240,7 +258,7 @@
   padding: 16px;
   background-color: var(--color-bg-spotlight, #f8f0ff);
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin: 0 10px 16px;
   border: 1px solid #0ea5e9;
 }
 
@@ -251,13 +269,16 @@
 }
 
 .profileModalExpertGrid {
-  display: flex;
-  gap: 16px;
-  flex-direction: row;
+  display: grid;
 }
 
 .profileModalExpertGridMobile {
-  flex-direction: column;
+  grid-template-columns: 1fr;
+}
+
+.profileModalExpertGridDesktop {
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
 .profileModalFlexField {
@@ -277,19 +298,19 @@
 }
 
 .profileModalWrap :global(.ant-modal-title) {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
   font-size: 16px !important;
 }
 
 .profileModalWrap :global(.ant-form-item-label > label) {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
-  font-size: 18px !important;
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 16px !important;
 }
 
 /* Tabs */
 .profileModalWrap :global(.ant-tabs-tab),
 .profileModalWrap :global(.ant-tabs-tab-btn) {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif !important;
+  font-family: 'Jost-SemiBold', sans-serif !important;
 }
 
 /* Dark theme overrides for profile modal */
@@ -339,14 +360,57 @@
   border-color: var(--border-color, #2d3348);
   color: var(--text-secondary, #94a3b8);
 }
-/* codex mobile modal polish */
-@media (max-width: 575px) {
-  .profileModalWrapMobile :global(.ant-modal) {
-    margin: 8px auto;
-    padding-bottom: 0;
+/* Desktop scrolling */
+@media (min-width: 769px) {
+  .profileModalWrapDesktop :global(.ant-modal-body) {
+    max-height: calc(100vh - 200px);
+    max-height: calc(100dvh - 200px);
+    max-height: calc(var(--app-vh, 100dvh) - 200px);
+    overflow-y: auto;
   }
+}
+
+/* Mobile full screen modal */
+@media (max-width: 480px) {
+  .profileModalWrapMobile :global(.ant-modal) {
+    top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
   .profileModalWrapMobile :global(.ant-modal-content) {
-    border-radius: 20px;
+    margin: 0;
+    max-width: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
+    max-height: var(--app-vh, 100dvh);
+    border-radius: 0;
+    height: 100vh;
+    height: 100dvh;
+    height: var(--app-vh, 100dvh);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .profileModalWrapMobile :global(.ant-modal-body) {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile adaptations */
+@media (max-width: 768px) {
+  .inputField {
+    padding: 8px 12px;
+  }
+  .inputNumberField {
+    padding: 6px 11px;
+    min-height: 40px;
+  }
+  .profileModalWrapMobile :global(.ant-input-lg),
+  .profileModalWrapMobile :global(.ant-input-number-lg .ant-input-number-input) {
+    padding: 6px 11px;
   }
   .profileModalWrapMobile :global(.ant-modal-header) {
     padding: 18px 20px 14px;
@@ -356,19 +420,18 @@
   }
   .profileModalWrapMobile :global(.ant-modal-footer) {
     display: flex;
-    flex-direction: column-reverse;
-    gap: 12px;
-    padding: 12px 16px 16px;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
   }
-  .profileModalWrapMobile :global(.ant-modal-footer .ant-btn) {
-    width: 100%;
-    margin: 0 !important;
+  .profileModalWrapMobile :global(.ant-modal-footer > .ant-btn + .ant-btn) {
+    margin-inline-start: 0 !important;
   }
   .profileModalWrapMobile :global(.ant-form-item) {
     margin-bottom: 18px;
   }
   .profileModalWrapMobile :global(.ant-form-item-label > label) {
-    font-size: 16px !important;
+    font-size: 14px !important;
     line-height: 1.25;
     white-space: normal;
   }
@@ -383,9 +446,6 @@
   }
   .profileModalWrapMobile .profileModalTextarea :global(textarea.ant-input) {
     min-height: 140px !important;
-  }
-  .profileModalWrapMobile .inputNumberField {
-    min-height: 44px;
   }
   .profileModalWrapMobile .profileModalExpertInfo {
     padding: 14px;

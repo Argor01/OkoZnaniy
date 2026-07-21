@@ -614,6 +614,58 @@ html[data-theme="dark"] .ant-message-warning .anticon,
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* ===== MOBILE MODAL FULLSCREEN (modals.css NOT imported — these are the base rules) ===== */
+@media (max-width: 575px) {
+  body .ant-modal-root .ant-modal-wrap {
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    height: var(--app-vh, 100dvh);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    transform: none;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    position: static !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-header,
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer {
+    flex-shrink: 0 !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-body {
+    flex: 1 1 0% !important;
+    height: 0 !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

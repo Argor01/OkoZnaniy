@@ -215,7 +215,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             popupRender={(menu) => (
               <>
                 {menu}
-                <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0' }}>
+                <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border-color, #f0f0f0)' }}>
                   <Button
                     type="text"
                     icon={<PlusOutlined />}

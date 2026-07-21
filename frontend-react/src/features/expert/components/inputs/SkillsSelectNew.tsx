@@ -117,7 +117,7 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
           <>
             {menu}
             {!disabled && (
-              <div style={{ padding: '8px 12px', borderTop: '1px solid #f0f0f0', background: '#fff' }}>
+              <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border-color, #f0f0f0)', background: 'var(--bg-primary, #fff)' }}>
                 <Button
                   type="text"
                   icon={<PlusOutlined />}
