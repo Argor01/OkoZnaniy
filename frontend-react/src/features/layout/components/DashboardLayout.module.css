@@ -150,6 +150,9 @@
     max-width: none;
     margin: 0 16px;
   }
+  .mainLayoutContentMessages {
+    margin: 0;
+  }
 }
 
 .mainContent {
@@ -276,6 +279,14 @@
   .dashboardLayout {
     padding: 0 8px;
   }
+
+  .mainLayoutContentMessages {
+    margin: 0;
+  }
+
+  .dashboardLayoutMessages {
+    padding: 0;
+  }
 }
 
 @media (max-width: 480px) {
@@ -285,6 +296,14 @@
 
   .dashboardLayout {
     padding: 0 4px;
+  }
+
+  .mainLayoutContentMessages {
+    margin: 0;
+  }
+
+  .dashboardLayoutMessages {
+    padding: 0;
   }
 }
 
@@ -329,6 +348,84 @@
 
 .mainLayoutContentMessages {
   max-width: none;
-  margin-right: 0;
+  margin: 0;
+}
+
+.dashboardLayoutMessages {
+  padding: 0;
+  max-width: none;
+  margin-top: 64px !important;
+  margin-bottom: 0 !important;
+}
+
+.dashboardLayoutMessages :global(.ant-layout) {
+  margin: 0;
+  max-width: none;
+}
+
+.contentNoPadding {
+  padding: 0 !important;
+}
+
+.contentNoMinHeight {
+  min-height: 0 !important;
+}
+
+/* Navigation drawer on /messages page */
+.messagesNavDrawer :global(.ant-drawer-mask) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.messagesNavDrawer :global(.ant-drawer-content) {
+  background: transparent;
+  box-shadow: none;
+}
+
+.messagesNavDrawer :global(.ant-drawer-body) {
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.messagesNavDrawer :global(.ant-drawer-body) > div {
+  height: 100% !important;
+  min-height: 100% !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  position: relative !important;
+  top: auto !important;
+  left: auto !important;
+  overflow-y: auto !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-right: 1px solid var(--border-color, #e5e7eb) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--color-sidebar-bg, #ffffff) !important;
+}
+
+.messagesNavDrawer :global(.ant-drawer-body) :global(.ant-layout-sider) {
+  height: 100% !important;
+  max-height: 100% !important;
+  position: relative !important;
+  top: auto !important;
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: var(--color-sidebar-bg, #ffffff) !important;
 }
 

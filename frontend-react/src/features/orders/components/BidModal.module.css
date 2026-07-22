@@ -113,5 +113,6 @@
 }
 
 :global([data-theme="dark"]) .formActions {
-  background: linear-gradient(180deg, rgba(31, 34, 48, 0.82), #1f2230 42%);
+  background: transparent;
+  box-shadow: none;
 }

@@ -60,6 +60,8 @@ interface DashboardHeaderProps {
   onLogout?: () => void;
   onMenuClick?: () => void;
   isMobile?: boolean;
+  isMessagesPage?: boolean;
+  onBurgerClick?: () => void;
 }
 
 
@@ -75,6 +77,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   onLogout,
   onMenuClick,
   isMobile = false,
+  isMessagesPage = false,
+  onBurgerClick,
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -258,14 +262,21 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   return (
     <Header className={styles.dashboardHeader}>
       <div className={styles.headerLeft}>
-        {isMobile && (
+        {isMessagesPage ? (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onBurgerClick}
+            className={styles.menuButton}
+          />
+        ) : isMobile ? (
           <Button
             type="text"
             icon={<MenuOutlined />}
             onClick={onMenuClick}
             className={styles.menuButton}
           />
-        )}
+        ) : null}
         {!isMobile && renderNavItems()}
         {isMobile && (
           <div className={styles.mobileNavIcons}>

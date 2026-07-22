@@ -14,7 +14,7 @@ const SupportButton: React.FC<SupportButtonProps> = ({ type = 'float' }) => {
   const [shouldShow, setShouldShow] = React.useState<boolean | null>(null);
 
   const token = localStorage.getItem('access_token');
-  const excludedPaths = ['/', '/home', '/login', '/register'];
+  const excludedPaths = ['/', '/home', '/login', '/register', '/messages'];
   const isExcludedPath = excludedPaths.includes(location.pathname);
 
   React.useEffect(() => {

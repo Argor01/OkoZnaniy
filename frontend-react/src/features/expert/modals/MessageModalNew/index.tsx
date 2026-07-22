@@ -2498,10 +2498,10 @@ const handleOverdueComplaint = async () => {
   const modalWidth = isMobile ? '100%' : (isDesktop ? 'min(1840px, calc(100vw - 32px))' : 'calc(100vw - 32px)');
   const pageContainerStyle = renderAsPage
     ? {
-        maxWidth: modalWidth,
         width: '100%',
         margin: '0 auto',
-        minHeight: isMobile ? 'calc(100dvh - 32px)' : 'calc(100vh - 48px)',
+        minHeight: isMobile ? 'calc(100dvh - 64px)' : 'calc(100vh - 64px)',
+        maxHeight: isMobile ? 'calc(100dvh - 64px)' : 'calc(100vh - 64px)',
       }
     : undefined;
 
@@ -2816,13 +2816,15 @@ const handleOverdueComplaint = async () => {
                       />
                     </Dropdown>
                   )}
-                  <Button
-                    type="text"
-                    icon={<CloseOutlined />}
-                    onClick={onClose}
-                    className={styles.chatCloseButton}
-                    aria-label="Закрыть чат"
-                  />
+                  {isMobile && (
+                    <Button
+                      type="text"
+                      icon={<CloseOutlined />}
+                      onClick={onClose}
+                      className={styles.chatCloseButton}
+                      aria-label="Закрыть чат"
+                    />
+                  )}
                   {isSupportChatSelected ? (
                     <Button
                       key={`support-claim-${selectedChat?.id || 'none'}`}
@@ -3754,8 +3756,8 @@ const handleOverdueComplaint = async () => {
     <>
       {renderAsPage ? (
         <div
-          className={`${styles.chatModalWrap} ${isMobile ? styles.chatModalWrapMobile : isDesktop ? styles.chatModalWrapDesktop : styles.chatModalWrapTablet}`}
-          style={{ padding: isMobile ? '16px 0' : '24px 0' }}
+          className={`${styles.chatModalWrap} ${styles.chatModalWrapDesktop}`}
+          style={{ padding: '0' }}
         >
           {chatShell}
         </div>

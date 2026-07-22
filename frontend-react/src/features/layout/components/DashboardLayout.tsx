@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, Suspense, lazy } from 'react';
 import { LogoutOutlined } from '@ant-design/icons';
-import { Layout, Modal, message, Spin } from 'antd';
+import { Layout, Modal, message, Spin, Drawer } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { authApi, type User } from '@/features/auth/api/auth';
@@ -162,6 +162,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   // не влезал и съезжал. Ниже 1280 скрываем правую колонку и даём
   // контенту растянуться.
   const [isCompact, setIsCompact] = useState(window.innerWidth <= 1400);
+  const [messagesNavOpen, setMessagesNavOpen] = useState(false);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -449,13 +450,15 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     styles.dashboardLayout,
     isMobile ? styles.dashboardLayoutMobile : styles.dashboardLayoutDesktopExpanded,
     shouldShowHeader ? styles.dashboardLayoutHeader : styles.dashboardLayoutNoHeader,
+    isMessagesPage ? styles.dashboardLayoutMessages : '',
   ].join(' ');
 
   const contentClassName = [
     styles.mainContent,
     styles.contentBase,
-    isMobile ? styles.contentPaddingMobile : styles.contentPaddingDesktop,
+    isMessagesPage ? styles.contentNoPadding : (isMobile ? styles.contentPaddingMobile : styles.contentPaddingDesktop),
     shouldShowHeader ? styles.contentWithHeader : styles.contentNoHeader,
+    isMessagesPage ? styles.contentNoMinHeight : '',
   ].join(' ');
 
   return (
@@ -475,27 +478,31 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             onLogout={handleLogout}
             onMenuClick={handleHeaderMenuClick}
             isMobile={isMobile}
+            isMessagesPage={isMessagesPage}
+            onBurgerClick={() => setMessagesNavOpen(true)}
           />
         )}
         
         <div className={dashboardLayoutClassName}>
-          <Sidebar
-            selectedKey={getSelectedKey()}
-            onMenuSelect={handleMenuSelect}
-            onLogout={handleLogout}
-            onMessagesClick={handleMessagesClick}
-            onNotificationsClick={handleNotificationsClick}
-            onArbitrationClick={handleArbitrationClick}
-            onFinanceClick={handleFinanceClick}
-            onFaqClick={handleFaqClick}
-            onImprovementsClick={handleImprovementsClick}
-            mobileDrawerOpen={mobileMenuVisible}
-            onMobileDrawerChange={setMobileMenuVisible}
-            collapsed={false}
-            unreadNotifications={unreadNotifications}
-            userProfile={sidebarUserProfile}
-            orderCounts={sidebarOrderCounts}
-          />
+          {!isMessagesPage && (
+            <Sidebar
+              selectedKey={getSelectedKey()}
+              onMenuSelect={handleMenuSelect}
+              onLogout={handleLogout}
+              onMessagesClick={handleMessagesClick}
+              onNotificationsClick={handleNotificationsClick}
+              onArbitrationClick={handleArbitrationClick}
+              onFinanceClick={handleFinanceClick}
+              onFaqClick={handleFaqClick}
+              onImprovementsClick={handleImprovementsClick}
+              mobileDrawerOpen={mobileMenuVisible}
+              onMobileDrawerChange={setMobileMenuVisible}
+              collapsed={false}
+              unreadNotifications={unreadNotifications}
+              userProfile={sidebarUserProfile}
+              orderCounts={sidebarOrderCounts}
+            />
+          )}
 
           {!isMobile && desktopSidebarOpen && (
             <div
@@ -515,10 +522,38 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           )}
         </div>
         
-        <AppFooter userRole={userProfile?.role} />
+        {!isMessagesPage && <AppFooter userRole={userProfile?.role} />}
       </Layout>
 
-      
+      <Drawer
+        placement="left"
+        open={messagesNavOpen}
+        onClose={() => setMessagesNavOpen(false)}
+        width={320}
+        className={styles.messagesNavDrawer}
+        closable={false}
+        maskClosable
+        keyboard
+      >
+        <Sidebar
+          selectedKey={getSelectedKey()}
+          onMenuSelect={(key) => { handleMenuSelect(key); setMessagesNavOpen(false); }}
+          onLogout={() => { setMessagesNavOpen(false); handleLogout(); }}
+          onMessagesClick={() => { setMessagesNavOpen(false); handleMessagesClick(); }}
+          onNotificationsClick={() => { setMessagesNavOpen(false); handleNotificationsOpen(); }}
+          onArbitrationClick={() => { setMessagesNavOpen(false); handleArbitrationClick(); }}
+          onFinanceClick={() => { setMessagesNavOpen(false); handleFinanceClick(); }}
+          onFaqClick={() => { setMessagesNavOpen(false); handleFaqClick(); }}
+          onImprovementsClick={() => { setMessagesNavOpen(false); handleImprovementsClick(); }}
+          mobileDrawerOpen={messagesNavOpen}
+          onMobileDrawerChange={setMessagesNavOpen}
+          collapsed={false}
+          unreadNotifications={unreadNotifications}
+          userProfile={sidebarUserProfile}
+          orderCounts={sidebarOrderCounts}
+        />
+      </Drawer>
+
       <Suspense fallback={<Spin size="large" />}>
         {profileModalVisible && (
           <ProfileModal

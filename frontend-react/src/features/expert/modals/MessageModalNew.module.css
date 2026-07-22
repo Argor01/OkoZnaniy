@@ -8,6 +8,13 @@
   display: none;
 }
 
+.chatModalWrap {
+  max-height: 100vh;
+  max-height: 100dvh;
+  max-height: var(--app-vh, 100dvh);
+  overflow: hidden;
+}
+
 .chatModalWrap :global(.ant-modal-content) {
   padding: 0;
   margin: auto;

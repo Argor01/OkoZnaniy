@@ -179,11 +179,12 @@ a {
 }
 
 [data-theme="dark"] .ant-modal-body {
-  background: var(--bg-primary);
+  background: var(--bg-primary) !important;
   color: var(--text-primary);
 }
 
 [data-theme="dark"] .ant-modal-footer {
+  background: var(--bg-primary) !important;
   border-top-color: var(--border-color) !important;
 }
 
