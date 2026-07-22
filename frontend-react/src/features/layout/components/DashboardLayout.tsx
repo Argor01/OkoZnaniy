@@ -37,8 +37,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(false);
-  
-  
+
   const [profileModalVisible, setProfileModalVisible] = useState(false);
   const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
   const [arbitrationModalVisible, setArbitrationModalVisible] = useState(false);
@@ -49,7 +48,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
 
   const { unreadCount: unreadNotifications, loadNotifications: refreshNotifications } = useNotifications();
-
   const handleNotificationsOpen = () => {
     setNotificationsModalVisible(true);
     refreshNotifications();
@@ -60,7 +58,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     refreshNotifications();
   };
 
-  
   const { data: userProfile, isLoading } = useQuery({
     queryKey: [...CURRENT_USER_KEY],
     queryFn: () => authApi.getCurrentUser(),
@@ -109,7 +106,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     };
   }, [clientOrdersData, inactiveClientOrdersData]);
 
-  
   const balance = userProfile?.balance ? parseFloat(userProfile.balance) : 0.00;
   const [supportUserId, setSupportUserId] = useState<number | null>(() => {
     const raw = localStorage.getItem('support_user_id');
@@ -157,10 +153,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [isChatMobile, setIsChatMobile] = useState(window.innerWidth <= 840);
   const [isChatTablet, setIsChatTablet] = useState(window.innerWidth > 840 && window.innerWidth <= 1024);
   const [isChatDesktop, setIsChatDesktop] = useState(window.innerWidth > 1024);
-  // #18: промежуточный брейкпоинт — на ноутбучных экранах (≈1024-1280px)
-  // трёхколоночный layout (sidebar 320 + content 1000 + rightSidebar 320)
-  // не влезал и съезжал. Ниже 1280 скрываем правую колонку и даём
-  // контенту растянуться.
   const [isCompact, setIsCompact] = useState(window.innerWidth <= 1400);
   const [messagesNavOpen, setMessagesNavOpen] = useState(false);
 
@@ -211,10 +203,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openMessagesPage();
   }, [closeAllModals, openMessagesPage]);
 
-  // Обработчик события для открытия формы подачи жалобы
   React.useEffect(() => {
     const handleOpenSupportChat = () => {
-      // Перенаправляем на форму подачи жалобы вместо открытия чата
       closeAllModals();
       openMessagesPage({ support: true });
     };
@@ -225,7 +215,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     };
   }, [closeAllModals, openMessagesPage]);
 
-  // Обработчик события для открытия чата по userId или chatId
   React.useEffect(() => {
     const handleOpenChatById = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -235,8 +224,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       closeAllModals();
       
       openMessagesPage({ chatId, userId });
-      
-      // Отправляем событие для загрузки чата в MessageModalNew
     };
 
     window.addEventListener('openChatById', handleOpenChatById);
@@ -260,7 +247,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     setFinanceModalVisible(true);
   }, [closeAllModals]);
 
-
   const handleFaqClick = useCallback(() => {
     closeAllModals();
     setFaqModalVisible(true);
@@ -277,7 +263,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [closeAllModals]);
 
   const handleSupportClick = useCallback(() => {
-    // Перенаправляем на форму подачи жалобы
     closeAllModals();
     openMessagesPage({ support: true });
   }, [closeAllModals, openMessagesPage]);
@@ -307,7 +292,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openOrderChat: (orderId: number, userId: number, chatId?: number) => {
         closeAllModals();
         openMessagesPage({ orderId, userId, chatId, title: `Заказ #${orderId}` });
-        // Если передан chatId, отправляем событие для открытия конкретного чата
     },
     openContextChat: (userId: number, title: string, workId?: number) => {
         closeAllModals();
@@ -534,24 +518,28 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         closable={false}
         maskClosable
         keyboard
+        zIndex={1100}
       >
-        <Sidebar
-          selectedKey={getSelectedKey()}
-          onMenuSelect={(key) => { handleMenuSelect(key); setMessagesNavOpen(false); }}
-          onLogout={() => { setMessagesNavOpen(false); handleLogout(); }}
-          onMessagesClick={() => { setMessagesNavOpen(false); handleMessagesClick(); }}
-          onNotificationsClick={() => { setMessagesNavOpen(false); handleNotificationsOpen(); }}
-          onArbitrationClick={() => { setMessagesNavOpen(false); handleArbitrationClick(); }}
-          onFinanceClick={() => { setMessagesNavOpen(false); handleFinanceClick(); }}
-          onFaqClick={() => { setMessagesNavOpen(false); handleFaqClick(); }}
-          onImprovementsClick={() => { setMessagesNavOpen(false); handleImprovementsClick(); }}
-          mobileDrawerOpen={messagesNavOpen}
-          onMobileDrawerChange={setMessagesNavOpen}
-          collapsed={false}
-          unreadNotifications={unreadNotifications}
-          userProfile={sidebarUserProfile}
-          orderCounts={sidebarOrderCounts}
-        />
+        <div className={styles.messagesNavContent}>
+          <Sidebar
+            selectedKey={getSelectedKey()}
+            onMenuSelect={(key) => { handleMenuSelect(key); setMessagesNavOpen(false); }}
+            onLogout={() => { setMessagesNavOpen(false); handleLogout(); }}
+            onMessagesClick={() => { setMessagesNavOpen(false); handleMessagesClick(); }}
+            onNotificationsClick={() => { setMessagesNavOpen(false); handleNotificationsOpen(); }}
+            onArbitrationClick={() => { setMessagesNavOpen(false); handleArbitrationClick(); }}
+            onFinanceClick={() => { setMessagesNavOpen(false); handleFinanceClick(); }}
+            onFaqClick={() => { setMessagesNavOpen(false); handleFaqClick(); }}
+            onImprovementsClick={() => { setMessagesNavOpen(false); handleImprovementsClick(); }}
+            mobileDrawerOpen={messagesNavOpen}
+            onMobileDrawerChange={setMessagesNavOpen}
+            collapsed={false}
+            unreadNotifications={unreadNotifications}
+            userProfile={sidebarUserProfile}
+            orderCounts={sidebarOrderCounts}
+            forceContentOnly
+          />
+        </div>
       </Drawer>
 
       <Suspense fallback={<Spin size="large" />}>
@@ -571,7 +559,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             isTablet={isChatTablet}
           />
         )}
-                <ArbitrationModal 
+        <ArbitrationModal 
           visible={arbitrationModalVisible} 
           onClose={() => setArbitrationModalVisible(false)}
           isMobile={isMobile}

@@ -4,6 +4,12 @@
   flex: 1;
   overflow-y: auto;
   background: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatList::-webkit-scrollbar {
+  display: none;
 }
 
 .chatListItem {

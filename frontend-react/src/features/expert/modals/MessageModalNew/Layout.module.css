@@ -84,6 +84,12 @@
   overflow: hidden;
   position: relative;
   box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatModalContainer::-webkit-scrollbar {
+  display: none;
 }
 
 .chatModalContainerMobile {

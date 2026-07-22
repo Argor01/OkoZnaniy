@@ -55,6 +55,7 @@ interface SidebarProps {
   onMobileDrawerChange?: (open: boolean) => void;
   collapsed?: boolean;
   orderCounts?: Partial<Record<'all' | 'new' | 'confirming' | 'in_progress' | 'waiting_payment' | 'review' | 'completed' | 'revision' | 'download' | 'closed' | 'inactive', number>>;
+  forceContentOnly?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = React.memo(({
@@ -74,6 +75,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   onMobileDrawerChange,
   collapsed = false,
   orderCounts,
+  forceContentOnly = false,
 }) => {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= BREAKPOINTS.TABLET);
@@ -351,6 +353,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       />
     </>
   ), [actionSection, selectedKey, isMobile, openKeys, handleMenuClick, menuItems]);
+
+  if (forceContentOnly) {
+    return <>{sidebarContent}</>;
+  }
 
   return (
     <>

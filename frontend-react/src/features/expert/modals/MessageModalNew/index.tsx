@@ -509,7 +509,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
             file_url: lastMessage.file_url ?? null,
           }
         : previous?.last_message ?? null,
-      last_message_time: lastMessage?.created_at ?? previous?.last_message_time ?? '',
+      last_message_time: previous?.last_message_time || lastMessage?.created_at || '',
       unread_count: detail.unread_count ?? previous?.unread_count ?? 0,
       is_frozen: detail.is_frozen,
       frozen_reason: detail.frozen_reason,

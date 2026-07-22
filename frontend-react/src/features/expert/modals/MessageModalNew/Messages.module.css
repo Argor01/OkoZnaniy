@@ -9,6 +9,12 @@
   display: flex;
   flex-direction: column;
   position: relative;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatMessages::-webkit-scrollbar {
+  display: none;
 }
 
 .chatMessagesDragOver {

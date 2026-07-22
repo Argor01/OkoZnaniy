@@ -135,16 +135,13 @@
 
 .mainLayoutContent {
   flex: 1 1 auto;
-  max-width: 1000px; /* Ограничиваем ширину основного контента */
-  min-width: 0; /* #18: без этого flex-child переполнял родителя на узких экранах */
+  max-width: 1000px;
+  min-width: 0;
   background: transparent;
-  min-height: 0; /* To allow truncation if needed */
-  margin: 0 24px; /* Отступы от боковых панелей */
+  min-height: 0;
+  margin: 0 24px;
 }
 
-/* #18: на компактных экранах (<=1280px) правая колонка скрыта —
- * отдаём всю доступную ширину основному контенту, чтобы карточки
- * и таблицы не ломались. */
 @media (max-width: 1280px) {
   .mainLayoutContent {
     max-width: none;
@@ -177,7 +174,7 @@
 .dashboardLayout {
   background: transparent;
   transition: all 0.2s;
-  max-width: 1920px; /* Увеличена ширина для размещения трех колонок */
+  max-width: 1920px;
   margin: 0 auto;
   padding: 0 24px;
   width: 100%;
@@ -194,7 +191,7 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  justify-content: center; /* Центрируем контент */
+  justify-content: center;
 }
 
 .dashboardLayoutDesktopCollapsed {
@@ -371,61 +368,33 @@
   min-height: 0 !important;
 }
 
-/* Navigation drawer on /messages page */
 .messagesNavDrawer :global(.ant-drawer-mask) {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   background-color: rgba(0, 0, 0, 0.25);
 }
 
+.messagesNavDrawer :global(.ant-drawer-content-wrapper) {
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15) !important;
+}
+
 .messagesNavDrawer :global(.ant-drawer-content) {
   background: transparent;
-  box-shadow: none;
 }
 
 .messagesNavDrawer :global(.ant-drawer-body) {
-  padding: 0;
+  padding: 0 !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  background: var(--color-sidebar-bg, #ffffff) !important;
+}
+
+.messagesNavContent {
   height: 100%;
-  overflow: hidden;
-  background: transparent;
   display: flex;
   flex-direction: column;
-}
-
-.messagesNavDrawer :global(.ant-drawer-body) > div {
-  height: 100% !important;
-  min-height: 100% !important;
-  max-height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: none !important;
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  overflow-y: auto !important;
-  border-radius: 0 !important;
-  border: none !important;
-  border-right: 1px solid var(--border-color, #e5e7eb) !important;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: var(--color-sidebar-bg, #ffffff) !important;
-}
-
-.messagesNavDrawer :global(.ant-drawer-body) :global(.ant-layout-sider) {
-  height: 100% !important;
-  max-height: 100% !important;
-  position: relative !important;
-  top: auto !important;
-  flex: 1 1 auto !important;
-  overflow-y: auto !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-  border: none !important;
-  background: var(--color-sidebar-bg, #ffffff) !important;
+  background: var(--color-sidebar-bg, #ffffff);
+  overflow-y: auto;
+  padding: 8px;
 }
 
