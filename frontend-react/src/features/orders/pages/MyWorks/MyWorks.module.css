@@ -628,24 +628,24 @@
   
   .table :global(.ant-table-thead > tr > th) {
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 18px;
   }
   
   .table :global(.ant-table-tbody > tr > td) {
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 18px;
   }
 }
 
 @media (max-width: 480px) {
   .table :global(.ant-table-thead > tr > th) {
     padding: 6px 8px;
-    font-size: 13px;
+    font-size: 17px;
   }
   
   .table :global(.ant-table-tbody > tr > td) {
     padding: 6px 8px;
-    font-size: 13px;
+    font-size: 17px;
   }
   
   .table :global(.ant-table-pagination) {
@@ -682,22 +682,22 @@
 /* Mobile title cell */
 @media (max-width: 768px) {
   .titleText {
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1.4;
   }
   
   .titleMeta {
-    font-size: 11px;
+    font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
   .titleText {
-    font-size: 13px;
+    font-size: 17px;
   }
   
   .titleMeta {
-    font-size: 10px;
+    font-size: 14px;
   }
 }
 
@@ -807,25 +807,80 @@
 /* codex mobile spacing fix */
 @media (max-width: 768px) {
   .filtersRowTop {
-    gap: 14px;
-  } 
-
-  .filtersToggleRow {
-    margin-top: 10px;
+    gap: 12px;
+    flex-direction: column;
   }
 
-}
+  .filtersRowTop .searchInput,
+  .orderIdInput,
+  .filtersRowTop .filterSelect {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    flex: none;
+  }
 
-/* codex mobile budget row fix */
-@media (max-width: 575px) {
+  /* 3 classes → always wins over AppSelect.module.css (2 classes) */
+  .filtersRowTop .filterSelect :global(.ant-select-selector) {
+    height: 38px !important;
+    font-size: 14px !important;
+    padding: 0 11px !important;
+  }
+
+  .filtersRowTop .filterSelect :global(.ant-select-selection-item) {
+    line-height: 38px !important;
+    font-size: 14px !important;
+  }
+
+  /* AppInput wraps <Input prefix=...> → .ant-input-affix-wrapper controls outer height */
+  .filtersRowTop :global(.ant-input-affix-wrapper) {
+    height: 38px !important;
+    min-height: 38px;
+    max-height: 38px;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 11px !important;
+    line-height: 1;
+  }
+
+  .filtersRowTop :global(.ant-input) {
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 !important;
+    line-height: 1;
+  }
+
+  .filtersRowTop :global(.ant-input-prefix) {
+    display: flex !important;
+    align-items: center !important;
+    line-height: 1;
+  }
+
+  .filtersRowTop .filterSelect {
+    margin-top: 0 !important;
+  }
+
+  .filtersRowTop .orderIdInput {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .filtersToggleRow {
+    margin-top: 2px;
+  }
+
   .filtersAdvancedRow {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 4px 0;
   }
 
   .budgetGroup {
     width: 100%;
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 8px;
     align-items: center;
   }
 
@@ -841,9 +896,32 @@
     flex: 1 1 0;
   }
 
+  .budgetInput :global(.ant-input-number) {
+    width: 100%;
+  }
+
   .budgetInput :global(.ant-input-number-input) {
+    height: 36px;
+    display: flex;
+    align-items: center;
     font-size: 14px;
-    padding-left: 10px;
-    padding-right: 10px;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filtersRowTop .filterSelect :global(.ant-select-selector) {
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .filtersRowTop .filterSelect :global(.ant-select-selection-item) {
+    line-height: 38px !important;
+  }
+}
+
+@media (max-width: 575px) {
+  .budgetGroup {
+    gap: 6px;
   }
 }
