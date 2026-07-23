@@ -556,16 +556,58 @@
 }
 
 /* Стили для TextArea */
-.promoTabs .ant-input {
+.promoTabs :global(.ant-input) {
   border-radius: var(--radius-sm, 8px);
   border-color: var(--border-color, #e5e7eb);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 }
 
-.promoTabs .ant-input:focus,
-.promoTabs .ant-input:hover {
+.copyRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 8px;
+}
+
+.copyInput {
+  flex: 1;
+  min-width: 0;
+}
+
+.copyInput :global(.ant-input) {
+  border-radius: var(--radius-sm, 8px) 0 0 var(--radius-sm, 8px);
+}
+
+.copyBtn {
+  height: 40px;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-left: none;
+  border-radius: 0 var(--radius-sm, 8px) var(--radius-sm, 8px) 0;
+  flex-shrink: 0;
+  padding: 0 16px;
+}
+
+.copyBtn:hover {
   border-color: var(--primary-blue, #7c3aed);
-  box-shadow: var(--shadow-focus, 0 0 0 3px rgba(100, 53, 165, 0.1));
+}
+
+.copyBtnText {
+  white-space: nowrap;
+}
+
+@media (max-width: 575px) {
+  .copyBtnText {
+    display: none;
+  }
+
+  .copyBtn {
+    padding: 0 12px;
+  }
 }
 /*
 Стили для реферальной карточки */

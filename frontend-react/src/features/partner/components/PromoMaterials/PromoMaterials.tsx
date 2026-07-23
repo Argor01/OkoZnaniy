@@ -120,41 +120,41 @@ export const PromoMaterials: React.FC = () => {
 
               <div>
                 <Text strong>Реферальный код:</Text>
-                <div style={{ marginTop: 8 }}>
+                <div className={styles.copyRow}>
                   <Input
                     value={user?.referral_code || ''}
                     readOnly
                     size="large"
-                    addonAfter={
-                      <Button
-                        type="text"
-                        icon={<CopyOutlined />}
-                        onClick={() => copyToClipboard(user?.referral_code || '')}
-                      >
-                        Копировать
-                      </Button>
-                    }
+                    className={styles.copyInput}
                   />
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={() => copyToClipboard(user?.referral_code || '')}
+                    className={styles.copyBtn}
+                  >
+                    <span className={styles.copyBtnText}>Копировать</span>
+                  </Button>
                 </div>
               </div>
 
               <div>
                 <Text strong>Партнерская ссылка:</Text>
-                <div style={{ marginTop: 8 }}>
+                <div className={styles.copyRow}>
                   <Input
                     value={referralLink}
                     readOnly
                     size="large"
-                    addonAfter={
-                      <Button
-                        type="text"
-                        icon={<CopyOutlined />}
-                        onClick={() => copyToClipboard(referralLink)}
-                      >
-                        Копировать
-                      </Button>
-                    }
+                    className={styles.copyInput}
                   />
+                  <Button
+                    type="text"
+                    icon={<CopyOutlined />}
+                    onClick={() => copyToClipboard(referralLink)}
+                    className={styles.copyBtn}
+                  >
+                    <span className={styles.copyBtnText}>Копировать</span>
+                  </Button>
                 </div>
               </div>
 

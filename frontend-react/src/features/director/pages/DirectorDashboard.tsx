@@ -380,7 +380,6 @@ const DirectorDashboard: React.FC = () => {
         open={logoutModalVisible}
         onCancel={() => setLogoutModalVisible(false)}
         footer={null}
-        centered
         width={400}
         closable={false}
         className={logoutStyles.logoutModal}
