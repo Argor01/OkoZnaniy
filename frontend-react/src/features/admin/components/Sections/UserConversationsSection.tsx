@@ -161,7 +161,7 @@ export const UserConversationsSection: React.FC = () => {
   const fetchChats = async (nextFilters: ConversationFilters = filters) => {
     setLoading(true);
     try {
-      const response = await apiClient.get('admin-panel/platform-conversations/', {
+      const response = await apiClient.get('/admin-panel/platform-conversations/', {
         params: {
           order_id: nextFilters.orderId || undefined,
           username: nextFilters.username || undefined,

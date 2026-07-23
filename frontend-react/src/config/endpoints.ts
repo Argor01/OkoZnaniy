@@ -178,6 +178,11 @@ export const API_ENDPOINTS = {
     generateLink: '/users/generate_referral_link/',
     list: '/users/partners_list/',
   },
+  payments: {
+    createPayment: '/payments/payments/create_payment/',
+    detail: (id: number) => `/payments/payments/${id}/`,
+    checkStatus: (id: number) => `/payments/payments/${id}/`,
+  },
   notifications: {
     sendRegistrationEmail: '/notifications/send-registration-email/',
     sendPartnerEmail: '/notifications/send-partner-email/',

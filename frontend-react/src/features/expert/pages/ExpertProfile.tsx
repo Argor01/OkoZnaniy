@@ -5,6 +5,7 @@ import { Typography, Tag, Spin, Alert, Rate, Divider, Avatar } from 'antd';
 import { ArrowLeftOutlined, UserOutlined, CheckCircleOutlined, MessageOutlined, QuestionCircleOutlined, LikeOutlined, TrophyOutlined } from '@ant-design/icons';
 import { expertsApi, type ExpertStatistics, type ExpertReview } from '@/features/expert/api/experts';
 import { knowledgeApi } from '@/features/knowledge/api/knowledgeApi';
+import { apiClient } from '@/api/client';
 import dayjs from 'dayjs';
 import { getMediaUrl } from '@/config/api';
 import styles from './ExpertProfile.module.css';
@@ -26,10 +27,8 @@ const ExpertProfile: React.FC = () => {
   const { data: expertData, isLoading: expertLoading, error: expertError } = useQuery({
     queryKey: ['expert', expertId],
     queryFn: async () => {
-      
-      const response = await fetch(`http://localhost:8000/api/users/${expertId}/`);
-      if (!response.ok) throw new Error('Эксперт не найден');
-      return response.json();
+      const response = await apiClient.get(`/users/${expertId}/`);
+      return response.data;
     },
     enabled: !!expertId,
   });

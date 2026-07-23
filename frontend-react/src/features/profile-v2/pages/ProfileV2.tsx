@@ -176,7 +176,7 @@ const ProfileV2: React.FC = () => {
   const saveAbout = async () => {
     setAboutSaving(true);
     try {
-      await apiClient.patch('/users/me/', { about_me: aboutDraft });
+      await apiClient.patch('/users/update_me/', { about_me: aboutDraft });
       msg.success('Сохранено');
     } catch { msg.error('Не удалось сохранить'); }
     finally { setAboutSaving(false); }
@@ -541,7 +541,7 @@ const ProfileV2: React.FC = () => {
                 onClick={async () => {
                   try {
                     setAboutSaving(true);
-                    await apiClient.patch('/users/me/', { about: aboutDraft });
+                    await apiClient.patch('/users/update_me/', { about_me: aboutDraft });
                     message.success('Сохранено');
                   } catch { message.error('Не удалось сохранить'); }
                   finally { setAboutSaving(false); }
