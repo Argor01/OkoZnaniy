@@ -109,6 +109,7 @@
 
 .ticketSystemSearch {
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .ticketSystemFiltersRow {
@@ -208,7 +209,67 @@
   }
   
   .ticketSystemFiltersRow {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .ticketSystemSearch,
+  .ticketSystemFilterSelect {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .ticketSystemSearch :global(.ant-input-wrapper) {
+    border: 1px solid var(--color-border-primary, #d9d9d9);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--color-bg-container, #fff);
+    padding: 0 !important;
+  }
+
+  .ticketSystemSearch :global(.ant-input-wrapper:focus-within) {
+    border-color: var(--color-primary, #6435a5);
+    box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.08);
+  }
+
+  .ticketSystemSearch :global(.ant-input-affix-wrapper),
+  .ticketSystemSearch :global(.ant-input),
+  .ticketSystemSearch :global(.ant-input-search-button),
+  .ticketSystemFiltersRow :global(.ant-select-selector) {
+    min-height: 44px !important;
+    box-sizing: border-box;
+    border-radius: 12px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .ticketSystemSearch :global(.ant-input) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .ticketSystemSearch :global(.ant-input-group-addon) {
+    width: 44px;
+    flex: 0 0 44px;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .ticketSystemSearch :global(.ant-input-search-button) {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .ticketSystemFiltersRow :global(.ant-select-selector) {
+    border: 1px solid var(--color-border-primary, #d9d9d9) !important;
+    border-radius: 12px !important;
+    min-height: 44px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
   
   .ticketSystemListBody {

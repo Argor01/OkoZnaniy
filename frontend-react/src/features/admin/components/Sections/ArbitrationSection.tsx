@@ -29,7 +29,6 @@ import {
   EyeOutlined,
   FileTextOutlined,
   FilterOutlined,
-  SearchOutlined,
   SendOutlined,
   UserOutlined,
   DollarOutlined,
@@ -37,10 +36,12 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { arbitrationApi } from '@/features/admin/api/arbitration';
 import styles from './ArbitrationSection.module.css';
+import './ArbitrationSection.css';
 import { logger } from '@/utils/logger';
 
 const { Text, Title, Paragraph } = Typography;
 const { Option } = Select;
+const { Search } = Input;
 
 interface ArbitrationCase {
   id: number;
@@ -109,6 +110,13 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   const [refundPercentage, setRefundPercentage] = useState<number>(50);
   const [refundForm] = Form.useForm();
   const [refundProcessing, setRefundProcessing] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     let filtered = cases;
@@ -356,15 +364,15 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       ) : null}
 
       <Card style={{ marginBottom: 16 }} className={styles.filtersContainer}>
-        <Space wrap>
-          <Input
-            placeholder="Поиск по номеру, теме, истцу..."
-            prefix={<SearchOutlined />}
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
-            className={styles.searchInput}
-            allowClear
-          />
+        <Search
+          placeholder="Поиск по номеру, теме, истцу..."
+          value={searchText}
+          onChange={(event) => setSearchText(event.target.value)}
+          className={styles.searchInput}
+          allowClear
+        />
+
+        <div className={styles.filtersRow}>
           <Select placeholder="Статус" value={statusFilter} onChange={setStatusFilter} className={styles.statusSelect} allowClear>
             <Option value="submitted">Подано</Option>
             <Option value="under_review">На рассмотрении</Option>
@@ -372,11 +380,14 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
             <Option value="decision_made">Решение принято</Option>
             <Option value="closed">Закрыто</Option>
           </Select>
+        </div>
+
+        <div className={styles.filtersActions}>
           <Button icon={<FilterOutlined />} onClick={() => { setSearchText(''); setStatusFilter(undefined); }}>
             Сбросить фильтры
           </Button>
           <Button type="primary" onClick={onRefresh}>Обновить</Button>
-        </Space>
+        </div>
       </Card>
 
       <Card>
@@ -391,7 +402,20 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
         />
       </Card>
 
-      <Modal title={selectedCase ? `Арбитраж ${selectedCase.case_number}` : 'Арбитраж'} open={modalOpen} onCancel={closeModal} footer={null} width={900} destroyOnClose>
+      <Modal
+        title={selectedCase ? `Арбитраж ${selectedCase.case_number}` : 'Арбитраж'}
+        open={modalOpen}
+        onCancel={closeModal}
+        footer={null}
+        width={900}
+        destroyOnClose
+        styles={{
+          body: {
+            overflowY: 'auto',
+            maxHeight: isMobile ? '100vh' : '70vh',
+          },
+        }}
+      >
         {detailLoading || !detailData ? (
           <div style={{ padding: 32, textAlign: 'center' }}><Spin /></div>
         ) : (

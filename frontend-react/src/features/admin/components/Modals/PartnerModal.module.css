@@ -235,4 +235,31 @@
     height: 28px;
     min-width: 56px;
   }
+
+  .form :global(.ant-form-item-label > label) {
+    font-size: 13px;
+  }
+
+  .form :global(.ant-input-number) {
+    font-size: 14px;
+  }
+
+  .form :global(.ant-input-number-input) {
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .form :global(.ant-input-number-addon) {
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .form :global(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+
+  .section :global(.ant-col) {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
 }

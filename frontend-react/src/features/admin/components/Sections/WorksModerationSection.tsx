@@ -268,7 +268,7 @@ export const WorksModerationSection: React.FC = () => {
           />
         )}
 
-        <div className="worksModerationFilterRow">
+        <div className={styles.worksModerationFiltersRow}>
           <Search
             placeholder="Поиск по названию..."
             allowClear
@@ -278,7 +278,7 @@ export const WorksModerationSection: React.FC = () => {
           <Select
             defaultValue="all"
             onChange={(value) => setStatusFilter(value)}
-            className="worksModerationSelect"
+            className={styles.worksModerationStatusSelect}
           >
             <Option value="all">Все статусы</Option>
             <Option value="pending">На модерации</Option>

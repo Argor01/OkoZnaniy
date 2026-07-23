@@ -27,7 +27,6 @@ import {
   UserOutlined,
   CheckOutlined,
   CloseOutlined,
-  SearchOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   FileTextOutlined,
@@ -437,7 +436,6 @@ export const PendingApprovalSection: React.FC = () => {
             className={styles.pendingApprovalSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

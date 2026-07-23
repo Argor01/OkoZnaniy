@@ -25,7 +25,6 @@ import {
   ClockCircleOutlined,
   CheckOutlined,
   CloseOutlined,
-  SearchOutlined,
   FilterOutlined,
   ExclamationCircleOutlined
 } from '@ant-design/icons';
@@ -313,7 +312,6 @@ export const NewClaimsSection: React.FC = () => {
             className={styles.newClaimsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

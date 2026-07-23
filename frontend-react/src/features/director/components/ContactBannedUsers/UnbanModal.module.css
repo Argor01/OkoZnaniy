@@ -226,12 +226,12 @@
   }
 
   .unbanModalActions {
-    flex-direction: column-reverse;
+    flex-direction: row;
     gap: 10px;
   }
 
   .unbanModalBtn {
-    width: 100%;
+    flex: 1;
     height: 46px;
     font-size: 16px;
   }

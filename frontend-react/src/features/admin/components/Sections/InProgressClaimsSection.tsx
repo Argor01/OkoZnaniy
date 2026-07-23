@@ -27,7 +27,6 @@ import {
   UserOutlined,
   CheckOutlined,
   CloseOutlined,
-  SearchOutlined,
   ClockCircleOutlined,
   EditOutlined,
   HistoryOutlined
@@ -386,7 +385,6 @@ export const InProgressClaimsSection: React.FC = () => {
             className={styles.inProgressClaimsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

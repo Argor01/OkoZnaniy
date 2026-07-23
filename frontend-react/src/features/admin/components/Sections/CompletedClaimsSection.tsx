@@ -25,7 +25,6 @@ import {
   MessageOutlined,
   UserOutlined,
   CheckCircleOutlined,
-  SearchOutlined,
   FilterOutlined,
   StarOutlined,
   ClockCircleOutlined,
@@ -415,7 +414,6 @@ export const CompletedClaimsSection: React.FC = () => {
             className={styles.completedClaimsSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

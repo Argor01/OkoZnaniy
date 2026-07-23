@@ -50,6 +50,47 @@
   width: 100%;
 }
 
+.chatListSearch :global(.ant-input-wrapper) {
+  border: 1px solid var(--color-border-primary, #d9d9d9);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-bg-container, #fff);
+  padding: 0 !important;
+}
+
+.chatListSearch :global(.ant-input-wrapper:focus-within) {
+  border-color: var(--color-primary, #6435a5);
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.08);
+}
+
+.chatListSearch :global(.ant-input-affix-wrapper),
+.chatListSearch :global(.ant-input),
+.chatListSearch :global(.ant-input-search-button) {
+  min-height: 44px !important;
+  box-sizing: border-box;
+  border-radius: 12px !important;
+}
+
+.chatListSearch :global(.ant-input) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.chatListSearch :global(.ant-input-group-addon) {
+  width: 44px;
+  flex: 0 0 44px;
+  border: none !important;
+  background: transparent !important;
+}
+
+.chatListSearch :global(.ant-input-search-button) {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
 .filtersGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -59,6 +100,47 @@
 
 .filterInput {
   width: 100%;
+}
+
+.filterInput :global(.ant-input-wrapper) {
+  border: 1px solid var(--color-border-primary, #d9d9d9);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-bg-container, #fff);
+  padding: 0 !important;
+}
+
+.filterInput :global(.ant-input-wrapper:focus-within) {
+  border-color: var(--color-primary, #6435a5);
+  box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.08);
+}
+
+.filterInput :global(.ant-input-affix-wrapper),
+.filterInput :global(.ant-input),
+.filterInput :global(.ant-input-search-button) {
+  min-height: 44px !important;
+  box-sizing: border-box;
+  border-radius: 12px !important;
+}
+
+.filterInput :global(.ant-input) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.filterInput :global(.ant-input-group-addon) {
+  width: 44px;
+  flex: 0 0 44px;
+  border: none !important;
+  background: transparent !important;
+}
+
+.filterInput :global(.ant-input-search-button) {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
 }
 
 .filterActions {
@@ -952,63 +1034,9 @@
   }
 
   .filterInput,
-  .filterInput :global(.ant-input-affix-wrapper),
-  .filtersGrid :global(.ant-input-affix-wrapper),
-  .chatListSearch,
-  .chatListSearch :global(.ant-input-search),
-  .chatListSearch :global(.ant-input-group-wrapper),
-  .chatListSearch :global(.ant-input-wrapper),
-  .chatListSearch :global(.ant-input-group),
-  .chatListSearch :global(.ant-input-affix-wrapper) {
+  .chatListSearch {
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
-  }
-
-  .filtersGrid :global(.ant-input-affix-wrapper),
-  .chatListSearch :global(.ant-input-affix-wrapper) {
-    padding: 0 14px;
-    overflow: hidden;
-  }
-
-  .chatListHeader :global(.ant-input-affix-wrapper),
-  .chatListHeader :global(.ant-input-search .ant-input),
-  .chatListHeader :global(.ant-input-search-button) {
-    min-height: 46px;
-    box-sizing: border-box;
-    border-radius: 14px;
-  }
-
-  .chatListHeader :global(.ant-input-affix-wrapper) {
-    display: flex;
-    align-items: center;
-  }
-
-  .chatListHeader :global(.ant-input) {
-    min-width: 0;
-    height: auto;
-    font-size: 15px;
-  }
-
-  .chatListHeader :global(.ant-input-affix-wrapper > input.ant-input),
-  .chatListHeader :global(.ant-input-affix-wrapper .ant-input) {
-    min-height: auto !important;
-    height: auto !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    background: transparent !important;
-  }
-
-  .chatListHeader :global(.ant-input-prefix),
-  .chatListHeader :global(.ant-input-suffix) {
-    flex: 0 0 auto;
-  }
-
-  .chatListHeader :global(.ant-input-group-addon) {
-    width: 48px;
-    flex: 0 0 48px;
   }
 
   .filterActions {

@@ -20,7 +20,6 @@ import {
 } from 'antd';
 import {
   EyeOutlined,
-  SearchOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useQuery } from '@tanstack/react-query';
@@ -373,7 +372,6 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             className={styles.allOrdersSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
 
           <Select

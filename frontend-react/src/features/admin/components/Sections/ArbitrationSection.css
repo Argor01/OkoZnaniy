@@ -40,3 +40,30 @@
   background: #ff4d4f;
   box-shadow: 0 0 0 1px #fff;
 }
+
+@media (max-width: 768px) {
+  .arbitration-modal .ant-modal {
+    top: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+  }
+
+  .arbitration-modal .ant-modal-content {
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .arbitration-modal .ant-modal-body {
+    flex: 1 1 0% !important;
+    overflow-y: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    padding: 16px !important;
+  }
+}

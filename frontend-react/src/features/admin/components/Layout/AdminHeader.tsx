@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Typography, Button, Dropdown } from 'antd';
+import { Layout, Typography, Button } from 'antd';
 import { 
   LogoutOutlined, 
   MenuOutlined
@@ -11,7 +11,7 @@ import type { MenuKey } from '@/features/admin/types';
 import styles from './AdminHeader.module.css';
 
 const { Header } = Layout;
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 interface AdminHeaderProps {
   user?: User;
@@ -32,17 +32,6 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   isTablet = false,
 }) => {
   const currentTitle = titleMap[selectedMenu] || 'Личный кабинет администратора';
-
-  
-  const userMenuItems = [
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Выйти',
-      onClick: onLogout,
-      danger: true,
-    },
-  ];
 
   return (
     <Header className={styles.header}>
@@ -67,30 +56,13 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       <div className={styles.rightSection}>
         <ThemeToggle size={isMobile ? 'small' : 'middle'} />
 
-        <Dropdown
-          menu={{ items: userMenuItems }}
-          placement="bottomRight"
-          trigger={['click']}
-        >
-          <Button
-            type="text"
-            className={styles.userButton}
-          >
-            <Text className={styles.username}>
-              Администратор
-            </Text>
-          </Button>
-        </Dropdown>
-
-        {isMobile && (
-          <Button
-            type="text"
-            danger
-            icon={<LogoutOutlined />}
-            onClick={onLogout}
-            className={styles.logoutButton}
-          />
-        )}
+        <Button
+          type="text"
+          danger
+          icon={<LogoutOutlined />}
+          onClick={onLogout}
+          className={styles.logoutButton}
+        />
       </div>
     </Header>
   );

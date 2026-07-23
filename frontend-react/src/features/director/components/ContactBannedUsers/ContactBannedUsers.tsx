@@ -17,7 +17,6 @@ import {
 } from 'antd';
 import { 
   UserOutlined, 
-  SearchOutlined,
   EyeOutlined,
   UnlockOutlined,
   WarningOutlined,
@@ -414,7 +413,6 @@ const ContactBannedUsers: React.FC = () => {
             className={styles.searchInput}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

@@ -145,7 +145,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
   const listPanel = (
     <div style={{ width: isMobile ? "100%" : 300, borderRight: isMobile ? "none" : "1px solid var(--color-border-secondary, #f0f0f0)", display: "flex", flexDirection: "column", flexShrink: 0, height: "100%", minHeight: 0 }}>
       <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--color-border-secondary, #f0f0f0)", flexShrink: 0 }}>
-        <Input prefix={<SearchOutlined style={{ color: "var(--color-text-tertiary, #bfbfbf)" }} />} placeholder="Поиск чатов..." value={search} onChange={e => setSearch(e.target.value)} style={{ borderRadius: 20 }} />
+        <Input prefix={<SearchOutlined style={{ color: "var(--color-text-tertiary, #bfbfbf)" }} />} placeholder="Поиск чатов..." value={search} onChange={e => setSearch(e.target.value)} style={{ borderRadius: 20 }} className={styles.chatListSearch} />
       </div>
       <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
         {rLoad ? <div style={{ padding: 32, textAlign: "center" }}><Spin /></div> :

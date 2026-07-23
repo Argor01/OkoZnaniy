@@ -13,7 +13,6 @@ import {
 } from 'antd';
 import { 
   MessageOutlined,
-  SearchOutlined,
   FilterOutlined,
   ReloadOutlined
 } from '@ant-design/icons';
@@ -301,31 +300,28 @@ export const UserConversationsSection: React.FC = () => {
           </div>
           
           <div className={styles.filtersGrid}>
-            <Input
+            <Search
               placeholder="ID заказа"
               value={filters.orderId}
               onChange={(e) => handleFilterChange('orderId', e.target.value.replace(/[^\d]/g, ''))}
-              onPressEnter={() => fetchChats()}
+              onSearch={() => fetchChats()}
               className={styles.filterInput}
-              prefix={<SearchOutlined />}
               allowClear
             />
-            <Input
+            <Search
               placeholder="Никнейм или email"
               value={filters.username}
               onChange={(e) => handleFilterChange('username', e.target.value)}
-              onPressEnter={() => fetchChats()}
+              onSearch={() => fetchChats()}
               className={styles.filterInput}
-              prefix={<SearchOutlined />}
               allowClear
             />
-            <Input
+            <Search
               placeholder="Название заказа"
               value={filters.orderTitle}
               onChange={(e) => handleFilterChange('orderTitle', e.target.value)}
-              onPressEnter={() => fetchChats()}
+              onSearch={() => fetchChats()}
               className={styles.filterInput}
-              prefix={<SearchOutlined />}
               allowClear
             />
           </div>
@@ -357,7 +353,6 @@ export const UserConversationsSection: React.FC = () => {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             className={styles.chatListSearch}
-            prefix={<SearchOutlined />}
           />
         </div>
 

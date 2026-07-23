@@ -165,32 +165,79 @@
   }
   
   :global(.ant-statistic-title) {
-    font-size: 12px !important;
+    font-size: 16px !important;
   }
   
   :global(.ant-statistic-content) {
-    font-size: 18px !important;
+    font-size: 22px !important;
   }
   
   /* Фильтры */
   .allOrdersFiltersRow {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
   
   .allOrdersSearch,
   .allOrdersSelectStatus,
   .allOrdersSelectSubject,
   .allOrdersRangePicker {
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     box-sizing: border-box;
   }
-  
-  .allOrdersSearch :global(.ant-input) {
-    font-size: 16px; /* Предотвращает зум на iOS */
+
+  .allOrdersFiltersRow :global(.ant-input-search .ant-input-wrapper) {
+    border: 1px solid var(--color-border-primary, #d9d9d9);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--color-bg-container, #fff);
+    padding: 0 !important;
+  }
+
+  .allOrdersFiltersRow :global(.ant-input-search .ant-input-wrapper:focus-within) {
+    border-color: var(--color-primary, #6435a5);
+    box-shadow: 0 0 0 2px rgba(100, 53, 165, 0.08);
+  }
+
+  .allOrdersFiltersRow :global(.ant-input-affix-wrapper),
+  .allOrdersFiltersRow :global(.ant-input-search .ant-input),
+  .allOrdersFiltersRow :global(.ant-input-search-button),
+  .allOrdersFiltersRow :global(.ant-select-selector),
+  .allOrdersFiltersRow :global(.ant-picker) {
+    min-height: 44px !important;
+    box-sizing: border-box;
+    border-radius: 12px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .allOrdersFiltersRow :global(.ant-input-search .ant-input) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .allOrdersFiltersRow :global(.ant-input-group-addon) {
+    width: 44px;
+    flex: 0 0 44px;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .allOrdersFiltersRow :global(.ant-input-search-button) {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .allOrdersFiltersRow :global(.ant-select-selector),
+  .allOrdersFiltersRow :global(.ant-picker) {
+    border: 1px solid var(--color-border-primary, #d9d9d9) !important;
+    border-radius: 12px !important;
   }
   
   /* Таблица */
@@ -204,37 +251,37 @@
   
   :global(.ant-table-thead > tr > th) {
     padding: 8px 4px !important;
-    font-size: 12px !important;
+    font-size: 16px !important;
   }
   
   :global(.ant-table-tbody > tr > td) {
     padding: 8px 4px !important;
-    font-size: 12px !important;
+    font-size: 16px !important;
   }
   
   .allOrdersTitle {
-    font-size: 13px;
+    font-size: 17px;
     -webkit-line-clamp: 1;
   }
   
   .allOrdersMetaText {
-    font-size: 10px;
+    font-size: 14px;
   }
   
   .allOrdersPersonName {
-    font-size: 13px;
+    font-size: 17px;
   }
   
   .allOrdersPersonHandle {
-    font-size: 10px;
+    font-size: 14px;
   }
   
   .allOrdersDeadlineDate {
-    font-size: 12px;
+    font-size: 16px;
   }
   
   .allOrdersDeadlineTime {
-    font-size: 10px;
+    font-size: 14px;
   }
   
   /* Пагинация */
@@ -336,45 +383,45 @@
   }
   
   :global(.ant-statistic-title) {
-    font-size: 10px !important;
+    font-size: 14px !important;
   }
   
   :global(.ant-statistic-content) {
-    font-size: 14px !important;
+    font-size: 18px !important;
   }
   
   :global(.ant-table-thead > tr > th) {
     padding: 6px 2px !important;
-    font-size: 11px !important;
+    font-size: 15px !important;
   }
   
   :global(.ant-table-tbody > tr > td) {
     padding: 6px 2px !important;
-    font-size: 11px !important;
+    font-size: 15px !important;
   }
   
   .allOrdersTitle {
-    font-size: 12px;
+    font-size: 16px;
   }
   
   .allOrdersMetaText {
-    font-size: 9px;
+    font-size: 13px;
   }
   
   .allOrdersPersonName {
-    font-size: 12px;
+    font-size: 16px;
   }
   
   .allOrdersPersonHandle {
-    font-size: 9px;
+    font-size: 13px;
   }
   
   .allOrdersDeadlineDate {
-    font-size: 11px;
+    font-size: 15px;
   }
   
   .allOrdersDeadlineTime {
-    font-size: 9px;
+    font-size: 13px;
   }
   
   .orderDetailsModal :global(.ant-modal-header) {

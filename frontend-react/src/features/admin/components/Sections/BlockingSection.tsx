@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Table, Button, Space, Tag, Modal, message, Tooltip, Input, Form, Select, Card, Typography, DatePicker } from 'antd';
-import { LockOutlined, UnlockOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons';
+import { LockOutlined, UnlockOutlined, EyeOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useUsers, useUserActions } from '@/features/admin/hooks';
 import { AdminUser } from '@/features/admin/types/admin';
@@ -206,7 +206,6 @@ export const BlockingTable: React.FC<BlockingTableProps> = ({
             className={styles.blockedUsersSearch}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            prefix={<SearchOutlined />}
           />
           
           <Select

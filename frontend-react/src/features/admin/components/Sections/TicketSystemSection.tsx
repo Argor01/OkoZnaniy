@@ -42,6 +42,7 @@ import { expertsApi, type ExpertReview } from '@/features/expert/api/experts';
 import styles from './TicketSystemSection.module.css';
 
 const { Text, Title, Paragraph } = Typography;
+const { Search } = Input;
 const { Option } = Select;
 
 interface TicketRow {
@@ -599,8 +600,7 @@ export const TicketSystemSection: React.FC = () => {
             <div className={styles.ticketSystemStatItem}><div className={`${styles.ticketSystemStatValue} ${styles.ticketSystemStatCompleted}`}>{ticketStats.completed}</div><div className={styles.ticketSystemStatLabel}>Завершено</div></div>
           </div>
 
-          <Input
-            prefix={<SearchOutlined />}
+          <Search
             placeholder="Поиск по номеру, теме или клиенту..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
