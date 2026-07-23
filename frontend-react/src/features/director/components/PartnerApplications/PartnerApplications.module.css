@@ -1,0 +1,53 @@
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.segmentedWrap {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .title {
+    white-space: normal;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+
+  .segmentedWrap {
+    margin: 0 -12px;
+    padding: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .segmentedWrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .segmentedWrap :global(.ant-segmented) {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .segmentedWrap :global(.ant-segmented-item) {
+    flex-shrink: 0;
+  }
+}

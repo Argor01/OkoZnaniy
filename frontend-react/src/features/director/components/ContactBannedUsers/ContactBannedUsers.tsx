@@ -29,6 +29,7 @@ import dayjs from 'dayjs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import styles from './ContactBannedUsers.module.css';
+import unbanStyles from './UnbanModal.module.css';
 import { logger } from '@/utils/logger';
 
 const { Text, Title } = Typography;
@@ -622,34 +623,65 @@ const ContactBannedUsers: React.FC = () => {
       </Modal>
 
       <Modal
-        title={`Разбанить пользователя ${selectedUser?.username}`}
         open={unbanModalVisible}
-        onOk={handleUnbanConfirm}
         onCancel={() => {
           setUnbanModalVisible(false);
           setSelectedUser(null);
           unbanForm.resetFields();
         }}
-        okText="Разбанить"
-        cancelText="Отмена"
-        okButtonProps={{ type: 'primary', loading: unbanMutation.isPending }}
-        confirmLoading={unbanMutation.isPending}
+        footer={null}
+        closable={false}
+        width={400}
+        className={unbanStyles.unbanModal}
       >
         {selectedUser && (
-          <div>
-            <div className={styles.unbanSection}>
-              <Text strong>Информация о пользователе:</Text>
-              <div className={styles.infoBlock}>
-                <div><strong>Имя:</strong> {selectedUser.first_name} {selectedUser.last_name}</div>
-                <div><strong>Email:</strong> {selectedUser.email || 'Не указан'}</div>
-                <div><strong>Причина бана:</strong> {selectedUser.contact_ban_reason}</div>
-                <div><strong>Нарушений:</strong> {selectedUser.contact_violations_count}</div>
+          <div className={unbanStyles.unbanModalBody}>
+            <div className={unbanStyles.unbanModalIcon}>
+              <UnlockOutlined />
+            </div>
+            <h3 className={unbanStyles.unbanModalTitle}>
+              Разбанить пользователя
+            </h3>
+            <p className={unbanStyles.unbanModalText}>
+              Вы уверены, что хотите разбанить этого пользователя? Он снова сможет отправлять сообщения в чатах.
+            </p>
+            <div className={unbanStyles.unbanModalInfo}>
+              <div className={unbanStyles.unbanModalInfoRow}>
+                <span className={unbanStyles.unbanModalInfoLabel}>Имя:</span>
+                <span className={unbanStyles.unbanModalInfoValue}>{selectedUser.first_name} {selectedUser.last_name}</span>
+              </div>
+              <div className={unbanStyles.unbanModalInfoRow}>
+                <span className={unbanStyles.unbanModalInfoLabel}>Email:</span>
+                <span className={unbanStyles.unbanModalInfoValue}>{selectedUser.email || 'Не указан'}</span>
+              </div>
+              <div className={unbanStyles.unbanModalInfoRow}>
+                <span className={unbanStyles.unbanModalInfoLabel}>Причина бана:</span>
+                <span className={unbanStyles.unbanModalInfoValue}>{selectedUser.contact_ban_reason}</span>
+              </div>
+              <div className={unbanStyles.unbanModalInfoRow}>
+                <span className={unbanStyles.unbanModalInfoLabel}>Нарушений:</span>
+                <span className={unbanStyles.unbanModalInfoValue}>{selectedUser.contact_violations_count}</span>
               </div>
             </div>
-            
-            <Text type="warning">
-              Вы уверены, что хотите разбанить этого пользователя? Он снова сможет отправлять сообщения в чатах.
-            </Text>
+            <div className={unbanStyles.unbanModalActions}>
+              <button
+                className={`${unbanStyles.unbanModalBtn} ${unbanStyles.unbanModalBtnCancel}`}
+                onClick={() => {
+                  setUnbanModalVisible(false);
+                  setSelectedUser(null);
+                  unbanForm.resetFields();
+                }}
+              >
+                Отмена
+              </button>
+              <button
+                className={`${unbanStyles.unbanModalBtn} ${unbanStyles.unbanModalBtnConfirm}`}
+                onClick={handleUnbanConfirm}
+                disabled={unbanMutation.isPending}
+              >
+                {unbanMutation.isPending ? 'Разбан...' : 'Разбанить'}
+              </button>
+            </div>
           </div>
         )}
       </Modal>

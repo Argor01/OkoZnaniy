@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Table, Tag, Select, Segmented, Typography, Space, Tooltip, Empty, message } from 'antd';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partnerApplicationsApi, type PartnerApplication } from '@/features/partner/api/partnerApplications';
+import styles from './PartnerApplications.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -104,21 +105,23 @@ const PartnerApplications: React.FC = () => {
 
   return (
     <div style={{ padding: 4 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>
+      <div className={styles.filters}>
+        <Title level={4} className={styles.title}>
           Заявки на партнёрство{newCount > 0 ? ` · ${newCount} новых` : ''}
         </Title>
-        <Segmented
-          value={filter}
-          onChange={(v) => setFilter(String(v))}
-          options={[
-            { label: 'Все', value: 'all' },
-            { label: 'Новые', value: 'new' },
-            { label: 'Связались', value: 'contacted' },
-            { label: 'Одобрены', value: 'approved' },
-            { label: 'Отклонены', value: 'rejected' },
-          ]}
-        />
+        <div className={styles.segmentedWrap}>
+          <Segmented
+            value={filter}
+            onChange={(v) => setFilter(String(v))}
+            options={[
+              { label: 'Все', value: 'all' },
+              { label: 'Новые', value: 'new' },
+              { label: 'Связались', value: 'contacted' },
+              { label: 'Одобрены', value: 'approved' },
+              { label: 'Отклонены', value: 'rejected' },
+            ]}
+          />
+        </div>
       </div>
       <Table
         rowKey="id"

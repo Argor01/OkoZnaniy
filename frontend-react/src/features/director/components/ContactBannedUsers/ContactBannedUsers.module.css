@@ -79,9 +79,30 @@
 }
 
 @media (max-width: 768px) {
-  .searchInput,
+  .filtersRow {
+    flex-direction: column;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  .searchInput {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .searchInput :global(.ant-input-affix-wrapper) {
+    display: flex;
+    align-items: center;
+  }
+
+  .searchInput :global(.ant-input) {
+    line-height: 1.5715;
+  }
+
   .roleSelect {
-    width: 100%;
-    min-width: 0;
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
   }
 }

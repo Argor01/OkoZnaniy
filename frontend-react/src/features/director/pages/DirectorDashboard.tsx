@@ -358,7 +358,6 @@ const DirectorDashboard: React.FC = () => {
         <Content
           className={[
             'directorDashboardContent',
-            isMobile ? 'directorDashboardContentMobile' : '',
             isTablet ? 'directorDashboardContentTablet' : '',
           ].filter(Boolean).join(' ')}
           key={selectedMenu}

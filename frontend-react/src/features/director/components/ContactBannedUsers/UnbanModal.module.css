@@ -1,0 +1,238 @@
+.unbanModal:global(.ant-modal) :global(.ant-modal-content) {
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.unbanModal .ant-modal-body {
+  padding: 0 !important;
+}
+
+.unbanModalBody {
+  padding: 32px 28px 28px;
+}
+
+.unbanModalIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.unbanModalIcon .anticon {
+  font-size: 28px;
+  color: #10b981;
+}
+
+.unbanModalTitle {
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.unbanModalText {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0 0 20px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.unbanModalInfo {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.unbanModalInfoRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.unbanModalInfoLabel {
+  color: #6b7280;
+}
+
+.unbanModalInfoValue {
+  color: #1f2937;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.unbanModalActions {
+  display: flex;
+  gap: 12px;
+}
+
+.unbanModalBtn {
+  flex: 1;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Jost-SemiBold', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.unbanModalBtnCancel {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.unbanModalBtnCancel:hover {
+  background: #e5e7eb;
+}
+
+.unbanModalBtnConfirm {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.unbanModalBtnConfirm:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.unbanModalBtnConfirm:active {
+  transform: translateY(0);
+}
+
+:global([data-theme="dark"]) .unbanModalBody {
+  background: var(--color-bg-container);
+}
+
+:global([data-theme="dark"]) .unbanModalIcon {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(5, 150, 105, 0.28));
+}
+
+:global([data-theme="dark"]) .unbanModalTitle {
+  color: var(--color-text-heading);
+}
+
+:global([data-theme="dark"]) .unbanModalText {
+  color: var(--color-text-secondary);
+}
+
+:global([data-theme="dark"]) .unbanModalInfo {
+  background: var(--color-bg-elevated);
+}
+
+:global([data-theme="dark"]) .unbanModalInfoLabel {
+  color: var(--color-text-secondary);
+}
+
+:global([data-theme="dark"]) .unbanModalInfoValue {
+  color: var(--color-text-heading);
+}
+
+:global([data-theme="dark"]) .unbanModalBtnCancel {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-base);
+  border: 1px solid var(--color-border-base);
+}
+
+:global([data-theme="dark"]) .unbanModalBtnCancel:hover {
+  background: var(--color-bg-hover);
+}
+
+@media (max-width: 575px) {
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).unbanModal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).unbanModal :global(.ant-modal-content) {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: 90vh !important;
+    border-radius: 20px !important;
+    display: block !important;
+    overflow: hidden !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    background: #fff !important;
+  }
+
+  :global(body) :global(.ant-modal-root) :global(.ant-modal-wrap) :global(.ant-modal).unbanModal :global(.ant-modal-content) :global(.ant-modal-body) {
+    padding: 0 !important;
+    flex: none !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    max-height: 90vh !important;
+    min-height: auto !important;
+    background: #fff !important;
+  }
+
+  .unbanModalBody {
+    padding: 28px 20px 20px;
+  }
+
+  .unbanModalIcon {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+  }
+
+  .unbanModalIcon .anticon {
+    font-size: 24px;
+  }
+
+  .unbanModalTitle {
+    font-size: 18px;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .unbanModalText {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .unbanModalInfoRow {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .unbanModalInfoValue {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .unbanModalActions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .unbanModalBtn {
+    width: 100%;
+    height: 46px;
+    font-size: 16px;
+  }
+}
