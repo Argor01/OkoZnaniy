@@ -40,6 +40,30 @@ def _contact_ban_response(user, action_detail='\u0414\u0435\u0439\u0441\u0442\u0
         status=status.HTTP_400_BAD_REQUEST,
     )
 
+
+def _contact_ban_other_response(user, action_detail='Действие'):
+    if not user:
+        return None
+    if hasattr(user, 'unban_for_contacts_if_expired'):
+        user.unban_for_contacts_if_expired()
+    if not getattr(user, 'is_banned_for_contacts', False):
+        return None
+    return Response(
+        {
+            'detail': (
+                f'{action_detail} временно недоступно. Собеседник нарушил правила платформы, '
+                'поэтому переписка заморожена до решения администратора.'
+            ),
+            'frozen': True,
+            'frozen_reason': (
+                'Собеседник нарушил правила платформы: обмен контактными данными запрещен. '
+                'Переписка временно недоступна до решения администратора.'
+            ),
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
 class ChatViewSet(viewsets.ModelViewSet):
     """
     ViewSet РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±С‹С‡РЅС‹РјРё С‡Р°С‚Р°РјРё РјРµР¶РґСѓ РєР»РёРµРЅС‚Р°РјРё Рё СЌРєСЃРїРµСЂС‚Р°РјРё.
@@ -170,6 +194,14 @@ class ChatViewSet(viewsets.ModelViewSet):
         chat = self.get_object()
 
         if hasattr(request.user, 'role') and request.user.role not in ['admin', 'director']:
+            blocked = _contact_ban_response(request.user, 'Отправка сообщений')
+            if blocked is not None:
+                return blocked
+            other_user_for_ban = chat.participants.exclude(id=request.user.id).first()
+            blocked_by_other = _contact_ban_other_response(other_user_for_ban, 'Отправка сообщений')
+            if blocked_by_other is not None:
+                return blocked_by_other
+
             if hasattr(request.user, 'unban_for_contacts_if_expired'):
                 request.user.unban_for_contacts_if_expired()
             if getattr(request.user, 'is_banned_for_contacts', False):

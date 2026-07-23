@@ -31,6 +31,7 @@ export interface ChatListItem {
   id: number;
   order: number;
   order_id?: number;
+  order_status?: string | null;
   order_title?: string | null;
   context_title?: string | null;
   client?: UserSummary | null;
@@ -56,6 +57,7 @@ export interface ChatDetail {
   id: number;
   order: number;
   order_id: number;
+  order_status?: string | null;
   order_title?: string | null;
   context_title?: string | null;
   client?: UserSummary | null;

@@ -17,6 +17,7 @@ from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
+from apps.chat.services import ContactDetectionService
 from apps.orders.models import Order
 
 User = get_user_model()
@@ -180,3 +181,80 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(mark_response.status_code, status.HTTP_200_OK)
         hidden_message.refresh_from_db()
         self.assertTrue(hidden_message.is_read)
+
+    def test_system_message_in_regular_frozen_chat_does_not_count_as_unread(self):
+        client = User.objects.create_user(
+            username="chat_unread_client",
+            email="chat_unread_client@example.com",
+            password="pwd",
+            role="client",
+        )
+        expert = User.objects.create_user(
+            username="chat_unread_expert",
+            email="chat_unread_expert@example.com",
+            password="pwd",
+            role="expert",
+        )
+        system_user = User.objects.create_user(
+            username="chat_unread_system",
+            email="chat_unread_system@example.com",
+            password="pwd",
+            role="admin",
+        )
+        chat = Chat.objects.create(client=client, expert=expert, is_frozen=True, frozen_reason="Frozen")
+        chat.participants.set([client, expert])
+        Message.objects.create(
+            chat=chat,
+            sender=system_user,
+            text="ЧАТ ЗАМОРОЖЕН",
+            message_type="system",
+            is_read=False,
+        )
+
+        self.api_client.force_authenticate(user=client)
+        detail_response = self.api_client.get(f"/api/chat/chats/{chat.id}/")
+        self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(detail_response.json()["unread_count"], 0)
+
+        count_response = self.api_client.get("/api/chat/chats/unread_count/")
+        self.assertEqual(count_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(count_response.json()["unread_count"], 0)
+
+    def test_other_contact_banned_user_gets_clear_frozen_reason(self):
+        client = User.objects.create_user(
+            username="chat_other_ban_client",
+            email="chat_other_ban_client@example.com",
+            password="pwd",
+            role="client",
+        )
+        expert = User.objects.create_user(
+            username="chat_other_ban_expert",
+            email="chat_other_ban_expert@example.com",
+            password="pwd",
+            role="expert",
+            is_banned_for_contacts=True,
+            contact_ban_reason="Обнаружен обмен контактами: номер телефона",
+        )
+        chat = Chat.objects.create(client=client, expert=expert)
+        chat.participants.set([client, expert])
+
+        self.api_client.force_authenticate(user=client)
+        detail_response = self.api_client.get(f"/api/chat/chats/{chat.id}/")
+        self.assertEqual(detail_response.status_code, status.HTTP_200_OK)
+        detail = detail_response.json()
+        self.assertTrue(detail["is_frozen"])
+        self.assertIn("Собеседник нарушил правила платформы", detail["frozen_reason"])
+
+        send_response = self.api_client.post(
+            f"/api/chat/chats/{chat.id}/send_message/",
+            {"text": "Здравствуйте"},
+            format="json",
+        )
+        self.assertEqual(send_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Собеседник нарушил правила платформы", send_response.json()["detail"])
+
+    def test_contact_detector_recognizes_russian_keywords(self):
+        result = ContactDetectionService.detect_contacts("напиши мне в личку, мой телефон позже")
+
+        self.assertTrue(result["has_contacts"])
+        self.assertIn("keywords", result["contact_types"])

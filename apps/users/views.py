@@ -1163,6 +1163,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         data = []
         for user in banned_users:
+            ban_source = 'manual' if user.banned_by else 'system'
             data.append({
                 'id': user.id,
                 'username': user.username,
@@ -1174,6 +1175,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 'contact_ban_reason': user.contact_ban_reason or '',
                 'contact_violations_count': user.contact_violations_count,
                 'banned_by': user.banned_by.username if user.banned_by else 'Система',
+                'banned_by_label': user.banned_by.username if user.banned_by else 'Система',
+                'ban_source': ban_source,
                 'phone': user.phone or '',
                 'telegram_id': user.telegram_id,
             })

@@ -46,6 +46,8 @@ interface ContactBannedUser {
   contact_ban_reason: string;
   contact_violations_count: number;
   banned_by: string;
+  banned_by_label?: string;
+  ban_source?: 'system' | 'manual' | string;
   phone: string;
   telegram_id: number | null;
 }
@@ -68,9 +70,11 @@ const normalizeBannedUsers = (payload: unknown): ContactBannedUser[] => {
   return [];
 };
 
-const isSystemBanSource = (value?: string | null): boolean => {
+const isSystemBanSource = (value?: string | null, source?: string | null): boolean => {
+  if (source === 'system') return true;
+  if (source === 'manual') return false;
   const normalized = String(value || '').trim().toLowerCase();
-  return normalized === 'system' || normalized === 'система' || normalized.includes('система');
+  return !normalized || normalized === 'system' || normalized === 'система' || normalized.includes('система');
 };
 
 const CONTACT_BANNED_USERS_QUERY_KEY = ['contact-banned-users'] as const;
@@ -265,7 +269,7 @@ const ContactBannedUsers: React.FC = () => {
     
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    const isSystemBan = isSystemBanSource(user.banned_by);
+    const isSystemBan = isSystemBanSource(user.banned_by, user.ban_source);
     const matchesBanSource = 
       banSourceFilter === 'all' || 
       (banSourceFilter === 'system' && isSystemBan) ||
@@ -340,8 +344,8 @@ const ContactBannedUsers: React.FC = () => {
       dataIndex: 'banned_by',
       key: 'banned_by',
       width: 150,
-      render: (bannedBy: string) => {
-        const isSystemBan = isSystemBanSource(bannedBy);
+      render: (bannedBy: string, record: ContactBannedUser) => {
+        const isSystemBan = isSystemBanSource(bannedBy, record.ban_source);
         return (
           <Space>
             {isSystemBan ? (
@@ -350,7 +354,7 @@ const ContactBannedUsers: React.FC = () => {
               </Tag>
             ) : (
               <Tag color="purple" icon={<UserOutlined />}>
-                {bannedBy}
+                {record.banned_by_label || bannedBy}
               </Tag>
             )}
           </Space>
@@ -442,12 +446,12 @@ const ContactBannedUsers: React.FC = () => {
           </Tag>
           <Tag color="purple">
             Системой: {filteredData.filter(u => {
-              return isSystemBanSource(u.banned_by);
+              return isSystemBanSource(u.banned_by, u.ban_source);
             }).length}
           </Tag>
           <Tag color="purple">
             Вручную: {filteredData.filter(u => {
-              return !isSystemBanSource(u.banned_by);
+              return !isSystemBanSource(u.banned_by, u.ban_source);
             }).length}
           </Tag>
           <Tag color="orange">
@@ -531,7 +535,7 @@ const ContactBannedUsers: React.FC = () => {
                   <div><strong>Дата бана:</strong> {selectedUser.contact_ban_date ? dayjs(selectedUser.contact_ban_date).format('DD.MM.YYYY HH:mm') : '-'}</div>
                   <div><strong>Причина:</strong> {selectedUser.contact_ban_reason}</div>
                   <div><strong>Количество нарушений:</strong> <Tag color={selectedUser.contact_violations_count > 3 ? 'red' : 'orange'}>{selectedUser.contact_violations_count}</Tag></div>
-                  <div><strong>Забанил:</strong> {selectedUser.banned_by}</div>
+                  <div><strong>Забанил:</strong> {selectedUser.banned_by_label || selectedUser.banned_by}</div>
                 </div>
               </div>
             </Space>

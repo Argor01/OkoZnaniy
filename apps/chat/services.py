@@ -62,7 +62,9 @@ def readable_messages_for_chat(chat: Chat):
 
 
 def unread_messages_for_user(chat: Chat, user):
-    return readable_messages_for_chat(chat).filter(is_read=False).exclude(sender=user)
+    # System events describe chat/order state. They should not create a
+    # personal unread badge, especially for frozen direct chats.
+    return readable_messages_for_chat(chat).filter(is_read=False).exclude(sender=user).exclude(message_type="system")
 
 
 class ContactDetectionService:
@@ -255,7 +257,7 @@ class ChatModerationService:
                     recipient=admin,
                     type="chat_violation",
                     title="Обнаружен обмен контактами в чате",
-                    message=f"Чат #{violation.chat.id} заморожен. Тип нарушения: {violation.get_violation_type_display()}",
+                    message=f"Чат #{violation.chat.id} заморожен. Тип нарушения: {violation_type_label(violation.violation_type)}",
                     related_object_id=violation.id,
                     related_object_type="contact_violation",
                 )

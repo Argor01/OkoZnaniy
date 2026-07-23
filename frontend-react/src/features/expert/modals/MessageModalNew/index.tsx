@@ -494,6 +494,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       id: detail.id,
       order: detail.order,
       order_id: detail.order_id,
+      order_status: detail.order_status ?? previous?.order_status ?? null,
       order_title: detail.order_title ?? previous?.order_title ?? null,
       context_title: detail.context_title ?? previous?.context_title ?? null,
       client: detail.client ?? previous?.client ?? null,
@@ -2304,7 +2305,7 @@ const handleOverdueComplaint = async () => {
     return selectedConversationGroup.orderChats.filter((chat) => {
       const orderId = toPositiveNumber(chat.order_id ?? chat.order);
       if (!orderId) return false;
-      const knownStatus = orderStatusById[orderId];
+      const knownStatus = orderStatusById[orderId] ?? chat.order_status;
       return !knownStatus || !closedOrderStatuses.has(knownStatus);
     });
   }, [closedOrderStatuses, orderStatusById, selectedConversationGroup, toPositiveNumber]);
@@ -2313,18 +2314,18 @@ const handleOverdueComplaint = async () => {
     if (!selectedConversationGroup) return [];
 
     const ids: number[] = [];
-    const addOrderId = (raw: unknown) => {
+    const addOrderId = (raw: unknown, fallbackStatus?: string | null) => {
       const id = toPositiveNumber(raw);
       if (!id || ids.includes(id)) return;
-      const knownStatus = orderStatusById[id];
+      const knownStatus = orderStatusById[id] ?? fallbackStatus;
       if (knownStatus && closedOrderStatuses.has(knownStatus)) return;
       ids.push(id);
     };
 
-    selectedConversationOrderChats.forEach((chat) => addOrderId(chat.order_id ?? chat.order));
+    selectedConversationOrderChats.forEach((chat) => addOrderId(chat.order_id ?? chat.order, chat.order_status));
 
     selectedConversationGroup.chats.forEach((chat) => {
-      addOrderId(chat.order_id ?? chat.order);
+      addOrderId(chat.order_id ?? chat.order, chat.order_status);
       (orderIdsByChatId[chat.id] || []).forEach(addOrderId);
     });
 
@@ -2492,9 +2493,9 @@ const handleOverdueComplaint = async () => {
   const hasActiveConversation = Boolean(selectedChat || isSupportChatSelected);
   const useStackedConversationLayout = isMobile || isTablet;
   const useCompactSidebar = false;
-  const showSidebar = !useStackedConversationLayout || !hasActiveConversation;
+  const showSidebar = !isSupportChatSelected && (!useStackedConversationLayout || !hasActiveConversation);
   const showChatPanel = !useStackedConversationLayout || hasActiveConversation;
-  const showTabletBackRail = isTablet && hasActiveConversation;
+  const showTabletBackRail = !isSupportChatSelected && isTablet && hasActiveConversation;
   const modalWidth = isMobile ? '100%' : (isDesktop ? 'min(1840px, calc(100vw - 32px))' : 'calc(100vw - 32px)');
   const pageContainerStyle = renderAsPage
     ? {

@@ -383,3 +383,22 @@ class OrderChatBootstrapTests(TestCase):
         )
         order_chat = Chat.objects.get(pk=response.json()["chat_id"])
         self.assertEqual(order_chat.order_id, order.id)
+
+    def test_contact_banned_expert_cannot_use_order_feed_or_bid(self):
+        order = self._create_order()
+        self.expert_user.is_banned_for_contacts = True
+        self.expert_user.contact_ban_reason = "Обнаружен обмен контактами: номер телефона"
+        self.expert_user.save(update_fields=["is_banned_for_contacts", "contact_ban_reason"])
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        available_response = self.api_client.get("/api/orders/orders/available/")
+        self.assertEqual(available_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(available_response.json()["frozen"])
+
+        bid_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/bids/",
+            {"amount": "3000", "comment": "Готов выполнить", "prepayment_percent": 50},
+            format="json",
+        )
+        self.assertEqual(bid_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(bid_response.json()["frozen"])

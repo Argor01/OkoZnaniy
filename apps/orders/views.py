@@ -207,6 +207,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             .select_related('subject', 'topic', 'work_type', 'complexity', 'client')
             .prefetch_related('files__uploaded_by', 'bids')
             .annotate(responses_count=models.Count('bids', distinct=True))
+            .order_by('-created_at', '-id')
         )
         
         try:
