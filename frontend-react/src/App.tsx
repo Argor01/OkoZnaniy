@@ -68,7 +68,13 @@ const ThemedApp: React.FC = () => {
             controlHeight: 38,
           },
           Input: {
-            controlHeight: 38,
+            controlHeight: 40,
+          },
+          InputNumber: {
+            controlHeight: 40,
+          },
+          Select: {
+            controlHeight: 40,
           },
           Card: {
             colorBgContainer: isDark ? '#1a1d27' : '#ffffff',

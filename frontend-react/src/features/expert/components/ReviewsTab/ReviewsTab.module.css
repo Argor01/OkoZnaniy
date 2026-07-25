@@ -235,6 +235,29 @@
   border-left: 3px solid #6435a5;
 }
 
+.reviewActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ratingFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 480px) {
+  .reviewActions :global(.ant-btn),
+  .ratingFilters :global(.ant-btn) {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+}
+
 [data-theme="dark"] .reviewReplyCard {
   background: rgba(100, 53, 165, 0.18);
   border-left-color: #8b5cf6;

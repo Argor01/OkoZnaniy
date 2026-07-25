@@ -349,6 +349,15 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           setNewWorkTypeName('');
         }}
         confirmLoading={createWorkTypeMutation.isPending}
+        wrapClassName={styles.modalWrap}
+        centered
+        width={500}
+        okText="Добавить"
+        cancelText="Отмена"
+        styles={{
+          content: { borderRadius: 24 },
+          header: { borderRadius: '24px 24px 0 0' },
+        }}
       >
         <AppInput
           placeholder="Название типа работы"
@@ -359,6 +368,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               createWorkTypeMutation.mutate(newWorkTypeName.trim());
             }
           }}
+          className={styles.modalInput}
         />
       </Modal>
 
@@ -377,6 +387,15 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
           setNewSubjectName('');
         }}
         confirmLoading={createSubjectMutation.isPending}
+        wrapClassName={styles.modalWrap}
+        centered
+        width={500}
+        okText="Добавить"
+        cancelText="Отмена"
+        styles={{
+          content: { borderRadius: 24 },
+          header: { borderRadius: '24px 24px 0 0' },
+        }}
       >
         <AppInput
           placeholder="Название предмета"
@@ -387,6 +406,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               createSubjectMutation.mutate(newSubjectName.trim());
             }
           }}
+          className={styles.modalInput}
         />
       </Modal>
     </AppCard>

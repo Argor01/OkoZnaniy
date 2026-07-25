@@ -116,7 +116,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
       </div>
 
       {total > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        <div className={styles.ratingFilters}>
           {STARS.map((s) => (
             <Button
               key={s}
@@ -160,7 +160,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                   />
                   <div className={styles.reviewUserText}>
                     <Text strong className={isMobile ? styles.reviewUserNameMobile : styles.reviewUserName}>
-                      @{getDisplayUsername(review.client || {})}
+                      {getDisplayUsername(review.client || {})}
                     </Text>
                     <Text type="secondary" className={styles.reviewUserMeta}>
                       {review.client?.first_name} {review.client?.last_name}
@@ -195,7 +195,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
               )}
 
               {isOwnExpert && (
-                <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className={styles.reviewActions}>
                   {!review.reply_text && (
                     <Button size="small" onClick={() => setReplyModal({ id: review.id })}>
                       Ответить

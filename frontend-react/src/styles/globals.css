@@ -648,7 +648,6 @@ html[data-theme="dark"] .ant-message-warning .anticon,
     flex-direction: column !important;
     overflow: hidden !important;
     height: 100% !important;
-    border-radius: 0 !important;
     position: static !important;
   }
 

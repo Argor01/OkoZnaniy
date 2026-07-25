@@ -127,6 +127,11 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
       centered
       maskClosable={false}
       keyboard
+      styles={{
+        content: { borderRadius: 24, overflow: 'hidden' },
+        header: { borderRadius: '24px 24px 0 0' },
+        body: { borderRadius: '0 0 24px 24px' },
+      }}
     >
       {step === 'email' && (
         <div className={styles.stepContainer}>
