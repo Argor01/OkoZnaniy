@@ -148,6 +148,7 @@ class PartnerReferralFlowTests(APITestCase):
         self.partner.refresh_from_db()
         self.assertEqual(self.partner.total_referrals, 1)
         self.assertEqual(self.partner.total_earnings, Decimal('50.00'))
+        self.assertEqual(self.partner.balance, Decimal('50.00'))
         self.assertTrue(
             PartnerEarning.objects.filter(
                 partner=self.partner,
@@ -198,6 +199,7 @@ class PartnerReferralFlowTests(APITestCase):
         self.partner.refresh_from_db()
         self.assertEqual(self.partner.active_referrals, 1)
         self.assertEqual(self.partner.total_earnings, Decimal('120.0000'))
+        self.assertEqual(self.partner.balance, Decimal('170.00'))
 
     def test_referred_expert_orders_count_as_active_referral(self):
         client = User.objects.create_user(

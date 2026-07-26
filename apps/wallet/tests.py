@@ -291,6 +291,7 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(partner.total_referrals, 1)
         self.assertEqual(partner.active_referrals, 1)
         self.assertEqual(partner.total_earnings, Decimal('75.0000'))
+        self.assertEqual(partner.balance, Decimal('75.00'))
 
         self.api.force_authenticate(partner)
         dashboard = self.api.get('/api/users/partner_dashboard/')
@@ -384,3 +385,4 @@ class WalletOrderLedgerTests(TestCase):
         earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
         self.assertEqual(earning.amount, Decimal('120.0000'))
         self.assertEqual(partner.total_earnings, Decimal('120.0000'))
+        self.assertEqual(partner.balance, Decimal('120.00'))
