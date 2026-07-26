@@ -234,3 +234,6 @@ class AnswerCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['content']
+        extra_kwargs = {
+            'content': {'max_length': 5000}
+        }

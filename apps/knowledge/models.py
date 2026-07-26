@@ -245,7 +245,7 @@ class Answer(models.Model):
         related_name='knowledge_answers',
         verbose_name='Автор'
     )
-    content = models.TextField('Содержание ответа')
+    content = models.TextField('Содержание ответа', max_length=5000)
     is_best_answer = models.BooleanField('Лучший ответ', default=False)
     likes_count = models.IntegerField('Количество лайков', default=0)
     created_at = models.DateTimeField('Дата создания', auto_now_add=True)

@@ -236,21 +236,21 @@ const ArticlesFeed: React.FC = () => {
                     </Tag>
                   </div>
                   <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>{deletion.article_title}</div>
-                  <div style={{ color: '#888', fontSize: 13, marginBottom: 8 }}>
+                  <div className={styles.deletionDate}>
                     Удалена: {dayjs(deletion.created_at).format('D MMMM YYYY, HH:mm')}
                   </div>
                   <div style={{ marginBottom: 4 }}>
                     <strong>Причина: </strong>{deletion.reason}
                   </div>
                   {deletion.dispute_message && (
-                    <div style={{ marginTop: 8, padding: 10, background: '#fff7e6', borderRadius: 6 }}>
-                      <strong style={{ color: '#d48806' }}>Ваше оспаривание: </strong>
+                    <div className={styles.disputeBanner}>
+                      <strong className={styles.disputeLabel}>Ваше оспаривание: </strong>
                       {deletion.dispute_message}
                     </div>
                   )}
                   {deletion.admin_final_response && (
-                    <div style={{ marginTop: 8, padding: 10, background: '#f6ffed', borderRadius: 6 }}>
-                      <strong style={{ color: '#389e0d' }}>Решение администратора: </strong>
+                    <div className={styles.adminBanner}>
+                      <strong className={styles.adminLabel}>Решение администратора: </strong>
                       {deletion.admin_final_response}
                     </div>
                   )}
@@ -280,6 +280,7 @@ const ArticlesFeed: React.FC = () => {
         okText="Отправить"
         cancelText="Отмена"
         confirmLoading={disputeLoading}
+        wrapClassName={styles.disputeModal}
       >
         <div>
           <div style={{ marginBottom: 12 }}>

@@ -386,6 +386,8 @@ const QuestionDetail: React.FC = () => {
             value={newAnswer}
             onChange={(e) => setNewAnswer(e.target.value)}
             className={styles.answerTextarea}
+            maxLength={5000}
+            showCount
           />
           <Button 
             type="primary" 

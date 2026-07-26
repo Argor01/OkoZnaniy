@@ -32,6 +32,10 @@
   border: 1px solid #f0f0f0;
 }
 
+:global([data-theme="dark"]) .articleCard {
+  border-color: #30394f;
+}
+
 .articleCard:hover {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
@@ -73,6 +77,54 @@
   overflow: hidden;
   margin-bottom: 14px;
   line-height: 1.6;
+}
+
+.deletionDate {
+  color: var(--color-grey-500);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+:global([data-theme="dark"]) .deletionDate {
+  color: #a7b0c3;
+}
+
+.disputeBanner {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #fff7e6;
+}
+
+:global([data-theme="dark"]) .disputeBanner {
+  background: rgba(250, 173, 20, 0.12);
+}
+
+.disputeLabel {
+  color: #d48806;
+}
+
+:global([data-theme="dark"]) .disputeLabel {
+  color: #fadb14;
+}
+
+.adminBanner {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  background: #f6ffed;
+}
+
+:global([data-theme="dark"]) .adminBanner {
+  background: rgba(82, 196, 26, 0.12);
+}
+
+.adminLabel {
+  color: #389e0d;
+}
+
+:global([data-theme="dark"]) .adminLabel {
+  color: #73d13d;
 }
 
 .articleTags {
@@ -166,4 +218,27 @@
 
 .createButton:global(.ant-btn) {
   min-height: 48px;
+}
+
+/* Dispute modal dark theme */
+:global([data-theme="dark"]) .disputeModal :global(.ant-modal-content) {
+  background: #202638;
+}
+
+:global([data-theme="dark"]) .disputeModal :global(.ant-modal-header) {
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .disputeModal :global(.ant-modal-title) {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .disputeModal :global(.ant-input) {
+  background: #171b27;
+  border-color: #30394f;
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .disputeModal :global(.ant-input:focus) {
+  border-color: #8b5cf6;
 }
