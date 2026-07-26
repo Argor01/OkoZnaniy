@@ -15,6 +15,7 @@ from apps.orders.models import Order, OrderFile
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
+from apps.wallet.services import InsufficientFunds, WalletService
 from decimal import Decimal, InvalidOperation
 
 
@@ -862,25 +863,33 @@ class ChatViewSet(viewsets.ModelViewSet):
             client_user = chat.client or request.user
             expert_user = chat.expert or message.sender
 
-            order = Order.objects.create(
-                client=client_user,
-                expert=expert_user,
-                subject_id=subject_id if subject_id else None,
-                work_type_id=work_type_id if work_type_id else None,
-                custom_subject=offer_data.get('subject') if not subject_id else None,
-                custom_work_type=offer_data.get('work_type') if not work_type_id else None,
-                title=offer_data.get('title') or None,
-                description=offer_data.get('description'),
-                budget=cost,
-                deadline=deadline,
-                status='in_progress'
-            )
+            with transaction.atomic():
+                order = Order.objects.create(
+                    client=client_user,
+                    expert=expert_user,
+                    subject_id=subject_id if subject_id else None,
+                    work_type_id=work_type_id if work_type_id else None,
+                    custom_subject=offer_data.get('subject') if not subject_id else None,
+                    custom_work_type=offer_data.get('work_type') if not work_type_id else None,
+                    title=offer_data.get('title') or None,
+                    description=offer_data.get('description'),
+                    budget=cost,
+                    deadline=deadline,
+                    status='in_progress'
+                )
+                if cost > 0:
+                    WalletService.hold(
+                        client_user,
+                        cost,
+                        order=order,
+                        description=f'Резерв средств по заказу #{order.id}',
+                    )
             
-            # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РїСЂРµРґР»РѕР¶РµРЅРёСЏ
-            offer_data['status'] = 'accepted'
-            offer_data['order_id'] = order.id
-            message.offer_data = offer_data
-            message.save(update_fields=['offer_data'])
+                # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РїСЂРµРґР»РѕР¶РµРЅРёСЏ
+                offer_data['status'] = 'accepted'
+                offer_data['order_id'] = order.id
+                message.offer_data = offer_data
+                message.save(update_fields=['offer_data'])
 
             _direct_chat, order_chat, _order_message = ensure_order_chat_started(
                 order,
@@ -907,6 +916,11 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response({'status': 'success', 'order_id': order.id, 'chat_id': order_chat.id})
             
         except Exception as e:
+            if isinstance(e, InsufficientFunds):
+                return Response(
+                    {'detail': 'Недостаточно средств на кошельке. Пополните баланс перед принятием предложения.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"[accept_offer] Error accepting offer in chat {pk}: {e}", exc_info=True)
@@ -1086,6 +1100,14 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         order = get_object_or_404(Order, id=order_id)
         other_user = get_object_or_404(User, id=user_id)
+
+        if order.expert_id:
+            participant_ids = {order.client_id, order.expert_id}
+            if request.user.id in participant_ids and other_user.id in participant_ids and other_user.id != request.user.id:
+                chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
+                chat.hidden_for_users.remove(request.user)
+                serializer = ChatDetailSerializer(chat, context={'request': request})
+                return Response(serializer.data)
 
         # РРЅРёС†РёР°С‚РѕСЂРѕРј РїРµСЂРµРїРёСЃРєРё РїРѕ РѕС‚РєР»РёРєСѓ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє
         if request.user.id != order.client_id and not request.user.is_staff:

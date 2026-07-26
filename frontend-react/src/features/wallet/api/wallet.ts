@@ -33,6 +33,14 @@ export type TopupResponse = {
   payment_url: string;
 };
 
+export type WithdrawResponse = {
+  withdrawal_id: number;
+  status: string;
+  amount: string;
+  card: string;
+  balance: WalletBalance;
+};
+
 export const walletApi = {
   me: async (): Promise<WalletBalance> => {
     const { data } = await apiClient.get('/wallet/me/');
@@ -50,6 +58,10 @@ export const walletApi = {
   },
   topup: async (body: { amount: number; payment_method: string }): Promise<TopupResponse> => {
     const { data } = await apiClient.post('/wallet/topup/', body);
+    return data;
+  },
+  withdraw: async (body: { amount: number; card_number: string }): Promise<WithdrawResponse> => {
+    const { data } = await apiClient.post('/wallet/withdraw/', body);
     return data;
   },
 };

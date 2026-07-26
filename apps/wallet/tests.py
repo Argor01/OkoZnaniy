@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
-from apps.orders.models import Order, Transaction, TransactionType
+from apps.orders.models import Bid, BidStatus, Order, Transaction, TransactionType
 from apps.payments.models import Payment, PaymentStatus
 from apps.payments.services import PaymentService
 from apps.users.models import PartnerEarning
@@ -74,6 +74,36 @@ class WalletSandboxTests(TestCase):
         withdrawal = WithdrawalRequest.objects.get(pk=response.json()['withdrawal_id'])
         self.assertEqual(withdrawal.status, WithdrawalRequest.Status.PENDING)
         self.assertEqual(withdrawal.transaction.type, TransactionType.WITHDRAWAL)
+
+    def test_partner_can_topup_and_withdraw_from_wallet(self):
+        partner = User.objects.create_user(
+            username='wallet_partner',
+            email='wallet_partner@okoznaniy.test',
+            password='pwd',
+            role='partner',
+        )
+        self.api.force_authenticate(partner)
+
+        topup = self.api.post(
+            '/api/wallet/topup/',
+            {'amount': '1200.00', 'payment_method': 'sberpay_qr'},
+            format='json',
+        )
+        self.assertEqual(topup.status_code, status.HTTP_200_OK, topup.content)
+        self.assertTrue(topup.json()['sandbox'])
+
+        withdraw = self.api.post(
+            '/api/wallet/withdraw/',
+            {'amount': '500.00', 'card_number': '5555444433332222'},
+            format='json',
+        )
+        self.assertEqual(withdraw.status_code, status.HTTP_201_CREATED, withdraw.content)
+
+        partner.refresh_from_db()
+        self.assertEqual(partner.balance, Decimal('700.00'))
+        withdrawal = WithdrawalRequest.objects.get(pk=withdraw.json()['withdrawal_id'])
+        self.assertEqual(withdrawal.user, partner)
+        self.assertEqual(withdrawal.status, WithdrawalRequest.Status.PENDING)
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -288,3 +318,69 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(mark_paid.status_code, status.HTTP_200_OK, mark_paid.content)
         earning.refresh_from_db()
         self.assertTrue(earning.is_paid)
+
+    def test_referred_order_full_wallet_flow_reserves_releases_and_accrues_partner_commission(self):
+        partner = User.objects.create_user(
+            username='ledger_partner_full_flow',
+            email='ledger_partner_full_flow@example.com',
+            password='pwd',
+            role='partner',
+            partner_commission_rate=Decimal('10.00'),
+        )
+        self.client_user.partner = partner
+        self.client_user.save(update_fields=['partner'])
+        WalletService.topup(self.client_user, Decimal('1200.00'))
+
+        order = Order.objects.create(
+            client=self.client_user,
+            expert=self.expert,
+            subject=self.subject,
+            work_type=self.work_type,
+            title='Referral full flow order',
+            description='Referral full flow order description',
+            deadline=timezone.now() + timedelta(days=3),
+            budget=Decimal('1200.00'),
+            status='awaiting_expert_acceptance',
+        )
+        Bid.objects.create(
+            order=order,
+            expert=self.expert,
+            amount=Decimal('1200.00'),
+            prepayment_percent=50,
+            status=BidStatus.INVITED,
+        )
+
+        self.api.force_authenticate(self.expert)
+        accepted = self.api.post(f'/api/orders/orders/{order.id}/accept_assignment/', {}, format='json')
+        self.assertEqual(accepted.status_code, status.HTTP_200_OK, accepted.content)
+
+        self.client_user.refresh_from_db()
+        self.assertEqual(self.client_user.balance, Decimal('1200.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('1200.00'))
+        self.assertEqual(Transaction.objects.filter(order=order, type=TransactionType.HOLD).count(), 1)
+
+        order.status = 'review'
+        order.save(update_fields=['status', 'updated_at'])
+        self.api.force_authenticate(self.client_user)
+        approved = self.api.post(f'/api/orders/orders/{order.id}/approve/')
+        self.assertEqual(approved.status_code, status.HTTP_200_OK, approved.content)
+
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.expert.refresh_from_db()
+        system_user = get_system_account()
+        system_user.refresh_from_db()
+        partner.refresh_from_db()
+
+        self.assertEqual(order.status, 'completed')
+        self.assertEqual(self.client_user.balance, Decimal('0.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.expert.balance, Decimal('1020.00'))
+        self.assertEqual(system_user.balance, Decimal('180.00'))
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.RELEASE).exists())
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PAYOUT).exists())
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.COMMISSION).exists())
+
+        earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
+        self.assertEqual(earning.amount, Decimal('120.0000'))
+        self.assertEqual(partner.total_earnings, Decimal('120.0000'))

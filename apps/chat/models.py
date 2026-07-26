@@ -55,7 +55,7 @@ class Chat(models.Model):
         self.frozen_at = timezone.now()
         self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
     
-    def unfreeze(self):
+    def unfreeze(self, *, post_system_message=True):
         """Разморозить чат"""
         was_frozen = self.is_frozen
         self.is_frozen = False
@@ -63,7 +63,7 @@ class Chat(models.Model):
         self.frozen_at = None
         self.save(update_fields=['is_frozen', 'frozen_reason', 'frozen_at'])
 
-        if was_frozen:
+        if was_frozen and post_system_message:
             self._post_unfreeze_system_message()
 
     def _post_unfreeze_system_message(self):

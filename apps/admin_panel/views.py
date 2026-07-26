@@ -251,7 +251,7 @@ def unblock_user(request, user_id):
             for chat in ChatModel.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user) | Q(participants=user)
             ).distinct():
-                chat.unfreeze()
+                chat.unfreeze(post_system_message=False)
             for order in Order.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user)
             ).distinct():

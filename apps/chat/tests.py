@@ -18,7 +18,8 @@ from rest_framework.test import APIClient
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
 from apps.chat.services import ContactDetectionService
-from apps.orders.models import Order
+from apps.orders.models import Order, Transaction, TransactionType
+from apps.wallet.services import WalletService
 
 User = get_user_model()
 
@@ -63,6 +64,7 @@ class AcceptOfferRegressionTests(TestCase):
         )
 
     def test_client_can_accept_individual_offer(self):
+        WalletService.topup(self.client_user, 1500)
         self.api_client.force_authenticate(user=self.client_user)
         response = self.api_client.post(
             f"/api/chat/chats/{self.chat.id}/accept_offer/",
@@ -78,10 +80,21 @@ class AcceptOfferRegressionTests(TestCase):
         self.assertEqual(payload.get("status"), "success")
         self.assertIn("order_id", payload)
         order = Order.objects.get(pk=payload["order_id"])
+        self.client_user.refresh_from_db()
         self.assertEqual(order.client_id, self.client_user.id)
         self.assertEqual(order.expert_id, self.expert_user.id)
         self.assertEqual(order.subject_id, self.subject.id)
         self.assertEqual(order.status, "in_progress")
+        self.assertEqual(self.client_user.balance, 1500)
+        self.assertEqual(self.client_user.frozen_balance, 1500)
+        self.assertTrue(
+            Transaction.objects.filter(
+                order=order,
+                user=self.client_user,
+                type=TransactionType.HOLD,
+                amount=1500,
+            ).exists()
+        )
         self.assertIn("chat_id", payload)
         order_chat = Chat.objects.get(pk=payload["chat_id"])
         self.assertEqual(order_chat.order_id, order.id)
@@ -90,6 +103,23 @@ class AcceptOfferRegressionTests(TestCase):
         # Offer message must be marked accepted
         self.offer_message.refresh_from_db()
         self.assertEqual(self.offer_message.offer_data.get("status"), "accepted")
+
+    def test_client_cannot_accept_individual_offer_without_wallet_funds(self):
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": self.offer_message.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.client_user.refresh_from_db()
+        self.offer_message.refresh_from_db()
+        self.assertEqual(self.client_user.frozen_balance, 0)
+        self.assertEqual(self.offer_message.offer_data.get("status"), "new")
+        self.assertFalse(Order.objects.filter(description="Test offer for regression").exists())
+        self.assertIn("Недостаточно средств", response.json()["detail"])
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
@@ -151,6 +181,19 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(response.json()["id"], self.order_chat.id)
         self.assertEqual(response.json()["order_id"], self.order.id)
 
+    def test_expert_can_open_assigned_order_subdialog(self):
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(
+            "/api/chat/chats/get_or_create_by_order_and_user/",
+            {"order_id": self.order.id, "user_id": self.client_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["id"], self.order_chat.id)
+        self.assertEqual(response.json()["order_id"], self.order.id)
+
     def test_locked_direct_chat_hides_system_messages_from_unread_and_detail(self):
         system_user = User.objects.create_user(
             username="chat_routing_system",
@@ -181,6 +224,40 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(mark_response.status_code, status.HTTP_200_OK)
         hidden_message.refresh_from_db()
         self.assertTrue(hidden_message.is_read)
+
+    def test_contact_unban_is_silent_and_keeps_pair_chats_visible(self):
+        self.direct_chat.freeze("Contact ban")
+        self.order_chat.freeze("Contact ban")
+        self.expert_user.is_banned_for_contacts = True
+        self.expert_user.contact_ban_reason = "Contact ban"
+        self.expert_user.contact_ban_date = timezone.now()
+        self.expert_user.save(update_fields=[
+            "is_banned_for_contacts",
+            "contact_ban_reason",
+            "contact_ban_date",
+        ])
+
+        stats = self.expert_user.clear_contact_ban(unfreeze_related=True)
+
+        self.assertGreaterEqual(stats["chats"], 2)
+        self.direct_chat.refresh_from_db()
+        self.order_chat.refresh_from_db()
+        self.assertFalse(self.direct_chat.is_frozen)
+        self.assertFalse(self.order_chat.is_frozen)
+        self.assertFalse(Message.objects.filter(
+            chat__in=[self.direct_chat, self.order_chat],
+            message_type="system",
+        ).exists())
+
+        self.order.status = "completed"
+        self.order.save(update_fields=["status", "updated_at"])
+        response = self.api_client.get("/api/chat/chats/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.json()
+        items = payload.get("results", payload) if isinstance(payload, dict) else payload
+        chat_ids = {item["id"] for item in items}
+        self.assertIn(self.direct_chat.id, chat_ids)
+        self.assertIn(self.order_chat.id, chat_ids)
 
     def test_system_message_in_regular_frozen_chat_does_not_count_as_unread(self):
         client = User.objects.create_user(

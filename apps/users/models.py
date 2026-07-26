@@ -145,7 +145,7 @@ class User(AbstractUser):
                 Q(expert=self) | Q(client=self) | Q(participants=self)
             ).distinct()
             for chat in chats:
-                chat.unfreeze()
+                chat.unfreeze(post_system_message=False)
                 stats['chats'] += 1
 
             orders = Order.objects.filter(is_frozen=True).filter(

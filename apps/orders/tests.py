@@ -24,7 +24,8 @@ from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
-from apps.orders.models import Bid, Order
+from apps.orders.models import Bid, Order, Transaction, TransactionType
+from apps.wallet.services import WalletService
 
 User = get_user_model()
 
@@ -183,13 +184,31 @@ class OrderReviewLifecycleTests(TestCase):
 
     def test_client_can_approve_review_order(self):
         order = self._create_order(status="review")
+        WalletService.topup(self.client_user, Decimal("5000"))
+        WalletService.hold(self.client_user, Decimal("5000"), order=order)
         self.api_client.force_authenticate(user=self.client_user)
 
         response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.expert_user.refresh_from_db()
         self.assertEqual(order.status, "completed")
+        self.assertEqual(self.client_user.balance, Decimal("0.00"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("0.00"))
+        self.assertEqual(self.expert_user.balance, Decimal("4250.00"))
+
+    def test_client_cannot_approve_review_order_without_reserved_funds(self):
+        order = self._create_order(status="review")
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "review")
+        self.assertIn("не зарезервированы", response.json()["detail"])
 
     def test_other_client_cannot_approve_review_order(self):
         order = self._create_order(status="review")
@@ -323,6 +342,7 @@ class OrderChatBootstrapTests(TestCase):
         main_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
         main_chat.participants.set([self.client_user, self.expert_user])
         bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"), status="invited")
+        WalletService.topup(self.client_user, Decimal("3000"))
         self.api_client.force_authenticate(user=self.expert_user)
 
         response = self.api_client.post(
@@ -333,8 +353,12 @@ class OrderChatBootstrapTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         order.refresh_from_db()
+        self.client_user.refresh_from_db()
         self.assertEqual(order.status, "in_progress")
         self.assertEqual(order.budget, Decimal("3000"))
+        self.assertEqual(self.client_user.balance, Decimal("3000.00"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("3000.00"))
+        self.assertTrue(Transaction.objects.filter(order=order, user=self.client_user, type=TransactionType.HOLD).exists())
         bid.refresh_from_db()
         self.assertEqual(bid.status, "accepted")
         order_chat = Chat.objects.get(pk=response.json()["chat_id"])
@@ -347,6 +371,26 @@ class OrderChatBootstrapTests(TestCase):
                 offer_data__order_id=order.id,
             ).exists()
         )
+
+    def test_expert_accept_assignment_requires_client_wallet_funds(self):
+        order = self._create_order(expert=self.expert_user, status="awaiting_expert_acceptance")
+        bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"), status="invited")
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/accept_assignment/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        order.refresh_from_db()
+        bid.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.assertEqual(order.status, "awaiting_expert_acceptance")
+        self.assertEqual(bid.status, "invited")
+        self.assertEqual(self.client_user.frozen_balance, Decimal("0.00"))
+        self.assertIn("Недостаточно средств", response.json()["detail"])
 
     def test_expert_decline_assignment_restores_order_to_new(self):
         order = self._create_order(expert=self.expert_user, status="awaiting_expert_acceptance")
@@ -368,14 +412,17 @@ class OrderChatBootstrapTests(TestCase):
 
     def test_take_creates_main_chat_and_order_subdialog(self):
         order = self._create_order()
+        WalletService.topup(self.client_user, Decimal("2500"))
         self.api_client.force_authenticate(user=self.expert_user)
 
         response = self.api_client.post(f"/api/orders/orders/{order.id}/take/", {}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         order.refresh_from_db()
+        self.client_user.refresh_from_db()
         self.assertEqual(order.expert_id, self.expert_user.id)
         self.assertEqual(order.status, "in_progress")
+        self.assertEqual(self.client_user.frozen_balance, Decimal("2500.00"))
         self.assertTrue(
             Chat.objects.filter(order__isnull=True, participants=self.client_user)
             .filter(participants=self.expert_user)

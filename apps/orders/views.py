@@ -8,6 +8,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
+from decimal import Decimal
 from .models import Order, Transaction, TransactionType, Dispute, OrderFile, OrderComment, Bid, BidStatus
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from .services import OrderActionService
@@ -79,6 +80,38 @@ def _active_order_hold(order):
         (totals.get(TransactionType.HOLD) or 0)
         - (totals.get(TransactionType.RELEASE) or 0)
         - (totals.get(TransactionType.REFUND) or 0)
+    )
+
+
+def _order_payment_amount(order):
+    amount = order.final_price if order.final_price is not None else order.budget
+    if amount in (None, ''):
+        return Decimal('0.00')
+    if not isinstance(amount, Decimal):
+        amount = Decimal(str(amount))
+    return amount.quantize(Decimal('0.01'))
+
+
+def _reserve_order_hold_if_needed(order, amount=None):
+    amount = amount if amount is not None else _order_payment_amount(order)
+    if not isinstance(amount, Decimal):
+        amount = Decimal(str(amount or '0'))
+    amount = amount.quantize(Decimal('0.01'))
+    if amount <= 0:
+        return None
+
+    active_hold = _active_order_hold(order)
+    if not isinstance(active_hold, Decimal):
+        active_hold = Decimal(str(active_hold or '0'))
+    active_hold = active_hold.quantize(Decimal('0.01'))
+    if active_hold >= amount:
+        return None
+
+    return WalletService.hold(
+        order.client,
+        amount - active_hold,
+        order=order,
+        description=f'Резерв средств по заказу #{order.id}',
     )
 
 
@@ -305,10 +338,17 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'У заказа уже есть назначенный эксперт.'}, status=status.HTTP_400_BAD_REQUEST)
         if order.status != 'new':
             return Response({'detail': 'Взять можно только заказ в статусе new.'}, status=status.HTTP_400_BAD_REQUEST)
-        with transaction.atomic():
-            order.expert = user
-            order.status = 'in_progress'
-            order.save(update_fields=['expert', 'status', 'updated_at'])
+        try:
+            with transaction.atomic():
+                _reserve_order_hold_if_needed(order)
+                order.expert = user
+                order.status = 'in_progress'
+                order.save(update_fields=['expert', 'status', 'updated_at'])
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Недостаточно средств на кошельке заказчика. Пополните баланс перед стартом заказа.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         _direct_chat, order_chat, _order_message = ensure_order_chat_started(
             order,
             sender=order.client,
@@ -333,7 +373,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if order.status != 'in_progress':
             return Response({'detail': 'Завершить можно только заказ в работе.'}, status=status.HTTP_400_BAD_REQUEST)
         with transaction.atomic():
-            order.status = 'completed'
+            order.status = 'review'
             order.save(update_fields=['status', 'updated_at'])
         serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -518,12 +558,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not bid:
             return Response({'detail': 'Для этого заказа не найдено активное приглашение.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        with transaction.atomic():
-            bid.status = BidStatus.ACCEPTED
-            bid.save(update_fields=['status'])
-            order.budget = bid.amount
-            order.status = 'in_progress'
-            order.save(update_fields=['budget', 'status', 'updated_at'])
+        try:
+            with transaction.atomic():
+                _reserve_order_hold_if_needed(order, bid.amount)
+                bid.status = BidStatus.ACCEPTED
+                bid.save(update_fields=['status'])
+                order.budget = bid.amount
+                order.status = 'in_progress'
+                order.save(update_fields=['budget', 'status', 'updated_at'])
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Недостаточно средств на кошельке заказчика. Пополните баланс перед стартом заказа.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         _direct_chat, chat, _order_message = ensure_order_chat_started(
             order,
@@ -636,6 +683,19 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Принять можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         if not _is_order_action_allowed(order, user, 'can_approve_work'):
             return _order_action_unavailable()
+
+        payment_amount = _order_payment_amount(order)
+        active_hold = _active_order_hold(order)
+        has_direct_payment = Transaction.objects.filter(
+            order=order,
+            user=order.client,
+            type=TransactionType.PURCHASE,
+        ).exists()
+        if payment_amount > 0 and active_hold < payment_amount and not has_direct_payment:
+            return Response(
+                {'detail': 'Средства по заказу не зарезервированы. Принятие работы и завершение заказа недоступны.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             _release_order_hold_if_any(order)
@@ -757,9 +817,17 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
         
         old_status = order.status
-        order.expert = request.user
-        order.status = 'in_progress'
-        order.save()
+        try:
+            with transaction.atomic():
+                _reserve_order_hold_if_needed(order)
+                order.expert = request.user
+                order.status = 'in_progress'
+                order.save(update_fields=['expert', 'status', 'updated_at'])
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Недостаточно средств на кошельке заказчика. Пополните баланс перед стартом заказа.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         _direct_chat, order_chat, _order_message = ensure_order_chat_started(
             order,
@@ -789,14 +857,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
         
         old_status = order.status
-        order.status = 'completed'
-        order.save()
+        order.status = 'review'
+        order.save(update_fields=['status', 'updated_at'])
         
         safe_call(NotificationService.notify_status_changed, order, old_status)
-        try:
-            NotificationService.notify_order_completed(order)
-        except Exception:
-            pass
 
         return Response(OrderSerializer(order).data)
 

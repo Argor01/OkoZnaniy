@@ -1134,7 +1134,7 @@ class UserViewSet(viewsets.ModelViewSet):
             for chat in ChatModel.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user) | Q(participants=user)
             ).distinct():
-                chat.unfreeze()
+                chat.unfreeze(post_system_message=False)
             for order in Order.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user)
             ).distinct():
@@ -1303,7 +1303,7 @@ class UserViewSet(viewsets.ModelViewSet):
             for chat in ChatModel.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user) | Q(participants=user)
             ).distinct():
-                chat.unfreeze()
+                chat.unfreeze(post_system_message=False)
             for order in Order.objects.filter(is_frozen=True).filter(
                 Q(expert=user) | Q(client=user)
             ).distinct():
@@ -1341,7 +1341,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
         unfrozen_count = 0
         for chat in frozen_chats:
-            chat.unfreeze()
+            chat.unfreeze(post_system_message=False)
             unfrozen_count += 1
 
         # Размораживаем заказы пользователя

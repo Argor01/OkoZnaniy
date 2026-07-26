@@ -47,7 +47,6 @@ import { ru } from 'date-fns/locale';
 import { getMediaUrl } from '../../../../config/api';
 import { IndividualOfferModal } from '@/features/orders';
 import { ordersApi } from '@/features/orders/api/orders';
-import OrderTimeline from '@/features/orders/components/OrderTimeline';
 import { expertsApi } from '@/features/expert/api/experts';
 import { SupportCenterPanel } from '@/features/support/components/SupportCenterPanel';
 import { supportRequestsApi } from '@/features/support/api/requests';
@@ -1055,7 +1054,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   useEffect(() => {
     if (!visible) return;
-    setOrderPanelOpen(!!effectiveOrderId);
+    setOrderPanelOpen(false);
     if (!effectiveOrderId) {
       setOrder(null);
       setOrderLoading(false);
@@ -2304,11 +2303,18 @@ const handleOverdueComplaint = async () => {
     if (!selectedConversationGroup) return [];
     return selectedConversationGroup.orderChats.filter((chat) => {
       const orderId = toPositiveNumber(chat.order_id ?? chat.order);
+      return Boolean(orderId);
+    });
+  }, [selectedConversationGroup, toPositiveNumber]);
+
+  const activeConversationOrderChats = useMemo(() => {
+    return selectedConversationOrderChats.filter((chat) => {
+      const orderId = toPositiveNumber(chat.order_id ?? chat.order);
       if (!orderId) return false;
       const knownStatus = orderStatusById[orderId] ?? chat.order_status;
       return !knownStatus || !closedOrderStatuses.has(knownStatus);
     });
-  }, [closedOrderStatuses, orderStatusById, selectedConversationGroup, toPositiveNumber]);
+  }, [closedOrderStatuses, orderStatusById, selectedConversationOrderChats, toPositiveNumber]);
 
   const tabsOrderIds = useMemo(() => {
     if (!selectedConversationGroup) return [];
@@ -2326,12 +2332,12 @@ const handleOverdueComplaint = async () => {
 
     selectedConversationGroup.chats.forEach((chat) => {
       addOrderId(chat.order_id ?? chat.order, chat.order_status);
-      (orderIdsByChatId[chat.id] || []).forEach(addOrderId);
+      (orderIdsByChatId[chat.id] || []).forEach((id) => addOrderId(id, orderStatusById[id]));
     });
 
     const selectedPeerId = toPositiveNumber(selectedChat?.other_user?.id);
     if (selectedPeerId && selectedPeerId === selectedConversationGroup.key) {
-      computedOrderIds.forEach(addOrderId);
+      computedOrderIds.forEach((id) => addOrderId(id, orderStatusById[id]));
     }
 
     return ids;
@@ -2347,23 +2353,23 @@ const handleOverdueComplaint = async () => {
   ]);
 
   const primaryOrderChatId = useMemo(() => {
-    const directMatch = selectedConversationOrderChats.find(
+    const directMatch = activeConversationOrderChats.find(
       (chat) => toPositiveNumber(chat.order_id ?? chat.order) === effectiveOrderId
     );
     if (directMatch) return directMatch.id;
-    return selectedConversationOrderChats[0]?.id ?? null;
-  }, [effectiveOrderId, selectedConversationOrderChats, toPositiveNumber]);
+    return activeConversationOrderChats[0]?.id ?? null;
+  }, [activeConversationOrderChats, effectiveOrderId, toPositiveNumber]);
 
   const primaryOrderId = useMemo(() => {
     if (!primaryOrderChatId) return null;
-    const targetChat = selectedConversationOrderChats.find((chat) => chat.id === primaryOrderChatId);
+    const targetChat = activeConversationOrderChats.find((chat) => chat.id === primaryOrderChatId);
     return toPositiveNumber(targetChat?.order_id ?? targetChat?.order) ?? null;
-  }, [primaryOrderChatId, selectedConversationOrderChats, toPositiveNumber]);
+  }, [activeConversationOrderChats, primaryOrderChatId, toPositiveNumber]);
 
   const isMainChatLocked = Boolean(
     selectedChat &&
     !selectedChat.order_id &&
-    selectedConversationOrderChats.length > 0 &&
+    activeConversationOrderChats.length > 0 &&
     !isSupportChatSelected
   );
 
@@ -2374,7 +2380,7 @@ const handleOverdueComplaint = async () => {
   }, [loadOrCreateChatWithUser, selectedConversationGroup?.key]);
 
   const handleOpenOrderConversation = useCallback((orderId: number) => {
-    const existingChat = selectedConversationOrderChats.find(
+    const existingChat = activeConversationOrderChats.find(
       (chat) => toPositiveNumber(chat.order_id ?? chat.order) === orderId
     );
     setOrderPanelOpen(true);
@@ -2388,8 +2394,8 @@ const handleOverdueComplaint = async () => {
   }, [
     loadChatDetail,
     loadOrCreateChatByOrderAndUser,
+    activeConversationOrderChats,
     selectedConversationGroup?.key,
-    selectedConversationOrderChats,
     toPositiveNumber,
   ]);
 
@@ -2947,8 +2953,6 @@ const handleOverdueComplaint = async () => {
                               </div>
                             </div>
                           </div>
-
-                          <OrderTimeline order={order} compact className={styles.orderTimelineInChat} />
 
                           <div className={styles.orderActionsBar}>
                              <div className={styles.primaryActionsRow}>

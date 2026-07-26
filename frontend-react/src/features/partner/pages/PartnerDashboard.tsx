@@ -16,6 +16,7 @@ import {
   FileImageOutlined,
   EnvironmentOutlined,
   QuestionCircleOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs, { Dayjs } from 'dayjs';
@@ -32,6 +33,7 @@ import PartnerFaqModal from '../modals/PartnerFaqModal';
 import { AppFooter } from '@/components/layout/AppFooter';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
+import Wallet from '@/features/wallet/pages/Wallet';
 import '@/styles/modal-overrides.css';
 import { getDisplayUsername } from '@/utils/formatters';
 import './PartnerDashboard.css';
@@ -596,6 +598,12 @@ const PartnerDashboard: React.FC = () => {
       icon: <TeamOutlined />,
       label: 'Мои рефералы',
       component: <ErrorBoundary><ReferralsList data={data} /></ErrorBoundary>,
+    },
+    {
+      key: 'wallet',
+      icon: <WalletOutlined />,
+      label: 'Кошелёк',
+      component: <ErrorBoundary><Wallet /></ErrorBoundary>,
     },
     {
       key: 'earnings',

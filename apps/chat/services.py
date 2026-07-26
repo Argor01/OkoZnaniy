@@ -319,7 +319,7 @@ class ChatModerationService:
 
     @staticmethod
     def unfreeze_chat(chat, admin_user, decision: str):
-        chat.unfreeze()
+        chat.unfreeze(post_system_message=False)
 
         violation = chat.contact_violations.filter(status="pending").first()
         if violation:
@@ -385,7 +385,7 @@ class ChatModerationService:
 
         chats = ChatModel.objects.filter(expert=expert, is_frozen=True)
         for expert_chat in chats:
-            expert_chat.unfreeze()
+            expert_chat.unfreeze(post_system_message=False)
 
         orders = Order.objects.filter(expert=expert, is_frozen=True)
         for order in orders:
