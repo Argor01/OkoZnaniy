@@ -80,9 +80,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
         validated_data['has_custom_username'] = username_provided
         
         # Создаем пользователя
-        user = User.objects.create_user(**validated_data)
-        user.set_password(password)
-        user.role = role
+        validated_data['role'] = role
         
         # Если указан реферальный код, находим партнера
         if referral_code:
@@ -91,17 +89,13 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                     referral_code=referral_code,
                     role='partner'
                 )
-                user.partner = partner
-                
-                # Увеличиваем счетчик рефералов у партнера
-                partner.total_referrals += 1
-                partner.save(update_fields=['total_referrals'])
+                validated_data['partner'] = partner
                 
             except User.DoesNotExist:
                 # Если код не найден, просто игнорируем
                 pass
         
-        user.save()
+        user = User.objects.create_user(password=password, **validated_data)
         return user
     
     def custom_signup(self, request, user):

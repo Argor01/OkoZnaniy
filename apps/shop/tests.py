@@ -22,7 +22,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
-from apps.shop.models import ReadyWork
+from apps.orders.models import Order, Transaction, TransactionType
+from apps.shop.models import Purchase, ReadyWork
+from apps.wallet.services import get_system_account
 
 User = get_user_model()
 
@@ -121,3 +123,70 @@ class ReadyWorkCreationRegressionTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         body = response.json()
         self.assertIn("description", body)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ReadyWorkPurchaseWalletTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name="Purchase subject")
+        cls.work_type = WorkType.objects.create(name="Purchase work type")
+        cls.author = User.objects.create_user(
+            username="purchase_author",
+            email="purchase_author@example.com",
+            password="pwd",
+            role="expert",
+        )
+        cls.buyer = User.objects.create_user(
+            username="purchase_buyer",
+            email="purchase_buyer@example.com",
+            password="pwd",
+            role="client",
+        )
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.buyer)
+        self.work = ReadyWork.objects.create(
+            title="Approved work",
+            description="Approved work description",
+            price=Decimal("1200.00"),
+            subject=self.subject,
+            work_type=self.work_type,
+            author=self.author,
+            is_active=True,
+            moderation_status=ReadyWork.ModerationStatus.APPROVED,
+        )
+
+    def test_purchase_requires_available_wallet_funds(self):
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Purchase.objects.exists())
+        self.assertFalse(Order.objects.exists())
+        self.assertFalse(Transaction.objects.exists())
+
+    def test_purchase_debits_buyer_pays_author_and_creates_order(self):
+        self.buyer.balance = Decimal("1200.00")
+        self.buyer.save(update_fields=["balance"])
+
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        purchase = Purchase.objects.get(pk=response.json()["id"])
+        order = purchase.order
+        self.buyer.refresh_from_db()
+        self.author.refresh_from_db()
+        system_user = get_system_account()
+        system_user.refresh_from_db()
+
+        self.assertEqual(order.status, "in_progress")
+        self.assertEqual(order.client_id, self.buyer.id)
+        self.assertEqual(order.expert_id, self.author.id)
+        self.assertEqual(self.buyer.balance, Decimal("0.00"))
+        self.assertEqual(self.author.balance, Decimal("1020.00"))
+        self.assertEqual(system_user.balance, Decimal("180.00"))
+        self.assertEqual(
+            set(Transaction.objects.filter(order=order).values_list("type", flat=True)),
+            {TransactionType.PURCHASE, TransactionType.PAYOUT, TransactionType.COMMISSION},
+        )

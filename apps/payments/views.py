@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
-from .models import Payment, PaymentMethod
+from .models import Payment
 from .serializers import PaymentSerializer
 from .services import PaymentService
 try:
@@ -49,7 +49,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        if payment_method not in PaymentMethod.values:
+        if payment_method not in PaymentService._NORMALIZE_METHOD:
             return Response(
                 {'error': 'Неподдерживаемый метод оплаты'},
                 status=status.HTTP_400_BAD_REQUEST

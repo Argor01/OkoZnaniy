@@ -1,0 +1,290 @@
+from decimal import Decimal
+from datetime import timedelta
+from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APIClient
+
+from apps.catalog.models import Subject, WorkType
+from apps.orders.models import Order, Transaction, TransactionType
+from apps.payments.models import Payment, PaymentStatus
+from apps.payments.services import PaymentService
+from apps.users.models import PartnerEarning
+from apps.users.serializers import CustomRegisterSerializer
+from apps.wallet.models import WithdrawalRequest
+from apps.wallet.services import WalletService, get_system_account
+
+User = get_user_model()
+
+
+@override_settings(PAYMENTS_SANDBOX=True, SECURE_SSL_REDIRECT=False)
+class WalletSandboxTests(TestCase):
+    def setUp(self):
+        self.client_user = User.objects.create_user(
+            username='wallet_client',
+            email='wallet_client@okoznaniy.test',
+            password='pwd',
+            role='client',
+        )
+        self.api = APIClient()
+        self.api.force_authenticate(self.client_user)
+
+    def test_sandbox_topup_credits_test_wallet_once(self):
+        response = self.api.post(
+            '/api/wallet/topup/',
+            {'amount': '500.00', 'payment_method': 'sberpay_qr'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertTrue(response.json()['sandbox'])
+        self.client_user.refresh_from_db()
+        self.assertEqual(self.client_user.balance, Decimal('500.00'))
+
+        payment = Payment.objects.get(payment_id=response.json()['payment_id'])
+        self.assertEqual(payment.status, PaymentStatus.COMPLETED)
+        self.assertEqual(
+            Transaction.objects.filter(
+                user=self.client_user,
+                payment=payment,
+                type=TransactionType.TOPUP,
+            ).count(),
+            1,
+        )
+
+        payment.save()
+        self.client_user.refresh_from_db()
+        self.assertEqual(self.client_user.balance, Decimal('500.00'))
+
+    def test_withdraw_debits_wallet_and_creates_pending_request(self):
+        WalletService.topup(self.client_user, Decimal('700.00'))
+
+        response = self.api.post(
+            '/api/wallet/withdraw/',
+            {'amount': '300.00', 'card_number': '4111111111111111'},
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.client_user.refresh_from_db()
+        self.assertEqual(self.client_user.balance, Decimal('400.00'))
+        withdrawal = WithdrawalRequest.objects.get(pk=response.json()['withdrawal_id'])
+        self.assertEqual(withdrawal.status, WithdrawalRequest.Status.PENDING)
+        self.assertEqual(withdrawal.transaction.type, TransactionType.WITHDRAWAL)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class PartnerReferralFinanceTests(TestCase):
+    def test_registration_with_referral_code_creates_partner_bonus(self):
+        partner = User.objects.create_user(
+            username='ref_partner',
+            email='ref_partner@example.com',
+            password='pwd',
+            role='partner',
+        )
+
+        serializer = CustomRegisterSerializer(data={
+            'email': 'referred_client@example.com',
+            'password': 'secret123',
+            'password2': 'secret123',
+            'role': 'client',
+            'referral_code': partner.referral_code,
+        })
+
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        referred_client = serializer.save()
+        bonus = PartnerEarning.objects.get(
+            partner=partner,
+            referral=referred_client,
+            earning_type='registration',
+        )
+
+        self.assertEqual(bonus.amount, Decimal('50.00'))
+        self.assertEqual(bonus.source_amount, Decimal('50.00'))
+        partner.refresh_from_db()
+        self.assertEqual(partner.total_referrals, 1)
+        self.assertEqual(partner.total_earnings, Decimal('50.00'))
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class WalletOrderLedgerTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name='Wallet subject')
+        cls.work_type = WorkType.objects.create(name='Wallet work type')
+
+    def setUp(self):
+        self.client_user = User.objects.create_user(
+            username='ledger_client',
+            email='ledger_client@example.com',
+            password='pwd',
+            role='client',
+        )
+        self.expert = User.objects.create_user(
+            username='ledger_expert',
+            email='ledger_expert@example.com',
+            password='pwd',
+            role='expert',
+        )
+        self.api = APIClient()
+
+    def _order(self, status_value='review'):
+        return Order.objects.create(
+            client=self.client_user,
+            expert=self.expert,
+            subject=self.subject,
+            work_type=self.work_type,
+            title='Ledger order',
+            description='Ledger order description',
+            deadline=timezone.now() + timedelta(days=3),
+            budget=Decimal('1000.00'),
+            final_price=Decimal('1000.00'),
+            status=status_value,
+        )
+
+    def test_approve_releases_order_hold_to_expert_with_commission(self):
+        order = self._order()
+        WalletService.topup(self.client_user, Decimal('1000.00'))
+        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+
+        self.api.force_authenticate(self.client_user)
+        response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.expert.refresh_from_db()
+        system_user = get_system_account()
+        system_user.refresh_from_db()
+
+        self.assertEqual(order.status, 'completed')
+        self.assertEqual(self.client_user.balance, Decimal('0.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.expert.balance, Decimal('850.00'))
+        self.assertEqual(system_user.balance, Decimal('150.00'))
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.RELEASE).exists())
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PAYOUT).exists())
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.COMMISSION).exists())
+
+    def test_reject_refunds_order_hold_to_available_balance(self):
+        order = self._order()
+        WalletService.topup(self.client_user, Decimal('1000.00'))
+        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+
+        self.api.force_authenticate(self.client_user)
+        response = self.api.post(f'/api/orders/orders/{order.id}/reject/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.expert.refresh_from_db()
+
+        self.assertEqual(order.status, 'cancelled')
+        self.assertEqual(self.client_user.balance, Decimal('1000.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.expert.balance, Decimal('0.00'))
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists())
+
+    def test_external_order_payment_callback_creates_idempotent_wallet_hold(self):
+        order = self._order(status_value='waiting_payment')
+        payment = Payment.objects.create(
+            order=order,
+            user=self.client_user,
+            amount=Decimal('1000.00'),
+            payment_method='card',
+            status=PaymentStatus.PENDING,
+            payment_id='callback-order-payment',
+        )
+
+        with patch('apps.payments.services.AlfaBankClient.process_callback', return_value=payment):
+            self.assertTrue(PaymentService.process_payment_callback(payment.payment_id, {'orderId': payment.payment_id}))
+            self.assertTrue(PaymentService.process_payment_callback(payment.payment_id, {'orderId': payment.payment_id}))
+
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        payment.refresh_from_db()
+
+        self.assertEqual(payment.status, PaymentStatus.COMPLETED)
+        self.assertEqual(order.status, 'in_progress')
+        self.assertEqual(self.client_user.balance, Decimal('1000.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('1000.00'))
+        self.assertEqual(
+            Transaction.objects.filter(order=order, payment=payment, type=TransactionType.TOPUP).count(),
+            1,
+        )
+        self.assertEqual(
+            Transaction.objects.filter(order=order, type=TransactionType.HOLD).count(),
+            1,
+        )
+
+    def test_completed_referred_order_is_visible_in_partner_and_director_finance(self):
+        partner = User.objects.create_user(
+            username='ledger_partner',
+            email='ledger_partner@example.com',
+            password='pwd',
+            role='partner',
+            partner_commission_rate=Decimal('7.50'),
+        )
+        director = User.objects.create_user(
+            username='ledger_director',
+            email='ledger_director@example.com',
+            password='pwd',
+            role='director',
+        )
+        admin_user = User.objects.create_user(
+            username='ledger_admin',
+            email='ledger_admin@example.com',
+            password='pwd',
+            role='admin',
+        )
+        self.client_user.partner = partner
+        self.client_user.save(update_fields=['partner'])
+
+        order = self._order()
+        WalletService.topup(self.client_user, Decimal('1000.00'))
+        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+
+        self.api.force_authenticate(self.client_user)
+        response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
+        self.assertEqual(earning.source_amount, Decimal('1000.00'))
+        self.assertEqual(earning.commission_rate, Decimal('7.50'))
+        self.assertEqual(earning.amount, Decimal('75.0000'))
+        self.assertFalse(earning.is_paid)
+
+        partner.refresh_from_db()
+        self.assertEqual(partner.total_referrals, 1)
+        self.assertEqual(partner.active_referrals, 1)
+        self.assertEqual(partner.total_earnings, Decimal('75.0000'))
+
+        self.api.force_authenticate(partner)
+        dashboard = self.api.get('/api/users/partner_dashboard/')
+        self.assertEqual(dashboard.status_code, status.HTTP_200_OK, dashboard.content)
+        self.assertEqual(Decimal(str(dashboard.json()['partner_info']['total_earnings'])), Decimal('75.0000'))
+        self.assertEqual(len(dashboard.json()['recent_earnings']), 1)
+
+        start = (timezone.now() - timedelta(days=1)).date().isoformat()
+        end = (timezone.now() + timedelta(days=1)).date().isoformat()
+        self.api.force_authenticate(director)
+        turnover = self.api.get(f'/api/director/partners/turnover/?start_date={start}&end_date={end}')
+        self.assertEqual(turnover.status_code, status.HTTP_200_OK, turnover.content)
+        partner_row = next(item for item in turnover.json()['partners'] if item['id'] == partner.id)
+        self.assertEqual(Decimal(str(partner_row['turnover'])), Decimal('1000.0'))
+        self.assertEqual(Decimal(str(partner_row['commission'])), Decimal('75.0'))
+
+        self.api.force_authenticate(admin_user)
+        admin_earnings = self.api.get('/api/users/admin_earnings/')
+        self.assertEqual(admin_earnings.status_code, status.HTTP_200_OK, admin_earnings.content)
+        admin_row = next(item for item in admin_earnings.json() if item['id'] == earning.id)
+        self.assertEqual(Decimal(str(admin_row['amount'])), Decimal('75.00'))
+        self.assertFalse(admin_row['is_paid'])
+
+        mark_paid = self.api.post('/api/users/admin_mark_earning_paid/', {'earning_id': earning.id}, format='json')
+        self.assertEqual(mark_paid.status_code, status.HTTP_200_OK, mark_paid.content)
+        earning.refresh_from_db()
+        self.assertTrue(earning.is_paid)

@@ -662,7 +662,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # Статистика рефералов
         referrals = user.referrals.all()
         active_referrals = referrals.filter(
-            client_orders__isnull=False
+            models.Q(client_orders__isnull=False) | models.Q(expert_orders__isnull=False)
         ).distinct()
         
         # Доходы партнера

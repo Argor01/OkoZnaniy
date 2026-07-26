@@ -43,6 +43,15 @@ class IsDirector(permissions.BasePermission):
         )
 
 
+def parse_aware_date_range(start_date: str, end_date: str):
+    start_day = datetime.strptime(start_date, '%Y-%m-%d').date()
+    end_day = datetime.strptime(end_date, '%Y-%m-%d').date()
+    current_timezone = timezone.get_current_timezone()
+    start_dt = timezone.make_aware(datetime.combine(start_day, datetime.min.time()), current_timezone)
+    end_dt = timezone.make_aware(datetime.combine(end_day, datetime.max.time()), current_timezone)
+    return start_dt, end_dt
+
+
 class DirectorExpertApplicationViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ExpertApplication.objects.select_related('expert', 'reviewed_by').prefetch_related('educations')
     serializer_class = ExpertApplicationSerializer
@@ -608,8 +617,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -763,8 +771,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -854,8 +861,7 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -944,8 +950,7 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -1037,8 +1042,7 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -1143,8 +1147,7 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
@@ -1220,8 +1223,7 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
                           status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
         except ValueError:
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)

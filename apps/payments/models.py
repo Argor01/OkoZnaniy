@@ -7,6 +7,8 @@ from .crypto import PaymentCrypto
 class PaymentMethod(models.TextChoices):
     SBP = 'sbp', 'Система быстрых платежей'
     CARD = 'card', 'Банковская карта'
+    SBERBANK = 'sberbank', 'Sberbank'
+    SBERPAY_QR = 'sberpay_qr', 'SberPay QR'
 
 
 class PaymentStatus(models.TextChoices):

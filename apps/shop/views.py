@@ -2,6 +2,7 @@ import mimetypes
 from datetime import timedelta
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.http import FileResponse
 from django.utils import timezone
@@ -10,7 +11,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.chat.services import ensure_order_chat_started
-from apps.orders.models import Order
+from apps.orders.models import Order, TransactionType
+from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
@@ -135,6 +137,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         return Response({'status': 'added', 'is_favorite': True})
 
     @action(detail=True, methods=['post'])
+    @transaction.atomic
     def purchase(self, request, pk=None):
         work = self.get_object()
 
@@ -155,6 +158,21 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             final_price=work.price,
             status='in_progress',
         )
+        try:
+            WalletService.direct_transfer(
+                payer=request.user,
+                recipient=work.author,
+                amount=work.price,
+                order=order,
+                description=f'Покупка готовой работы "{work.title}"',
+                purpose=TransactionType.PURCHASE,
+            )
+        except InsufficientFunds:
+            order.delete()
+            return Response(
+                {'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         ensure_order_chat_started(
             order,
             sender=request.user,

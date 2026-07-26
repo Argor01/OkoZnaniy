@@ -8,12 +8,13 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
-from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid, BidStatus
+from .models import Order, Transaction, TransactionType, Dispute, OrderFile, OrderComment, Bid, BidStatus
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from .services import OrderActionService
 from apps.chat.services import ensure_order_chat_started
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
+from apps.wallet.services import InsufficientFunds, WalletService
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse, Http404
 import mimetypes
@@ -61,6 +62,46 @@ def _order_action_unavailable():
         {'detail': 'Action is not available for the current order state.'},
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+def _active_order_hold(order):
+    rows = Transaction.objects.filter(
+        order=order,
+        user=order.client,
+        type__in=[
+            TransactionType.HOLD,
+            TransactionType.RELEASE,
+            TransactionType.REFUND,
+        ],
+    ).values('type').annotate(total=models.Sum('amount'))
+    totals = {row['type']: row['total'] for row in rows}
+    return (
+        (totals.get(TransactionType.HOLD) or 0)
+        - (totals.get(TransactionType.RELEASE) or 0)
+        - (totals.get(TransactionType.REFUND) or 0)
+    )
+
+
+def _release_order_hold_if_any(order):
+    amount = _active_order_hold(order)
+    if amount > 0 and order.expert_id:
+        WalletService.release_to_expert(
+            client=order.client,
+            expert=order.expert,
+            amount=amount,
+            order=order,
+        )
+
+
+def _refund_order_hold_if_any(order):
+    amount = _active_order_hold(order)
+    if amount > 0:
+        WalletService.refund_hold(
+            order.client,
+            amount,
+            order=order,
+            description=f'Возврат резерва по заказу #{order.id}',
+        )
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -596,6 +637,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not _is_order_action_allowed(order, user, 'can_approve_work'):
             return _order_action_unavailable()
 
+        try:
+            _release_order_hold_if_any(order)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось выпустить резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         order.status = 'completed'
         order.save(update_fields=['status', 'updated_at'])
         if order.expert_id:
@@ -674,6 +723,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Отклонить можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         if not _is_order_action_allowed(order, user, 'can_reject_work'):
             return _order_action_unavailable()
+
+        try:
+            _refund_order_hold_if_any(order)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось вернуть резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         old_status = order.status
         order.status = 'cancelled'

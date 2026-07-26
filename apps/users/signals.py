@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.db import models
 from decimal import Decimal
 from .models import User, PartnerEarning
 
@@ -74,7 +75,7 @@ def update_partner_statistics(partner):
     
     # Подсчитываем активных рефералов (у которых есть заказы)
     active_referrals = partner.referrals.filter(
-        client_orders__isnull=False
+        models.Q(client_orders__isnull=False) | models.Q(expert_orders__isnull=False)
     ).distinct().count()
     
     # Подсчитываем общий доход

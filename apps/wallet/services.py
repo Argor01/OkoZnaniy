@@ -112,7 +112,7 @@ class WalletService:
 
     @staticmethod
     @transaction.atomic
-    def topup(user, amount, *, payment=None, description: str = '') -> Transaction:
+    def topup(user, amount, *, payment=None, order=None, description: str = '') -> Transaction:
         """Credit user's balance after a successful external payment."""
         amount = _q(amount)
         if amount <= 0:
@@ -121,7 +121,7 @@ class WalletService:
         u.balance = (u.balance or ZERO) + amount
         u.save(update_fields=['balance'])
         return Transaction.objects.create(
-            user=u, amount=amount, type=TransactionType.TOPUP,
+            user=u, amount=amount, type=TransactionType.TOPUP, order=order,
             description=description or 'Пополнение баланса',
             payment=payment, balance_after=u.balance,
         )
@@ -231,6 +231,7 @@ class WalletService:
         *, payer, recipient, amount,
         commission_percent: Optional[Decimal] = None,
         description: str = '',
+        order=None,
         purpose: str = TransactionType.PURCHASE,
     ) -> dict:
         """Spend from payer.balance immediately (no escrow) and credit recipient
@@ -260,18 +261,18 @@ class WalletService:
         r.save(update_fields=['balance'])
         s.save(update_fields=['balance'])
         t = Transaction.objects.create(
-            user=p, amount=amount, type=purpose,
+            user=p, amount=amount, type=purpose, order=order,
             description=description or 'Покупка',
             balance_after=p.balance,
         )
         Transaction.objects.create(
-            user=r, amount=payout, type=TransactionType.PAYOUT,
+            user=r, amount=payout, type=TransactionType.PAYOUT, order=order,
             description=f'Продажа: {description}' if description else 'Продажа',
             balance_after=r.balance,
         )
         if fee > 0:
             Transaction.objects.create(
-                user=s, amount=fee, type=TransactionType.COMMISSION,
+                user=s, amount=fee, type=TransactionType.COMMISSION, order=order,
                 description=description or 'Комиссия платформы',
                 balance_after=s.balance,
             )

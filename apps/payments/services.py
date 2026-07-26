@@ -1,6 +1,7 @@
 from typing import Dict, Any
 from decimal import Decimal
 from django.conf import settings
+from django.db.models import Sum
 from django.utils import timezone
 from .models import Payment, PaymentMethod, PaymentStatus
 from .providers.alfabank import AlfaBankClient
@@ -15,6 +16,7 @@ class PaymentService:
         """
         payment = Payment.objects.create(
             order=order,
+            user=order.client,
             amount=order.final_price or order.budget,
             payment_method=payment_method,
             status=PaymentStatus.PENDING,
@@ -54,17 +56,21 @@ class PaymentService:
             payment = Payment.objects.get(payment_id=payment_id)
             
             # Определяем провайдера платежа
-            if payment.payment_method == PaymentMethod.CARD:
+            rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
+            if rail == PaymentMethod.CARD:
                 result = AlfaBankClient().process_callback(data)
-            elif payment.payment_method == PaymentMethod.SBP:
+            elif rail == PaymentMethod.SBP:
                 result = SBPClient().process_callback(data)
             else:
                 result = None
 
             if result:
-                # Top-ups have no order: the Payment post_save signal credits
-                # the wallet. Legacy order payments still advance the order.
+                if payment.status != PaymentStatus.COMPLETED:
+                    payment.status = PaymentStatus.COMPLETED
+                    payment.paid_at = timezone.now()
+                    payment.save(update_fields=['status', 'paid_at', 'updated_at'])
                 if payment.order_id:
+                    PaymentService._reserve_order_payment(payment)
                     order = payment.order
                     order.status = 'in_progress'
                     order.save(update_fields=['status'])
@@ -73,6 +79,48 @@ class PaymentService:
             return False
         except Payment.DoesNotExist:
             return False
+
+    @staticmethod
+    def _reserve_order_payment(payment: Payment) -> None:
+        """Reflect a successful external order payment in the wallet ledger."""
+        if not payment.order_id:
+            return
+
+        from apps.orders.models import Transaction, TransactionType
+        from apps.wallet.services import WalletService
+
+        order = payment.order
+        client = order.client
+
+        if not Transaction.objects.filter(
+            user=client,
+            payment=payment,
+            type=TransactionType.TOPUP,
+        ).exists():
+            WalletService.topup(
+                client,
+                payment.amount,
+                payment=payment,
+                order=order,
+                description=f'Оплата заказа #{order.id}',
+            )
+
+        aggregate = Transaction.objects.filter(user=client, order=order).values('type').annotate(
+            total=Sum('amount')
+        )
+        totals = {row['type']: row['total'] for row in aggregate}
+        active_hold = (
+            (totals.get(TransactionType.HOLD) or Decimal('0.00'))
+            - (totals.get(TransactionType.RELEASE) or Decimal('0.00'))
+            - (totals.get(TransactionType.REFUND) or Decimal('0.00'))
+        )
+        if active_hold < payment.amount:
+            WalletService.hold(
+                client,
+                payment.amount - active_hold,
+                order=order,
+                description=f'Резерв по заказу #{order.id}',
+            )
 
     @staticmethod
     def _get_alfabank_payment_link(payment: Payment) -> str:
