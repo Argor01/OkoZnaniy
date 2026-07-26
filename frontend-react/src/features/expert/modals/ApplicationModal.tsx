@@ -4,7 +4,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { expertsApi, type Education, type ExpertApplication } from '@/features/expert/api/experts';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { CURRENT_USER_KEY } from '@/hooks/queries';
+import { CURRENT_USER_KEY, useSubjects } from '@/hooks/queries';
 import SkillsSelect from '../components/inputs/SkillsSelect';
 import styles from './ApplicationModal.module.css';
 
@@ -102,6 +102,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 575);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const { data: subjects = [], isLoading: subjectsLoading } = useSubjects();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 575);
@@ -120,14 +121,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
         const firstName = nameParts[1] || user.first_name;
         const middleName = nameParts.slice(2).join(' ') || '';
 
-        let specs: number[] = [];
-        if (Array.isArray(application.specializations)) {
-          // Если это массив объектов с id
-          specs = application.specializations.map((s: any) => 
-            typeof s === 'object' && s.id ? s.id : s
-          ).filter((id: any) => typeof id === 'number');
-        }
-
         applicationForm.setFieldsValue({
           first_name: firstName,
           last_name: lastName,
@@ -137,7 +130,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           biography: application.biography || user.bio || '',
           portfolio_url: application.portfolio_url || user.portfolio_url || '',
           work_experience_years: application.work_experience_years,
-          specializations: specs,
           educations: application.educations && application.educations.length > 0 ? application.educations : [{}],
         });
       } else {
@@ -153,6 +145,18 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
       }
     }
   }, [visible, user, application, applicationForm]);
+
+  useEffect(() => {
+    if (visible && application && subjects.length > 0 && (application.status === 'needs_revision' || application.status === 'rejected')) {
+      let specs: number[] = [];
+      if (Array.isArray(application.specializations)) {
+        specs = application.specializations.map((s: any) =>
+          typeof s === 'object' && s.id ? s.id : s
+        ).filter((id: any) => typeof id === 'number');
+      }
+      applicationForm.setFieldsValue({ specializations: specs });
+    }
+  }, [visible, application, subjects, applicationForm]);
 
   const updateApplicationMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) => expertsApi.updateApplication(id, data),

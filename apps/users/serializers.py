@@ -295,9 +295,25 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
     
     def validate(self, attrs):
+        username = attrs.get('username', '')
+        password = attrs.get('password', '')
+
+        if username and password:
+            if '@' in username:
+                user_exists = User.objects.filter(email=username).exists()
+            else:
+                user_exists = User.objects.filter(username=username).exists()
+
+            if not user_exists:
+                from rest_framework.exceptions import AuthenticationFailed
+                raise AuthenticationFailed(
+                    'Аккаунт не найден',
+                    code='no_active_account',
+                )
+
         data = super().validate(attrs)
-        
-        # Добавляем данные пользователя в ответ
+
+        # Если super().validate() прошёл — пароль верный, добавляем данные пользователя
         data['user'] = {
             'id': self.user.id,
             'username': self.user.username,
@@ -307,7 +323,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'first_name': self.user.first_name,
             'last_name': self.user.last_name,
         }
-        
+
         return data
 
 

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from django.db import models
 from django.db.models import Count, Q
 from django.utils import timezone
-from .models import Question, Answer, AnswerLike, QuestionView, ArticleComplaint, ArticleDeletion
+from .models import Article, Question, Answer, AnswerLike, QuestionView, ArticleComplaint, ArticleDeletion
 from .serializers import (
     QuestionListSerializer,
     QuestionDetailSerializer,
@@ -467,5 +467,18 @@ class ArticleViewSet(viewsets.ModelViewSet):
         deletion.admin_final_response = (request.data.get('response') or '').strip()
         deletion.save(update_fields=['status', 'admin_final_response', 'updated_at'])
 
+        article = None
+        if decision == 'restored':
+            article = Article.objects.create(
+                title=deletion.article_title,
+                description=deletion.article_description,
+                work_type=deletion.article_work_type,
+                subject=deletion.article_subject,
+                author=deletion.author,
+            )
+
         serializer = ArticleDeletionSerializer(deletion, context={'request': request})
-        return Response(serializer.data)
+        data = serializer.data
+        if article:
+            data['restored_article_id'] = article.id
+        return Response(data)

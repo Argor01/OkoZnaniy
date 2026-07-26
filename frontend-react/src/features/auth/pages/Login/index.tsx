@@ -101,8 +101,10 @@ const Login: React.FC = () => {
       const errorData = error.response?.data;
       const errorMessage = errorData?.detail || errorData?.non_field_errors?.[0] || 'Ошибка входа';
       message.error(errorMessage);
-      if (errorMessage.includes('учетные данные') || errorMessage.includes('credentials')) {
+      if (errorMessage.includes('Неверный пароль') || errorMessage.includes('неверный пароль') || errorMessage.includes('учетные данные') || errorMessage.includes('credentials')) {
         setTimeout(() => { message.info('Забыли пароль? Используйте функцию "Забыли пароль?" ниже'); }, 1000);
+      } else if (errorMessage.includes('Аккаунт не найден') || errorMessage.includes('не найден')) {
+        setTimeout(() => { message.info('Аккаунт не найден. Проверьте данные или зарегистрируйтесь.'); }, 1000);
       }
     } finally {
       setLoading(false);

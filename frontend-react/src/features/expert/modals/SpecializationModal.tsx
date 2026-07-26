@@ -204,7 +204,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             placeholder="Выберите предмет из списка"
             className={styles.inputField}
             showSearch
-            optionFilterProp="children"
+            optionFilterProp="label"
             filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
             options={subjects.map((subject) => ({
               value: subject.id,

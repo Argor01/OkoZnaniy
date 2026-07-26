@@ -72,7 +72,7 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         PartnerChatMessage.objects.create(
             room=room,
             sender=self.request.user,
-            message=f'Р§Р°С‚ "{room.name}" СЃРѕР·РґР°РЅ',
+            message=f'Чат "{room.name}" создан',
             is_system=True,
         )
 
@@ -82,7 +82,7 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         message_text = request.data.get('message')
 
         if not message_text:
-            return Response({'error': 'РџРѕР»Рµ message РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Поле message обязательно'}, status=status.HTTP_400_BAD_REQUEST)
 
         message = PartnerChatMessage.objects.create(
             room=room,
@@ -101,11 +101,11 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} РїСЂРёСЃРѕРµРґРёРЅРёР»СЃСЏ Рє С‡Р°С‚Сѓ',
+            message=f'{request.user.get_full_name() or request.user.username} присоединился к чату',
             is_system=True,
         )
 
-        return Response({'message': 'Р’С‹ РїСЂРёСЃРѕРµРґРёРЅРёР»РёСЃСЊ Рє С‡Р°С‚Сѓ'})
+        return Response({'message': 'Вы присоединились к чату'})
 
     @action(detail=True, methods=['post'])
     def leave_room(self, request, pk=None):
@@ -115,11 +115,11 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=f'{request.user.get_full_name() or request.user.username} РїРѕРєРёРЅСѓР» С‡Р°С‚',
+            message=f'{request.user.get_full_name() or request.user.username} покинул чат',
             is_system=True,
         )
 
-        return Response({'message': 'Р’С‹ РїРѕРєРёРЅСѓР»Рё С‡Р°С‚'})
+        return Response({'message': 'Вы покинули чат'})
 
     @action(detail=True, methods=['get'])
     def messages(self, request, pk=None):
@@ -134,19 +134,19 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         user_id = request.data.get('user_id')
 
         if not user_id:
-            return Response({'error': 'РџРѕР»Рµ user_id РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Поле user_id обязательно'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return Response({'error': 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Пользователь не найден'}, status=status.HTTP_404_NOT_FOUND)
 
         room.members.add(user)
 
         PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=f'{user.get_full_name() or user.username} Р±С‹Р» РїСЂРёРіР»Р°С€РµРЅ РІ С‡Р°С‚',
+            message=f'{user.get_full_name() or user.username} был приглашен в чат',
             is_system=True,
         )
 
@@ -156,15 +156,15 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
             NotificationService.create_notification(
                 recipient=user,
                 type='new_contact',
-                title='РџСЂРёРіР»Р°С€РµРЅРёРµ РІ С‡Р°С‚',
-                message=f'{request.user.get_full_name() or request.user.username} РїСЂРёРіР»Р°СЃРёР» РІР°СЃ РІ С‡Р°С‚ "{room.name}"',
+                title='Приглашение в чат',
+                message=f'{request.user.get_full_name() or request.user.username} пригласил вас в чат "{room.name}"',
                 related_object_id=room.id,
                 related_object_type='partner_chat_room',
             )
         except ImportError:
             pass
 
-        return Response({'message': 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РїСЂРёРіР»Р°С€РµРЅ'})
+        return Response({'message': 'Пользователь приглашен'})
 
     @action(detail=True, methods=['post'])
     def upload_file(self, request, pk=None):
@@ -172,16 +172,16 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         file = request.FILES.get('file')
 
         if not file:
-            return Response({'error': 'РџРѕР»Рµ file РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Поле file обязательно'}, status=status.HTTP_400_BAD_REQUEST)
 
         PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=f'Р—Р°РіСЂСѓР¶РµРЅ С„Р°Р№Р»: {file.name}',
+            message=f'Загружен файл: {file.name}',
             is_system=False,
         )
 
-        return Response({'message': 'Р¤Р°Р№Р» Р·Р°РіСЂСѓР¶РµРЅ', 'filename': file.name})
+        return Response({'message': 'Файл загружен', 'filename': file.name})
 
 
 from rest_framework import mixins

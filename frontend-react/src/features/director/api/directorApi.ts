@@ -257,6 +257,18 @@ export const getExpenseDetail = async (startDate: string, endDate: string): Prom
   }
 };
 
+export const getFinanceSummary = async (startDate: string, endDate: string) => {
+  try {
+    const response = await apiClient.get('/director/finance/finance-summary/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching finance summary:', error);
+    throw error;
+  }
+};
+
 export const addIncome = async (data: { date: string; description: string; amount: number }): Promise<IncomeDetail> => {
   try {
     const response = await apiClient.post('/director/finance/income/', data);
@@ -524,6 +536,7 @@ export const directorApi = {
 
   getMonthlyTurnover,
   getNetProfit,
+  getFinanceSummary,
   getIncomeDetail,
   getExpenseDetail,
   exportFinancialData,

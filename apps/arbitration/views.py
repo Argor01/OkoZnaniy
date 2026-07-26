@@ -829,12 +829,17 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         return queryset
     
     def perform_create(self, serializer):
-        """При создании претензии автоматически замораживаем заказ"""
+        """При создании претензии автоматически замораживаем заказ и чат"""
         complaint = serializer.save()
         
         # Замораживаем заказ
         if complaint.order:
             complaint.order.freeze(f'Открыта претензия #{complaint.id}')
+        
+        # Замораживаем чаты заказа
+        from apps.chat.models import Chat
+        for chat in Chat.objects.filter(order=complaint.order):
+            chat.freeze(f'Открыта претензия #{complaint.id}')
     
     @action(detail=True, methods=['patch'], url_path='close')
     def close_complaint(self, request, pk=None):
@@ -869,6 +874,11 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         if complaint.order:
             complaint.order.unfreeze()
         
+        # Размораживаем чаты заказа
+        from apps.chat.models import Chat
+        for chat in Chat.objects.filter(order_id=complaint.order_id):
+            chat.unfreeze()
+        
         return Response(ComplaintSerializer(complaint).data)
     
     @action(detail=True, methods=['patch'], url_path='resolve')
@@ -896,6 +906,11 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         # Размораживаем заказ
         if complaint.order:
             complaint.order.unfreeze()
+        
+        # Размораживаем чаты заказа
+        from apps.chat.models import Chat
+        for chat in Chat.objects.filter(order_id=complaint.order_id):
+            chat.unfreeze()
         
         return Response(ComplaintSerializer(complaint).data)
 
@@ -993,10 +1008,10 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Претензия уже закрыта'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
-        is_participant = user.id in [complaint.plaintiff_id, complaint.defendant_id]
+        is_complainant = user.id == complaint.plaintiff_id
         is_admin = getattr(user, 'role', None) == 'admin'
-        if not (is_participant or is_admin):
-            return Response({'detail': 'Недостаточно прав'}, status=status.HTTP_403_FORBIDDEN)
+        if not (is_complainant or is_admin):
+            return Response({'detail': 'Только истец и администратор могут писать во время претензии'}, status=status.HTTP_403_FORBIDDEN)
 
         if not complaint.order_id or not complaint.order:
             return Response({'detail': 'Чат заказа недоступен'}, status=status.HTTP_400_BAD_REQUEST)

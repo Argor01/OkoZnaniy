@@ -40,6 +40,7 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -121,6 +122,7 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -188,6 +190,7 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -255,6 +258,7 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -309,6 +313,7 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}

@@ -36,30 +36,27 @@ const faqData: FAQItem[] = [
 ];
 
 const FAQ: React.FC = () => {
-  const [activeItems, setActiveItems] = useState<Set<number>>(
-    new Set(faqData.filter(item => item.isActive).map(item => item.id))
+  const [activeItemId, setActiveItemId] = useState<number | null>(
+    faqData.find(item => item.isActive)?.id ?? null
   );
   const panelsRef = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    activeItems.forEach((id) => {
-      const panel = panelsRef.current[id];
+    Object.values(panelsRef.current).forEach((panel) => {
+      if (panel) panel.style.maxHeight = '0px';
+    });
+    if (activeItemId !== null) {
+      const panel = panelsRef.current[activeItemId];
       if (panel) {
         const content = panel.firstElementChild as HTMLDivElement | null;
         const targetHeight = content ? content.scrollHeight : 0;
         panel.style.maxHeight = `${targetHeight}px`;
       }
-    });
-  }, [activeItems]);
+    }
+  }, [activeItemId]);
 
   const toggleItem = (id: number) => {
-    const newActiveItems = new Set(activeItems);
-    if (newActiveItems.has(id)) {
-      newActiveItems.delete(id);
-    } else {
-      newActiveItems.add(id);
-    }
-    setActiveItems(newActiveItems);
+    setActiveItemId((prev) => (prev === id ? null : id));
   };
 
   const imageRef = useScrollAnimation<HTMLElement>('fade-left');
@@ -79,7 +76,7 @@ const FAQ: React.FC = () => {
             {faqData.map((item) => (
               <div 
                 key={item.id} 
-                className={`${styles.faqItem} ${activeItems.has(item.id) ? styles.active : ''}`}
+                className={`${styles.faqItem} ${activeItemId === item.id ? styles.active : ''}`}
               >
                 <div 
                   className={styles.faqItemToggler}
@@ -93,7 +90,7 @@ const FAQ: React.FC = () => {
                     if (!panelsRef.current) panelsRef.current = {};
                     panelsRef.current[item.id] = el;
                     if (el) {
-                      el.style.maxHeight = activeItems.has(item.id)
+                      el.style.maxHeight = activeItemId === item.id
                         ? `${(el.firstElementChild as HTMLDivElement | null)?.scrollHeight || 0}px`
                         : '0px';
                     }

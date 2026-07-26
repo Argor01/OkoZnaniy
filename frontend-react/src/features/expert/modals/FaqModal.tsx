@@ -42,6 +42,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTable
           </Text>
 
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -183,6 +184,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTable
           </Text>
 
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -273,6 +275,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTable
           </Text>
 
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -329,6 +332,7 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTable
           </Text>
 
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}

@@ -40,6 +40,7 @@ const AdminFaqModal: React.FC<AdminFaqModalProps> = ({ visible, onClose, isMobil
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -82,6 +83,7 @@ const AdminFaqModal: React.FC<AdminFaqModalProps> = ({ visible, onClose, isMobil
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -125,6 +127,7 @@ const AdminFaqModal: React.FC<AdminFaqModalProps> = ({ visible, onClose, isMobil
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}
@@ -167,6 +170,7 @@ const AdminFaqModal: React.FC<AdminFaqModalProps> = ({ visible, onClose, isMobil
           </Text>
           
           <Collapse
+            accordion
             expandIcon={({ isActive }) => (
               <PlusOutlined 
                 className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`}

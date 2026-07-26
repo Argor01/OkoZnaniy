@@ -912,6 +912,51 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
         except ManualExpense.DoesNotExist:
             return Response({'error': 'Расход не найден'}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=False, methods=['get'])
+    def finance_summary(self, request):
+        """Сводка по всем финансовым потокам: пополнения, выводы, возвраты, комиссии"""
+        from apps.orders.models import Transaction as Tx, TransactionType as TxType
+
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+
+        if not start_date or not end_date:
+            return Response({'error': 'Укажите start_date и end_date'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            start_dt, end_dt = parse_aware_date_range(start_date, end_date)
+        except ValueError:
+            return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'},
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        date_filter = {'timestamp__gte': start_dt, 'timestamp__lte': end_dt}
+
+        topups = Tx.objects.filter(type=TxType.TOPUP, **date_filter).aggregate(
+            total=Sum('amount'))['total'] or Decimal('0')
+        withdrawals = Tx.objects.filter(type=TxType.WITHDRAWAL, **date_filter).aggregate(
+            total=Sum('amount'))['total'] or Decimal('0')
+        refunds = Tx.objects.filter(type=TxType.REFUND, **date_filter).aggregate(
+            total=Sum('amount'))['total'] or Decimal('0')
+        commissions = Tx.objects.filter(type=TxType.COMMISSION, **date_filter).aggregate(
+            total=Sum('amount'))['total'] or Decimal('0')
+        payouts = Tx.objects.filter(type=TxType.PAYOUT, **date_filter).aggregate(
+            total=Sum('amount'))['total'] or Decimal('0')
+
+        topups_count = Tx.objects.filter(type=TxType.TOPUP, **date_filter).count()
+        withdrawals_count = Tx.objects.filter(type=TxType.WITHDRAWAL, **date_filter).count()
+        refunds_count = Tx.objects.filter(type=TxType.REFUND, **date_filter).count()
+
+        return Response({
+            'period': f'{start_date} - {end_date}',
+            'topups': {'total': float(topups), 'count': topups_count},
+            'withdrawals': {'total': float(withdrawals), 'count': withdrawals_count},
+            'refunds': {'total': float(refunds), 'count': refunds_count},
+            'commissions': float(commissions),
+            'payouts': float(payouts),
+            'net_cash_flow': float(topups - withdrawals - refunds),
+        })
+
 
 class DirectorPartnersViewSet(viewsets.ViewSet):
     """ViewSet для управления партнерами"""
@@ -1168,8 +1213,13 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
             total=Sum('budget')
         )['total'] or Decimal('0')
 
-        # Чистая прибыль (упрощенный расчет)
-        expert_payments = total_turnover * Decimal('0.7')
+        # Чистая прибыль (реальные данные из Transaction)
+        from apps.orders.models import Transaction as Tx, TransactionType as TxType
+        expert_payments = Tx.objects.filter(
+            type=TxType.PAYOUT,
+            timestamp__gte=start_dt,
+            timestamp__lte=end_dt,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
         # Партнерские выплаты
         partner_payments = Decimal('0')
         try:
@@ -1240,6 +1290,7 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
 
         # Функция для получения KPI за период
         def get_period_kpi(start, end):
+            from apps.orders.models import Transaction as Tx, TransactionType as TxType
             completed_orders = Order.objects.filter(
                 status='completed',
                 updated_at__gte=start,
@@ -1250,7 +1301,11 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
                 total=Sum('budget')
             )['total'] or Decimal('0')
 
-            expert_payments = total_turnover * Decimal('0.7')
+            expert_payments = Tx.objects.filter(
+                type=TxType.PAYOUT,
+                timestamp__gte=start,
+                timestamp__lte=end,
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
             # Партнерские выплаты
             partner_payments = Decimal('0')
             try:

@@ -702,6 +702,9 @@ class UserViewSet(viewsets.ModelViewSet):
                     'earning_type': earning.earning_type,
                     'created_at': earning.created_at,
                     'is_paid': earning.is_paid,
+                    'order_id': earning.order_id,
+                    'order_number': f'#{earning.order_id}' if earning.order_id else None,
+                    'order_title': earning.order.title if earning.order_id else None,
                 }
                 for earning in earnings[:10]
             ]
