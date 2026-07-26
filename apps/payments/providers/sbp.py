@@ -140,4 +140,13 @@ class SBPClient:
             payment.save()
             return payment
         
-        return None 
+        return None
+
+    def verify_callback_signature(self, data: Dict[str, Any]) -> bool:
+        """Verify the HMAC-SHA256 signature of an SBP callback."""
+        signature = data.get('signature')
+        if not signature:
+            return False
+        data_to_verify = {k: v for k, v in data.items() if k != 'signature'}
+        expected = self._sign_request(data_to_verify)
+        return hmac.compare_digest(signature, expected)

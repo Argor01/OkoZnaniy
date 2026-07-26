@@ -1,5 +1,6 @@
 # apps/users/models.py
 import hashlib
+from decimal import Decimal
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -42,6 +43,18 @@ class User(AbstractUser):
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     frozen_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     email_verified = models.BooleanField(default=False, verbose_name="Email подтвержден")
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(balance__gte=0),
+                name='user_balance_non_negative',
+            ),
+            models.CheckConstraint(
+                check=models.Q(frozen_balance__gte=0),
+                name='user_frozen_balance_non_negative',
+            ),
+        ]
     
     # Поля профиля специалиста
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name="Аватар")
@@ -233,6 +246,11 @@ class PartnerEarning(models.Model):
     
     def __str__(self):
         return f"{self.partner.username} - {self.amount} ₽ от {self.referral.username}"
+
+    def save(self, *args, **kwargs):
+        if self.amount is not None:
+            self.amount = self.amount.quantize(Decimal('0.01'))
+        super().save(*args, **kwargs)
 
 
 class EmailVerificationCode(models.Model):

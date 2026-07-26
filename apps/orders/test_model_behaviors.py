@@ -95,7 +95,7 @@ class OrderModelBehaviorTests(TestCase):
         self.assertEqual(self.order.original_price, Decimal('5000.00'))
         self.assertEqual(self.order.discount_amount, Decimal('500.00'))
         self.assertEqual(self.order.final_price, Decimal('4500.00'))
-        self.assertEqual(self.order.budget, Decimal('4500.00'))
+        self.assertEqual(self.order.budget, Decimal('5000.00'))
 
     def test_apply_fixed_discount_is_capped_by_order_budget(self):
         discount = DiscountRule.objects.create(
@@ -113,7 +113,7 @@ class OrderModelBehaviorTests(TestCase):
         self.assertTrue(applied)
         self.assertEqual(self.order.discount_amount, Decimal('5000.00'))
         self.assertEqual(self.order.final_price, Decimal('0.00'))
-        self.assertEqual(self.order.budget, Decimal('0.00'))
+        self.assertEqual(self.order.budget, Decimal('5000.00'))
 
     def test_apply_discount_rejects_inactive_rule(self):
         discount = DiscountRule.objects.create(

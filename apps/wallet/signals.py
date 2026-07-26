@@ -9,6 +9,7 @@ Wire ``Payment`` lifecycle into the wallet:
 
 import logging
 
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -31,17 +32,21 @@ def _topup_on_payment_completed(sender, instance: Payment, created, **kwargs):
         return
     if getattr(instance, '_wallet_credited', False):
         return
-    # Guard against double-credit: rely on Transaction uniqueness per payment.
-    from apps.orders.models import Transaction
-    if Transaction.objects.filter(payment_id=instance.pk).exists():
-        return
-    try:
-        WalletService.topup(
-            instance.user, instance.amount,
-            payment=instance,
-            description=f'Пополнение {instance.payment_method.upper()} #{instance.payment_id}',
-        )
-        log.info('Wallet credited: user=%s amount=%s payment=%s',
-                 instance.user_id, instance.amount, instance.payment_id)
-    except Exception:  # noqa: BLE001
-        log.exception('Wallet top-up failed for payment %s', instance.pk)
+
+    with transaction.atomic():
+        from apps.orders.models import Transaction
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        _lock = User.objects.select_for_update().get(pk=instance.user_id)
+        if Transaction.objects.filter(payment_id=instance.pk).exists():
+            return
+        try:
+            WalletService.topup(
+                _lock, instance.amount,
+                payment=instance,
+                description=f'Пополнение {instance.payment_method.upper()} #{instance.payment_id}',
+            )
+            log.info('Wallet credited: user=%s amount=%s payment=%s',
+                     instance.user_id, instance.amount, instance.payment_id)
+        except Exception:
+            log.exception('Wallet top-up failed for payment %s', instance.pk)

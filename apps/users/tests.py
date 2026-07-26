@@ -1,5 +1,7 @@
+from datetime import timedelta
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -177,6 +179,7 @@ class PartnerReferralFlowTests(APITestCase):
             title='Partner referral order',
             description='Order for partner earning',
             budget=Decimal('1200.00'),
+            deadline=timezone.now() + timedelta(days=30),
             status='new',
         )
         order.status = 'completed'
@@ -216,6 +219,7 @@ class PartnerReferralFlowTests(APITestCase):
             title='Expert referral order',
             description='Order assigned to referred expert',
             budget=Decimal('900.00'),
+            deadline=timezone.now() + timedelta(days=30),
             status='in_progress',
         )
 

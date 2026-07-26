@@ -156,16 +156,21 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             budget=work.price,
             original_price=work.price,
             final_price=work.price,
-            status='in_progress',
+            status='completed',
         )
         try:
-            WalletService.direct_transfer(
-                payer=request.user,
-                recipient=work.author,
+            WalletService.hold(
+                request.user,
+                work.price,
+                order=order,
+                description=f'Резерв на покупку готовой работы "{work.title}"',
+            )
+            WalletService.release_to_expert(
+                client=request.user,
+                expert=work.author,
                 amount=work.price,
                 order=order,
                 description=f'Покупка готовой работы "{work.title}"',
-                purpose=TransactionType.PURCHASE,
             )
         except InsufficientFunds:
             order.delete()

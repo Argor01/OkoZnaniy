@@ -149,4 +149,23 @@ class AlfaBankClient:
             payment.save()
             return payment
         
-        return None 
+        return None
+
+    def verify_callback_signature(self, data: Dict[str, Any]) -> bool:
+        """Verify that the callback originated from AlfaBank.
+
+        AlfaBank server-to-server callbacks don't carry a cryptographic
+        signature in the request body.  The standard verification is to
+        call ``getOrderStatus.do`` and confirm the order actually exists
+        and is paid.  We perform a lightweight check here (presence of
+        orderId); the full API status check happens in ``process_callback``
+        which is called downstream.
+        """
+        order_id = data.get('orderId')
+        if not order_id:
+            return False
+        try:
+            Payment.objects.get(payment_id=order_id)
+            return True
+        except Payment.DoesNotExist:
+            return False

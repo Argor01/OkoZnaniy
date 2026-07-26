@@ -20,6 +20,9 @@ from .serializers import (
 from .models import WithdrawalRequest
 from .services import WalletService, InsufficientFunds
 
+MIN_WITHDRAWAL = Decimal('100.00')
+MAX_WITHDRAWAL = Decimal('500000.00')
+
 
 def _sandbox_topup_allowed(user) -> bool:
     """Instant no-acquirer top-ups are allowed only when PAYMENTS_SANDBOX
@@ -35,6 +38,7 @@ def _sandbox_topup_allowed(user) -> bool:
 
 class WalletViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
+    throttle_scope = 'wallet'
 
     @action(detail=False, methods=['get'])
     def me(self, request):
@@ -59,20 +63,32 @@ class WalletViewSet(viewsets.ViewSet):
         ser.is_valid(raise_exception=True)
         amount: Decimal = ser.validated_data['amount']
         method = ser.validated_data['payment_method']
-        payment = Payment.objects.create(
-            amount=amount,
-            payment_method=method,
-            status=PaymentStatus.PENDING,
+        idem_key = f'topup-{request.user.pk}-{amount}-{method}'
+        from datetime import timedelta as _td
+        idem_cutoff = timezone.now() - _td(seconds=60)
+        existing = Payment.objects.filter(
+            payment_id__startswith=f'topup-{request.user.pk}',
+            status__in=[PaymentStatus.PENDING, PaymentStatus.COMPLETED],
             purpose=Payment.Purpose.TOPUP,
             user=request.user,
-            payment_id=f'topup-{request.user.pk}-{uuid.uuid4().hex}',
-        )
+            created_at__gte=idem_cutoff,
+        ).order_by('-created_at').first()
+        if existing and existing.amount == amount and existing.payment_method == method:
+            payment = existing
+        else:
+            payment = Payment.objects.create(
+                amount=amount,
+                payment_method=method,
+                status=PaymentStatus.PENDING,
+                purpose=Payment.Purpose.TOPUP,
+                user=request.user,
+                payment_id=f'topup-{request.user.pk}-{uuid.uuid4().hex}',
+            )
         if _sandbox_topup_allowed(request.user):
-            # Sandbox/test top-up: no real acquirer required. Complete the
-            # payment instantly so the wallet is fully usable for testing.
-            payment.status = PaymentStatus.COMPLETED
-            payment.paid_at = timezone.now()
-            payment.save(update_fields=['status', 'paid_at'])  # signal credits wallet
+            if payment.status != PaymentStatus.COMPLETED:
+                payment.status = PaymentStatus.COMPLETED
+                payment.paid_at = timezone.now()
+                payment.save(update_fields=['status', 'paid_at'])
             bal = WalletService.get_balance(request.user)
             return Response({
                 'payment_id': payment.payment_id,
@@ -102,6 +118,29 @@ class WalletViewSet(viewsets.ViewSet):
         ser = WithdrawRequestSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         amount = ser.validated_data['amount']
+        if amount < MIN_WITHDRAWAL:
+            return Response(
+                {'detail': f'Минимальная сумма вывода: {MIN_WITHDRAWAL} ₽'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if amount > MAX_WITHDRAWAL:
+            return Response(
+                {'detail': f'Максимальная сумма вывода за раз: {MAX_WITHDRAWAL} ₽'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        from django.db.models import Sum as QSum
+        from django.db.models import Q
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        daily_withdrawn = WithdrawalRequest.objects.filter(
+            user=request.user,
+            created_at__gte=today_start,
+            status__in=[WithdrawalRequest.Status.PENDING, WithdrawalRequest.Status.PAID],
+        ).aggregate(total=QSum('amount'))['total'] or Decimal('0')
+        if daily_withdrawn + amount > MAX_WITHDRAWAL:
+            return Response(
+                {'detail': f'Дневной лимит вывода превышен. Осталось: {MAX_WITHDRAWAL - daily_withdrawn} ₽'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         digits = ser.validated_data['card_number']
         masked = '**** **** **** ' + digits[-4:]
         try:

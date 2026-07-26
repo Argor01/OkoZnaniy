@@ -28,7 +28,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_staff:
             return self.queryset.select_related('order', 'order__client')
-        return self.queryset.filter(order__client=user).select_related('order')
+        from django.db.models import Q
+        return self.queryset.filter(
+            Q(order__client=user) | Q(user=user)
+        ).distinct().select_related('order')
 
     @action(detail=False, methods=['post'])
     def create_payment(self, request):
@@ -86,9 +89,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny])
     def process_callback(self, request, pk=None):
-        # Provider callbacks have no site JWT and top-ups have order=None, so
-        # self.get_object() (user-scoped queryset) cannot be used here.
         payment = get_object_or_404(Payment, pk=pk)
+
+        rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
+        if rail == PaymentMethod.CARD:
+            from .providers.alfabank import AlfaBankClient
+            if not AlfaBankClient().verify_callback_signature(request.data):
+                logger.warning("Invalid AlfaBank callback signature for payment %s", pk)
+                return Response({'status': 'invalid_signature'}, status=status.HTTP_403_FORBIDDEN)
+        elif rail == PaymentMethod.SBP:
+            from .providers.sbp import SBPClient
+            if not SBPClient().verify_callback_signature(request.data):
+                logger.warning("Invalid SBP callback signature for payment %s", pk)
+                return Response({'status': 'invalid_signature'}, status=status.HTTP_403_FORBIDDEN)
+
         try:
             with transaction.atomic():
                 success = PaymentService.process_payment_callback(

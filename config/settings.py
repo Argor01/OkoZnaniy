@@ -363,6 +363,7 @@ REST_FRAMEWORK = {
         'password_reset': '5/hour',
         'email_verify': '10/hour',
         'send_email': '5/hour',
+        'wallet': '30/minute',
     },
     'EXCEPTION_HANDLER': 'apps.core.exception_handler.global_exception_handler',
 }

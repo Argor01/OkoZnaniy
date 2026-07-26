@@ -608,7 +608,11 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
     def net_profit(self, request):
-        """Чистая прибыль за период с детализацией по дням"""
+        """Чистая прибыль за период с детализацией по дням.
+        Считает по реальным данным Transaction (PAYOUT + COMMISSION),
+        а не по hardcoded 70%."""
+        from apps.orders.models import Transaction as Tx, TransactionType as TxType
+
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         
@@ -622,21 +626,18 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
             return Response({'error': 'Неверный формат даты. Используйте YYYY-MM-DD'}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
-        # Доходы - завершенные заказы
-        completed_orders = Order.objects.filter(
-            status='completed',
-            updated_at__gte=start_dt,
-            updated_at__lte=end_dt
-        )
-        
-        total_income = completed_orders.aggregate(
-            total=Sum('budget')
-        )['total'] or Decimal('0')
+        total_income = Tx.objects.filter(
+            type=TxType.COMMISSION,
+            timestamp__gte=start_dt,
+            timestamp__lte=end_dt,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
-        # Расходы - выплаты экспертам (примерно 70% от суммы заказа)
-        expert_payments = total_income * Decimal('0.7')
-        
-        # Партнерские выплаты
+        expert_payments = Tx.objects.filter(
+            type=TxType.PAYOUT,
+            timestamp__gte=start_dt,
+            timestamp__lte=end_dt,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
         partner_payments = Decimal('0')
         try:
             partner_payments = PartnerEarning.objects.filter(
@@ -647,65 +648,69 @@ class DirectorFinanceViewSet(viewsets.ViewSet):
         except Exception:
             pass
 
-        # Чистая прибыль
-        net_profit = total_income - expert_payments - partner_payments
+        net_profit_val = total_income - expert_payments - partner_payments
         total_expense = expert_payments + partner_payments
 
-        # Данные по дням
         daily_data = []
         current_date = start_dt
         while current_date <= end_dt:
             day_start = current_date
             day_end = current_date + timedelta(days=1)
-            
-            day_orders = completed_orders.filter(
-                updated_at__gte=day_start,
-                updated_at__lt=day_end
-            )
-            
-            day_income = day_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
-            day_expense = day_income * Decimal('0.7')
-            day_profit = day_income - day_expense
-            
+
+            day_commission = Tx.objects.filter(
+                type=TxType.COMMISSION,
+                timestamp__gte=day_start,
+                timestamp__lt=day_end,
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            day_payout = Tx.objects.filter(
+                type=TxType.PAYOUT,
+                timestamp__gte=day_start,
+                timestamp__lt=day_end,
+            ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
+            day_profit = day_commission - day_payout
+
             daily_data.append({
                 'date': current_date.strftime('%d.%m'),
                 'profit': float(day_profit),
-                'income': float(day_income),
-                'expense': float(day_expense)
+                'income': float(day_commission),
+                'expense': float(day_payout)
             })
             
             current_date += timedelta(days=1)
 
-        # Рассчитываем изменение к предыдущему периоду
         days_diff = (end_dt - start_dt).days + 1
         prev_start = start_dt - timedelta(days=days_diff)
         prev_end = start_dt - timedelta(days=1)
         
-        prev_orders = Order.objects.filter(
-            status='completed',
-            updated_at__gte=prev_start,
-            updated_at__lte=prev_end
-        )
-        
-        prev_income = prev_orders.aggregate(total=Sum('budget'))['total'] or Decimal('0')
-        prev_expense = prev_income * Decimal('0.7')
-        prev_profit = prev_income - prev_expense
+        prev_commission = Tx.objects.filter(
+            type=TxType.COMMISSION,
+            timestamp__gte=prev_start,
+            timestamp__lte=prev_end,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        prev_payout = Tx.objects.filter(
+            type=TxType.PAYOUT,
+            timestamp__gte=prev_start,
+            timestamp__lte=prev_end,
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+        prev_profit = prev_commission - prev_payout
         
         if prev_profit > 0:
-            change_percent = float(((net_profit - prev_profit) / prev_profit) * 100)
+            change_percent = float(((net_profit_val - prev_profit) / prev_profit) * 100)
         else:
             change_percent = 0.0
 
         return Response({
             'period': f"{start_date} - {end_date}",
-            'total': float(net_profit),
+            'total': float(net_profit_val),
             'income': float(total_income),
             'expense': float(total_expense),
             'expert_payments': float(expert_payments),
             'partner_payments': float(partner_payments),
             'change_percent': round(change_percent, 2),
             'daily_data': daily_data,
-            'profit_margin': float((net_profit / total_income * 100) if total_income > 0 else 0)
+            'profit_margin': float((net_profit_val / total_income * 100) if total_income > 0 else 0)
         })
 
     @action(detail=False, methods=['get', 'post'])

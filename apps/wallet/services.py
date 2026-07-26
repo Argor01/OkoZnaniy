@@ -99,7 +99,7 @@ class WalletService:
         total_topup = qs.filter(type=TransactionType.TOPUP).aggregate(s=Sum('amount'))['s'] or ZERO
         total_spent = qs.filter(type__in=[
             TransactionType.PURCHASE,
-            TransactionType.HOLD,
+            TransactionType.RELEASE,
         ]).aggregate(s=Sum('amount'))['s'] or ZERO
         total_earned = qs.filter(type=TransactionType.PAYOUT).aggregate(s=Sum('amount'))['s'] or ZERO
         return {

@@ -1,7 +1,9 @@
 ﻿from django.test import TestCase, override_settings
+from django.utils import timezone
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
+from datetime import timedelta
 from apps.orders.models import Order
 from apps.experts.models import ExpertReview as ExpertRating, ExpertStatistics
 from apps.catalog.models import Subject, WorkType
@@ -43,6 +45,7 @@ class ExpertRatingAPITest(TestCase):
             title='РўРµСЃС‚РѕРІС‹Р№ Р·Р°РєР°Р·',
             description='РћРїРёСЃР°РЅРёРµ',
             budget=1000,
+            deadline=timezone.now() + timedelta(days=30),
             status='completed'
         )
     
@@ -170,6 +173,7 @@ class ExpertRatingPermissionsTest(TestCase):
             title='РўРµСЃС‚РѕРІС‹Р№ Р·Р°РєР°Р· РґР»СЏ РїСЂР°РІ',
             description='РћРїРёСЃР°РЅРёРµ',
             budget=1500,
+            deadline=timezone.now() + timedelta(days=30),
             status='completed'
         )
         
@@ -194,6 +198,7 @@ class ExpertRatingPermissionsTest(TestCase):
             work_type=self.work_type,
             title='Р—Р°РєР°Р· 2',
             budget=1000,
+            deadline=timezone.now() + timedelta(days=30),
             status='completed'
         )
         
@@ -261,6 +266,7 @@ class ExpertRatingPermissionsTest(TestCase):
             work_type=self.work_type,
             title='РќРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·',
             budget=1000,
+            deadline=timezone.now() + timedelta(days=30),
             status='in_progress'
         )
         

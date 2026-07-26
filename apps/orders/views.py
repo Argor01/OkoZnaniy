@@ -142,31 +142,34 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_destroy(self, instance):
-        """Запрещаем удаление заказов, которые уже в работе"""
+        """Запрещаем удаление заказов, которые уже в работе.
+        Завершённые заказы с финансовыми транзакциями удалять нельзя —
+        это уничтожит записи леджера (CASCADE на Transaction.order)."""
         user = self.request.user
-        
-        # Проверяем, что пользователь имеет право удалять (только клиент)
+
         if instance.client_id != user.id:
             raise PermissionDenied('Только клиент может удалять свой заказ')
-        
-        # Можно удалять только заказы в статусе 'new' или 'completed'
-        # Все остальные статусы означают, что заказ в работе
-        if instance.status not in ['new', 'completed']:
+
+        if instance.status not in ('new', 'completed'):
             raise PermissionDenied(
                 f'Нельзя удалить заказ в статусе "{instance.status}". '
-                'Удаление возможно только для заказов в статусе "new" или "completed"'
+                'Удаление возможно только для заказов в статусе "new".'
             )
-        
-        # Для заказов в статусе 'new' дополнительно проверяем:
+
         if instance.status == 'new':
-            # Нет ли назначенного эксперта
             if instance.expert_id:
                 raise PermissionDenied('Нельзя удалить заказ с назначенным экспертом')
-            
-            # Нет ли принятых ставок
             if instance.bids.filter(status='accepted').exists():
                 raise PermissionDenied('Нельзя удалить заказ с принятой ставкой')
-        
+
+        if instance.status == 'completed':
+            from apps.orders.models import Transaction as Tx
+            if Tx.objects.filter(order=instance).exists():
+                raise PermissionDenied(
+                    'Нельзя удалить завершённый заказ — есть финансовые записи. '
+                    'Используйте архивирование вместо удаления.'
+                )
+
         instance.delete()
 
     @staticmethod
@@ -458,6 +461,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not _is_order_action_allowed(order, user, 'can_cancel_overdue'):
             return _order_action_unavailable()
 
+        try:
+            _refund_order_hold_if_any(order)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось вернуть резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         old_status = order.status
         order.status = 'cancelled'
         order.save(update_fields=['status', 'updated_at'])
@@ -515,8 +526,9 @@ class OrderViewSet(viewsets.ModelViewSet):
                 return Response({'detail': 'Выбрать исполнителя можно только для нового заказа.'}, status=status.HTTP_400_BAD_REQUEST)
 
             order.expert = bid.expert
+            order.budget = bid.amount
             order.status = 'awaiting_expert_acceptance'
-            order.save(update_fields=['expert', 'status', 'updated_at'])
+            order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
 
             Bid.objects.filter(order=order, expert=bid.expert).update(status=BidStatus.INVITED)
 
@@ -801,68 +813,13 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def take_order(self, request, pk=None):
-        blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
-        if blocked is not None:
-            return blocked
-        order = self.get_object()
-        if order.status != 'new':
-            return Response(
-                {'detail': 'Заказ уже взят в работу'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if request.user.role != 'expert':
-            return Response(
-                {'detail': 'Только эксперты могут брать заказы'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        old_status = order.status
-        try:
-            with transaction.atomic():
-                _reserve_order_hold_if_needed(order)
-                order.expert = request.user
-                order.status = 'in_progress'
-                order.save(update_fields=['expert', 'status', 'updated_at'])
-        except InsufficientFunds:
-            return Response(
-                {'detail': 'Недостаточно средств на кошельке заказчика. Пополните баланс перед стартом заказа.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        _direct_chat, order_chat, _order_message = ensure_order_chat_started(
-            order,
-            sender=order.client,
-            text=f'Заказ #{order.id} принят в работу',
-        )
-        
-        safe_call(NotificationService.notify_order_taken, order)
-        safe_call(NotificationService.notify_status_changed, order, old_status)
-
-        response_data = OrderSerializer(order).data
-        response_data['chat_id'] = order_chat.id
-        return Response(response_data)
+        """DEPRECATED: use ``take`` instead. Kept for backwards compatibility."""
+        return self.take(request, pk)
 
     @action(detail=True, methods=['post'])
     def complete_order(self, request, pk=None):
-        order = self.get_object()
-        if order.expert != request.user:
-            return Response(
-                {'detail': 'Только назначенный эксперт может завершить заказ'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        if order.status not in ['in_progress', 'revision']:
-            return Response(
-                {'detail': 'Неверный статус заказа'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        old_status = order.status
-        order.status = 'review'
-        order.save(update_fields=['status', 'updated_at'])
-        
-        safe_call(NotificationService.notify_status_changed, order, old_status)
-
-        return Response(OrderSerializer(order).data)
+        """DEPRECATED: use ``complete`` instead. Kept for backwards compatibility."""
+        return self.complete(request, pk)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def create_dispute(self, request, pk=None):

@@ -1,14 +1,22 @@
+import logging
+
 from cryptography.fernet import Fernet
 from django.conf import settings
 from base64 import b64encode, b64decode
 import json
 
+log = logging.getLogger(__name__)
+
 
 class PaymentCrypto:
     def __init__(self):
-        # Получаем ключ шифрования из настроек или генерируем новый
         key = getattr(settings, 'PAYMENT_ENCRYPTION_KEY', None)
         if not key:
+            log.warning(
+                'PAYMENT_ENCRYPTION_KEY is not set! '
+                'Generated a temporary key — previously encrypted data will be unreadable. '
+                'Set PAYMENT_ENCRYPTION_KEY in your .env file.'
+            )
             key = Fernet.generate_key()
         self.fernet = Fernet(key)
 

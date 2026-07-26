@@ -180,7 +180,7 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         system_user = get_system_account()
         system_user.refresh_from_db()
 
-        self.assertEqual(order.status, "in_progress")
+        self.assertEqual(order.status, "completed")
         self.assertEqual(order.client_id, self.buyer.id)
         self.assertEqual(order.expert_id, self.author.id)
         self.assertEqual(self.buyer.balance, Decimal("0.00"))
@@ -188,5 +188,5 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertEqual(system_user.balance, Decimal("180.00"))
         self.assertEqual(
             set(Transaction.objects.filter(order=order).values_list("type", flat=True)),
-            {TransactionType.PURCHASE, TransactionType.PAYOUT, TransactionType.COMMISSION},
+            {TransactionType.HOLD, TransactionType.RELEASE, TransactionType.PAYOUT, TransactionType.COMMISSION},
         )

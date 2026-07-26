@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.core.validators import FileExtensionValidator, MinValueValidator, MaxValueValidator
 from django.db import models
 from django.conf import settings
@@ -126,7 +128,8 @@ class Order(models.Model):
         verbose_name="Бюджет",
         default=0,
         null=True,
-        blank=True
+        blank=True,
+        validators=[MinValueValidator(Decimal('0.01'))]
     )
     status = models.CharField(
         max_length=32,
@@ -212,6 +215,13 @@ class Order(models.Model):
     def get_status_display(self):
         return self.status.capitalize()
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new and self.deadline and self.deadline <= timezone.now():
+            from django.core.exceptions import ValidationError
+            raise ValidationError({'deadline': 'Дедлайн не может быть в прошлом'})
+
     def freeze(self, reason: str):
         if self.is_frozen:
             return
@@ -256,9 +266,11 @@ class Order(models.Model):
         else:
             self.discount_amount = min(discount.value, self.original_price)
 
+        self.discount_amount = min(self.discount_amount, self.original_price)
         self.final_price = self.original_price - self.discount_amount
-        self.budget = self.final_price
-        self.save()
+        self.save(update_fields=[
+            'discount', 'original_price', 'discount_amount', 'final_price',
+        ])
         return True
 
     def remove_discount(self):
