@@ -104,7 +104,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       <Space direction="vertical" className={styles.spaceFullWidth} size="large">
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>Название работы</Text>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Название работы</Text>
             <AppInput
               placeholder="Введите название работы"
               value={formData.title}
@@ -113,7 +113,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             />
           </Col>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>Стоимость работы</Text>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Стоимость работы</Text>
             <div className={styles.priceInputWrap}>
               <AppInput.Number
                 placeholder="Введите стоимость работы"
@@ -130,7 +130,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>Тип работы</Text>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Тип работы</Text>
             <AppSelect
               placeholder="Выберите тип работы"
               value={formData.workType}
@@ -162,7 +162,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
             </AppSelect>
           </Col>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>Срок выполнения (дни)</Text>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Срок выполнения (дни)</Text>
             <AppInput.Number
               placeholder="Например, 7"
               value={formData.executionDays}
@@ -176,7 +176,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
 
         <Row gutter={16}>
           <Col xs={24} sm={12}>
-            <Text className={styles.label}>Предмет</Text>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Предмет</Text>
             <AppSelect
               placeholder="Выберите предмет"
               value={formData.subject}
@@ -210,7 +210,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </Row>
 
         <div>
-          <Text className={styles.label}>Подробное описание</Text>
+          <Text className={`${styles.label} ${styles.labelRequired}`}>Подробное описание</Text>
           <RichTextEditor
             value={formData.description}
             onChange={(value) => setFormData({ ...formData, description: value })}

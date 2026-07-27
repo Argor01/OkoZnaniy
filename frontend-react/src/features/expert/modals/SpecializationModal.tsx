@@ -43,15 +43,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  React.useEffect(() => {
-    if (visible && isMobile) {
-      const originalStyle = window.getComputedStyle(document.body).overflow;
-      document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = originalStyle;
-      };
-    }
-  }, [visible, isMobile]);
+
 
   const { data: subjects = [] } = useSubjects();
 
@@ -200,7 +192,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           style={{ marginTop: 10 }}
         >
           <Select
-            size={isMobile ? 'middle' : 'large'}
             placeholder="Выберите предмет из списка"
             className={styles.inputField}
             showSearch
@@ -211,6 +202,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               label: subject.name,
             }))}
             getPopupContainer={() => document.body}
+            popupStyle={{ zIndex: 2100 }}
             virtual={!isMobile}
             popupRender={(menu) => (
               <>
@@ -238,7 +230,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           tooltip="Оставьте пустым, чтобы использовать название предмета"
         >
           <Input
-            size={isMobile ? 'middle' : 'large'}
             placeholder="Например: Высшая математика (профильный уровень)"
             className={styles.inputField}
             maxLength={100}
@@ -266,7 +257,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               formatter={(value) => (value !== undefined && value !== null ? String(value) : '')}
               controls={false}
               className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
-              size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) {
@@ -296,7 +286,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               controls={false}
               step={100}
               className={`${styles.inputField} ${styles.specializationModalFullWidth}`}
-              size={isMobile ? 'middle' : 'large'}
               placeholder="0"
               onKeyPress={(e) => {
                 if (!/[0-9]/.test(e.key)) {
@@ -312,11 +301,12 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           extra="Начните вводить навык или выберите из списка. Можно добавить свои навыки."
         >
           <SkillsSelectNew
-            size={isMobile ? 'middle' : 'large'}
+            className={styles.inputField}
             placeholder="Начните писать навык"
             valueType="name"
             mode="tags"
             getPopupContainer={() => document.body}
+            popupStyle={{ zIndex: 2100 }}
           />
         </Form.Item>
         <Form.Item label="Описание" name="description">
