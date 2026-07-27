@@ -28,6 +28,7 @@ urlpatterns = [
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('token/logout/', CookieLogoutView.as_view(), name='token_logout'),
     path('reset-password/', views.UserViewSet.as_view({'post': 'request_password_reset'}), name='user-reset-password'),
+    path('reset-password/verify/', views.UserViewSet.as_view({'post': 'verify_reset_code'}), name='user-verify-reset-code'),
     path('reset-password/confirm/', views.UserViewSet.as_view({'post': 'reset_password_with_code'}), name='user-reset-password-confirm'),
     path('telegram_auth_status/<str:auth_id>/', views.telegram_auth_status, name='telegram_auth_status'),
     path('max_auth_status/<str:auth_id>/', views.max_auth_status, name='max_auth_status'),

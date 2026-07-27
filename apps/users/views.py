@@ -522,6 +522,30 @@ class UserViewSet(viewsets.ModelViewSet):
         )
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    def verify_reset_code(self, request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+        
+        if not all([email, code]):
+            return Response(
+                {'error': 'Email и код обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        user_id = verify_password_reset_code(email, code)
+        
+        if not user_id:
+            return Response(
+                {'error': 'Неверный или истекший код'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        return Response(
+            {'message': 'Код подтверждён'},
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def reset_password_with_code(self, request):
         """
         Сброс пароля с помощью кода
@@ -546,6 +570,12 @@ class UserViewSet(viewsets.ModelViewSet):
             logger.warning("❌ Missing required fields")
             return Response(
                 {'error': 'Email, код и новый пароль обязательны'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if len(new_password) < 8:
+            return Response(
+                {'error': 'Пароль должен содержать минимум 8 символов'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         

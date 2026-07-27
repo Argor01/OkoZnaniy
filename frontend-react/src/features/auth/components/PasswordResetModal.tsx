@@ -126,7 +126,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
       wrapClassName={styles.modalWrap}
       centered
       maskClosable={false}
-      keyboard
+      keyboard={false}
       styles={{
         content: { borderRadius: 24, overflow: 'hidden' },
         header: { borderRadius: '24px 24px 0 0' },

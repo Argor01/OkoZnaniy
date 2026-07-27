@@ -227,7 +227,15 @@ const Login: React.FC = () => {
   const handleVerifyResetCode = async () => {
     const codeString = resetCode.join('');
     if (codeString.length !== 6) { message.error('Введите 6-значный код'); return; }
-    setResetStep('password');
+    setResetLoading(true);
+    try {
+      await authApi.verifyResetCode(resetEmail, codeString);
+      setResetStep('password');
+    } catch (error: any) {
+      message.error(error?.response?.data?.error || 'Неверный или истекший код');
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleResetPassword = async () => {
@@ -237,7 +245,12 @@ const Login: React.FC = () => {
     if (codeString.length !== 6) { message.error('Введите 6-значный код'); return; }
     setResetLoading(true);
     try {
-      await authApi.resetPasswordWithCode(resetEmail, codeString, newPassword);
+      const auth = await authApi.resetPasswordWithCode(resetEmail, codeString, newPassword);
+      localStorage.setItem('access_token', auth.access);
+      localStorage.setItem('refresh_token', auth.refresh);
+      if (auth.user?.role) {
+        localStorage.setItem('user_role', auth.user.role);
+      }
       message.success('Пароль успешно изменен!');
       setPasswordResetModalVisible(false);
       setResetStep('email');
@@ -245,7 +258,7 @@ const Login: React.FC = () => {
       setResetCode(['', '', '', '', '', '']);
       setNewPassword('');
       setConfirmPassword('');
-      navigateByRole();
+      navigateByRole(auth?.user?.role);
     } catch (error: any) {
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
