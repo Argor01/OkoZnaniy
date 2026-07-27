@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
     verifyEmailCode: '/users/verify_email_code/',
     resendVerificationCode: '/users/resend_verification_code/',
     requestPasswordReset: '/users/request_password_reset/',
+    verifyResetCode: '/users/reset-password/verify/',
     telegramAuth: '/users/telegram_auth/', 
     telegramAuthStatus: (authId: string) => `/users/telegram_auth_status/${authId}/`,
     maxAuthStatus: (authId: string) => `/users/max_auth_status/${authId}/`,

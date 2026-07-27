@@ -143,34 +143,29 @@ export const authApi = {
   },
 
   
-  confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<void> => {
-    await apiClient.post(API_ENDPOINTS.auth.resetPasswordWithCode, {
+  confirmPasswordReset: async (email: string, code: string, newPassword: string): Promise<AuthResponse> => {
+    const response = await apiClient.post(API_ENDPOINTS.auth.resetPasswordWithCode, {
       email,
       code,
       new_password: newPassword,
     });
+    return response.data;
   },
 
-  resetPasswordConfirm: async (
-    uid: string,
-    token: string,
-    newPassword: string,
-    newPassword2?: string
-  ): Promise<void> => {
-    await apiClient.post(API_ENDPOINTS.auth.resetPasswordConfirm, {
-      uid,
-      token,
-      new_password: newPassword,
-      new_password2: newPassword2 ?? newPassword,
+  verifyResetCode: async (email: string, code: string): Promise<void> => {
+    await apiClient.post(API_ENDPOINTS.auth.verifyResetCode, {
+      email,
+      code,
     });
   },
 
   
-  resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<void> => {
-    await apiClient.post(API_ENDPOINTS.auth.resetPasswordWithCode, {
+  resetPasswordWithCode: async (email: string, code: string, newPassword: string): Promise<AuthResponse> => {
+    const response = await apiClient.post(API_ENDPOINTS.auth.resetPasswordWithCode, {
       email,
       code,
       new_password: newPassword,
     });
+    return response.data;
   },
 };
