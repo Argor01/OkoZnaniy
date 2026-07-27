@@ -427,7 +427,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             ) : null}
             <Text className={`${styles.messageTime} ${isMobile ? styles.messageTimeMobile : ''} ${msg.is_mine ? styles.messageTimeMine : styles.messageTimeOther}`}>
               {formatMessageTime(msg.created_at)}
-              {msg.is_mine && (
+              {msg.is_mine && (msg as any).send_status === 'failed' ? (
+                <span className={`${styles.messageReadStatus} ${styles.messageReadStatusFailed}`}>
+                  <ExclamationCircleOutlined className={`${styles.messageReadCheckSingle} ${isMobile ? styles.messageReadCheckMobile : styles.messageReadCheckDesktop}`} />
+                </span>
+              ) : msg.is_mine ? (
                 <span className={`${styles.messageReadStatus} ${msg.is_read ? styles.messageReadStatusRead : styles.messageReadStatusUnread}`}>
                   {msg.is_read ? (
                     <span className={`${styles.messageReadIcons} ${isMobile ? styles.messageReadIconsMobile : styles.messageReadIconsDesktop}`}>
@@ -438,7 +442,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                     <CheckOutlined className={`${styles.messageReadCheckSingle} ${isMobile ? styles.messageReadCheckMobile : styles.messageReadCheckDesktop}`} />
                   )}
                 </span>
-              )}
+              ) : null}
             </Text>
           </>
         )}

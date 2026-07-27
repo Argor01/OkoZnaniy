@@ -1890,6 +1890,10 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
+.messageReadStatusFailed {
+  color: #ef4444;
+}
+
 .messageReadIcons {
   position: relative;
   display: inline-block;

@@ -786,7 +786,7 @@
   }
 
   .authPanel :global(.ant-checkbox-wrapper > span:last-child) {
-    margin-inline-start: 0 !important;
+    margin-inline-start: 8px !important;
     padding-inline-start: 0 !important;
   }
   

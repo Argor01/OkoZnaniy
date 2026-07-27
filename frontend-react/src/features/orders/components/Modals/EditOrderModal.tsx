@@ -1,25 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Form, Typography, message, Modal } from 'antd';
-import type { UploadFile } from 'antd/es/upload/interface';
-import { InboxOutlined, PlusOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { PlusOutlined } from '@ant-design/icons';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { catalogApi } from '@/features/common/api/catalog';
 import { ordersApi, Order } from '@/features/orders/api/orders';
-import { Subject, WorkType } from '@/features/common/types/catalog';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { AppDatePicker } from '@/components/ui/AppDatePicker';
-import { AppUpload } from '@/components/ui/AppUpload';
 import { AppButton } from '@/components/ui/AppButton';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
 import styles from './EditOrderModal.module.css';
 import { logger } from '@/utils/logger';
-import {useSubjects, useWorkTypes } from '@/hooks/queries';
-
-const { Title } = Typography;
+import { useSubjects, useWorkTypes } from '@/hooks/queries';
 
 interface EditOrderFormValues {
   title: string;
@@ -43,15 +38,6 @@ interface EditOrderModalProps {
   onSuccess?: () => void;
 }
 
-const ALLOWED_FILE_EXTENSIONS = [
-  'doc', 'docx', 'pdf', 'rtf', 'txt',
-  'ppt', 'pptx',
-  'xls', 'xlsx', 'csv',
-  'dwg', 'dxf', 'cdr', 'cdw', 'bak',
-  'jpg', 'jpeg', 'png', 'bmp', 'svg',
-  'zip', 'rar', '7z',
-];
-
 const EditOrderModal: React.FC<EditOrderModalProps> = ({
   visible,
   onClose,
@@ -61,10 +47,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   const [form] = Form.useForm<EditOrderFormValues>();
   const queryClient = useQueryClient();
   const { isMobile, isTablet, isDesktop } = useDeviceType();
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [existingFiles, setExistingFiles] = useState<Array<{ id: number; filename: string }>>([]);
-  const [filesToDelete, setFilesToDelete] = useState<number[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
   const [submitLocked, setSubmitLocked] = useState(false);
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
@@ -102,14 +84,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   // Инициализация формы данными заказа
   useEffect(() => {
     if (visible && order) {
-      // Извлекаем существующие файлы (только task файлы)
-      const taskFiles = (order.files || []).filter(
-        (file: any) => (file.file_type === 'task' || !file.file_type) && file.description !== 'chat_delivery_message_id:'
-      );
-      setExistingFiles(taskFiles.map((f: any) => ({ id: f.id, filename: f.filename || f.file_name })));
-      setFileList([]);
-      setFilesToDelete([]);
-
       // Устанавливаем значения формы
       const deadlineDate = order.deadline ? dayjs(order.deadline) : dayjs().add(7, 'day');
       setDeadlineTime({
@@ -214,8 +188,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     lockSubmit();
 
     try {
-      setIsUploading(true);
-
       const deadlineWithTime = values.deadline
         .hour(deadlineTime.hours)
         .minute(deadlineTime.minutes)
@@ -234,55 +206,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
       await updateOrderMutation.mutateAsync({ orderId: order.id, data: orderData });
 
-      // Удаляем отмеченные файлы
-      if (filesToDelete.length > 0) {
-        await Promise.all(
-          filesToDelete.map((fileId) => ordersApi.deleteOrderFile(order.id, fileId))
-        );
-      }
-
-      // Загружаем новые файлы
-      const filesToUpload = [...fileList];
-      if (filesToUpload.length > 0) {
-        const total = filesToUpload.length;
-        message.loading({ content: `Загрузка файлов: 0 из ${total}`, key: 'upload', duration: 0 });
-
-        const concurrency = 3;
-        const queue = [...filesToUpload];
-        let completed = 0;
-
-        const uploadFile = async (item: UploadFile) => {
-          const rawFile = item.originFileObj ?? item;
-          if (!(rawFile instanceof File)) {
-            message.warning(`Файл ${item.name}: неверный объект, пропуск`);
-            return;
-          }
-
-          try {
-            await ordersApi.uploadOrderFile(order.id, rawFile, {
-              file_type: 'task',
-              description: 'Файл задания'
-            });
-            completed++;
-            message.loading({ content: `Загрузка файлов: ${completed} из ${total}`, key: 'upload', duration: 0 });
-          } catch (error) {
-            logger.error('Ошибка загрузки файла:', error);
-            const errMsg = (error as any)?.response?.data?.detail || (error as Error)?.message;
-            message.warning({ content: `${rawFile.name}: ${errMsg || 'ошибка загрузки'}`, key: `uploadErr-${item.uid}` });
-          }
-        };
-
-        const workers = Array(Math.min(concurrency, total)).fill(null).map(async () => {
-          while (queue.length > 0) {
-            const file = queue.shift();
-            if (file) await uploadFile(file);
-          }
-        });
-
-        await Promise.all(workers);
-        message.success({ content: 'Все файлы загружены', key: 'upload', duration: 2 });
-      }
-
       await queryClient.invalidateQueries({ queryKey: ['order', String(order.id)] });
     } catch (error) {
       logger.error('❌ Ошибка при обновлении заказа:', error);
@@ -293,45 +216,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         (error as Error)?.message;
       message.error(errMsg || 'Не удалось обновить заказ');
     } finally {
-      setIsUploading(false);
       unlockSubmit();
     }
-  };
-
-  const getOrderFileIcon = (filename: string) => {
-    const ext = filename.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return <FilePdfOutlined className={styles.fileIconPdf} />;
-    if (['doc', 'docx'].includes(ext || '')) return <FileWordOutlined className={styles.fileIconDoc} />;
-    if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext || '')) return <FileImageOutlined className={styles.fileIconImage} />;
-    if (['zip', 'rar', '7z'].includes(ext || '')) return <FileZipOutlined className={styles.fileIconArchive} />;
-    return <FileOutlined className={styles.fileIconDefault} />;
-  };
-
-  const formatOrderFileTileName = (filename: string, maxLength = 30) => {
-    if (filename.length <= maxLength) return filename;
-    const extIndex = filename.lastIndexOf('.');
-    if (extIndex <= 0) return `${filename.slice(0, maxLength - 1)}…`;
-    const ext = filename.slice(extIndex);
-    const base = filename.slice(0, extIndex);
-    const allowedBaseLength = Math.max(6, maxLength - ext.length - 1);
-    return `${base.slice(0, allowedBaseLength)}…${ext}`;
-  };
-
-  const handleRemoveExistingFile = (fileId: number) => {
-    setExistingFiles(prev => prev.filter(f => f.id !== fileId));
-    setFilesToDelete(prev => [...prev, fileId]);
-    message.success('Файл будет удален при сохранении');
-  };
-
-  const handleRestoreExistingFile = (fileId: number) => {
-    setExistingFiles(prev => {
-      const fileToRestore = filesToDelete.find(id => id === fileId);
-      if (fileToRestore) {
-        setFilesToDelete(prev => prev.filter(id => id !== fileId));
-      }
-      return prev;
-    });
-    message.success('Файл восстановлен');
   };
 
   if (!order) return null;
@@ -353,8 +239,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         okText="Сохранить изменения"
         cancelText="Отмена"
         okButtonProps={{
-          loading: submitLocked || updateOrderMutation.isPending || isUploading,
-          disabled: !canEdit || submitLocked || updateOrderMutation.isPending || isUploading,
+          loading: submitLocked || updateOrderMutation.isPending,
+          disabled: !canEdit || submitLocked || updateOrderMutation.isPending,
           size: isMobile ? 'large' : 'large',
         }}
         cancelButtonProps={{
@@ -565,113 +451,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                 min={1}
                 className={`${styles.priceInput} ${styles.fullWidth}`}
               />
-            </Form.Item>
-
-            <Form.Item
-              name="files"
-              label="Прикрепить файлы"
-            >
-              <AppUpload.Dragger
-                name="files"
-                multiple
-                fileList={fileList}
-                showUploadList={false}
-                beforeUpload={(file) => {
-                  const isLt50M = file.size < 50 * 1024 * 1024;
-                  if (!isLt50M) {
-                    message.error('Максимальный размер файла: 50 МБ');
-                    return AppUpload.LIST_IGNORE;
-                  }
-
-                  const ext = file.name.split('.').pop()?.toLowerCase() || '';
-                  if (!ALLOWED_FILE_EXTENSIONS.includes(ext)) {
-                    message.error('Неподдерживаемый формат файла');
-                    return AppUpload.LIST_IGNORE;
-                  }
-
-                  setFileList(prev => [...prev, file as UploadFile]);
-                  return false;
-                }}
-                onRemove={(file) => {
-                  setFileList(prev => prev.filter(f => f.uid !== file.uid));
-                }}
-                className={styles.uploadArea}
-              >
-                <div className="ant-upload-drag-icon">
-                  <InboxOutlined />
-                </div>
-                <div className="ant-upload-text">Нажмите или перетащите файлы сюда</div>
-                <div className="ant-upload-hint">
-                  Допустимые форматы: .doc, .docx, .pdf, .rtf, .txt, .ppt, .pptx, .xls, .xlsx, .csv, .dwg, .dxf, .cdr, .cdw, .bak, .jpg, .png, .bmp, .svg, .zip, .rar, .7z
-                </div>
-              </AppUpload.Dragger>
-
-              {/* Существующие файлы */}
-              {existingFiles.length > 0 && (
-                <>
-                  <Title level={5} className={styles.existingFilesTitle}>Уже прикрепленные файлы:</Title>
-                  <div className={styles.orderFilesGrid}>
-                    {existingFiles.map((file) => {
-                      const isMarkedForDeletion = filesToDelete.includes(file.id);
-                      return (
-                        <button
-                          key={file.id}
-                          type="button"
-                          className={`${styles.orderFileTile} ${isMarkedForDeletion ? styles.fileMarkedForDeletion : ''}`}
-                          onClick={() => {
-                            if (isMarkedForDeletion) {
-                              handleRestoreExistingFile(file.id);
-                            } else {
-                              handleRemoveExistingFile(file.id);
-                            }
-                          }}
-                          title={isMarkedForDeletion ? 'Восстановить файл' : `Убрать ${file.filename}`}
-                        >
-                          <div className={styles.orderFileIconBox}>
-                            {getOrderFileIcon(file.filename)}
-                          </div>
-                          <div className={styles.orderFileName}>
-                            {formatOrderFileTileName(file.filename)}
-                          </div>
-                          {isMarkedForDeletion ? (
-                            <PlusOutlined className={styles.orderFileRestoreIcon} />
-                          ) : (
-                            <DeleteOutlined className={styles.orderFileDeleteIcon} />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-
-              {/* Новые файлы */}
-              {fileList.length > 0 && (
-                <>
-                  <Title level={5} className={styles.newFilesTitle}>Новые файлы:</Title>
-                  <div className={styles.orderFilesGrid}>
-                    {fileList.map((file) => (
-                      <button
-                        key={file.uid}
-                        type="button"
-                        className={styles.orderFileTile}
-                        onClick={() => {
-                          setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
-                        }}
-                        title={`Убрать ${file.name}`}
-                      >
-                        <div className={styles.orderFileIconBox}>
-                          {getOrderFileIcon(file.name)}
-                        </div>
-                        <div className={styles.orderFileName}>
-                          {formatOrderFileTileName(file.name)}
-                        </div>
-                        <DeleteOutlined className={styles.orderFileDeleteIcon} />
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
             </Form.Item>
 
             <Form.Item

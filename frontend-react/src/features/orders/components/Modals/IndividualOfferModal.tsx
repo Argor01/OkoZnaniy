@@ -145,7 +145,6 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
       footer={null}
       width={isMobile ? '100%' : isTablet ? 500 : 600}
       style={isMobile ? { top: 0, paddingBottom: 0 } : {}}
-      bodyStyle={isMobile ? { height: '100vh', overflow: 'auto' } : {}}
       title={
         <div className={styles.titleWrapper}>
           <Title level={4} className={styles.title}>

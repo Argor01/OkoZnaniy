@@ -63,7 +63,6 @@ const MessageForm: React.FC<MessageFormProps> = ({
 
       await arbitratorApi.sendMessage(messageData);
 
-      message.success('Сообщение успешно отправлено');
       form.resetFields();
       setFileList([]);
       

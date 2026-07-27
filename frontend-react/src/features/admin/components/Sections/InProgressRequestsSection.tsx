@@ -105,7 +105,7 @@ interface CustomerRequest {
   related_order?: {
     id: number;
     title: string;
-    amount: number;
+    budget: number;
     status: string;
   };
   actions: RequestAction[];
@@ -786,7 +786,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
                 <div className={styles.inProgressRequestsRelatedOrder}>
                   <div>ID: {selectedRequest.related_order.id}</div>
                   <div>Название: {selectedRequest.related_order.title}</div>
-                  <div>Сумма: {selectedRequest.related_order.amount.toLocaleString()} ₽</div>
+                  <div>Сумма: {selectedRequest.related_order.budget.toLocaleString()} ₽</div>
                   <div>Статус: {selectedRequest.related_order.status}</div>
                 </div>
               </div>

@@ -151,7 +151,6 @@ export const DirectorChatsSection: React.FC = () => {
     
     try {
       await sendChatRoomMessage(selectedRoom.id, messageText.trim());
-      message.success('Сообщение отправлено');
       setMessageText('');
       // Перезагружаем сообщения
       await loadMessages(selectedRoom.id);

@@ -119,7 +119,6 @@ const ArbitratorChat: React.FC<ArbitratorChatProps> = ({ claimId }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['director-messages'] });
       setReplyToMessage(null);
-      message.success('Сообщение успешно отправлено');
     },
     onError: (error: any) => {
       message.error(error?.response?.data?.detail || 'Ошибка при отправке сообщения');

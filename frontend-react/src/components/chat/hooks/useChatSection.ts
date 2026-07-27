@@ -47,7 +47,6 @@ export function useChatSection(api: ChatSectionApi) {
     if (!messageText.trim() || !selectedRoom) return;
     try {
       await api.sendMessage(selectedRoom.id, messageText.trim());
-      message.success('Сообщение отправлено');
       setMessageText('');
       await loadMessages(selectedRoom.id);
     } catch (error) {

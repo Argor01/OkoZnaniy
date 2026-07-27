@@ -203,7 +203,6 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       await arbitrationApi.sendMessage(detailData.id, messageText);
       setMessageText('');
       await refreshSelectedCase();
-      message.success('Сообщение отправлено');
     } catch {
       message.error('Не удалось отправить сообщение');
     } finally {
@@ -221,7 +220,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       await refundForm.validateFields();
       setRefundProcessing(true);
       
-      const orderAmount = detailData.order.amount || 0;
+      const orderAmount = detailData.order.budget || 0;
       const refundAmount = Math.round((orderAmount * refundPercentage) / 100);
       
       // Здесь должен быть вызов API для возврата средств
@@ -453,7 +452,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                     <div>
                       <Text strong>Сумма заказа: </Text>
                       <Text style={{ fontSize: 16, color: '#6435a5' }}>
-                        {(detailData.order.amount || 0).toLocaleString()} ₽
+                        {(detailData.order.budget || 0).toLocaleString()} ₽
                       </Text>
                     </div>
 
@@ -463,7 +462,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                       </div>
                       <div style={{ marginBottom: 8 }}>
                         <Text style={{ fontSize: 18, color: '#52c41a', fontWeight: 600 }}>
-                          {Math.round(((detailData.order.amount || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                           {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
                         </Text>
                       </div>
                       <Slider
@@ -480,7 +479,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                           100: '100%',
                         }}
                         tooltip={{
-                          formatter: (value) => `${value}% (${Math.round(((detailData.order.amount || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
+                          formatter: (value) => `${value}% (${Math.round(((detailData.order.budget || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
                         }}
                       />
                     </div>
@@ -513,7 +512,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                       size="large"
                       block
                     >
-                      Оформить возврат {Math.round(((detailData.order.amount || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                      Оформить возврат {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
                     </Button>
                   </Space>
                 </Form>

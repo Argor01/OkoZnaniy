@@ -753,3 +753,63 @@ html[data-theme="dark"] .ant-message-warning .anticon,
 [data-theme="dark"] .ant-descriptions-item-content {
   color: var(--color-text-base, #cbd5e1) !important;
 }
+
+/* ===== REGISTER PAGE CHECKBOX STYLES ===== */
+.register-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.register-checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.register-checkbox {
+  margin-top: 3px;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #6435a5;
+}
+
+.register-checkbox-label {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.register-checkbox-label a {
+  color: #6435a5;
+  text-decoration: none;
+}
+
+.register-checkbox-label a:hover {
+  color: #4e1f9e;
+  text-decoration: underline;
+}
+
+@media (max-width: 500px) {
+  .register-checkbox-item {
+    gap: 12px;
+  }
+
+  .register-checkbox {
+    margin-top: 2px;
+  }
+}
+
+[data-theme="dark"] .register-checkbox-label {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .register-checkbox-label a {
+  color: #a78bfa;
+}
+
+[data-theme="dark"] .register-checkbox-label a:hover {
+  color: #8b5cf6;
+}

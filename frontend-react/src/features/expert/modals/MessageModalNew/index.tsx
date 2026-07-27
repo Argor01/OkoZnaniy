@@ -1788,17 +1788,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
 
     setSending(true);
-    try {
-      const textForFirst = normalizeMessageText(messageText).trim();
-      const filesToSend = [...attachedFiles].filter((f) => {
-        if (!f) return false;
-        if (typeof f.size === 'number' && f.size <= 0) {
-          antMessage.error(`Файл "${f.name}" пустой и не будет отправлен`);
-          return false;
-        }
-        return true;
-      });
+    const textForFirst = normalizeMessageText(messageText).trim();
+    const filesToSend = [...attachedFiles].filter((f) => {
+      if (!f) return false;
+      if (typeof f.size === 'number' && f.size <= 0) {
+        antMessage.error(`Файл "${f.name}" пустой и не будет отправлен`);
+        return false;
+      }
+      return true;
+    });
 
+    const tempId = Date.now();
+    const optimisticMessage: GroupedMessage = {
+      id: tempId,
+      sender: {} as any,
+      sender_id: 0,
+      text: textForFirst || '',
+      is_read: false,
+      is_mine: true,
+      created_at: new Date().toISOString(),
+      send_status: 'sending',
+    };
+
+    setSelectedChat(prev => prev ? {
+      ...prev,
+      messages: [...prev.messages, optimisticMessage]
+    } : null);
+
+    setMessageText('');
+    setAttachedFiles([]);
+
+    try {
       let createdMessages: Message[] = [];
       if (filesToSend.length > 0) {
         createdMessages = await chatApi.sendMessageWithFiles(selectedChat.id, textForFirst, filesToSend);
@@ -1812,7 +1832,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
         setSelectedChat(prev => prev ? {
           ...prev,
-          messages: [...prev.messages, ...createdMessages]
+          messages: prev.messages.map(m =>
+            m.id === tempId ? { ...createdMessages[0], send_status: 'sent' as const } : m
+          ).concat(createdMessages.length > 1 ? createdMessages.slice(1) : [])
         } : null);
 
         setChatList(prev => prev.map(chat =>
@@ -1830,20 +1852,21 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         ));
       }
 
-      setMessageText('');
-      setAttachedFiles([]);
-      
       const refreshedChat = await loadChatDetail(selectedChat.id);
 
       if (refreshedChat?.is_frozen) {
         antMessage.warning('Сообщение отклонено: переписка заморожена из-за проверки правил безопасности.');
-      } else {
-        antMessage.success('Сообщение отправлено');
       }
     } catch (error: unknown) {
       logger.error('Ошибка отправки сообщения:', error);
-      
-      // Обновляем данные чата в любом случае
+
+      setSelectedChat(prev => prev ? {
+        ...prev,
+        messages: prev.messages.map(m =>
+          m.id === tempId ? { ...m, send_status: 'failed' as const } : m
+        )
+      } : null);
+
       try {
         await Promise.all([
           loadChatDetail(selectedChat.id)
@@ -1851,12 +1874,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       } catch (updateError) {
         logger.error('Ошибка обновления данных чата:', updateError);
       }
-      
-      // Проверяем, если это ошибка заморозки чата
+
       if (error instanceof ChatFrozenError) {
         antMessage.error(error.frozenReason || error.message);
-      } else {
-        antMessage.error('Не удалось отправить сообщение');
       }
     } finally {
       setSending(false);
@@ -2366,6 +2386,8 @@ const handleOverdueComplaint = async () => {
     return toPositiveNumber(targetChat?.order_id ?? targetChat?.order) ?? null;
   }, [activeConversationOrderChats, primaryOrderChatId, toPositiveNumber]);
 
+  const hasMainChat = Boolean(selectedConversationGroup?.mainChat);
+
   const isMainChatLocked = Boolean(
     selectedChat &&
     !selectedChat.order_id &&
@@ -2408,6 +2430,15 @@ const handleOverdueComplaint = async () => {
     }
     return true;
   }), [conversationGroups, searchQuery]);
+
+  useEffect(() => {
+    if (!selectedChat?.order_id || activeConversationOrderChats.length > 0) return;
+    const activeOrderStillOpen = activeConversationOrderChats.some(
+      (c) => toPositiveNumber(c.order_id ?? c.order) === toPositiveNumber(selectedChat.order_id)
+    );
+    if (activeOrderStillOpen) return;
+    void handleOpenMainConversation();
+  }, [selectedChat?.order_id, activeConversationOrderChats, handleOpenMainConversation, toPositiveNumber]);
 
   useEffect(() => {
     if (!visible) return;
@@ -2858,7 +2889,7 @@ const handleOverdueComplaint = async () => {
             )}
           </div>
 
-          {selectedConversationGroup && tabsOrderIds.length > 0 && !isSupportChatSelected ? (
+          {selectedConversationGroup && (tabsOrderIds.length > 0 || hasMainChat) && !isSupportChatSelected ? (
             <>
               <input
                 ref={workFileInputRef}

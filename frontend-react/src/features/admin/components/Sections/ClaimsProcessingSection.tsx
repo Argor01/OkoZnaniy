@@ -114,7 +114,7 @@ interface Claim {
   order?: {
     id: number;
     title: string;
-    amount: number;
+    budget: number;
     created_at: string;
   };
   priority: 'low' | 'medium' | 'high' | 'urgent';
@@ -275,7 +275,6 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
       const values = await messageForm.validateFields();
       if (selectedClaim) {
         onSendMessage?.(selectedClaim.id, values.message, values.recipient);
-        message.success('Сообщение отправлено');
         setMessageModalVisible(false);
       }
     } catch (error) {
@@ -795,7 +794,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                   <div className={styles.claimsProcessingOrderBox}>
                     <div>ID: {selectedClaim.order.id}</div>
                     <div>Название: {selectedClaim.order.title}</div>
-                    <div>Сумма: {selectedClaim.order.amount.toLocaleString()} ₽</div>
+                    <div>Сумма: {selectedClaim.order.budget.toLocaleString()} ₽</div>
                     <div>Создан: {dayjs(selectedClaim.order.created_at).format('DD.MM.YYYY HH:mm')}</div>
                   </div>
                 </div>

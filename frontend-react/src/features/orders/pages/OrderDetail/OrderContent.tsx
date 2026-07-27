@@ -28,8 +28,6 @@ interface OrderContentProps {
   onDrag: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
   onFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onTaskFileDrop: (e: React.DragEvent) => void;
-  onTaskFileInput: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDownloadFile: (file: any) => Promise<boolean> | boolean;
   onDeleteOrderFile: (file: any) => void;
   onDeliveredFilesResolved?: (ids: number[]) => void;
@@ -48,8 +46,6 @@ const OrderContent: React.FC<OrderContentProps> = ({
   onDrag,
   onDrop,
   onFileInput,
-  onTaskFileDrop,
-  onTaskFileInput,
   onDownloadFile,
   onDeleteOrderFile,
   onDeliveredFilesResolved,
@@ -164,12 +160,6 @@ const OrderContent: React.FC<OrderContentProps> = ({
       return orderClientIdFromOrder > 0 ? uploadedById === orderClientIdFromOrder : true;
     });
   }, [order?.files, deliveredWorkFiles]);
-
-  const canUploadTaskFiles = useMemo(() => {
-    if (typeof availableActions?.can_upload_task_files === 'boolean') return availableActions.can_upload_task_files;
-    if (!isOrderOwner) return false;
-    return !['completed', 'cancelled', 'canceled'].includes(String(order.status || '').toLowerCase());
-  }, [availableActions?.can_upload_task_files, isOrderOwner, order.status]);
 
   const handleTileDownload = useCallback(async (file: any, keyPrefix: string) => {
     const downloaded = await onDownloadFile(file);
@@ -304,50 +294,12 @@ const OrderContent: React.FC<OrderContentProps> = ({
         </div>
       ) : null}
 
-      {(canUploadTaskFiles || attachedOrderFiles.length > 0) && (
+      {attachedOrderFiles.length > 0 && (
         <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
           <Title level={4} className={styles.sectionTitle}>Файлы задания</Title>
-          {canUploadTaskFiles && (
-            <div
-              className={`${styles.uploadDropzone} ${dragActive ? styles.uploadDropzoneActive : ''}`}
-              onDragEnter={onDrag}
-              onDragLeave={onDrag}
-              onDragOver={onDrag}
-              onDrop={onTaskFileDrop}
-            >
-              <input
-                type="file"
-                id="task-file-upload"
-                multiple
-                className={styles.fileInput}
-                onChange={onTaskFileInput}
-                disabled={uploadingFiles}
-                accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak"
-              />
-              <label htmlFor="task-file-upload" className={styles.uploadLabel}>
-                <div className={styles.uploadContent}>
-                  {uploadingFiles ? (
-                    <Spin size="large" />
-                  ) : (
-                    <>
-                      <InboxOutlined className={styles.uploadIcon} />
-                      <Text strong className={styles.uploadTitle}>
-                        Перетащите файлы задания сюда или нажмите для загрузки
-                      </Text>
-                      <Text type="secondary" className={styles.uploadSubtitle}>
-                        После удаления файла можно сразу добавить новый
-                      </Text>
-                    </>
-                  )}
-                </div>
-              </label>
-            </div>
-          )}
-          {attachedOrderFiles.length > 0 && (
-            <div className={styles.orderFilesGrid}>
-              {attachedOrderFiles.map((file: any, index: number) => renderFileTile(file, index, 'attached'))}
-            </div>
-          )}
+          <div className={styles.orderFilesGrid}>
+            {attachedOrderFiles.map((file: any, index: number) => renderFileTile(file, index, 'attached'))}
+          </div>
         </div>
       )}
     </>

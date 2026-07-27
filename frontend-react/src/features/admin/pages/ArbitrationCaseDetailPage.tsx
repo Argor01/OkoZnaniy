@@ -164,7 +164,6 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
     try {
       setSending(true);
       await apiClient.post(`/arbitration/cases/${caseData.id}/send-message/`, { message: messageText });
-      message.success('Сообщение отправлено');
       setMessageText('');
       fetchCaseData();
     } catch (error) {

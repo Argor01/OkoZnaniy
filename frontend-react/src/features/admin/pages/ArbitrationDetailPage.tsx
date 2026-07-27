@@ -50,7 +50,7 @@ interface TicketDetail {
   refund_percentage?: number;
   refund_amount?: number;
   claim_type?: string;
-  order?: { id: number; title: string; amount: number; status: string };
+  order?: { id: number; title: string; budget: number; status: string };
 }
 
 const getStatusConfig = (status: string) => {

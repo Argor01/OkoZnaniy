@@ -182,7 +182,6 @@ export const InProgressClaimsSection: React.FC = () => {
       const values = await messageForm.validateFields();
       if (selectedClaim) {
         await sendMessage(selectedClaim.id, values.message, 'claim');
-        message.success('Сообщение отправлено');
         setMessageModalVisible(false);
         refetch();
       }

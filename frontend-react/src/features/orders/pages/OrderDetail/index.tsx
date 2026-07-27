@@ -55,8 +55,6 @@ const OrderDetail: React.FC = () => {
     handleDrag,
     handleDrop,
     handleFileInput,
-    handleTaskFileDrop,
-    handleTaskFileInput,
     navigate,
     location,
   } = useOrderDetail(orderId);
@@ -221,8 +219,6 @@ const OrderDetail: React.FC = () => {
               onDrag={handleDrag}
               onDrop={handleDrop}
               onFileInput={handleFileInput}
-              onTaskFileDrop={handleTaskFileDrop}
-              onTaskFileInput={handleTaskFileInput}
               onDownloadFile={handleDownloadFile}
               onDeleteOrderFile={handleDeleteOrderFile}
               onDeliveredFilesResolved={handleDeliveredFilesResolved}

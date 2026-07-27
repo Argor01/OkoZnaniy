@@ -124,7 +124,6 @@ export const PartnerCommunication: React.FC = () => {
       await sendChatRoomMessage(selectedDirector.roomId, messageText.trim());
       setMessageText('');
       await loadMessages(selectedDirector.roomId);
-      message.success('Сообщение отправлено');
     } catch (error) {
       logger.error('Ошибка отправки сообщения:', error);
       message.error('Не удалось отправить сообщение');

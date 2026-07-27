@@ -70,7 +70,7 @@ export function useOrderDetail(orderId?: string) {
     if (status === 404 && orderId) {
       const idNum = Number(orderId);
       if (!Number.isNaN(idNum)) removeOrderFromCaches(idNum);
-      message.warning('Р вЂ”Р В°Р С”Р В°Р В· Р В±РЎвЂ№Р В» РЎС“Р Т‘Р В°Р В»РЎвЂР Р… Р С‘ Р В±Р С•Р В»РЎРЉРЎв‚¬Р Вµ Р Р…Р ВµР Т‘Р С•РЎРѓРЎвЂљРЎС“Р С—Р ВµР Р…');
+      message.warning('\u0417\u0430\u043a\u0430\u0437 \u0431\u044b\u043b \u0443\u0434\u0430\u043b\u0451\u043d \u0438\u043b\u0438 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d');
       navigate(ROUTES.orders.feed);
     }
   }, [orderError, orderId, navigate, removeOrderFromCaches]);
@@ -110,7 +110,7 @@ export function useOrderDetail(orderId?: string) {
       const currentUserId = Number(userProfile?.id ?? 0);
 
       if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
-        message.error('РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє СЌС‚РѕРіРѕ Р·Р°РєР°Р·Р°');
+        message.error('\u041e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043e\u0442\u0437\u044b\u0432 \u043c\u043e\u0436\u0435\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0437\u0430\u043a\u0430\u0437\u0447\u0438\u043a \u044d\u0442\u043e\u0433\u043e \u0437\u0430\u043a\u0430\u0437\u0430');
         return;
       }
 
@@ -130,7 +130,7 @@ export function useOrderDetail(orderId?: string) {
       }
 
       if (latestStatus !== 'completed') {
-        message.error('РћСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ РїРѕСЃР»Рµ РїСЂРѕРІРµСЂРєРё РёР»Рё Р·Р°РІРµСЂС€РµРЅРёСЏ Р·Р°РєР°Р·Р°');
+        message.error('\u041e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043e\u0442\u0437\u044b\u0432 \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u043f\u043e\u0441\u043b\u0435 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u0438\u043b\u0438 \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f \u0437\u0430\u043a\u0430\u0437\u0430');
         return;
       }
 
@@ -141,11 +141,11 @@ export function useOrderDetail(orderId?: string) {
       setReviewComment('');
       message.success(
         String(freshOrder?.status ?? '') === 'review'
-          ? 'Р Р°Р±РѕС‚Р° РїСЂРёРЅСЏС‚Р°, РѕС‚Р·С‹РІ РѕСЃС‚Р°РІР»РµРЅ'
-          : 'РћС‚Р·С‹РІ СЃРѕС…СЂР°РЅС‘РЅ'
+          ? '\u0420\u0430\u0431\u043e\u0442\u0430 \u043f\u0440\u0438\u043d\u044f\u0442\u0430, \u043e\u0442\u0437\u044b\u0432 \u043e\u0441\u0442\u0430\u0432\u043b\u0435\u043d'
+          : '\u041e\u0442\u0437\u044b\u0432 \u0441\u043e\u0445\u0440\u0430\u043d\u0451\u043d'
       );
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РѕС‚Р·С‹РІ');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c \u043e\u0442\u0437\u044b\u0432');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
@@ -164,7 +164,7 @@ export function useOrderDetail(orderId?: string) {
       const currentUserId = Number(userProfile?.id ?? 0);
 
       if (currentUserId <= 0 || freshOrderClientId !== currentUserId) {
-        message.error('РџСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє СЌС‚РѕРіРѕ Р·Р°РєР°Р·Р°');
+        message.error('\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u0440\u0430\u0431\u043e\u0442\u0443 \u043c\u043e\u0436\u0435\u0442 \u0442\u043e\u043b\u044c\u043a\u043e \u0437\u0430\u043a\u0430\u0437\u0447\u0438\u043a \u044d\u0442\u043e\u0433\u043e \u0437\u0430\u043a\u0430\u0437\u0430');
         return;
       }
 
@@ -184,7 +184,7 @@ export function useOrderDetail(orderId?: string) {
       }
 
       if (latestStatus !== 'completed') {
-        message.error('РџСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РјРѕР¶РЅРѕ С‚РѕР»СЊРєРѕ РёР· СЃС‚Р°С‚СѓСЃР° РїСЂРѕРІРµСЂРєРё');
+        message.error('\u041f\u0440\u0438\u043d\u044f\u0442\u044c \u0440\u0430\u0431\u043e\u0442\u0443 \u043c\u043e\u0436\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u0438\u0437 \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438');
         return;
       }
 
@@ -194,11 +194,11 @@ export function useOrderDetail(orderId?: string) {
       setReviewComment('');
       message.success(
         String(freshOrder?.status ?? '') === 'review'
-          ? 'Р Р°Р±РѕС‚Р° РїСЂРёРЅСЏС‚Р°. Р’С‹ СЃРјРѕР¶РµС‚Рµ РѕСЃС‚Р°РІРёС‚СЊ РѕС‚Р·С‹РІ РїРѕР·Р¶Рµ.'
-          : 'Р—Р°РєР°Р· СѓР¶Рµ Р·Р°РІРµСЂС€С‘РЅ. РћС‚Р·С‹РІ РјРѕР¶РЅРѕ РѕСЃС‚Р°РІРёС‚СЊ РїРѕР·Р¶Рµ.'
+          ? '\u0420\u0430\u0431\u043e\u0442\u0430 \u043f\u0440\u0438\u043d\u044f\u0442\u0430. \u0412\u044b \u0441\u043c\u043e\u0436\u0435\u0442\u0435 \u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043e\u0442\u0437\u044b\u0432 \u043f\u043e\u0437\u0436\u0435.'
+          : '\u0417\u0430\u043a\u0430\u0437 \u0443\u0436\u0435 \u0437\u0430\u0432\u0435\u0440\u0448\u0451\u043d. \u041e\u0442\u0437\u044b\u0432 \u043c\u043e\u0436\u043d\u043e \u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u043f\u043e\u0437\u0436\u0435.'
       );
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || e?.response?.data?.error || 'РќРµ СѓРґР°Р»РѕСЃСЊ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ');
+      message.error(e?.response?.data?.detail || e?.response?.data?.error || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043f\u0440\u0438\u043d\u044f\u0442\u044c \u0440\u0430\u0431\u043e\u0442\u0443');
     } finally {
       setReviewSubmitting(false);
       setReviewActionLoading(null);
@@ -209,7 +209,7 @@ export function useOrderDetail(orderId?: string) {
     if (!orderId) return;
     const comment = revisionComment.trim();
     if (!comment) {
-      message.warning('Р вЂќР С•Р В±Р В°Р Р†РЎРЉРЎвЂљР Вµ Р С”Р С•Р СР СР ВµР Р…РЎвЂљР В°РЎР‚Р С‘Р в„– Р Т‘Р В»РЎРЏ Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”Р С‘');
+      message.warning('\u041a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0439 \u043e\u0431\u044f\u0437\u0430\u0442\u0435\u043b\u0435\u043d \u0434\u043b\u044f \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438');
       return;
     }
     try {
@@ -219,9 +219,9 @@ export function useOrderDetail(orderId?: string) {
       await refreshOrderWithLists();
       setRevisionModalOpen(false);
       setRevisionComment('');
-      message.success('Р В Р В°Р В±Р С•РЎвЂљР В° Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р В»Р ВµР Р…Р В° Р Р…Р В° Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”РЎС“');
+      message.success('\u0417\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С—РЎР‚Р В°Р Р†Р С‘РЎвЂљРЎРЉ Р Р…Р В° Р Т‘Р С•РЎР‚Р В°Р В±Р С•РЎвЂљР С”РЎС“');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0437\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443');
     } finally {
       setRevisionSubmitting(false);
       setReviewActionLoading(null);
@@ -234,9 +234,9 @@ export function useOrderDetail(orderId?: string) {
       setReviewActionLoading('reject');
       await ordersApi.rejectOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success('Р В Р В°Р В±Р С•РЎвЂљР В° Р С•РЎвЂљР С”Р В»Р С•Р Р…Р ВµР Р…Р В°');
+      message.success('\u0420\u0430\u0431\u043e\u0442\u0430 \u043e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u0430');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Р СњР Вµ РЎС“Р Т‘Р В°Р В»Р С•РЎРѓРЎРЉ Р С•РЎвЂљР С”Р В»Р С•Р Р…Р С‘РЎвЂљРЎРЉ РЎР‚Р В°Р В±Р С•РЎвЂљРЎС“');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043a\u043b\u043e\u043d\u0438\u0442\u044c \u0440\u0430\u0431\u043e\u0442\u0443');
     } finally {
       setReviewActionLoading(null);
     }
@@ -248,9 +248,9 @@ export function useOrderDetail(orderId?: string) {
       setAssigningExpertId(expertId);
       await ordersApi.acceptBid(Number(orderId), bidId);
       await refreshOrderWithLists();
-      message.success(`Исполнителю ${expertUsername} отправлено приглашение принять заказ`);
+      message.success(`\u0418\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044e ${expertUsername} \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u043e \u043f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435 \u043f\u0440\u0438\u043d\u044f\u0442\u044c \u0437\u0430\u043a\u0430\u0437`);
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось отправить приглашение исполнителю');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u043f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435 \u0438\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044e');
     } finally {
       setAssigningExpertId(null);
     }
@@ -262,14 +262,14 @@ export function useOrderDetail(orderId?: string) {
       setReviewActionLoading('accept_assignment');
       const response = await ordersApi.acceptAssignment(Number(orderId));
       await refreshOrderWithLists();
-      message.success('Заказ принят в работу');
+      message.success('\u0417\u0430\u043a\u0430\u0437 \u043f\u0440\u0438\u043d\u044f\u0442 \u0432 \u0440\u0430\u0431\u043e\u0442\u0443');
       if (response?.chat_id && order.expert?.id) {
         setTimeout(() => {
           dashboard.openOrderChat(Number(orderId), order.expert!.id, response.chat_id);
         }, 300);
       }
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось принять заказ');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043f\u0440\u0438\u043d\u044f\u0442\u044c \u0437\u0430\u043a\u0430\u0437');
     } finally {
       setReviewActionLoading(null);
     }
@@ -281,9 +281,9 @@ export function useOrderDetail(orderId?: string) {
       setReviewActionLoading('decline_assignment');
       await ordersApi.declineAssignment(Number(orderId));
       await refreshOrderWithLists();
-      message.success('Приглашение на заказ отклонено');
+      message.success('\u041f\u0440\u0438\u0433\u043b\u0430\u0448\u0435\u043d\u0438\u0435 \u043d\u0430 \u0437\u0430\u043a\u0430\u0437 \u043e\u0442\u043a\u043b\u043e\u043d\u0435\u043d\u043e');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось отклонить заказ');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043a\u043b\u043e\u043d\u0438\u0442\u044c \u0437\u0430\u043a\u0430\u0437');
     } finally {
       setReviewActionLoading(null);
     }
@@ -296,15 +296,15 @@ export function useOrderDetail(orderId?: string) {
       const uploadPromises = files.map((file) =>
         ordersApi.uploadOrderFile(Number(orderId), file, {
           file_type: 'solution',
-          description: 'Готовая работа загружена экспертом',
+          description: '\u0413\u043e\u0442\u043e\u0432\u0430\u044f \u0440\u0430\u0431\u043e\u0442\u0430 \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u0430 \u044d\u043a\u0441\u043f\u0435\u0440\u0442\u043e\u043c',
         })
       );
       await Promise.all(uploadPromises);
       await ordersApi.submitOrder(Number(orderId));
       await refreshOrderWithLists();
-      message.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
+      message.success(files.length > 1 ? '\u0420\u0430\u0431\u043e\u0442\u044b \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u044b \u043d\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443' : '\u0420\u0430\u0431\u043e\u0442\u0430 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0430 \u043d\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0443');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Ошибка при загрузке файлов');
+      message.error(e?.response?.data?.detail || '\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u0437\u0430\u0433\u0440\u0443\u0437\u043a\u0435 \u0444\u0430\u0439\u043b\u043e\u0432');
     } finally {
       setUploadingFiles(false);
     }
@@ -318,14 +318,14 @@ export function useOrderDetail(orderId?: string) {
         files.map((file) =>
           ordersApi.uploadOrderFile(Number(orderId), file, {
             file_type: 'task',
-            description: 'Файл задания',
+            description: '\u0424\u0430\u0439\u043b \u0437\u0430\u0434\u0430\u043d\u0438\u044f',
           })
         )
       );
       await refreshOrderWithLists();
-      message.success(files.length > 1 ? 'Файлы задания загружены' : 'Файл задания загружен');
+      message.success(files.length > 1 ? '\u0424\u0430\u0439\u043b\u044b \u0437\u0430\u0434\u0430\u043d\u0438\u044f \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u044b' : '\u0424\u0430\u0439\u043b \u0437\u0430\u0434\u0430\u043d\u0438\u044f \u0437\u0430\u0433\u0440\u0443\u0436\u0435\u043d');
     } catch (e: any) {
-      message.error(e?.response?.data?.detail || 'Не удалось загрузить файл задания');
+      message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0444\u0430\u0439\u043b \u0437\u0430\u0434\u0430\u043d\u0438\u044f');
     } finally {
       setUploadingFiles(false);
     }
@@ -337,7 +337,7 @@ export function useOrderDetail(orderId?: string) {
       const fileIdNum = Number(file?.id);
       const filename = file?.filename || file?.file_name || 'file';
       if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
-        message.error('Не удалось скачать файл');
+        message.error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043a\u0430\u0447\u0430\u0442\u044c \u0444\u0430\u0439\u043b');
         return false;
       }
       const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
@@ -353,9 +353,9 @@ export function useOrderDetail(orderId?: string) {
     } catch (e: any) {
       const status = e?.response?.status;
       if (status === 401) {
-        message.error('Недостаточно прав для скачивания файла');
+        message.error('\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432 \u0434\u043b\u044f \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u044f \u0444\u0430\u0439\u043b\u0430');
       } else {
-        message.error('Ошибка при скачивании файла');
+        message.error('\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u0438 \u0444\u0430\u0439\u043b\u0430');
       }
       return false;
     }
@@ -363,20 +363,20 @@ export function useOrderDetail(orderId?: string) {
 
   const handleDeleteOrderFile = useCallback((file: any) => {
     if (!orderId || !file?.id) return;
-    const filename = file?.filename || file?.file_name || 'Файл';
+    const filename = file?.filename || file?.file_name || '\u0424\u0430\u0439\u043b';
     Modal.confirm({
-      title: 'Удалить файл?',
-      content: `Файл "${filename}" будет удален из заказа.`,
-      okText: 'Удалить',
-      cancelText: 'Отмена',
+      title: '\u0423\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u0430\u0439\u043b?',
+      content: `\u0424\u0430\u0439\u043b "${filename}" \u0431\u0443\u0434\u0435\u0442 \u0443\u0434\u0430\u043b\u0435\u043d \u0438\u0437 \u0437\u0430\u043a\u0430\u0437\u0430.`,
+      okText: '\u0423\u0434\u0430\u043b\u0438\u0442\u044c',
+      cancelText: '\u041e\u0442\u043c\u0435\u043d\u0430',
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
           await ordersApi.deleteOrderFile(Number(orderId), Number(file.id));
           await refreshOrderWithLists();
-          message.success('Файл удален');
+          message.success('\u0424\u0430\u0439\u043b \u0443\u0434\u0430\u043b\u0435\u043d');
         } catch (e: any) {
-          message.error(e?.response?.data?.detail || 'Не удалось удалить файл');
+          message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0443\u0434\u0430\u043b\u0438\u0442\u044c \u0444\u0430\u0439\u043b');
         }
       },
     });
@@ -468,5 +468,3 @@ export function useOrderDetail(orderId?: string) {
     dashboard,
   };
 }
-
-

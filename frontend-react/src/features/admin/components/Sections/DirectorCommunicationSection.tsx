@@ -193,7 +193,6 @@ export const DirectorCommunicationSection: React.FC<DirectorCommunicationSection
       onSendMessage?.(values);
       setMessageModalVisible(false);
       messageForm.resetFields();
-      message.success('Сообщение отправлено директору');
     } catch (error) {
       logger.error('Validation failed:', error);
     }

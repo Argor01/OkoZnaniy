@@ -152,7 +152,6 @@ export const PartnerChatsSection: React.FC = () => {
 
     try {
       await sendChatRoomMessage(selectedRoom.id, messageText.trim());
-      message.success('Сообщение отправлено');
       setMessageText('');
       await loadMessages(selectedRoom.id);
     } catch (error) {

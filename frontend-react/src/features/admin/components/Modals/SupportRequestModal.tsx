@@ -112,7 +112,6 @@ export const SupportRequestModal: React.FC<SupportRequestModalProps> = ({
       if (success) {
         setMessageText('');
         setAttachments([]);
-        message.success('Сообщение отправлено');
       } else {
         message.error('Ошибка отправки сообщения');
       }

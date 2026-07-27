@@ -177,7 +177,6 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       setReply('');
       await loadActivity(selectedItem);
       await loadItems();
-      message.success('Сообщение отправлено');
     } catch {
       message.error('Не удалось отправить сообщение');
     } finally {

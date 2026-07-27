@@ -64,7 +64,7 @@ export type OrderForChat = {
 export type DeviceEmojiFamily = 'ios' | 'android' | 'windows' | 'mac' | 'linux' | 'other';
 export type EmojiVersionLevel = '12.0' | '13.0' | '14.0' | '15.0';
 
-export type GroupedMessage = Message & { attached_files?: { name: string; url: string }[] };
+export type GroupedMessage = Message & { attached_files?: { name: string; url: string }[]; send_status?: 'sending' | 'sent' | 'failed' };
 
 export type ContextChat = { userId: number; title: string } | null;
 

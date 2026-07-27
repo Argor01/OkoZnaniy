@@ -215,7 +215,7 @@ class Order(models.Model):
         return f"{self.title or 'Без названия'} ({self.get_status_display()})"
 
     def get_status_display(self):
-        return self.status.capitalize()
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
