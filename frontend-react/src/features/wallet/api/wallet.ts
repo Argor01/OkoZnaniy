@@ -3,6 +3,7 @@ import { apiClient } from '@/api/client';
 export type WalletBalance = {
   balance: string;
   frozen_balance: string;
+  pending_balance: string;
   available_balance: string;
 };
 

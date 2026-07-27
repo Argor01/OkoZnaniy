@@ -4,9 +4,9 @@ import {
   Segmented, Skeleton, Space, Tag, Tooltip, Typography,
 } from 'antd';
 import {
-  ArrowDownOutlined, ArrowUpOutlined, BankOutlined, CreditCardOutlined,
-  HistoryOutlined, LockOutlined, PlusOutlined, QrcodeOutlined,
-  ReloadOutlined, WalletOutlined,
+  ArrowDownOutlined, ArrowUpOutlined, BankOutlined, ClockCircleOutlined,
+  CreditCardOutlined, HistoryOutlined, LockOutlined, PlusOutlined,
+  QrcodeOutlined, ReloadOutlined, WalletOutlined,
 } from '@ant-design/icons';
 import { walletApi, WalletBalance, WalletStats, WalletTransaction } from '../api/wallet';
 import styles from './Wallet.module.css';
@@ -123,6 +123,13 @@ export default function Wallet() {
                 <Text className={styles.balanceSmallLabel}>В резерве по заказам</Text>
                 <div className={styles.balanceSmallValue}>{formatMoney(balance?.frozen_balance)} ₽</div>
               </div>
+              {Number(balance?.pending_balance || 0) > 0 && (
+                <div className={`${styles.balanceCardSmall} ${styles.pendingCard}`}>
+                  <div className={styles.balanceSmallIcon}><ClockCircleOutlined /></div>
+                  <Text className={styles.balanceSmallLabel}>Ожидает выплаты</Text>
+                  <div className={`${styles.balanceSmallValue} ${styles.pendingValue}`}>{formatMoney(balance?.pending_balance)} ₽</div>
+                </div>
+              )}
               <div className={styles.balanceCardSmall}>
                 <div className={styles.balanceSmallIcon}><WalletOutlined /></div>
                 <Text className={styles.balanceSmallLabel}>Всего на счёте</Text>

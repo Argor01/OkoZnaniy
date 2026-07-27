@@ -150,10 +150,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         if instance.client_id != user.id:
             raise PermissionDenied('Только клиент может удалять свой заказ')
 
-        if instance.status not in ('new', 'completed'):
+        if instance.status not in ('new', 'completed', 'expired'):
             raise PermissionDenied(
                 f'Нельзя удалить заказ в статусе "{instance.status}". '
-                'Удаление возможно только для заказов в статусе "new".'
+                'Удаление возможно только для заказов в статусе "new" или "expired".'
             )
 
         if instance.status == 'new':
@@ -177,7 +177,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return models.Q(
             status='new',
             expert__isnull=True,
-            created_at__lte=timezone.now() - timedelta(days=7),
+            created_at__lte=timezone.now() - timedelta(days=14),
         )
 
     def retrieve(self, request, *args, **kwargs):
@@ -313,13 +313,22 @@ class OrderViewSet(viewsets.ModelViewSet):
         user = request.user
         if order.client_id != user.id:
             return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
-        if order.expert_id is not None or order.status != 'new':
-            return Response({'detail': 'Активировать можно только новый заказ без эксперта.'}, status=status.HTTP_400_BAD_REQUEST)
-        if not Order.objects.filter(pk=order.pk).filter(self._inactive_unassigned_filter()).exists():
-            return Response({'detail': 'Заказ не находится в неактивных.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Можно активировать: новый без эксперта (просроченный по 7 дням) или истёкший
+        if order.expert_id is not None:
+            return Response({'detail': 'Активировать можно только заказ без эксперта.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.status == 'expired':
+            pass  # OK — истёкший заказ можно продлить
+        elif order.status == 'new':
+            if not Order.objects.filter(pk=order.pk).filter(self._inactive_unassigned_filter()).exists():
+                return Response({'detail': 'Заказ не находится в неактивных.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'detail': 'Активировать можно только новый или истёкший заказ.'}, status=status.HTTP_400_BAD_REQUEST)
 
         order.created_at = timezone.now()
-        order.save(update_fields=['created_at', 'updated_at'])
+        order.status = 'new'
+        order.save(update_fields=['created_at', 'status', 'updated_at'])
         return Response(self.get_serializer(order).data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])

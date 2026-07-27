@@ -291,7 +291,8 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(partner.total_referrals, 1)
         self.assertEqual(partner.active_referrals, 1)
         self.assertEqual(partner.total_earnings, Decimal('75.0000'))
-        self.assertEqual(partner.balance, Decimal('75.00'))
+        self.assertEqual(partner.balance, Decimal('0.00'))
+        self.assertEqual(partner.pending_balance, Decimal('75.00'))
 
         self.api.force_authenticate(partner)
         dashboard = self.api.get('/api/users/partner_dashboard/')
@@ -311,7 +312,8 @@ class WalletOrderLedgerTests(TestCase):
         self.api.force_authenticate(admin_user)
         admin_earnings = self.api.get('/api/users/admin_earnings/')
         self.assertEqual(admin_earnings.status_code, status.HTTP_200_OK, admin_earnings.content)
-        admin_row = next(item for item in admin_earnings.json() if item['id'] == earning.id)
+        earnings_data = admin_earnings.json()['earnings']
+        admin_row = next(item for item in earnings_data if item['id'] == earning.id)
         self.assertEqual(Decimal(str(admin_row['amount'])), Decimal('75.00'))
         self.assertFalse(admin_row['is_paid'])
 
@@ -385,4 +387,117 @@ class WalletOrderLedgerTests(TestCase):
         earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
         self.assertEqual(earning.amount, Decimal('120.0000'))
         self.assertEqual(partner.total_earnings, Decimal('120.0000'))
-        self.assertEqual(partner.balance, Decimal('120.00'))
+        self.assertEqual(partner.balance, Decimal('0.00'))
+        self.assertEqual(partner.pending_balance, Decimal('120.00'))
+
+
+class PartnerPayoutTests(TestCase):
+    """Tests for WalletService.payout_to_partner and admin_mark_earning_paid API."""
+
+    def setUp(self):
+        self.partner = User.objects.create_user(
+            username='partner1', email='partner1@test.com', password='pwd',
+            role='partner',
+        )
+        self.client_user = User.objects.create_user(
+            username='client1', email='client1@test.com', password='pwd',
+            role='client',
+        )
+        self.client_user.partner = self.partner
+        self.client_user.save(update_fields=['partner'])
+        self.admin = User.objects.create_user(
+            username='admin1', email='admin1@test.com', password='pwd',
+            role='admin',
+        )
+        self.earning1 = PartnerEarning.objects.create(
+            partner=self.partner, referral=self.client_user,
+            amount=Decimal('50.00'),
+            commission_rate=Decimal('5.00'), source_amount=Decimal('1000.00'),
+            earning_type='order',
+        )
+        self.earning2 = PartnerEarning.objects.create(
+            partner=self.partner, referral=self.client_user,
+            amount=Decimal('100.00'),
+            commission_rate=Decimal('5.00'), source_amount=Decimal('2000.00'),
+            earning_type='order',
+        )
+        from apps.users.signals import _add_pending_balance
+        _add_pending_balance(self.partner, self.earning1)
+        _add_pending_balance(self.partner, self.earning2)
+        self.partner.refresh_from_db()
+        self.assertEqual(self.partner.pending_balance, Decimal('150.00'))
+        self.assertEqual(self.partner.balance, Decimal('0.00'))
+
+    def test_payout_single_earning(self):
+        result = WalletService.payout_to_partner(self.partner, [self.earning1.pk])
+        self.partner.refresh_from_db()
+        self.assertEqual(self.partner.balance, Decimal('50.00'))
+        self.assertEqual(self.partner.pending_balance, Decimal('100.00'))
+        self.assertTrue(PartnerEarning.objects.get(pk=self.earning1.pk).is_paid)
+        self.assertFalse(PartnerEarning.objects.get(pk=self.earning2.pk).is_paid)
+        self.assertEqual(result['amount'], Decimal('50.00'))
+        self.assertEqual(result['earnings_count'], 1)
+        tx = Transaction.objects.get(pk=result['transaction'].pk)
+        self.assertEqual(tx.type, TransactionType.PARTNER_PAYOUT)
+        self.assertEqual(tx.user, self.partner)
+
+    def test_payout_all_earnings(self):
+        result = WalletService.payout_to_partner(
+            self.partner, [self.earning1.pk, self.earning2.pk]
+        )
+        self.partner.refresh_from_db()
+        self.assertEqual(self.partner.balance, Decimal('150.00'))
+        self.assertEqual(self.partner.pending_balance, Decimal('0.00'))
+        self.assertTrue(PartnerEarning.objects.get(pk=self.earning1.pk).is_paid)
+        self.assertTrue(PartnerEarning.objects.get(pk=self.earning2.pk).is_paid)
+        self.assertEqual(result['amount'], Decimal('150.00'))
+        self.assertEqual(result['earnings_count'], 2)
+
+    def test_payout_already_paid_earning_fails(self):
+        self.earning1.is_paid = True
+        self.earning1.save(update_fields=['is_paid'])
+        with self.assertRaises(ValueError):
+            WalletService.payout_to_partner(self.partner, [self.earning1.pk])
+
+    def test_payout_empty_list_fails(self):
+        with self.assertRaises(ValueError):
+            WalletService.payout_to_partner(self.partner, [])
+
+    def test_payout_creates_transaction(self):
+        WalletService.payout_to_partner(self.partner, [self.earning1.pk, self.earning2.pk])
+        txs = Transaction.objects.filter(
+            user=self.partner, type=TransactionType.PARTNER_PAYOUT
+        )
+        self.assertEqual(txs.count(), 1)
+        self.assertEqual(txs.first().amount, Decimal('150.00'))
+
+    def test_wallet_balance_includes_pending(self):
+        bal = WalletService.get_balance(self.partner)
+        self.assertEqual(bal['pending_balance'], Decimal('150.00'))
+        self.assertEqual(bal['balance'], Decimal('0.00'))
+
+    def test_admin_api_pay_earning(self):
+        self.api = APIClient()
+        self.api.force_authenticate(self.admin)
+        resp = self.api.post(
+            '/api/users/admin_mark_earning_paid/',
+            {'earning_id': self.earning1.pk},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        self.partner.refresh_from_db()
+        self.assertEqual(self.partner.balance, Decimal('50.00'))
+        self.assertEqual(self.partner.pending_balance, Decimal('100.00'))
+
+    def test_admin_api_pay_all_for_partner(self):
+        self.api = APIClient()
+        self.api.force_authenticate(self.admin)
+        resp = self.api.post(
+            '/api/users/admin_mark_earning_paid/',
+            {'earning_ids': [self.earning1.pk, self.earning2.pk]},
+            format='json',
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.content)
+        self.partner.refresh_from_db()
+        self.assertEqual(self.partner.balance, Decimal('150.00'))
+        self.assertEqual(self.partner.pending_balance, Decimal('0.00'))

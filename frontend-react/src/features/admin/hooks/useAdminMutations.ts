@@ -22,19 +22,22 @@ export const useAdminMutations = () => {
       const previousEarnings = queryClient.getQueryData(QUERY_KEYS.ADMIN_EARNINGS);
       
       
-      queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, (old: PartnerEarning[] | undefined) => {
+      queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, (old: any) => {
         if (!old) return old;
-        return old.map(earning => 
+        const earnings = old.earnings || old;
+        if (!Array.isArray(earnings)) return old;
+        const updated = earnings.map((earning: PartnerEarning) => 
           earning.id === earningId 
             ? { ...earning, is_paid: true }
             : earning
         );
+        return old.earnings !== undefined ? { ...old, earnings: updated } : updated;
       });
       
       return { previousEarnings };
     },
     onSuccess: () => {
-      message.success('Начисление отмечено как выплаченное');
+      message.success('Начисление выплачено');
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_EARNINGS });
     },
     onError: (error: any, earningId, context) => {
@@ -43,7 +46,20 @@ export const useAdminMutations = () => {
         queryClient.setQueryData(QUERY_KEYS.ADMIN_EARNINGS, context.previousEarnings);
       }
       logger.error('Error marking earning as paid:', error);
-      message.error(error?.message || 'Ошибка при отметке начисления');
+      message.error(error?.response?.data?.error || 'Ошибка при выплате начисления');
+    },
+  });
+
+  
+  const payPartnerEarningsMutation = useMutation({
+    mutationFn: (earningIds: number[]) => adminPanelApi.payPartnerEarnings(earningIds),
+    onSuccess: (data) => {
+      message.success(data.message || `Выплачено ${data.earnings_count} начислений`);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_EARNINGS });
+    },
+    onError: (error: any) => {
+      logger.error('Error paying partner earnings:', error);
+      message.error(error?.response?.data?.error || 'Ошибка при выплате');
     },
   });
 
@@ -96,6 +112,11 @@ export const useAdminMutations = () => {
     markEarningPaid: markEarningPaidMutation.mutate,
     markEarningPaidAsync: markEarningPaidMutation.mutateAsync,
     isMarkingEarningPaid: markEarningPaidMutation.isPending,
+
+    
+    payPartnerEarnings: payPartnerEarningsMutation.mutate,
+    payPartnerEarningsAsync: payPartnerEarningsMutation.mutateAsync,
+    isPayingPartnerEarnings: payPartnerEarningsMutation.isPending,
 
     
     updatePartner: updatePartnerMutation.mutate,

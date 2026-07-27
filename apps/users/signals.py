@@ -1,10 +1,11 @@
 import logging
+from decimal import Decimal
 
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db import models
-from decimal import Decimal
-from .models import User, PartnerEarning
+
+from .models import PartnerEarning, User
 
 log = logging.getLogger(__name__)
 
@@ -40,8 +41,7 @@ def create_partner_earning_on_order_completion(sender, instance, created, **kwar
         earning_type='order',
     )
 
-    _credit_partner_wallet(partner, earning)
-
+    _add_pending_balance(partner, earning)
     update_partner_statistics(partner)
 
 
@@ -63,25 +63,14 @@ def create_registration_bonus_for_partner(sender, instance, created, **kwargs):
         earning_type='registration',
     )
 
-    _credit_partner_wallet(partner, earning)
-
+    _add_pending_balance(partner, earning)
     update_partner_statistics(partner)
 
 
-def _credit_partner_wallet(partner, earning):
-    from apps.wallet.services import WalletService
-
-    description = (
-        f'Начисление от реферала {earning.referral.display_username} '
-        f'({earning.get_earning_type_display()})'
+def _add_pending_balance(partner, earning):
+    User.objects.filter(pk=partner.pk).update(
+        pending_balance=models.F('pending_balance') + earning.amount
     )
-    try:
-        WalletService.topup(partner, earning.amount, description=description)
-    except Exception:
-        log.exception(
-            'Failed to credit wallet for partner %s earning #%s',
-            partner.pk, earning.pk,
-        )
 
 
 def update_partner_statistics(partner):

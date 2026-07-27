@@ -37,6 +37,7 @@ const isAllTabGroup = (order: Order) => {
   if (status === 'closed') return true;
   if (status === 'completed') return true;
   if (status === 'cancelled' || status === 'canceled') return true;
+  if (status === 'expired') return true;
   return false;
 };
 

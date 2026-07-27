@@ -29,6 +29,7 @@ class NotificationType(models.TextChoices):
     REVIEW_REQUEST = 'review_request', 'Оставьте отзыв о работе'
     REVIEW_REPLY = 'review_reply', 'Ответ на ваш отзыв'
     REVIEW_APPEAL = 'review_appeal', 'Обжалование отзыва'
+    ORDER_EXPIRED = 'order_expired', 'Срок заказа истёк'
 
 
 class Notification(models.Model):

@@ -28,6 +28,7 @@ export interface PartnerInfo {
   total_referrals: number;
   active_referrals: number;
   total_earnings: number;
+  pending_balance: number;
 }
 
 export interface PartnerDashboardData {

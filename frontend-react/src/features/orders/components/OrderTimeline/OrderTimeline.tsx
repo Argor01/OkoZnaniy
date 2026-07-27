@@ -41,6 +41,7 @@ const statusRank: Record<string, number> = {
   completed: 7,
   cancelled: -1,
   canceled: -1,
+  expired: -2,
 };
 
 const formatDate = (value?: string | null) => {
@@ -78,6 +79,7 @@ const getNextStep = (order: TimelineOrder) => {
   if (status === 'revision') return 'Дождитесь исправленной версии работы';
   if (status === 'completed') return 'Заказ завершён';
   if (status === 'cancelled' || status === 'canceled') return 'Заказ отменён';
+  if (status === 'expired') return 'Срок размещения заказа истёк';
   if (order.expert || order.expert_id) return 'Дождитесь начала работы эксперта';
   return 'Ожидайте откликов или выберите эксперта';
 };

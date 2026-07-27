@@ -15,6 +15,7 @@ class OrderStatus(models.TextChoices):
     DONE = 'done', 'Выполнен'
     DISPUTE = 'disputed', 'Арбитраж'
     CANCELED = 'canceled', 'Отменен'
+    EXPIRED = 'expired', 'Истёк срок'
 
 
 WORK_TYPES = [
@@ -34,7 +35,8 @@ class Order(models.Model):
         ('review', 'На проверке'),
         ('revision', 'На доработке'),
         ('completed', 'Выполнен'),
-        ('cancelled', 'Отменен')
+        ('cancelled', 'Отменен'),
+        ('expired', 'Истёк срок'),
     ]
 
     client = models.ForeignKey(
@@ -380,6 +382,7 @@ class TransactionType(models.TextChoices):
     TOPUP = "topup", "Пополнение"
     WITHDRAWAL = "withdrawal", "Вывод средств"
     PURCHASE = "purchase", "Покупка"
+    PARTNER_PAYOUT = "partner_payout", "Выплата партнеру"
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

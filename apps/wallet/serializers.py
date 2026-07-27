@@ -5,6 +5,7 @@ from apps.orders.models import Transaction
 class WalletBalanceSerializer(serializers.Serializer):
     balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     frozen_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
+    pending_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     available_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
 
 

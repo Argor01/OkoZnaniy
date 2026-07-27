@@ -568,3 +568,21 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.pendingCard {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(245, 158, 11, 0.03)) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.pendingCard .balanceSmallIcon {
+  color: #f59e0b;
+}
+
+.pendingValue {
+  color: #f59e0b !important;
+}
+
+:global([data-theme="dark"]) .pendingCard {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}

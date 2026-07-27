@@ -146,6 +146,17 @@ class ExpertReviewViewSet(viewsets.ModelViewSet):
             NotificationService.notify_review_received(review)
         except Exception:
             logger.exception('Не удалось отправить уведомление о новом отзыве')
+        try:
+            from apps.notifications.models import Notification, NotificationType
+            Notification.objects.filter(
+                recipient=self.request.user,
+                type=NotificationType.REVIEW_REQUEST,
+                related_object_type='order',
+                related_object_id=order.id,
+                is_read=False,
+            ).update(is_read=True)
+        except Exception:
+            logger.exception('Не удалось снять уведомление об отзыве')
 
     @action(detail=True, methods=['post'], url_path='reply', permission_classes=[permissions.IsAuthenticated])
     def reply(self, request, pk=None):

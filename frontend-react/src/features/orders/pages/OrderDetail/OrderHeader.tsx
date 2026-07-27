@@ -50,8 +50,8 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   onEditOrder,
 }) => {
   const navigate = useNavigate();
-  const canEditOrder = availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'));
-  const canCancelOrder = (availableActions?.can_delete ?? order.status === 'new') && order.status === 'new';
+  const canEditOrder = (availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'))) && order.status !== 'expired';
+  const canCancelOrder = ((availableActions?.can_delete ?? order.status === 'new') && order.status === 'new') && order.status !== 'expired';
 
   return (
     <>

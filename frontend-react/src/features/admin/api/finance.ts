@@ -2,6 +2,11 @@ import { apiClient } from '@/api/client';
 import { Partner, PartnerEarning, UpdatePartnerRequest } from '@/features/admin/types/admin';
 import { API_ENDPOINTS } from '@/config/endpoints';
 
+export interface EarningsResponse {
+  earnings: PartnerEarning[];
+  partners_pending: Array<{ id: number; username: string; pending_balance: string }>;
+}
+
 export const financeApi = {
   // Tariffs
   getTariffs: async () => {
@@ -61,13 +66,13 @@ export const financeApi = {
     return [];
   },
 
-  getEarnings: async (): Promise<PartnerEarning[]> => {
+  getEarnings: async (): Promise<EarningsResponse> => {
     const response = await apiClient.get(API_ENDPOINTS.admin.finance.earnings);
     const data = response.data;
-    if (Array.isArray(data)) return data;
-    if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;
-    if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
-    return [];
+    if (data && typeof data === 'object' && Array.isArray(data.earnings)) {
+      return data;
+    }
+    return { earnings: Array.isArray(data) ? data : [], partners_pending: [] };
   },
 
   updatePartner: async (partnerId: number, data: UpdatePartnerRequest): Promise<Partner> => {
@@ -78,6 +83,13 @@ export const financeApi = {
   markEarningPaid: async (earningId: number): Promise<{ message: string }> => {
     const response = await apiClient.post(API_ENDPOINTS.admin.finance.markEarningPaid, {
       earning_id: earningId,
+    });
+    return response.data;
+  },
+
+  payPartnerEarnings: async (earningIds: number[]): Promise<{ message: string; amount: string; earnings_count: number }> => {
+    const response = await apiClient.post(API_ENDPOINTS.admin.finance.markEarningPaid, {
+      earning_ids: earningIds,
     });
     return response.data;
   },

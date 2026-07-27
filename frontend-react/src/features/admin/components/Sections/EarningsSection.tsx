@@ -1,6 +1,6 @@
-import React from 'react';
-import { Card, Table, Button, Tag, Space, Tooltip } from 'antd';
-import { CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import React, { useMemo } from 'react';
+import { Card, Table, Button, Tag, Space, Tooltip, Popconfirm } from 'antd';
+import { CheckOutlined, ClockCircleOutlined, WalletOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { PartnerEarning } from '@/features/admin/types';
 import { TABLE_CONSTANTS, EARNING_TYPE_LABELS } from '@/features/admin/constants';
@@ -10,6 +10,7 @@ interface EarningsSectionProps {
   earnings: PartnerEarning[];
   loading: boolean;
   onMarkAsPaid: (earningId: number) => void;
+  onPayPartner?: (partnerName: string, earningIds: number[]) => void;
   isMarkingPaid?: boolean;
 }
 
@@ -18,8 +19,19 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
   earnings,
   loading,
   onMarkAsPaid,
+  onPayPartner,
   isMarkingPaid = false,
 }) => {
+  const unpaidByPartner = useMemo(() => {
+    const map = new Map<string, { ids: number[]; total: number }>();
+    earnings.filter(e => !e.is_paid).forEach(e => {
+      const entry = map.get(e.partner) || { ids: [], total: 0 };
+      entry.ids.push(e.id);
+      entry.total += e.amount;
+      map.set(e.partner, entry);
+    });
+    return map;
+  }, [earnings]);
   const columns = [
     {
       title: 'Партнер',
@@ -113,25 +125,51 @@ export const EarningsSection: React.FC<EarningsSectionProps> = ({
     {
       title: 'Действия',
       key: 'actions',
-      width: 100,
-      render: (record: PartnerEarning) => (
-        <Space size="small">
-          {!record.is_paid && (
-            <Tooltip title="Отметить как выплаченное">
-              <Button 
-                size="small" 
-                type="primary"
-                icon={<CheckOutlined />}
-                onClick={() => onMarkAsPaid(record.id)}
-                loading={isMarkingPaid}
-                className={styles.payButton}
-              >
-                Выплатить
-              </Button>
-            </Tooltip>
-          )}
-        </Space>
-      ),
+      width: 180,
+      render: (record: PartnerEarning) => {
+        const partnerPending = unpaidByPartner.get(record.partner);
+        const canPayAll = partnerPending && partnerPending.ids.length > 1 && partnerPending.ids[0] === record.id;
+        return (
+          <Space size="small">
+            {!record.is_paid && (
+              <>
+                <Tooltip title="Выплатить это начисление">
+                  <Button 
+                    size="small" 
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() => onMarkAsPaid(record.id)}
+                    loading={isMarkingPaid}
+                    className={styles.payButton}
+                  >
+                    Выплатить
+                  </Button>
+                </Tooltip>
+                {canPayAll && onPayPartner && (
+                  <Popconfirm
+                    title={`Выплатить все невыплаченные начисления партнёру «${record.partner}»?`}
+                    description={`Сумма: ${partnerPending.total.toLocaleString()} ₽ (${partnerPending.ids.length} шт.)`}
+                    onConfirm={() => onPayPartner(record.partner, partnerPending.ids)}
+                    okText="Выплатить"
+                    cancelText="Отмена"
+                  >
+                    <Tooltip title={`Выплатить все (${partnerPending.ids.length} шт.)`}>
+                      <Button 
+                        size="small" 
+                        type="default"
+                        icon={<WalletOutlined />}
+                        className={styles.payButton}
+                      >
+                        Всё
+                      </Button>
+                    </Tooltip>
+                  </Popconfirm>
+                )}
+              </>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 

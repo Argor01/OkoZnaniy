@@ -19,6 +19,7 @@ export const ORDER_STATUSES = {
   CLOSED: 'closed',
   CANCELLED: 'cancelled',
   DISPUTE: 'dispute',
+  EXPIRED: 'expired',
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
@@ -34,6 +35,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   closed: 'Закрыт',
   cancelled: 'Отменен',
   dispute: 'Спор',
+  expired: 'Истёк срок',
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -49,6 +51,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   closed: 'default',
   cancelled: 'red',
   dispute: 'volcano',
+  expired: 'default',
 };
 
 export const ORDER_PRIORITIES = {

@@ -167,6 +167,24 @@ const StatisticsPanel: React.FC<{
             />
           </Card>
         </Col>
+        {partnerInfo.pending_balance > 0 && (
+          <Col xs={24} sm={12} md={6}>
+            <Card 
+              style={{ 
+                borderLeft: '4px solid #fa8c16',
+                background: isDark ? 'linear-gradient(135deg, #1e1a32 0%, #2e2a1a 100%)' : 'linear-gradient(135deg, #ffffff 0%, #fff7e6 100%)'
+              }}
+            >
+              <Statistic
+                title="Ожидает выплаты"
+                value={partnerInfo.pending_balance}
+                suffix="₽"
+                prefix={<DollarOutlined style={{ color: '#fa8c16' }} />}
+                valueStyle={{ color: '#fa8c16' }}
+              />
+            </Card>
+          </Col>
+        )}
       </Row>
     </div>
   );

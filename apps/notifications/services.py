@@ -278,24 +278,26 @@ class NotificationService:
             )
         # Просим клиента оставить отзыв о работе эксперта
         if order.client and order.expert_id:
-            expert_name = order.expert.get_full_name() or order.expert.username
-            NotificationService.create_notification(
-                recipient=order.client,
-                type=NotificationType.REVIEW_REQUEST,
-                title="Оставьте отзыв о работе",
-                message=(
-                    f"Заказ {NotificationService._order_ref(order)} завершён. "
-                    f"Поделитесь впечатлениями о работе эксперта {expert_name}."
-                ),
-                related_object_id=order.id,
-                related_object_type='order',
-                data={
-                    'order_id': order.id,
-                    'expert_id': order.expert_id,
-                    'expert_username': getattr(order.expert, 'username', None),
-                },
-                expires_in=timedelta(days=30),
-            )
+            from apps.experts.models import ExpertReview
+            if not ExpertReview.objects.filter(order=order).exists():
+                expert_name = order.expert.get_full_name() or order.expert.username
+                NotificationService.create_notification(
+                    recipient=order.client,
+                    type=NotificationType.REVIEW_REQUEST,
+                    title="Оставьте отзыв о работе",
+                    message=(
+                        f"Заказ {NotificationService._order_ref(order)} завершён. "
+                        f"Поделитесь впечатлениями о работе эксперта {expert_name}."
+                    ),
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={
+                        'order_id': order.id,
+                        'expert_id': order.expert_id,
+                        'expert_username': getattr(order.expert, 'username', None),
+                    },
+                    expires_in=timedelta(days=30),
+                )
 
     @staticmethod
     def notify_complaint_filed(case):

@@ -586,38 +586,34 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
         width={480}
       >
         {reviewOrderLoading ? (
-          <div style={{ textAlign: 'center', padding: '32px 0' }}>
+          <div className={styles.reviewModalLoading}>
             <Spin size="large" />
           </div>
         ) : reviewOrderData ? (
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0' }}>
+          <Space direction="vertical" size="middle" className={styles.reviewModalContent}>
+            <div className={styles.reviewModalExpertRow}>
               <Avatar
                 size={48}
                 src={getMediaUrl(reviewOrderData.expertAvatar)}
                 icon={<UserOutlined />}
               />
               <div>
-                <Text strong style={{ display: 'block', fontSize: 16 }}>
+                <Text strong className={styles.reviewModalExpertName}>
                   {reviewOrderData.expertName}
                 </Text>
-                <Text type="secondary" style={{ fontSize: 13 }}>
+                <Text type="secondary" className={styles.reviewModalOrderTitle}>
                   {reviewOrderData.orderTitle}
                 </Text>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <Text strong>Оценка:</Text>
-              <div style={{ display: 'flex', gap: 6 }}>
+            <div className={styles.reviewModalRatingRow}>
+              <Text strong className={styles.reviewModalRatingLabel}>Оценка:</Text>
+              <div className={styles.reviewModalRatingStars}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <StarFilled
                     key={star}
-                    style={{
-                      fontSize: 28,
-                      cursor: 'pointer',
-                      color: star <= reviewRating ? 'var(--color-brand-orange-500, #ff9500)' : '#d9d9d9',
-                    }}
+                    className={`${styles.reviewModalStar} ${star <= reviewRating ? styles.reviewModalStarActive : ''}`}
                     onClick={() => setReviewRating(star)}
                   />
                 ))}
@@ -628,15 +624,7 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
               value={reviewComment}
               onChange={(e) => setReviewComment(e.target.value)}
               placeholder="Поделитесь впечатлениями (необязательно)"
-              style={{
-                width: '100%',
-                border: '1px solid #d9d9d9',
-                borderRadius: 8,
-                padding: '8px 12px',
-                resize: 'vertical',
-                fontFamily: 'inherit',
-                fontSize: 14,
-              }}
+              className={styles.reviewModalTextarea}
               rows={4}
             />
           </Space>

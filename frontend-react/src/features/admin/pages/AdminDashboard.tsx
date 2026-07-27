@@ -124,9 +124,11 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
   
   const { 
     markEarningPaid, 
+    payPartnerEarnings,
     updatePartner,
     assignArbitrator, 
     isMarkingEarningPaid, 
+    isPayingPartnerEarnings,
     isUpdatingPartner,
     isAssigningArbitrator 
   } = useAdminMutations();
@@ -178,7 +180,8 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             earnings={adminData.earnings}
             loading={adminData.earningsLoading}
             onMarkAsPaid={markEarningPaid}
-            isMarkingPaid={isMarkingEarningPaid}
+            onPayPartner={(partnerName, earningIds) => payPartnerEarnings(earningIds)}
+            isMarkingPaid={isMarkingEarningPaid || isPayingPartnerEarnings}
           />
         );
 

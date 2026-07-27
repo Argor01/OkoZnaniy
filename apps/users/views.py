@@ -26,6 +26,7 @@ from django.utils.dateparse import parse_datetime
 logger = logging.getLogger(__name__)
 from apps.orders.models import Order, Transaction
 from .models import PartnerEarning, ImprovementSuggestion
+from apps.wallet.services import WalletService
 from apps.orders.serializers import OrderSerializer, TransactionSerializer
 from .serializers import (
     UserSerializer, UserCreateSerializer, UserUpdateSerializer,
@@ -681,6 +682,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'total_referrals': user.total_referrals,
                 'active_referrals': user.active_referrals,
                 'total_earnings': user.total_earnings,
+                'pending_balance': user.pending_balance,
             },
             'referrals': [
                 {
@@ -820,8 +822,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 'created_at': earning.created_at,
                 'is_paid': earning.is_paid,
             })
+
+        partners_with_pending = User.objects.filter(
+            role='partner',
+            pending_balance__gt=0,
+        ).values('id', 'username', 'pending_balance')
         
-        return Response(earnings_data)
+        return Response({
+            'earnings': earnings_data,
+            'partners_pending': list(partners_with_pending),
+        })
 
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def admin_update_partner(self, request, pk=None):
@@ -853,7 +863,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def admin_mark_earning_paid(self, request):
-        """Отметить начисление как выплаченное"""
+        """Выплатить начисление партнеру — переводит средства из pending_balance в кошелек"""
         user = request.user
         if user.role != 'admin':
             return Response(
@@ -862,22 +872,39 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         earning_id = request.data.get('earning_id')
-        if not earning_id:
+        earning_ids = request.data.get('earning_ids')
+
+        if earning_id:
+            earning_ids = [earning_id]
+        if not earning_ids:
             return Response(
                 {'error': 'ID начисления не указан'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
-            earning = PartnerEarning.objects.get(id=earning_id)
-            earning.is_paid = True
-            earning.save()
-            return Response({'message': 'Начисление отмечено как выплаченное'})
+            first_earning = PartnerEarning.objects.select_related('partner').get(id=earning_ids[0])
         except PartnerEarning.DoesNotExist:
             return Response(
                 {'error': 'Начисление не найдено'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+        partner = first_earning.partner
+
+        try:
+            result = WalletService.payout_to_partner(partner, earning_ids)
+        except ValueError as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({
+            'message': f'Выплачено {result["earnings_count"]} начислений на сумму {result["amount"]} ₽',
+            'amount': str(result['amount']),
+            'earnings_count': result['earnings_count'],
+        })
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def admin_arbitrators(self, request):

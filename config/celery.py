@@ -27,6 +27,10 @@ app.conf.beat_schedule = {
         'task': 'apps.notifications.tasks.cleanup_old_notifications',
         'schedule': crontab(hour='3', minute='0'),  # Каждый день в 3:00
     },
+    'expire-old-orders': {
+        'task': 'apps.orders.tasks.expire_old_orders',
+        'schedule': crontab(hour='4', minute='0'),  # Каждый день в 4:00
+    },
 }
 
 @app.task(bind=True)

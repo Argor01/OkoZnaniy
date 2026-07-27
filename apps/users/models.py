@@ -54,6 +54,10 @@ class User(AbstractUser):
                 check=models.Q(frozen_balance__gte=0),
                 name='user_frozen_balance_non_negative',
             ),
+            models.CheckConstraint(
+                check=models.Q(pending_balance__gte=0),
+                name='user_pending_balance_non_negative',
+            ),
         ]
     
     # Поля профиля специалиста
@@ -80,6 +84,7 @@ class User(AbstractUser):
     total_referrals = models.PositiveIntegerField(default=0, verbose_name="Всего рефералов")
     active_referrals = models.PositiveIntegerField(default=0, verbose_name="Активных рефералов")
     total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Общий доход")
+    pending_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Ожидает выплаты", help_text="Сумма невыплаченных партнерских начислений")
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Город проживания")
     
     # Поля для бана за обмен контактами

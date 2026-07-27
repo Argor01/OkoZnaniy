@@ -77,12 +77,14 @@ class WalletService:
     # --------------- queries ---------------
     @staticmethod
     def get_balance(user) -> dict:
-        u = User.objects.only('balance', 'frozen_balance').get(pk=user.pk)
+        u = User.objects.only('balance', 'frozen_balance', 'pending_balance').get(pk=user.pk)
         balance = u.balance or ZERO
         frozen = u.frozen_balance or ZERO
+        pending = u.pending_balance or ZERO
         return {
             'balance': balance,
             'frozen_balance': frozen,
+            'pending_balance': pending,
             'available_balance': balance - frozen,
         }
 
@@ -296,3 +298,54 @@ class WalletService:
             user=u, amount=amount, type=TransactionType.WITHDRAWAL,
             description=description, balance_after=u.balance,
         )
+
+    @staticmethod
+    @transaction.atomic
+    def payout_to_partner(partner, earning_ids: list[int]) -> dict:
+        """Transfer unpaid partner earnings to the partner's wallet balance.
+
+        Called by an admin to actually credit money that was previously sitting
+        in ``pending_balance``.  Each earning is marked ``is_paid=True`` and
+        the partner's ``balance`` is increased by the total.
+        """
+        from apps.users.models import PartnerEarning
+
+        if not earning_ids:
+            raise ValueError('No earning IDs provided')
+
+        u = _lock_user(partner.pk)
+
+        earnings = list(
+            PartnerEarning.objects.select_for_update()
+            .filter(pk__in=earning_ids, partner=u, is_paid=False)
+        )
+        if len(earnings) != len(earning_ids):
+            found_ids = {e.pk for e in earnings}
+            missing = set(earning_ids) - found_ids
+            raise ValueError(
+                f'Earnings not found or already paid: {missing}'
+            )
+
+        total = _q(sum(e.amount for e in earnings))
+
+        u.balance = (u.balance or ZERO) + total
+        u.pending_balance = max(ZERO, (u.pending_balance or ZERO) - total)
+        u.save(update_fields=['balance', 'pending_balance'])
+
+        for earning in earnings:
+            earning.is_paid = True
+            earning.save(update_fields=['is_paid'])
+
+        tx = Transaction.objects.create(
+            user=u,
+            amount=total,
+            type=TransactionType.PARTNER_PAYOUT,
+            description=f'Выплата начислений ({len(earnings)} шт.)',
+            balance_after=u.balance,
+        )
+
+        return {
+            'transaction': tx,
+            'amount': total,
+            'earnings_count': len(earnings),
+        }

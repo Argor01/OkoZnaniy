@@ -4,8 +4,10 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
+from rest_framework import status as http_status
+from rest_framework.test import APIClient
 
 from apps.catalog.models import DiscountRule, Subject, WorkType
 from apps.orders.models import Order
@@ -156,3 +158,107 @@ class OrderModelBehaviorTests(TestCase):
 
         with self.assertRaises(ValidationError):
             self.order.clean()
+
+
+class OrderExpirationTests(TestCase):
+    """Tests for order expiration feature (14-day auto-expire)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.client_user = User.objects.create_user(
+            username='expire_client',
+            email='expire_client@example.com',
+            password='testpass123',
+            role='client',
+        )
+        cls.expert_user = User.objects.create_user(
+            username='expire_expert',
+            email='expire_expert@example.com',
+            password='testpass123',
+            role='expert',
+        )
+        cls.subject = Subject.objects.create(name='Expiration subject')
+        cls.work_type = WorkType.objects.create(name='Expiration work type')
+
+    def _create_order(self, **kwargs):
+        defaults = dict(
+            client=self.client_user,
+            subject=self.subject,
+            work_type=self.work_type,
+            title='Expire test order',
+            description='Testing expiration',
+            budget=Decimal('1000.00'),
+            deadline=timezone.now() + timedelta(days=30),
+            status='new',
+        )
+        defaults.update(kwargs)
+        return Order.objects.create(**defaults)
+
+    def test_task_expires_old_unassigned_orders(self):
+        order = self._create_order(
+            created_at=timezone.now() - timedelta(days=15),
+        )
+        from apps.orders.tasks import expire_old_orders
+        result = expire_old_orders()
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'expired')
+        self.assertIn('1', result)
+
+    def test_task_does_not_expire_recent_orders(self):
+        order = self._create_order(
+            created_at=timezone.now() - timedelta(days=10),
+        )
+        from apps.orders.tasks import expire_old_orders
+        expire_old_orders()
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'new')
+
+    def test_task_does_not_expire_assigned_orders(self):
+        order = self._create_order(
+            created_at=timezone.now() - timedelta(days=15),
+            expert=self.expert_user,
+        )
+        from apps.orders.tasks import expire_old_orders
+        expire_old_orders()
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'new')
+
+    def test_task_sends_notification_to_client(self):
+        order = self._create_order(
+            created_at=timezone.now() - timedelta(days=15),
+        )
+        from apps.orders.tasks import expire_old_orders
+        expire_old_orders()
+        from apps.notifications.models import Notification
+        notif = Notification.objects.filter(
+            recipient=self.client_user,
+            type='order_expired',
+        ).first()
+        self.assertIsNotNone(notif)
+        self.assertIn(order.title, notif.message)
+
+    @override_settings(SECURE_SSL_REDIRECT=False)
+    def test_reactivate_expired_order(self):
+        order = self._create_order(
+            created_at=timezone.now() - timedelta(days=15),
+            status='expired',
+        )
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.client_user)
+        resp = self.api_client.post(f'/api/orders/orders/{order.id}/reactivate/')
+        self.assertEqual(resp.status_code, http_status.HTTP_200_OK)
+        order.refresh_from_db()
+        self.assertEqual(order.status, 'new')
+
+    @override_settings(SECURE_SSL_REDIRECT=False)
+    def test_expired_order_excluded_from_available_feed(self):
+        self._create_order(
+            created_at=timezone.now() - timedelta(days=15),
+        )
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.expert_user)
+        resp = self.api_client.get('/api/orders/orders/available/')
+        self.assertEqual(resp.status_code, http_status.HTTP_200_OK)
+        results = resp.data.get('results', [])
+        statuses = [o['status'] for o in results]
+        self.assertNotIn('expired', statuses)

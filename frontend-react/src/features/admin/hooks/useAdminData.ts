@@ -79,6 +79,14 @@ export const useAdminData = (canLoadData: boolean): {
     staleTime: QUERY_CONFIG.staleTime,
     gcTime: QUERY_CONFIG.cacheTime,
     select: (data: unknown): PartnerEarning[] => {
+      if (
+        typeof data === 'object' &&
+        data !== null &&
+        'earnings' in data &&
+        Array.isArray((data as { earnings?: unknown }).earnings)
+      ) {
+        return (data as { earnings: PartnerEarning[] }).earnings;
+      }
       if (Array.isArray(data)) return data;
       if (
         typeof data === 'object' &&
@@ -87,14 +95,6 @@ export const useAdminData = (canLoadData: boolean): {
         Array.isArray((data as { results?: unknown }).results)
       ) {
         return (data as { results: PartnerEarning[] }).results;
-      }
-      if (
-        typeof data === 'object' &&
-        data !== null &&
-        'data' in data &&
-        Array.isArray((data as { data?: unknown }).data)
-      ) {
-        return (data as { data: PartnerEarning[] }).data;
       }
       return [];
     },
