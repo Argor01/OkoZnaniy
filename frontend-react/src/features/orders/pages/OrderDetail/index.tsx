@@ -417,10 +417,10 @@ const OrderDetail: React.FC = () => {
       </Modal>
 
       <EditOrderModal
-        open={editOrderModalVisible}
+        visible={editOrderModalVisible}
         onClose={() => setEditOrderModalVisible(false)}
         order={order}
-        onSaved={async () => {
+        onSuccess={async () => {
           await refreshOrderWithLists();
           setEditOrderModalVisible(false);
         }}
