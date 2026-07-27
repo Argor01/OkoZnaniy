@@ -351,6 +351,7 @@
 
   .ant-select-dropdown {
     max-height: 50vh;
+    z-index: 2100 !important;
   }
 
   .ant-picker-dropdown {
