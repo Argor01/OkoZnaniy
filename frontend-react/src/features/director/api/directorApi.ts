@@ -637,6 +637,26 @@ export const inviteToChatRoom = async (roomId: number, userId: number): Promise<
   }
 };
 
+export const updateChatRoom = async (roomId: number, data: { name?: string; description?: string }): Promise<any> => {
+  try {
+    const response = await apiClient.patch(`/director/chat-rooms/${roomId}/`, data);
+    return response.data;
+  } catch (error) {
+    logger.error('Error updating chat room:', error);
+    throw error;
+  }
+};
+
+export const getDirectorUsers = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/admin-panel/users/');
+    return response.data || [];
+  } catch (error) {
+    logger.error('Error fetching users:', error);
+    return [];
+  }
+};
+
 export const uploadChatRoomFile = async (roomId: number, file: File): Promise<any> => {
   try {
     const formData = new FormData();

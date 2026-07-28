@@ -60,7 +60,6 @@ export const useNotifications = () => {
     try {
       const apiNotifications = await notificationsApi.getAll();
       const formatted = apiNotifications
-        .filter(n => !['new_message', 'message', 'chat_message', 'private_message'].includes(n.type))
         .map(formatNotification);
       setNotifications(formatted);
       setUnreadCount(formatted.filter(n => !n.isRead).length);

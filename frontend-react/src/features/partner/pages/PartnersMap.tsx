@@ -368,7 +368,7 @@ const PartnersMap: React.FC = () => {
           <div className={styles.sidebar}>
             <Card title="Список партнеров" className={styles.partnersCard}>
               <div className={styles.partnersList}>
-                {filteredPartners.length === 0 ? (
+                  {filteredPartners.length === 0 ? (
                   <div className={styles.emptyState}>
                     <div className={styles.emptyStateIcon}>⚠</div>
                     <Text className={styles.emptyStateText}>
@@ -393,77 +393,34 @@ const PartnersMap: React.FC = () => {
                       onClick={() => handleMarkerClick(partner)}
                       hoverable
                     >
-                      <div className={styles.partnerInfo} style={{ background: '#ffffff', padding: '16px' }}>
-                        <Title
-                          level={5}
-                          className={styles.partnerName}
-                          style={{
-                            color: '#1f2937 !important',
-                            fontWeight: 600,
-                            fontSize: '16px',
-                            marginBottom: '8px'
-                          }}
-                        >
-                          {getDisplayUsername(partner)}
-                        </Title>
-                        <div
-                          className={styles.partnerCity}
-                          style={{
-                            color: '#ffffff !important',
-                            background: 'linear-gradient(135deg, #6435a5 0%, #5629a0 100%)',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            marginBottom: '8px',
-                            display: 'inline-block'
-                          }}
-                        >
-                          {partner.city}
+                      <div className={styles.partnerInfo}>
+                        <div className={styles.partnerNameRow}>
+                          <div className={styles.partnerAvatar}>
+                            {getDisplayUsername(partner).split(' ').map(w => w[0]).join('').slice(0, 2)}
+                          </div>
+                          <div className={styles.partnerNameText}>
+                            <Text className={styles.partnerName}>{getDisplayUsername(partner)}</Text>
+                            <Text className={styles.partnerCity}>{partner.city}</Text>
+                          </div>
                         </div>
-                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                          <div className={styles.partnerStat} style={{ color: '#374151' }}>
-                            <span className={styles.partnerStatIcon} style={{ color: '#6435a5' }}>
-                              <UserOutlined />
-                            </span>
-                            <span style={{ color: '#374151' }}>Рефералов: </span>
-                            <span
-                              className={styles.partnerStatValue}
-                              style={{ color: '#1f2937', fontWeight: 600 }}
-                            >
-                              {partner.total_referrals}
-                            </span>
+                        <div className={styles.partnerStats}>
+                          <div className={styles.partnerStat}>
+                            <UserOutlined className={styles.partnerStatIcon} />
+                            <Text className={styles.partnerStatLabel}>Рефералов</Text>
+                            <Text className={styles.partnerStatValue}>{partner.total_referrals}</Text>
                           </div>
-                          <div className={styles.partnerStat} style={{ color: '#374151' }}>
-                            <span className={styles.partnerStatIcon} style={{ color: '#6435a5' }}>
-                              <UserOutlined />
-                            </span>
-                            <span style={{ color: '#374151' }}>Активных: </span>
-                            <span
-                              className={styles.partnerStatValue}
-                              style={{ color: '#1f2937', fontWeight: 600 }}
-                            >
-                              {partner.active_referrals}
-                            </span>
+                          <div className={styles.partnerStat}>
+                            <UserOutlined className={styles.partnerStatIcon} />
+                            <Text className={styles.partnerStatLabel}>Активных</Text>
+                            <Text className={styles.partnerStatValue}>{partner.active_referrals}</Text>
                           </div>
-                          <div
-                            className={styles.partnerEarnings}
-                            style={{
-                              color: '#ffffff !important',
-                              background: 'linear-gradient(135deg, #6435a5 0%, #5629a0 100%)',
-                              padding: '8px 16px',
-                              borderRadius: '4px',
-                              textAlign: 'center',
-                              marginTop: '8px'
-                            }}
-                          >
-                            {partner.total_earnings.toLocaleString('ru-RU')} ₽
-                          </div>
-                          {partner.error && (
-                            <Text type="danger" className={styles.errorText}>
-                              {partner.error}
-                            </Text>
-                          )}
-                        </Space>
+                        </div>
+                        <div className={styles.partnerEarnings}>
+                          {partner.total_earnings.toLocaleString('ru-RU')} ₽
+                        </div>
+                        {partner.error && (
+                          <Text type="danger" className={styles.partnerError}>{partner.error}</Text>
+                        )}
                       </div>
                     </Card>
                   ))

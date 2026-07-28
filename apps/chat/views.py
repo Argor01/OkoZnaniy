@@ -371,18 +371,24 @@ class ChatViewSet(viewsets.ModelViewSet):
             message_serializer = MessageSerializer(message, context={'request': request})
             notify_chat_message(chat.id, message_serializer.data)
 
-            # РЈРІРµРґРѕРјР»СЏРµРј РІСЃРµС… СѓС‡Р°СЃС‚РЅРёРєРѕРІ С‡Р°С‚Р° С‡РµСЂРµР· РїРµСЂСЃРѕРЅР°Р»СЊРЅС‹Рµ СѓРІРµРґРѕРјР»РµРЅРёСЏ
+            # Уведомляем участников чата через персональные уведомления (создаёт DB + WS)
             for participant in chat.participants.exclude(id=request.user.id):
-                from .websocket_utils import notify_new_notification
-                notify_new_notification(
-                    participant.id,
-                    {
-                        'id': message.id,
+                sender_name = request.user.get_full_name() or request.user.username
+                chat_label = f"по заказу №{chat.order.id}" if chat.order else "в чате"
+                text_preview = (message.text or '')[:100]
+                safe_call(
+                    NotificationService.create_notification,
+                    recipient=participant,
+                    type=NotificationType.NEW_MESSAGE,
+                    title=f"Новое сообщение {chat_label}",
+                    message=f"{sender_name}: {text_preview}",
+                    related_object_id=chat.id,
+                    related_object_type='chat',
+                    data={
                         'chat_id': chat.id,
-                        'sender': request.user.username,
-                        'text': (message.text or '')[:100],
-                        'created_at': message.created_at.isoformat(),
-                    }
+                        'message_id': message.id,
+                        'sender_id': request.user.id,
+                    },
                 )
         except Exception:
             pass

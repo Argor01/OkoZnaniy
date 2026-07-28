@@ -446,8 +446,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [selectedChat?.id, computedOrderIds, orderIdsByChatId]);
 
   const prevAcceptedOrderIdsRef = useRef<number[]>([]);
+  const skipNextOrderIdSyncRef = useRef(false);
   useEffect(() => {
     if (!visible) return;
+    if (skipNextOrderIdSyncRef.current) {
+      skipNextOrderIdSyncRef.current = false;
+      return;
+    }
     prevAcceptedOrderIdsRef.current = orderIdsForTabs;
     const chatOrderId = toPositiveNumber(selectedChat?.order_id);
     setActiveOrderId(chatOrderId);
@@ -997,6 +1002,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
           
           if (orderIdFromAcceptedOffer) {
             logger.log('🔧 Found order_id from accepted offer:', orderIdFromAcceptedOffer);
+            skipNextOrderIdSyncRef.current = true;
             setActiveOrderId(orderIdFromAcceptedOffer);
             setOrderPanelOpen(true);
           } else if (!toPositiveNumber(chatData.order_id)) {

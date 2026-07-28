@@ -7,7 +7,6 @@ import {
   Space, 
   Typography, 
   Input,
-  InputNumber,
   Modal,
   message,
   Tooltip,
@@ -30,7 +29,7 @@ import {
 import dayjs from 'dayjs';
 import styles from './DirectorChatsSection.module.css';
 import { logger } from '@/utils/logger';
-import { createChatRoom, getChatRoomMessages, getChatRooms, sendChatRoomMessage } from '@/features/director/api/directorApi';
+import { createChatRoom, getChatRoomMessages, getChatRooms, sendChatRoomMessage, inviteToChatRoom, updateChatRoom, getDirectorUsers } from '@/features/director/api/directorApi';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -89,9 +88,13 @@ export const DirectorChatsSection: React.FC = () => {
   
   const [createRoomModalVisible, setCreateRoomModalVisible] = useState(false);
   const [inviteUserModalVisible, setInviteUserModalVisible] = useState(false);
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   
   const [createRoomForm] = Form.useForm();
   const [inviteUserForm] = Form.useForm();
+  const [settingsForm] = Form.useForm();
 
   // Загрузка чатов
   useEffect(() => {
@@ -182,12 +185,56 @@ export const DirectorChatsSection: React.FC = () => {
   const handleInviteUser = async () => {
     try {
       const values = await inviteUserForm.validateFields();
-      // TODO: Implement API call
-      message.success('Пользователь приглашен');
+      if (!selectedRoom) return;
+      setInviteLoading(true);
+      await inviteToChatRoom(selectedRoom.id, values.userId);
+      message.success('Пользователь приглашён');
       setInviteUserModalVisible(false);
       inviteUserForm.resetFields();
+      await loadChatRooms();
+      const updated = (Array.isArray(chatRooms) ? chatRooms : []).find(r => r.id === selectedRoom.id);
+      if (updated) setSelectedRoom(updated);
     } catch (error) {
-      logger.error('Validation failed:', error);
+      logger.error('Error inviting user:', error);
+      message.error('Ошибка при приглашении');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const loadUsersForInvite = async () => {
+    try {
+      const users = await getDirectorUsers();
+      setAllUsers(Array.isArray(users) ? users : []);
+    } catch (error) {
+      logger.error('Error loading users:', error);
+    }
+  };
+
+  const handleOpenInvite = () => {
+    setInviteUserModalVisible(true);
+    loadUsersForInvite();
+  };
+
+  const handleOpenSettings = () => {
+    if (selectedRoom) {
+      settingsForm.setFieldsValue({ name: selectedRoom.name, description: selectedRoom.description || '' });
+    }
+    setSettingsModalVisible(true);
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      const values = await settingsForm.validateFields();
+      if (!selectedRoom) return;
+      await updateChatRoom(selectedRoom.id, values);
+      message.success('Настройки сохранены');
+      setSettingsModalVisible(false);
+      await loadChatRooms();
+      setSelectedRoom(prev => prev ? { ...prev, ...values } : null);
+    } catch (error) {
+      logger.error('Error updating chat room:', error);
+      message.error('Ошибка сохранения');
     }
   };
 
@@ -354,13 +401,14 @@ export const DirectorChatsSection: React.FC = () => {
                 <Button 
                   size="small" 
                   icon={<TeamOutlined />}
-                  onClick={() => setInviteUserModalVisible(true)}
+                  onClick={handleOpenInvite}
                 />
               </Tooltip>
               <Tooltip title="Настройки">
                 <Button 
                   size="small" 
                   icon={<SettingOutlined />}
+                  onClick={handleOpenSettings}
                 />
               </Tooltip>
             </Space>
@@ -545,14 +593,46 @@ export const DirectorChatsSection: React.FC = () => {
         }}
         okText="Пригласить"
         cancelText="Отмена"
+        confirmLoading={inviteLoading}
       >
         <Form form={inviteUserForm} layout="vertical">
           <Form.Item
             name="userId"
-            label="ID Пользователя"
-            rules={[{ required: true, message: 'Введите ID пользователя' }]}
+            label="Пользователь"
+            rules={[{ required: true, message: 'Выберите пользователя' }]}
           >
-            <InputNumber style={{ width: '100%' }} min={1} placeholder="ID" />
+            <Select
+              showSearch
+              optionFilterProp="label"
+              placeholder="Найти по имени или почте"
+              loading={allUsers.length === 0}
+              options={allUsers.map((u: any) => ({
+                value: u.id,
+                label: `${u.first_name || ''} ${u.last_name || ''} (${u.email})`.trim(),
+              }))}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Настройки чата"
+        open={settingsModalVisible}
+        onOk={handleSaveSettings}
+        onCancel={() => setSettingsModalVisible(false)}
+        okText="Сохранить"
+        cancelText="Отмена"
+      >
+        <Form form={settingsForm} layout="vertical">
+          <Form.Item
+            name="name"
+            label="Название"
+            rules={[{ required: true, message: 'Введите название' }]}
+          >
+            <Input placeholder="Название чата" />
+          </Form.Item>
+          <Form.Item name="description" label="Описание">
+            <Input.TextArea placeholder="Описание чата" />
           </Form.Item>
         </Form>
       </Modal>

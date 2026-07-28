@@ -28,7 +28,7 @@
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 380px;
   gap: var(--spacing-lg);
   min-height: 600px;
 }
@@ -50,7 +50,7 @@
   background: var(--color-bg-container, #ffffff);
 }
 
-.mapCard .ant-card-body {
+.mapCard :global(.ant-card-body) {
   flex: 1;
   padding: var(--spacing-md);
   display: flex;
@@ -126,6 +126,19 @@
   border-radius: 50%;
 }
 
+.markerDot::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid #ef4444;
+  border-radius: 50%;
+  opacity: 0;
+  animation: pulse 2s infinite;
+}
+
 .marker:hover .markerDot {
   width: 18px;
   height: 18px;
@@ -184,25 +197,16 @@
   background: var(--color-bg-container, #ffffff);
 }
 
-.partnersCard .ant-card-body {
+.partnersCard :global(.ant-card-body) {
   flex: 1;
   padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-.partnersCard .ant-card-head {
+.partnersCard :global(.ant-card-head) {
   border-bottom: 1px solid var(--color-grey-300);
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  padding: var(--spacing-md) var(--spacing-lg);
-}
-
-.partnersCard .ant-card-head-title {
-  color: #ffffff !important;
-  font-weight: 600;
-  font-size: 18px;
-  font-family: var(--font-family-display);
 }
 
 .partnersList {
@@ -210,177 +214,123 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--spacing-sm);
   padding: var(--spacing-sm);
-  max-height: 500px;
-  background: var(--color-grey-100);
-  border-radius: var(--radius-sm);
-  margin: var(--spacing-sm);
-}
-
-/* Отладочные стили для видимости карточек */
-.partnersList .partnerCard {
-  background: var(--color-bg-container, #ffffff) !important;
-  border: 2px solid var(--color-brand-blue-500) !important;
-  min-height: 120px !important;
-}
-
-.partnersList .partnerInfo {
-  background: var(--color-bg-container, #ffffff) !important;
-  padding: var(--spacing-md) !important;
+  max-height: 560px;
 }
 
 /* ===== КАРТОЧКИ ПАРТНЕРОВ ===== */
 .partnerCard {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--color-grey-300);
   border-radius: var(--radius-md);
+  border: 1px solid var(--color-grey-300);
   background: var(--color-bg-container, #ffffff);
-  box-shadow: var(--shadow-card);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: var(--spacing-sm);
-  border-left: 4px solid var(--color-grey-300);
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .partnerCard:hover {
-  border-left-color: var(--color-brand-blue-500);
   border-color: var(--color-brand-blue-500);
-  transform: translateX(4px);
-  box-shadow: 0 8px 25px rgba(43, 159, 230, 0.15);
-  background: var(--gradient-card, linear-gradient(135deg, #ffffff 0%, #f8faff 100%));
+  box-shadow: 0 4px 16px rgba(43, 159, 230, 0.12);
 }
 
-.partnerCard:active {
-  transform: translateX(2px) scale(0.98);
-}
-
-.partnerCard .ant-card-body {
+.partnerCard :global(.ant-card-body) {
   padding: 0 !important;
 }
 
 .partnerInfo {
   padding: var(--spacing-md);
-  background: var(--color-bg-container, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
 }
 
-.partnerName {
-  margin-bottom: var(--spacing-sm) !important;
-  color: var(--color-grey-900) !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
-  font-family: var(--font-family-display) !important;
+.partnerNameRow {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: 0 4px;
 }
 
-.partnerName::before {
-  content: '';
-  width: 16px;
-  height: 16px;
-  background: var(--color-brand-blue-500);
+.partnerAvatar {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  display: inline-block;
+  background: var(--color-brand-purple-500, #7c3aed);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
   flex-shrink: 0;
+}
+
+.partnerNameText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.partnerName {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--color-grey-900) !important;
+  line-height: 1.3;
 }
 
 .partnerCity {
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%);
-  color: #ffffff !important;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-sm);
-  margin-left: 4px;
-}
-
-.partnerCity::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: var(--color-bg-container, #ffffff);
-  border-radius: 50%;
-  display: inline-block;
-  flex-shrink: 0;
+  font-size: 12px !important;
+  color: var(--color-grey-500) !important;
+  margin: 0 !important;
 }
 
 .partnerStats {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
-  padding: 0 4px;
+  gap: 2px;
 }
 
 .partnerStat {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-xs) 0;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  color: var(--color-grey-600) !important;
-}
-
-.partnerStat:hover {
-  background: var(--color-grey-100);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  margin: 0 calc(-1 * var(--spacing-sm));
-}
-
-.partnerStat span {
-  color: var(--color-grey-600) !important;
+  gap: var(--spacing-xs);
+  font-size: 13px;
+  color: var(--color-grey-600);
+  padding: 2px 0;
 }
 
 .partnerStatIcon {
-  width: 18px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-brand-blue-500) !important;
-  font-size: 14px;
+  color: var(--color-brand-blue-500);
+  font-size: 12px;
   flex-shrink: 0;
+}
+
+.partnerStatLabel {
+  color: var(--color-grey-500) !important;
+  font-size: 13px !important;
 }
 
 .partnerStatValue {
   font-weight: 600 !important;
-  color: var(--color-grey-900) !important;
+  color: var(--color-grey-800) !important;
   margin-left: auto;
+  font-size: 13px !important;
 }
 
 .partnerEarnings {
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%);
-  color: #ffffff !important;
-  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-brand-purple-500, #7c3aed);
+  color: #ffffff;
+  padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: var(--radius-sm);
   font-weight: 600;
+  font-size: 13px;
   text-align: center;
-  margin-top: var(--spacing-sm);
-  margin-left: 4px;
-  margin-right: 4px;
-  box-shadow: var(--shadow-card);
-  font-size: 14px;
+}
+
+.partnerError {
+  font-size: 12px;
 }
 
 /* ===== СОСТОЯНИЯ И УТИЛИТЫ ===== */
-.errorText {
-  font-size: 12px;
-  color: #ef4444;
-  background: #fef2f2;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  border-left: 3px solid #ef4444;
-  margin-top: var(--spacing-xs);
-}
-
 .emptyState {
   display: flex;
   flex-direction: column;
@@ -405,12 +355,11 @@
   font-size: 16px;
   color: var(--color-grey-700);
   margin-bottom: var(--spacing-sm);
-  font-family: var(--font-family-display);
 }
 
 .emptyStateSubtext {
   font-size: 14px;
-  color: var(--color-grey-600);
+  color: var(--color-grey-500);
 }
 
 .loadingContainer {
@@ -428,7 +377,6 @@
 .loadingText {
   font-size: 16px;
   color: var(--color-grey-600);
-  font-family: var(--font-family-display);
 }
 
 .partnerDetails {
@@ -440,116 +388,8 @@
   min-width: 220px;
 }
 
-.citySelect .ant-select-selector {
+.citySelect :global(.ant-select-selector) {
   border-radius: var(--radius-md) !important;
-  border-color: var(--color-grey-300) !important;
-  transition: all 0.3s ease !important;
-}
-
-.citySelect .ant-select-selector:hover {
-  border-color: var(--color-brand-blue-500) !important;
-  box-shadow: 0 0 0 2px rgba(43, 159, 230, 0.1) !important;
-}
-
-.citySelect .ant-select-focused .ant-select-selector {
-  border-color: var(--color-brand-blue-500) !important;
-  box-shadow: 0 0 0 2px rgba(43, 159, 230, 0.1) !important;
-}
-
-.ant-tag {
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border: none;
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%);
-  color: #ffffff;
-}
-
-/* ===== ПЕРЕОПРЕДЕЛЕНИЯ ЦВЕТОВ ТЕКСТА ===== */
-/* Максимально агрессивные переопределения для Ant Design */
-.partnersList .partnerCard .ant-typography,
-.partnersList .partnerCard .ant-typography h5,
-.partnersList .partnerCard .ant-typography-h5,
-.partnersList .partnerCard h5,
-.partnersList .partnerCard .partnerName {
-  color: var(--color-grey-900) !important;
-  font-weight: 600 !important;
-  font-size: 16px !important;
-  font-family: var(--font-family-display) !important;
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-.partnersList .partnerCard .ant-space-item,
-.partnersList .partnerCard span,
-.partnersList .partnerCard .partnerStat span {
-  color: var(--color-grey-600) !important;
-  font-size: 14px !important;
-}
-
-.partnersList .partnerCard .partnerStatValue {
-  color: var(--color-grey-900) !important;
-  font-weight: 600 !important;
-}
-
-.partnersList .partnerCard .partnerCity {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%) !important;
-}
-
-.partnersList .partnerCard .partnerEarnings {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, var(--color-brand-blue-500) 0%, var(--color-brand-blue-600) 100%) !important;
-}
-
-/* Принудительное переопределение для всех текстовых элементов */
-.partnersList .partnerInfo * {
-  visibility: visible !important;
-  opacity: 1 !important;
-  color: var(--color-grey-900) !important;
-}
-
-.partnersList .partnerInfo .ant-typography {
-  color: var(--color-grey-900) !important;
-}
-
-.partnersList .partnerInfo .ant-space .ant-space-item {
-  color: var(--color-grey-600) !important;
-}
-
-/* Дополнительные переопределения для Ant Design */
-.partnersList .ant-card .ant-card-body {
-  padding: 0 !important;
-}
-
-.partnersList .ant-typography-h5 {
-  color: var(--color-grey-900) !important;
-  margin-bottom: var(--spacing-sm) !important;
-}
-
-.partnersList .ant-space {
-  width: 100% !important;
-}
-
-.partnersList .ant-space-item {
-  color: var(--color-grey-600) !important;
-}
-
-/* Еще более агрессивные переопределения */
-.partnersList div,
-.partnersList span,
-.partnersList h1,
-.partnersList h2,
-.partnersList h3,
-.partnersList h4,
-.partnersList h5,
-.partnersList h6,
-.partnersList p {
-  color: var(--color-grey-900) !important;
-}
-
-.partnersList .partnerCity,
-.partnersList .partnerEarnings {
-  color: #ffffff !important;
 }
 
 /* ===== СКРОЛЛБАРЫ ===== */
@@ -558,18 +398,16 @@
 }
 
 .partnersList::-webkit-scrollbar-track {
-  background: var(--color-grey-100);
-  border-radius: var(--radius-sm);
+  background: transparent;
 }
 
 .partnersList::-webkit-scrollbar-thumb {
   background: var(--color-grey-300);
   border-radius: var(--radius-sm);
-  transition: background 0.3s ease;
 }
 
 .partnersList::-webkit-scrollbar-thumb:hover {
-  background: var(--color-grey-600);
+  background: var(--color-grey-500);
 }
 
 .partnersList {
@@ -578,55 +416,9 @@
 }
 
 /* ===== АНИМАЦИИ ===== */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes pulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
-}
-
-.partnerCard {
-  animation: slideInUp 0.3s ease-out;
-}
-
-.markerDot::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border: 2px solid #ef4444;
-  border-radius: 50%;
-  opacity: 0;
-  animation: pulse 2s infinite;
-}
-
-/* ===== ДОСТУПНОСТЬ ===== */
-.partnerCard:focus-visible {
-  outline: 2px solid var(--color-brand-blue-500);
-  outline-offset: 2px;
-}
-
-.marker:focus-visible {
-  outline: 2px solid var(--color-brand-blue-500);
-  outline-offset: 4px;
-  border-radius: 50%;
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
 }
 
 /* ===== РЕСПОНСИВНОСТЬ ===== */
@@ -636,7 +428,7 @@
     gap: var(--spacing-md);
     min-height: auto;
   }
-  
+
   .mapCard,
   .partnersCard {
     min-height: 500px;
@@ -651,27 +443,26 @@
   .container {
     padding: var(--spacing-md);
   }
-  
+
   .header {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
     padding: var(--spacing-lg);
-    padding-top: calc(var(--spacing-lg) + 16px);
   }
-  
+
   .controls {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-sm);
   }
-  
+
   .citySelect {
     min-width: auto;
     width: 100%;
   }
-  
+
   .mapCard,
   .partnersCard {
     min-height: 400px;
@@ -680,25 +471,9 @@
   .partnersList {
     max-height: 300px;
   }
-  
-  .partnerCard {
-    margin-bottom: var(--spacing-xs);
-  }
-  
-  .partnerInfo {
-    padding: var(--spacing-sm);
-  }
 
   .partnerName {
-    font-size: 15px !important;
-  }
-
-  .partnersCard .ant-card-head {
-    padding: var(--spacing-sm) var(--spacing-md);
-  }
-
-  .partnersCard .ant-card-head-title {
-    font-size: 16px;
+    font-size: 13px !important;
   }
 }
 
@@ -706,11 +481,11 @@
   .container {
     padding: var(--spacing-sm);
   }
-  
+
   .header {
     padding: var(--spacing-sm);
   }
-  
+
   .mapCard,
   .partnersCard {
     min-height: 300px;
@@ -719,46 +494,22 @@
   .partnersList {
     max-height: 220px;
   }
-  
+
   .markerDot {
     width: 12px;
     height: 12px;
   }
-  
+
   .marker:hover .markerDot {
     width: 16px;
     height: 16px;
   }
-  
+
   .markerLabel {
     font-size: 10px;
   }
-  
-  .partnerName {
-    font-size: 14px !important;
-  }
 
   .partnerInfo {
-    padding: var(--spacing-xs);
-  }
-}
-
-@media (max-width: 360px) {
-  .container {
-    padding: var(--spacing-xs);
-  }
-  
-  .header {
-    padding: var(--spacing-xs);
-  }
-  
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .citySelect {
-    min-width: auto;
-    width: 100%;
+    padding: var(--spacing-sm);
   }
 }

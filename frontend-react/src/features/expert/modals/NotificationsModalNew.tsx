@@ -58,6 +58,7 @@ const getNotificationIcon = (type: string) => {
     'review_reply': styles.notificationsIconWarning,
     'review_appeal': styles.notificationsIconDanger,
     'complaint_filed': styles.notificationsIconDanger,
+    'new_message': styles.notificationsIconInfo,
   };
   const iconClassName = iconClassMap[type] || styles.notificationsIconMuted;
   const iconMap: Record<string, React.ReactNode> = {
@@ -85,6 +86,7 @@ const getNotificationIcon = (type: string) => {
     'review_reply': <CommentOutlined className={iconClassName} />,
     'review_appeal': <QuestionCircleOutlined className={iconClassName} />,
     'complaint_filed': <QuestionCircleOutlined className={iconClassName} />,
+    'new_message': <CommentOutlined className={iconClassName} />,
   };
   return iconMap[type] || <BellOutlined className={iconClassName} />;
 };
@@ -155,6 +157,7 @@ const resolveNotificationTarget = (notification: Notification): string | null =>
   if (notification.related_object_type === 'specialization') return '/expert?tab=specializations';
   if (notification.related_object_type === 'review') return '/expert?tab=reviews';
   if (notification.related_object_type === 'order') return '/orders-feed';
+  if (notification.related_object_type === 'chat') return '/messages';
 
   if (
     ['new_bid', 'new_order', 'order_taken', 'order_assigned', 'status_changed', 'order_completed', 'payment_received', 'deadline_soon', 'expert_violation'].includes(notification.type)
@@ -428,7 +431,6 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
     }, new Map<string, Notification>()).values()
   );
   const filteredNotifications = dedupedNotifications
-    .filter(notification => !['new_message', 'message', 'chat_message', 'private_message'].includes(notification.type))
     .filter(notification => {
     if (notificationTab === 'all') return true;
     const category = getNotificationCategory(notification.type);

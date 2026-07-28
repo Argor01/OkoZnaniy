@@ -30,6 +30,7 @@ class NotificationType(models.TextChoices):
     REVIEW_REPLY = 'review_reply', 'Ответ на ваш отзыв'
     REVIEW_APPEAL = 'review_appeal', 'Обжалование отзыва'
     ORDER_EXPIRED = 'order_expired', 'Срок заказа истёк'
+    NEW_MESSAGE = 'new_message', 'Новое сообщение'
 
 
 class Notification(models.Model):

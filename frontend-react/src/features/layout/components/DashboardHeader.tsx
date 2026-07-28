@@ -414,6 +414,24 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           
           {isMobile && (
             <>
+              <Badge count={unreadMessages} size="small" offset={[-3, 3]}>
+                <Button
+                  type="text"
+                  icon={<MessageOutlined />}
+                  onClick={onMessagesClick}
+                  className={styles.iconButton}
+                />
+              </Badge>
+
+              <Badge count={unreadNotifications} size="small" offset={[-3, 3]}>
+                <Button
+                  type="text"
+                  icon={<BellOutlined />}
+                  onClick={onNotificationsClick}
+                  className={styles.iconButton}
+                />
+              </Badge>
+
               <WalletBadge compact />
               <ThemeToggle
                 size="middle"
