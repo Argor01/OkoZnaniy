@@ -71,6 +71,24 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const reconnectAttempts = useRef(0);
 
+  const onMessageRef = useRef(onMessage);
+  const onNotificationRef = useRef(onNotification);
+  const onOrderUpdateRef = useRef(onOrderUpdate);
+  const onArbitrationUpdateRef = useRef(onArbitrationUpdate);
+  const onTypingRef = useRef(onTyping);
+  const onConnectRef = useRef(onConnect);
+  const onDisconnectRef = useRef(onDisconnect);
+  const onErrorRef = useRef(onError);
+
+  onMessageRef.current = onMessage;
+  onNotificationRef.current = onNotification;
+  onOrderUpdateRef.current = onOrderUpdate;
+  onArbitrationUpdateRef.current = onArbitrationUpdate;
+  onTypingRef.current = onTyping;
+  onConnectRef.current = onConnect;
+  onDisconnectRef.current = onDisconnect;
+  onErrorRef.current = onError;
+
   const getWebSocketUrl = useCallback((path: string) => {
     const token = localStorage.getItem('access_token');
     const separator = path.includes('?') ? '&' : '?';
@@ -81,34 +99,33 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
   }, []);
 
   const getReconnectDelay = useCallback((attempt: number) => {
-    // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
     return Math.min(1000 * Math.pow(2, attempt), 30000);
   }, []);
 
   const handleEvent = useCallback((event: WSEvent) => {
     switch (event.type) {
       case 'new_message':
-        onMessage?.(event);
+        onMessageRef.current?.(event);
         break;
       case 'typing':
-        onTyping?.(event);
+        onTypingRef.current?.(event);
         break;
       case 'new_notification':
       case 'notification_batch':
-        onNotification?.(event);
+        onNotificationRef.current?.(event);
         break;
       case 'order_status_changed':
       case 'new_bid':
       case 'order_file_uploaded':
-        onOrderUpdate?.(event);
+        onOrderUpdateRef.current?.(event);
         break;
       case 'new_arbitration_message':
       case 'arbitration_status_changed':
       case 'arbitration_activity':
-        onArbitrationUpdate?.(event);
+        onArbitrationUpdateRef.current?.(event);
         break;
     }
-  }, [onMessage, onNotification, onOrderUpdate, onArbitrationUpdate, onTyping]);
+  }, []);
 
   const connect = useCallback(() => {
     if (!enabled) return;
@@ -120,12 +137,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       return;
     }
 
-    // Закрываем существующее соединение
     if (wsRef.current) {
       wsRef.current.close();
     }
 
-    // Подключаемся к уведомлениям (всегда)
     const url = getWebSocketUrl('/ws/notifications/');
     const ws = new WebSocket(url);
 
@@ -133,12 +148,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       logger.log('[WS] Connected');
       setIsConnected(true);
       reconnectAttempts.current = 0;
-      onConnect?.();
+      onConnectRef.current?.();
 
-      // Переподписываемся на все каналы
       subscriptionsRef.current.forEach((key) => {
         const [type, id] = key.split(':');
-        subscribe(type as 'chat' | 'order' | 'arbitration', parseInt(id));
+        sendSubscribe(type as 'chat' | 'order' | 'arbitration', parseInt(id));
       });
     };
 
@@ -154,10 +168,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     ws.onclose = (event) => {
       logger.log('[WS] Disconnected', event.code, event.reason);
       setIsConnected(false);
-      onDisconnect?.();
+      onDisconnectRef.current?.();
 
-      // Автоматическое переподключение
-      if (event.code !== 4001) { // Не переподключаемся при ошибке аутентификации
+      if (event.code !== 4001) {
         const delay = getReconnectDelay(reconnectAttempts.current);
         reconnectAttempts.current += 1;
         logger.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttempts.current})`);
@@ -170,11 +183,11 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
     ws.onerror = (error) => {
       logger.error('[WS] Error:', error);
-      onError?.(error);
+      onErrorRef.current?.(error);
     };
 
     wsRef.current = ws;
-  }, [enabled, getWebSocketUrl, handleEvent, getReconnectDelay, onConnect, onDisconnect, onError]);
+  }, [enabled, getWebSocketUrl, handleEvent, getReconnectDelay]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -188,17 +201,17 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     setIsConnected(false);
   }, []);
 
+  const sendSubscribe = useCallback((type: 'chat' | 'order' | 'arbitration', id: number) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ action: 'subscribe', type, id }));
+    }
+  }, []);
+
   const subscribe = useCallback((type: 'chat' | 'order' | 'arbitration', id: number) => {
     const key = `${type}:${id}`;
     subscriptionsRef.current.add(key);
-
-    // Если соединение активно, переподключаемся для подписки
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      // Закрываем и переподключаемся с новыми подписками
-      disconnect();
-      setTimeout(() => connect(), 100);
-    }
-  }, [disconnect, connect]);
+    sendSubscribe(type, id);
+  }, [sendSubscribe]);
 
   const unsubscribe = useCallback((type: 'chat' | 'order' | 'arbitration', id: number) => {
     const key = `${type}:${id}`;
@@ -214,7 +227,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }
   }, []);
 
-  // Подключение при монтировании
   useEffect(() => {
     if (enabled) {
       connect();

@@ -26,6 +26,8 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
   const [isConnected, setIsConnected] = useState(false);
   const reconnectAttempts = useRef(0);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onNewMessageRef = useRef(onNewMessage);
+  onNewMessageRef.current = onNewMessage;
 
   const connect = useCallback(() => {
     if (!chatId) return;
@@ -54,7 +56,7 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'new_message' && data.data) {
-          onNewMessage?.(data.data);
+          onNewMessageRef.current?.(data.data);
         }
       } catch (e) {
         logger.error('[ChatWS] Error parsing message:', e);
@@ -76,7 +78,7 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
     };
 
     wsRef.current = ws;
-  }, [chatId, onNewMessage]);
+  }, [chatId]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
