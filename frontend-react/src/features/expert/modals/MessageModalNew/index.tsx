@@ -944,6 +944,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [visible, loadChats]);
 
   useEffect(() => {
+    if (!selectedChat?.id) return;
+    const listItem = safeChatList.find((c) => c.id === selectedChat.id);
+    if (!listItem) return;
+    if (listItem.is_frozen === selectedChat.is_frozen && listItem.frozen_reason === selectedChat.frozen_reason) return;
+    setSelectedChat((prev) => prev ? { ...prev, is_frozen: listItem.is_frozen, frozen_reason: listItem.frozen_reason } : prev);
+  }, [safeChatList, selectedChat?.id]);
+
+  useEffect(() => {
     const handleOpenSupportCenter = () => {
       setSupportCenterSelected(true);
       setSelectedChat(null);
