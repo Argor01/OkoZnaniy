@@ -19,7 +19,7 @@ fi
 
 # Останавливаем контейнеры
 echo "🛑 Останавливаем контейнеры..."
-docker-compose down
+docker compose down
 
 if [ $? -ne 0 ]; then
     echo "❌ Ошибка при остановке контейнеров"
@@ -36,7 +36,7 @@ fi
 
 # Пересобираем контейнеры без кеша
 echo "🔨 Пересобираем контейнеры..."
-docker-compose build --no-cache
+docker compose build --no-cache
 
 if [ $? -ne 0 ]; then
     echo "❌ Ошибка при сборке контейнеров"
@@ -45,7 +45,7 @@ fi
 
 # Запускаем контейнеры в фоновом режиме
 echo "🚀 Запускаем контейнеры..."
-docker-compose up -d
+docker compose up -d
 
 if [ $? -ne 0 ]; then
     echo "❌ Ошибка при запуске контейнеров"
@@ -54,7 +54,7 @@ fi
 
 # Убеждаемся что nginx и telegram-bot запущены
 echo "🌐 Проверяем nginx и telegram-bot..."
-docker-compose up -d nginx telegram-bot
+docker compose up -d nginx telegram-bot
 
 # Ждем пока контейнеры запустятся
 echo "⏳ Ожидание запуска контейнеров..."
@@ -62,12 +62,12 @@ sleep 10
 
 # Исправляем права доступа
 echo "🔧 Исправляем права доступа..."
-docker-compose exec -T backend chown -R appuser:appuser /app/media /app/static 2>/dev/null || true
-docker-compose exec -T backend chmod -R 755 /app/media /app/static 2>/dev/null || true
+docker compose exec -T backend chown -R appuser:appuser /app/media /app/static 2>/dev/null || true
+docker compose exec -T backend chmod -R 755 /app/media /app/static 2>/dev/null || true
 
 # Применяем миграции
 echo "🗄️ Применяем миграции базы данных..."
-docker-compose exec -T backend python manage.py migrate
+docker compose exec -T backend python manage.py migrate
 
 if [ $? -ne 0 ]; then
     echo "⚠️ Предупреждение: Ошибка при применении миграций"
@@ -75,22 +75,22 @@ fi
 
 # Собираем статические файлы
 echo "📦 Собираем статические файлы..."
-docker-compose exec -T backend python manage.py collectstatic --noinput 2>/dev/null || true
+docker compose exec -T backend python manage.py collectstatic --noinput 2>/dev/null || true
 
 # Настраиваем Google OAuth
 echo "🔐 Настраиваем Google OAuth..."
-docker-compose exec -T backend python setup_google_oauth.py 2>/dev/null || true
+docker compose exec -T backend python setup_google_oauth.py 2>/dev/null || true
 
 # Заполняем справочники (если они пустые)
 echo "📚 Проверяем справочники..."
-docker-compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
+docker compose exec -T backend python populate_subjects_and_work_types.py 2>/dev/null || true
 
 # Test accounts/data are forbidden in production. To seed a local dev
 # environment, run them manually with DJANGO_ENV=development.
 
 echo "✅ Проект успешно обновлен и перезапущен!"
-echo "📊 Проверьте статус контейнеров: docker-compose ps"
-echo "📝 Просмотр логов: docker-compose logs -f"
+echo "📊 Проверьте статус контейнеров: docker compose ps"
+echo "📝 Просмотр логов: docker compose logs -f"
 echo ""
 echo "🧪 Тестовые аккаунты:"
 echo "   👑 Администраторы:"

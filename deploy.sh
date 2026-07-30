@@ -63,7 +63,7 @@ create_backup() {
     echo "$CURRENT_COMMIT" > "$BACKUP_PATH.commit"
     
     # Экспортируем состояние контейнеров
-    docker-compose ps > "$BACKUP_PATH.containers"
+    docker compose ps > "$BACKUP_PATH.containers"
     
     log_success "Бэкап создан: $BACKUP_NAME (commit: ${CURRENT_COMMIT:0:7})"
     
@@ -97,8 +97,8 @@ rollback() {
     git reset --hard "$BACKUP_COMMIT"
     
     # Пересобираем контейнеры
-    docker-compose build --no-cache
-    docker-compose up -d
+    docker compose build --no-cache
+    docker compose up -d
     
     log_success "Откат выполнен успешно"
 }
@@ -112,13 +112,13 @@ check_health() {
     
     while [ $elapsed -lt $timeout ]; do
         # Проверяем статус контейнеров
-        if docker-compose ps | grep -q "Up"; then
+        if docker compose ps | grep -q "Up"; then
             # Проверяем доступность backend
-            if docker-compose exec -T backend python manage.py check --deploy > /dev/null 2>&1; then
+            if docker compose exec -T backend python manage.py check --deploy > /dev/null 2>&1; then
                 log_success "Backend работает корректно"
                 
                 # Проверяем frontend
-                if docker-compose exec -T frontend nginx -t > /dev/null 2>&1; then
+                if docker compose exec -T frontend nginx -t > /dev/null 2>&1; then
                     log_success "Frontend работает корректно"
                     return 0
                 fi
@@ -171,17 +171,17 @@ apply_migrations() {
     cd "$PROJECT_DIR"
     
     # Проверяем наличие неприменённых миграций
-    PENDING_MIGRATIONS=$(docker-compose exec -T backend python manage.py showmigrations | grep "\[ \]" | wc -l)
+    PENDING_MIGRATIONS=$(docker compose exec -T backend python manage.py showmigrations | grep "\[ \]" | wc -l)
     
     if [ "$PENDING_MIGRATIONS" -gt 0 ]; then
         log "Найдено неприменённых миграций: $PENDING_MIGRATIONS"
         
         # Создаем бэкап базы данных перед миграциями
         log "Создание бэкапа базы данных..."
-        docker-compose exec -T postgres pg_dump -U postgres okoznaniy > "$BACKUP_DIR/db_backup_$(date +'%Y%m%d_%H%M%S').sql"
+        docker compose exec -T postgres pg_dump -U postgres okoznaniy > "$BACKUP_DIR/db_backup_$(date +'%Y%m%d_%H%M%S').sql"
         
         # Применяем миграции
-        if docker-compose exec -T backend python manage.py migrate; then
+        if docker compose exec -T backend python manage.py migrate; then
             log_success "Миграции применены успешно"
         else
             log_error "Ошибка при применении миграций"
@@ -200,7 +200,7 @@ build_frontend() {
     
     cd "$PROJECT_DIR"
     
-    if docker-compose build frontend; then
+    if docker compose build frontend; then
         log_success "Frontend собран успешно"
         return 0
     else
@@ -216,11 +216,11 @@ restart_services() {
     cd "$PROJECT_DIR"
     
     # Останавливаем frontend
-    docker-compose stop frontend
-    docker-compose rm -f frontend
+    docker compose stop frontend
+    docker compose rm -f frontend
     
     # Запускаем все сервисы
-    if docker-compose up -d; then
+    if docker compose up -d; then
         log_success "Сервисы перезапущены"
         return 0
     else
