@@ -219,10 +219,10 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
-        super().save(*args, **kwargs)
         if is_new and self.deadline and self.deadline <= timezone.now():
             from django.core.exceptions import ValidationError
             raise ValidationError({'deadline': 'Дедлайн не может быть в прошлом'})
+        super().save(*args, **kwargs)
 
     def freeze(self, reason: str):
         if self.is_frozen:

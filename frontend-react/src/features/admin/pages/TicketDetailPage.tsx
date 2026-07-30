@@ -254,22 +254,12 @@ export const TicketDetailPage: React.FC = () => {
     if (!ticket) return;
     setSending(true);
     try {
-      const endpoint = ticket.type === 'claim'
-        ? `/api/admin-panel/claims/${ticket.id}/process_refund/`
-        : `/api/admin-panel/support-requests/${ticket.id}/process_refund/`;
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ refund_percentage: refundPercentage }),
+      await apiClient.post(`/admin-panel/claims/${ticket.id}/process_refund/`, {
+        refund_percentage: refundPercentage,
       });
-      if (response.ok) {
-        message.success(`Возврат ${refundPercentage}% оформлен`);
-        setRefundModalVisible(false);
-        doRefetch();
-      } else {
-        message.error('Ошибка при оформлении возврата');
-      }
+      message.success(`Возврат ${refundPercentage}% оформлен`);
+      setRefundModalVisible(false);
+      doRefetch();
     } catch {
       message.error('Ошибка при оформлении возврата');
     } finally {

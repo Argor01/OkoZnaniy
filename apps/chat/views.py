@@ -870,6 +870,13 @@ class ChatViewSet(viewsets.ModelViewSet):
             expert_user = chat.expert or message.sender
 
             with transaction.atomic():
+                message = Message.objects.select_for_update().get(pk=message.pk)
+                offer_data = message.offer_data or {}
+                if not isinstance(offer_data, dict):
+                    return Response({'detail': 'Р СњР ВµР С”Р С•РЎР‚РЎР‚Р ВµР С”РЎвЂљР Р…РЎвЂ№Р Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ Р С—РЎР‚Р ВµР Т‘Р В»Р С•Р В¶Р ВµР Р…Р С‘РЎРЏ'}, status=status.HTTP_400_BAD_REQUEST)
+                if offer_data.get('status', 'new') != 'new':
+                    return Response({'detail': 'Р СџРЎР‚Р ВµР Т‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ РЎС“Р В¶Р Вµ Р С•Р В±РЎР‚Р В°Р В±Р С•РЎвЂљР В°Р Р…Р С•'}, status=status.HTTP_400_BAD_REQUEST)
+
                 order = Order.objects.create(
                     client=client_user,
                     expert=expert_user,
@@ -953,15 +960,18 @@ class ChatViewSet(viewsets.ModelViewSet):
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
             
-        message = get_object_or_404(Message, id=message_id, chat=chat)
-        
-        if message.message_type != 'offer':
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј'}, status=status.HTTP_400_BAD_REQUEST)
-            
-        offer_data = message.offer_data or {}
-        offer_data['status'] = 'rejected'
-        message.offer_data = offer_data
-        message.save()
+        with transaction.atomic():
+            message = get_object_or_404(Message.objects.select_for_update(), id=message_id, chat=chat)
+
+            if message.message_type != 'offer':
+                return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј'}, status=status.HTTP_400_BAD_REQUEST)
+
+            offer_data = message.offer_data or {}
+            if offer_data.get('status', 'new') != 'new':
+                return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            offer_data['status'] = 'rejected'
+            message.offer_data = offer_data
+            message.save(update_fields=['offer_data'])
         
         return Response({'status': 'success'})
 
@@ -999,7 +1009,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
         
         # РћС‚РјРµС‡Р°РµРј РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ
-        readable_messages_for_chat(chat).exclude(sender=request.user).update(is_read=False)
+        readable_messages_for_chat(chat).exclude(sender=request.user).exclude(message_type='system').update(is_read=False)
         
         return Response({'status': 'success'})
 

@@ -813,3 +813,224 @@ html[data-theme="dark"] .ant-message-warning .anticon,
 [data-theme="dark"] .register-checkbox-label a:hover {
   color: #8b5cf6;
 }
+
+/* ===== STAGE 4: UI hardening for dark theme and mobile adaptive ===== */
+html[data-theme="dark"] .ant-modal-confirm .ant-modal-content,
+html[data-theme="dark"] .ant-popconfirm .ant-popover-inner,
+html[data-theme="dark"] .ant-popover .ant-popover-inner,
+html[data-theme="dark"] .ant-dropdown .ant-dropdown-menu,
+html[data-theme="dark"] .ant-picker-dropdown .ant-picker-panel-container,
+html[data-theme="dark"] .ant-select-dropdown {
+  background: #1a1f2d !important;
+  border: 1px solid #30384d !important;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.42) !important;
+  color: #f8fafc !important;
+}
+
+html[data-theme="dark"] .ant-modal-confirm-title,
+html[data-theme="dark"] .ant-modal-confirm-content,
+html[data-theme="dark"] .ant-popconfirm-title,
+html[data-theme="dark"] .ant-popconfirm-description,
+html[data-theme="dark"] .ant-popover-title,
+html[data-theme="dark"] .ant-popover-inner-content,
+html[data-theme="dark"] .ant-dropdown-menu-title-content,
+html[data-theme="dark"] .ant-select-item,
+html[data-theme="dark"] .ant-picker-content th,
+html[data-theme="dark"] .ant-picker-cell,
+html[data-theme="dark"] .ant-picker-header,
+html[data-theme="dark"] .ant-picker-header button {
+  color: #e5e7eb !important;
+}
+
+html[data-theme="dark"] .ant-modal-confirm-content,
+html[data-theme="dark"] .ant-popconfirm-description {
+  color: #b8c2d6 !important;
+}
+
+html[data-theme="dark"] .ant-modal-confirm-btns,
+html[data-theme="dark"] .ant-popconfirm-buttons {
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .ant-notification-notice,
+html[data-theme="dark"] .ant-message-notice-content {
+  background: linear-gradient(135deg, #202638 0%, #171b27 100%) !important;
+  border: 1px solid #30384d !important;
+  color: #f8fafc !important;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42) !important;
+}
+
+html[data-theme="dark"] .ant-notification-notice-message,
+html[data-theme="dark"] .ant-notification-notice-description,
+html[data-theme="dark"] .ant-message-notice-content span {
+  color: #f8fafc !important;
+}
+
+.ant-card,
+.ant-list-item,
+.ant-table-cell,
+.ant-modal,
+.ant-modal-content,
+.ant-descriptions,
+.ant-form-item,
+.ant-typography,
+.ant-btn,
+.ant-tag,
+.ant-badge,
+.ant-space,
+.ant-select,
+.ant-picker,
+.ant-input-affix-wrapper,
+.ant-input-group-wrapper {
+  min-width: 0;
+}
+
+.ant-table-cell,
+.ant-card,
+.ant-list-item,
+.ant-descriptions-item-content,
+.ant-modal-body,
+.ant-typography,
+.ant-tag {
+  overflow-wrap: anywhere;
+}
+
+.ant-btn,
+.ant-tag,
+.ant-typography,
+.ant-select-selection-item,
+.ant-select-selection-placeholder {
+  max-width: 100%;
+}
+
+.ant-modal-footer {
+  display: flex !important;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
+.ant-modal-footer::before,
+.ant-modal-footer::after {
+  display: none !important;
+}
+
+@media (max-width: 575px) {
+  body .ant-modal-root .ant-modal-wrap {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: var(--app-vh, 100dvh) !important;
+    padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal {
+    position: relative !important;
+    inset: auto !important;
+    width: min(100%, calc(100vw - 20px)) !important;
+    max-width: calc(100vw - 20px) !important;
+    height: auto !important;
+    max-height: calc(var(--app-vh, 100dvh) - 20px) !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content {
+    width: 100% !important;
+    height: auto !important;
+    max-height: calc(var(--app-vh, 100dvh) - 20px) !important;
+    min-height: 0 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-body {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    max-height: calc(var(--app-vh, 100dvh) - 150px) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 16px !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-header {
+    padding: 16px 18px 12px !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer {
+    padding: 12px 16px 16px !important;
+    justify-content: stretch;
+  }
+
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer .ant-btn {
+    flex: 1 1 140px;
+    min-height: 44px;
+    margin-inline-start: 0 !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap.chatModalWrap,
+  body .ant-modal-root .ant-modal-wrap.chatModalWrapMobile {
+    padding: 0 !important;
+    align-items: stretch;
+  }
+
+  body .ant-modal-root .ant-modal-wrap.chatModalWrap .ant-modal,
+  body .ant-modal-root .ant-modal-wrap.chatModalWrapMobile .ant-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    max-height: none !important;
+  }
+
+  body .ant-modal-root .ant-modal-wrap.chatModalWrap .ant-modal .ant-modal-content,
+  body .ant-modal-root .ant-modal-wrap.chatModalWrapMobile .ant-modal .ant-modal-content {
+    height: 100% !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+  }
+
+  .ant-input-search,
+  .ant-input-group-wrapper,
+  .ant-input-wrapper,
+  .ant-input-group,
+  .ant-input-affix-wrapper,
+  .ant-input,
+  .ant-select,
+  .ant-picker,
+  .ant-input-number,
+  .ant-segmented {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .ant-space {
+    max-width: 100%;
+  }
+
+  .ant-space.ant-space-horizontal {
+    flex-wrap: wrap;
+  }
+
+  .ant-table-wrapper,
+  .ant-table-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 430px) {
+  body .ant-modal-root .ant-modal-wrap .ant-modal .ant-modal-content .ant-modal-footer .ant-btn {
+    flex-basis: 100%;
+    width: 100%;
+  }
+}

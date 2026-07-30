@@ -104,6 +104,45 @@ class AcceptOfferRegressionTests(TestCase):
         self.offer_message.refresh_from_db()
         self.assertEqual(self.offer_message.offer_data.get("status"), "accepted")
 
+    def test_client_cannot_accept_same_offer_twice(self):
+        WalletService.topup(self.client_user, 3000)
+        self.api_client.force_authenticate(user=self.client_user)
+
+        first_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": self.offer_message.id},
+            format="json",
+        )
+        second_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": self.offer_message.id},
+            format="json",
+        )
+
+        self.assertEqual(first_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(second_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Order.objects.filter(description="Test offer for regression").count(), 1)
+
+    def test_accepted_offer_cannot_be_rejected_afterwards(self):
+        WalletService.topup(self.client_user, 1500)
+        self.api_client.force_authenticate(user=self.client_user)
+
+        accept_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": self.offer_message.id},
+            format="json",
+        )
+        reject_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/reject_offer/",
+            {"message_id": self.offer_message.id},
+            format="json",
+        )
+
+        self.assertEqual(accept_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(reject_response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.offer_message.refresh_from_db()
+        self.assertEqual(self.offer_message.offer_data.get("status"), "accepted")
+
     def test_client_cannot_accept_individual_offer_without_wallet_funds(self):
         self.api_client.force_authenticate(user=self.client_user)
 
@@ -218,6 +257,11 @@ class ChatConversationRoutingTests(TestCase):
         count_response = self.api_client.get("/api/chat/chats/unread_count/")
         self.assertEqual(count_response.status_code, status.HTTP_200_OK)
         self.assertEqual(count_response.json()["unread_count"], 0)
+
+        Message.objects.filter(chat=chat, message_type="system").update(is_read=True)
+        mark_response = self.api_client.post(f"/api/chat/chats/{chat.id}/mark_as_unread/")
+        self.assertEqual(mark_response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Message.objects.filter(chat=chat, message_type="system", is_read=False).exists())
 
         Message.objects.filter(pk=hidden_message.pk).update(is_read=True)
         mark_response = self.api_client.post(f"/api/chat/chats/{self.direct_chat.id}/mark_as_unread/")

@@ -160,6 +160,32 @@
     border-radius: 14px !important;
   }
 
+  .filtersRow :global(.ant-input-search .ant-input-wrapper) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 52px !important;
+    align-items: center;
+    height: 52px;
+  }
+
+  .filtersRow :global(.ant-input-search .ant-input-group) {
+    display: contents !important;
+  }
+
+  .filtersRow :global(.ant-input-affix-wrapper) {
+    width: 100% !important;
+    height: 52px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .filtersRow :global(.ant-input-affix-wrapper-focused),
+  .filtersRow :global(.ant-input-affix-wrapper:focus),
+  .filtersRow :global(.ant-input-affix-wrapper:focus-within) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .filtersRow :global(.ant-input),
   .filtersRow :global(.ant-select-selection-placeholder),
   .filtersRow :global(.ant-select-selection-item) {
@@ -175,15 +201,20 @@
   }
 
   .filtersRow :global(.ant-input-group-addon) {
-    width: 52px;
+    width: 52px !important;
+    min-width: 52px !important;
     flex: 0 0 52px;
+    border: 0 !important;
+    background: transparent !important;
   }
 
   .filtersRow :global(.ant-input-search-button) {
-    border-top: 0 !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 52px !important;
+    border: 0 !important;
     border-radius: 0 !important;
+    background: transparent !important;
   }
 
   .articleCard {
@@ -233,6 +264,20 @@
 }
 
 @media (max-width: 480px) {
+  .knowledgeSection {
+    padding-inline: 2px;
+  }
+
+  .knowledgeSection :global(.ant-tabs-nav-list) {
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .knowledgeSection :global(.ant-tabs-tab) {
+    flex: 0 0 auto;
+    padding-inline: 2px;
+  }
+
   .articleCardInner {
     grid-template-columns: 1fr;
   }

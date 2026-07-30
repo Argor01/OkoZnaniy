@@ -329,6 +329,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class ExpertApplicationSerializer(serializers.Serializer):
     """Serializer для заявки на эксперта"""
+    first_name = serializers.CharField(required=True, max_length=150)
+    last_name = serializers.CharField(required=True, max_length=150)
     bio = serializers.CharField(required=True)
     experience_years = serializers.IntegerField(required=True)
     hourly_rate = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)

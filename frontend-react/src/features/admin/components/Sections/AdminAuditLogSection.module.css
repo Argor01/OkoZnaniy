@@ -186,6 +186,13 @@
     background: transparent !important;
   }
 
+  .auditFilters :global(.ant-input-affix-wrapper-focused),
+  .auditFilters :global(.ant-input-affix-wrapper:focus),
+  .auditFilters :global(.ant-input-affix-wrapper:focus-within) {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
   .auditFilters :global(.ant-input-group-addon) {
     width: 52px !important;
     min-width: 52px !important;
@@ -198,5 +205,36 @@
     min-width: 52px !important;
     height: 52px !important;
     border: 0 !important;
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .auditCard :global(.ant-card-body) {
+    padding: 14px 12px !important;
+  }
+
+  .auditHeader :global(h4.ant-typography) {
+    font-size: 20px !important;
+  }
+
+  .auditHeader :global(.ant-typography-secondary) {
+    font-size: 14px !important;
+  }
+
+  .auditFilters :global(.ant-input-search .ant-input-wrapper),
+  .auditFilters :global(.ant-select-selector) {
+    min-height: 48px !important;
+    height: 48px !important;
+  }
+
+  .auditFilters :global(.ant-input-affix-wrapper),
+  .auditFilters :global(.ant-input-search-button) {
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+
+  .auditTable :global(.ant-table) {
+    min-width: 560px;
   }
 }

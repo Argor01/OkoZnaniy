@@ -875,7 +875,7 @@ class ClaimViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         # Администраторы видят все претензии
-        if user.role == 'admin':
+        if is_support_staff(user):
             status_filter = self.request.query_params.get('status')
             if status_filter:
                 queryset = queryset.filter(status=status_filter)

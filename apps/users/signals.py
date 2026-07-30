@@ -27,7 +27,10 @@ def create_partner_earning_on_order_completion(sender, instance, created, **kwar
     if existing_earning:
         return
 
-    order_amount = Decimal(str(instance.budget))
+    order_amount = instance.final_price if instance.final_price is not None else instance.budget
+    order_amount = Decimal(str(order_amount or '0')).quantize(Decimal('0.01'))
+    if order_amount <= 0:
+        return
     commission_rate = partner.partner_commission_rate / 100
     earning_amount = order_amount * commission_rate
 

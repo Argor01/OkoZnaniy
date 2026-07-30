@@ -168,12 +168,12 @@ export const getDisplayUsername = (user: {
 }): string => {
   const displayUsername = user.display_username?.trim();
   if (displayUsername) {
-    return displayUsername;
+    return displayUsername.replace(/^@+/, '');
   }
 
   const username = user.username?.trim();
   if (username && !isEmailLike(username)) {
-    return username;
+    return username.replace(/^@+/, '');
   }
 
   return `user${getStableAnonymousNumber(user)}`;

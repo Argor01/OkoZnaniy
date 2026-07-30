@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings as dj_settings
 
 from django.utils import timezone
+from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -144,19 +145,20 @@ class WalletViewSet(viewsets.ViewSet):
         digits = ser.validated_data['card_number']
         masked = '**** **** **** ' + digits[-4:]
         try:
-            tx = WalletService.withdraw(
-                request.user, amount,
-                description=f'Вывод на карту {masked}',
-            )
+            with transaction.atomic():
+                tx = WalletService.withdraw(
+                    request.user, amount,
+                    description=f'Вывод на карту {masked}',
+                )
+                wr = WithdrawalRequest.objects.create(
+                    user=request.user, amount=amount, card_number=masked,
+                    status=WithdrawalRequest.Status.PENDING, transaction=tx,
+                )
         except InsufficientFunds as e:
             return Response({'detail': 'Недостаточно доступных средств'},
                             status=status.HTTP_400_BAD_REQUEST)
         except ValueError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        wr = WithdrawalRequest.objects.create(
-            user=request.user, amount=amount, card_number=masked,
-            status=WithdrawalRequest.Status.PENDING, transaction=tx,
-        )
         data = WalletService.get_balance(request.user)
         return Response({
             'withdrawal_id': wr.id,

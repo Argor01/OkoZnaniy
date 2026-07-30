@@ -92,6 +92,70 @@ def _order_payment_amount(order):
     return amount.quantize(Decimal('0.01'))
 
 
+def _approve_review_order_atomically(order, user):
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        if locked_order.client_id != user.id:
+            raise PermissionDenied('Недостаточно прав.')
+        if locked_order.status != 'review':
+            raise ValueError('Принять можно только заказ на проверке.')
+        if not _is_order_action_allowed(locked_order, user, 'can_approve_work'):
+            raise ValueError('Действие недоступно для текущего состояния заказа.')
+
+        payment_amount = _order_payment_amount(locked_order)
+        active_hold = _active_order_hold(locked_order)
+        has_direct_payment = Transaction.objects.filter(
+            order=locked_order,
+            user=locked_order.client,
+            type=TransactionType.PURCHASE,
+        ).exists()
+        if payment_amount > 0 and active_hold < payment_amount and not has_direct_payment:
+            raise ValueError('Средства по заказу не зарезервированы.')
+
+        _release_order_hold_if_any(locked_order)
+        locked_order.status = 'completed'
+        locked_order.save(update_fields=['status', 'updated_at'])
+        return locked_order
+
+
+def _cancel_overdue_order_atomically(order, user):
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        if locked_order.client_id != user.id:
+            raise PermissionDenied('Недостаточно прав.')
+        if not locked_order.expert_id:
+            raise ValueError('У заказа нет назначенного эксперта.')
+        if locked_order.status not in ['in_progress', 'revision']:
+            raise ValueError('Отменить можно только заказ в работе.')
+        if not locked_order.deadline or locked_order.deadline > timezone.now():
+            raise ValueError('Заказ не просрочен.')
+        if not _is_order_action_allowed(locked_order, user, 'can_cancel_overdue'):
+            raise ValueError('Действие недоступно для текущего состояния заказа.')
+
+        old_status = locked_order.status
+        _refund_order_hold_if_any(locked_order)
+        locked_order.status = 'cancelled'
+        locked_order.save(update_fields=['status', 'updated_at'])
+        return locked_order, old_status
+
+
+def _reject_review_order_atomically(order, user):
+    with transaction.atomic():
+        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        if locked_order.client_id != user.id:
+            raise PermissionDenied('Недостаточно прав.')
+        if locked_order.status != 'review':
+            raise ValueError('Отклонить можно только заказ на проверке.')
+        if not _is_order_action_allowed(locked_order, user, 'can_reject_work'):
+            raise ValueError('Действие недоступно для текущего состояния заказа.')
+
+        old_status = locked_order.status
+        _refund_order_hold_if_any(locked_order)
+        locked_order.status = 'cancelled'
+        locked_order.save(update_fields=['status', 'updated_at'])
+        return locked_order, old_status
+
+
 def _reserve_order_hold_if_needed(order, amount=None):
     amount = amount if amount is not None else _order_payment_amount(order)
     if not isinstance(amount, Decimal):
@@ -471,6 +535,32 @@ class OrderViewSet(viewsets.ModelViewSet):
             return _order_action_unavailable()
 
         try:
+            order, old_status = _cancel_overdue_order_atomically(order, user)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось вернуть резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.expert_id:
+            safe_call(NotificationService.create_notification,
+                recipient=order.expert,
+                type='status_changed',
+                title='Заказ отменён',
+                message=f"Клиент отменил заказ №{order.id} из-за просрочки.",
+                related_object_id=order.id,
+                related_object_type='order',
+                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status})
+            try:
+                from apps.experts.services import ExpertStatisticsService
+                ExpertStatisticsService.update_expert_statistics(order.expert)
+            except Exception:
+                pass
+        return Response(self.get_serializer(order).data)
+
+        try:
             _refund_order_hold_if_any(order)
         except InsufficientFunds:
             return Response(
@@ -705,13 +795,38 @@ class OrderViewSet(viewsets.ModelViewSet):
         if not _is_order_action_allowed(order, user, 'can_approve_work'):
             return _order_action_unavailable()
 
-        payment_amount = _order_payment_amount(order)
-        active_hold = _active_order_hold(order)
-        has_direct_payment = Transaction.objects.filter(
-            order=order,
-            user=order.client,
-            type=TransactionType.PURCHASE,
-        ).exists()
+        try:
+            order = _approve_review_order_atomically(order, user)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось выпустить резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.expert_id:
+            try:
+                from apps.experts.models import ExpertStatistics
+                stats, _ = ExpertStatistics.objects.get_or_create(expert=order.expert)
+                stats.update_statistics()
+            except Exception:
+                pass
+        try:
+            NotificationService.notify_order_completed(order)
+        except Exception:
+            pass
+        return Response(self.get_serializer(order).data)
+
+        with transaction.atomic():
+            order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+            payment_amount = _order_payment_amount(order)
+            active_hold = _active_order_hold(order)
+            has_direct_payment = Transaction.objects.filter(
+                order=order,
+                user=order.client,
+                type=TransactionType.PURCHASE,
+            ).exists()
         if payment_amount > 0 and active_hold < payment_amount and not has_direct_payment:
             return Response(
                 {'detail': 'Средства по заказу не зарезервированы. Принятие работы и завершение заказа недоступны.'},
@@ -804,6 +919,20 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Отклонить можно только из статуса review.'}, status=status.HTTP_400_BAD_REQUEST)
         if not _is_order_action_allowed(order, user, 'can_reject_work'):
             return _order_action_unavailable()
+
+        try:
+            order, old_status = _reject_review_order_atomically(order, user)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Не удалось вернуть резерв по заказу. Проверьте баланс клиента.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if order.expert_id:
+            safe_call(NotificationService.notify_status_changed, order, old_status)
+        return Response(self.get_serializer(order).data)
 
         try:
             _refund_order_hold_if_any(order)

@@ -1670,7 +1670,7 @@ class MeetingRequestViewSet(viewsets.ModelViewSet):
             )
         
         try:
-            director = User.objects.get(id=director_id, role='admin')
+            director = User.objects.get(id=director_id, role='director')
         except User.DoesNotExist:
             return Response(
                 {'error': 'Директор не найден'},
@@ -1708,7 +1708,7 @@ class MeetingRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def approve(self, request, pk=None):
         """Одобрить встречу (только для директора)"""
-        if request.user.role != 'admin':
+        if request.user.role != 'director':
             return Response(
                 {'error': 'Доступно только для директора'},
                 status=status.HTTP_403_FORBIDDEN
@@ -1737,7 +1737,7 @@ class MeetingRequestViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def reject(self, request, pk=None):
         """Отклонить встречу (только для директора)"""
-        if request.user.role != 'admin':
+        if request.user.role != 'director':
             return Response(
                 {'error': 'Доступно только для директора'},
                 status=status.HTTP_403_FORBIDDEN
