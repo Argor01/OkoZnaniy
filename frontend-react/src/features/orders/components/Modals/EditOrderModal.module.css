@@ -333,10 +333,15 @@
   .timeSelectors {
     justify-content: flex-start !important;
     gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .timeFieldWrapper {
+    flex: 1 !important;
   }
 
   .timeSelect {
-    width: 60px !important;
+    width: 100% !important;
   }
 
   .orderFilesGrid {
@@ -421,7 +426,7 @@
   }
 
   .timeSelect {
-    width: 55px !important;
+    width: 100% !important;
   }
 
   .editOrderModalWrap :global(.ant-btn) {

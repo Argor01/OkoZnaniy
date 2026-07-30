@@ -195,7 +195,6 @@
   
   .sectionTitle {
     font-size: 22px;
-    text-align: center;
   }
   
   .worksGrid {
@@ -205,29 +204,6 @@
   
   .workCard {
     max-width: none;
-  }
-  
-  .workCardContent {
-    text-align: center;
-  }
-  
-  .workCardTitle {
-    font-size: 18px;
-    text-align: center;
-  }
-  
-  .workCardPrice {
-    font-size: 16px;
-    text-align: center;
-  }
-  
-  .workCardMeta {
-    justify-content: center;
-    text-align: center;
-  }
-  
-  .workCardActions {
-    justify-content: center;
   }
 }
 

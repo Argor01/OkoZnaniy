@@ -158,6 +158,7 @@
   padding: 12px;
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .filesLabel {
@@ -178,6 +179,7 @@
   transition: all 0.2s;
   max-width: 100%;
   min-width: 0;
+  overflow: hidden;
 }
 
 .fileTag :global(.ant-tag-content) {

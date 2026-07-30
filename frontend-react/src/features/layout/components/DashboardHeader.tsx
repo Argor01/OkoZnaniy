@@ -19,6 +19,7 @@ import {
   AppstoreOutlined,
   SunOutlined,
   MoonOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -432,18 +433,55 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
                 />
               </Badge>
 
-              <WalletBadge compact />
-              <ThemeToggle
-                size="middle"
-                className={`${styles.iconButton} ${styles.themeToggle} ${styles.mobileThemeToggle}`}
-              />
-              <Button
-                type="text"
-                icon={<LogoutOutlined />}
-                onClick={onLogout}
-                className={`${styles.iconButton} ${styles.logoutButton}`}
-                danger
-              />
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'wallet',
+                      label: 'Финансы',
+                      icon: <WalletOutlined />,
+                      onClick: onBalanceClick,
+                    },
+                    { type: 'divider' },
+                    {
+                      key: 'theme',
+                      label: isDark ? 'Светлая тема' : 'Тёмная тема',
+                      icon: isDark ? <SunOutlined /> : <MoonOutlined />,
+                      onClick: toggleTheme,
+                    },
+                    { type: 'divider' },
+                    {
+                      key: 'edit-profile',
+                      label: 'Редактировать профиль',
+                      icon: <EditOutlined />,
+                      onClick: onProfileClick,
+                    },
+                    {
+                      key: 'logout',
+                      label: 'Выход',
+                      icon: <LogoutOutlined />,
+                      danger: true,
+                      onClick: onLogout,
+                    },
+                  ],
+                }}
+                placement="bottomRight"
+                trigger={['click']}
+              >
+                <div className={styles.mobileAvatarButton}>
+                  {userProfile?.avatar ? (
+                    <img
+                      src={userProfile.avatar}
+                      alt=""
+                      className={styles.mobileAvatarImg}
+                    />
+                  ) : (
+                    <div className={styles.mobileAvatarPlaceholder}>
+                      <UserOutlined />
+                    </div>
+                  )}
+                </div>
+              </Dropdown>
             </>
           )}
         </Space>

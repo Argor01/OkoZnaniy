@@ -13,6 +13,7 @@
   right: 0;
   z-index: 1000;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 @media (max-width: 1024px) {
@@ -231,6 +232,11 @@
   font-weight: 600;
   font-size: 16px;
   color: white;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
 }
 
 .balanceIcon {
@@ -554,6 +560,48 @@
     background: rgba(255, 255, 255, 0.9) !important;
     border-radius: 50% !important;
   }
+}
+
+@media (max-width: 380px) {
+  .logoutButtonMobile {
+    display: none !important;
+  }
+}
+
+/* Mobile avatar button */
+.mobileAvatarButton {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.mobileAvatarButton:hover {
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.mobileAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mobileAvatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 16px;
 }
 
 /* ===== DARK THEME ===== */

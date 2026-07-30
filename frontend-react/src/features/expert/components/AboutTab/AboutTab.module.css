@@ -186,7 +186,6 @@
   
   .aboutHighlightItem {
     margin-bottom: 16px;
-    justify-content: center;
   }
   
   .aboutHighlightIcon {
@@ -195,26 +194,22 @@
   
   .aboutHighlightText {
     font-size: 14px;
-    text-align: center;
   }
   
   .aboutSectionTitle {
     font-size: 20px !important;
     margin-bottom: 16px;
-    text-align: center;
   }
   
   .aboutSectionText {
     font-size: 16px;
     line-height: 1.6;
     margin-bottom: 20px;
-    text-align: center;
   }
   
   .aboutSkillsList {
     margin-top: 12px;
     margin-bottom: 20px;
-    justify-content: center;
   }
   
   .aboutSkillTag {
@@ -224,7 +219,6 @@
   
   .aboutPortfolioLink {
     font-size: 14px;
-    justify-content: center;
   }
 }
 

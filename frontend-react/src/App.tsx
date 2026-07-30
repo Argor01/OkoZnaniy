@@ -1,11 +1,11 @@
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConfigProvider, Spin, App as AntApp, theme as antTheme } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
-import './utils/clearAuth'; 
+import './utils/clearAuth';
 import './styles/globals.css';
 
 import { SupportButton } from '@/features/support';
@@ -16,6 +16,28 @@ import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
 
 dayjs.locale('ru');
+
+const BodyStyleCleanup: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const body = document.body;
+    const html = document.documentElement;
+    body.classList.remove('ant-scrolling-effect');
+    body.style.position = '';
+    body.style.top = '';
+    body.style.left = '';
+    body.style.right = '';
+    body.style.width = '';
+    body.style.overflow = '';
+    body.style.touchAction = '';
+    body.style.overscrollBehavior = '';
+    html.style.overflow = '';
+    html.style.overscrollBehavior = '';
+  }, [location.pathname]);
+
+  return null;
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -102,6 +124,7 @@ const ThemedApp: React.FC = () => {
       <AntApp>
         <Router>
           <ScrollToTop />
+          <BodyStyleCleanup />
           <ErrorBoundary>
             <Suspense fallback={
               <div className="fullScreenCenter">
