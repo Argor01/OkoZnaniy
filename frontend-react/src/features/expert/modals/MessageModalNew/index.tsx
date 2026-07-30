@@ -948,6 +948,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     };
   }, [visible, loadChats]);
 
+  const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
+
   useEffect(() => {
     if (!selectedChat?.id) return;
     const listItem = safeChatList.find((c) => c.id === selectedChat.id);
@@ -2026,7 +2028,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
-  const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
   const showChatListLoading = loading && safeChatList.length === 0;
 
   useEffect(() => {
