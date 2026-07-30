@@ -8,6 +8,7 @@
   flex-direction: column;
   position: relative;
   z-index: 1;
+  min-width: 0;
 }
 
 .card :global(.ant-card-body) {
@@ -16,6 +17,7 @@
   flex-direction: column;
   padding: 16px;
   overflow: hidden;
+  min-width: 0;
 }
 
 .card:hover {
@@ -57,6 +59,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .header :global(.ant-tag) {
@@ -78,6 +81,10 @@
   height: auto;
   font-size: 13px;
   color: var(--primary-blue);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rating {
@@ -87,6 +94,10 @@
 .title {
   margin: 0;
   color: var(--text-primary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .description {
@@ -96,6 +107,8 @@
   opacity: 0;
   margin-bottom: 0;
   transition: max-height 0.45s ease, opacity 0.35s ease, margin-bottom 0.35s ease;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .card:hover .description {
@@ -108,6 +121,12 @@
   margin-bottom: 8px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border-color);
+  min-width: 0;
+}
+
+.author :global(.ant-space) {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .meta {
@@ -127,6 +146,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
 }
 
 .price {
@@ -138,6 +158,10 @@
   font-size: 24px;
   color: var(--primary-blue);
   font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 840px) {
@@ -165,6 +189,7 @@
 @media (max-width: 480px) {
   .card {
     max-height: none;
+    text-align: left;
   }
 
   .preview,
@@ -174,6 +199,8 @@
 
   .card :global(.ant-card-body) {
     padding: 12px;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .description {
@@ -184,6 +211,22 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
+    width: 100%;
+    text-align: left;
+  }
+
+  .header,
+  .author,
+  .title,
+  .footer {
+    width: 100%;
+    text-align: left;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .currentPrice {

@@ -333,3 +333,102 @@
   align-items: center;
   justify-content: center;
 }
+
+.arbitrationDetailModal:global(.ant-modal) {
+  max-width: calc(100vw - 24px);
+}
+
+.arbitrationDetailModal :global(.ant-modal-content) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.arbitrationDetailModal :global(.ant-modal-body) {
+  overflow-x: hidden;
+}
+
+.arbitrationDetailModal :global(.ant-space),
+.arbitrationDetailModal :global(.ant-card),
+.arbitrationDetailModal :global(.ant-alert),
+.arbitrationDetailModal :global(.ant-form),
+.arbitrationDetailModal :global(.ant-input),
+.arbitrationDetailModal :global(.ant-input-number),
+.arbitrationDetailModal :global(.ant-slider) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.arbitrationDetailModal :global(.ant-descriptions-view) {
+  overflow-x: auto;
+}
+
+.arbitrationDetailModal :global(.ant-card-body),
+.arbitrationDetailModal :global(.ant-typography) {
+  overflow-wrap: anywhere;
+}
+
+.arbitrationDetailModal :global(.ant-btn) {
+  white-space: normal;
+  height: auto;
+  min-height: 40px;
+}
+
+@media (max-width: 768px) {
+  .arbitrationDetailModal:global(.ant-modal) {
+    top: 8px;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px);
+    margin: 0 auto;
+    padding-bottom: 8px;
+  }
+
+  .arbitrationDetailModal :global(.ant-modal-content) {
+    max-height: calc(100dvh - 16px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .arbitrationDetailModal :global(.ant-modal-header) {
+    flex: 0 0 auto;
+    padding-right: 40px;
+  }
+
+  .arbitrationDetailModal :global(.ant-modal-title) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .arbitrationDetailModal :global(.ant-modal-body) {
+    flex: 1 1 auto;
+    max-height: calc(100dvh - 88px) !important;
+    padding: 12px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .arbitrationDetailModal :global(.ant-card-body) {
+    padding: 12px !important;
+  }
+
+  .arbitrationDetailModal :global(.ant-space) {
+    row-gap: 8px !important;
+  }
+
+  .arbitrationDetailModal :global(.ant-radio-group) {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .arbitrationDetailModal :global(.ant-radio-wrapper) {
+    margin-inline-end: 0;
+  }
+
+  .arbitrationDetailModal :global(.ant-slider-mark-text) {
+    font-size: 10px;
+  }
+
+  .arbitrationDetailModal :global(.ant-btn) {
+    width: 100%;
+  }
+}

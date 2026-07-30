@@ -90,3 +90,40 @@
     font-size: 11px;
   }
 }
+
+:global([data-theme="dark"]) .infoCard {
+  background: #171b27 !important;
+  border-color: #293145 !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22) !important;
+}
+
+:global([data-theme="dark"]) .infoCard:hover {
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.3) !important;
+}
+
+:global([data-theme="dark"]) .infoCard :global(.ant-card-head) {
+  border-bottom-color: #293145;
+  background: #171b27;
+}
+
+:global([data-theme="dark"]) .infoCard :global(.ant-card-head-title),
+:global([data-theme="dark"]) .infoCard :global(.ant-typography),
+:global([data-theme="dark"]) .infoCard :global(.ant-statistic-title),
+:global([data-theme="dark"]) .infoCard :global(.ant-statistic-content) {
+  color: #f8fafc !important;
+}
+
+:global([data-theme="dark"]) .infoCard :global(.ant-typography-secondary),
+:global([data-theme="dark"]) .listItemMeta {
+  color: #a7b0c3 !important;
+}
+
+:global([data-theme="dark"]) .listItem {
+  background: #202638;
+  border-left-color: #8b5cf6;
+}
+
+:global([data-theme="dark"]) .listItem:hover {
+  background: #273047;
+  border-left-color: #b794ff;
+}

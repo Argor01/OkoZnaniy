@@ -277,7 +277,7 @@ const ExpertProfile: React.FC = () => {
                 <div>
                   <Text strong>Telegram:</Text>
                   <br />
-                  <Text>@{expert.telegram_id}</Text>
+                  <Text>{expert.telegram_id}</Text>
                 </div>
               )}
             </div>
@@ -342,7 +342,7 @@ const ExpertProfile: React.FC = () => {
                     />
                     <div>
                       <Text strong className={styles.reviewAuthorName}>
-                        @{getDisplayUsername(review.client)}
+                        {getDisplayUsername(review.client)}
                       </Text>
                       <br />
                       <Text type="secondary" className={styles.reviewAuthorMeta}>

@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons';
 import { Order, OrderFile } from '@/features/orders/types/orders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername } from '@/utils/formatters';
 import { AppButton } from './AppButton';
 import { AppCard } from './AppCard';
 import dayjs from 'dayjs';
@@ -218,12 +218,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             icon={<UserOutlined />}
             className={styles.clientAvatar}
           />
-          <div>
+          <div className={styles.clientInfoText}>
             <Text strong className={styles.clientName}>
-              {order.client?.username || order.client_name || 
-                (order.client?.first_name && order.client?.last_name 
-                  ? `${order.client.first_name} ${order.client.last_name}` 
-                  : 'Заказчик')}
+              {order.client ? getDisplayUsername(order.client) : order.client_name || 'Заказчик'}
             </Text>
             <Text type="secondary" className={styles.clientOrders} style={{ display: 'block' }}>
               Заказов: {order.client_orders_count || 1}

@@ -632,7 +632,15 @@ export const TicketSystemSection: React.FC = () => {
         </Card>
       </div>
 
-      <Modal title={selectedTicket ? `Обращение #${selectedTicket.ticket_number}` : 'Обращение'} open={detailsOpen} onCancel={closeTicket} footer={null} width={860} destroyOnClose>
+      <Modal
+        className={styles.ticketDetailModal}
+        title={selectedTicket ? `Обращение #${selectedTicket.ticket_number}` : 'Обращение'}
+        open={detailsOpen}
+        onCancel={closeTicket}
+        footer={null}
+        width="min(860px, calc(100vw - 24px))"
+        destroyOnClose
+      >
         {detailLoading || !selectedTicket ? (
           <div style={{ padding: 32, textAlign: 'center' }}><Spin /></div>
         ) : (
@@ -926,6 +934,7 @@ export const TicketSystemSection: React.FC = () => {
 
       <Modal
         title="Заблокировать пользователя на период"
+        className={styles.contactBanModal}
         open={contactBanPeriodModalVisible}
         onOk={handlePeriodContactBan}
         onCancel={() => {

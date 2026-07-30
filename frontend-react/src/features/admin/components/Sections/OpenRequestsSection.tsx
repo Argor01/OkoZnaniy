@@ -389,7 +389,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
               {record.user.first_name} {record.user.last_name}
             </div>
             <Text type="secondary" className={styles.openRequestsUserHandle}>
-              @{record.user.username}
+              {record.user.username}
             </Text>
             <div className={styles.openRequestsUserTypeRow}>
               <Tag color={getUserTypeColor(record.user.user_type)}>
@@ -739,7 +739,7 @@ export const OpenRequestsSection: React.FC<OpenRequestsSectionProps> = ({
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</div>
-                      <Text type="secondary">@{selectedRequest.user.username}</Text>
+                      <Text type="secondary">{selectedRequest.user.username}</Text>
                       <br />
                       <Text type="secondary">{selectedRequest.user.email}</Text>
                       {selectedRequest.user.phone && (

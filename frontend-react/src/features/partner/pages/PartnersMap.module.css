@@ -513,3 +513,84 @@
     padding: var(--spacing-sm);
   }
 }
+
+.partnerNameText {
+  width: 100%;
+}
+
+.partnerName,
+.partnerCity {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.partnerEarnings {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .container {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  .content {
+    min-height: 0;
+  }
+
+  .mapCard {
+    min-height: 260px !important;
+  }
+
+  .partnersCard {
+    min-height: 0 !important;
+  }
+
+  .partnersList {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 10px;
+  }
+
+  .partnerCard {
+    width: 100%;
+  }
+
+  .partnerInfo {
+    min-width: 0;
+  }
+
+  .partnerStats {
+    gap: 6px;
+  }
+
+  .partnerStat {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    column-gap: 8px;
+    align-items: center;
+  }
+
+  .partnerStatLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .mapCard {
+    min-height: 220px !important;
+  }
+
+  .partnerNameRow {
+    align-items: flex-start;
+  }
+
+  .partnerStat {
+    grid-template-columns: 16px minmax(0, 1fr) auto;
+  }
+}

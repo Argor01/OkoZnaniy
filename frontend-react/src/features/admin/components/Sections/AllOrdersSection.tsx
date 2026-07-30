@@ -131,7 +131,7 @@ const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
           key={participant.id}
           label={`${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.username}
         >
-          <div><strong>Username:</strong> @{participant.username}</div>
+          <div><strong>Username:</strong> {participant.username}</div>
           <div><strong>Email:</strong> {participant.email || '-'}</div>
           <div><strong>Роль:</strong> {participant.role || '-'}</div>
         </Descriptions.Item>
@@ -250,7 +250,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             {record.client.first_name} {record.client.last_name}
           </div>
           <Text type="secondary" className={styles.allOrdersPersonHandle}>
-            @{record.client.username}
+            {record.client.username}
           </Text>
         </div>
       ),
@@ -266,7 +266,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
               {record.expert.first_name} {record.expert.last_name}
             </div>
             <Text type="secondary" className={styles.allOrdersPersonHandle}>
-              @{record.expert.username}
+              {record.expert.username}
             </Text>
           </div>
         ) : (

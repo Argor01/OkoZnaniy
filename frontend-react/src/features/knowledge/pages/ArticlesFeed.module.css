@@ -221,6 +221,37 @@
 }
 
 /* Dispute modal dark theme */
+.disputeModal :global(.ant-modal) {
+  max-width: calc(100vw - 32px);
+}
+
+.disputeModal :global(.ant-modal-content) {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.disputeModal :global(.ant-modal-title) {
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.disputeModal :global(.ant-modal-body) {
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+}
+
+.disputeModal :global(.ant-modal-footer) {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.disputeModal :global(.ant-modal-footer .ant-btn) {
+  min-width: 120px;
+  margin-inline-start: 0 !important;
+}
+
 :global([data-theme="dark"]) .disputeModal :global(.ant-modal-content) {
   background: #202638;
 }
@@ -241,4 +272,43 @@
 
 :global([data-theme="dark"]) .disputeModal :global(.ant-input:focus) {
   border-color: #8b5cf6;
+}
+
+@media (max-width: 600px) {
+  .disputeModal :global(.ant-modal) {
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+    top: 0;
+    padding-bottom: 12px;
+  }
+
+  .disputeModal :global(.ant-modal-content) {
+    border-radius: 18px;
+  }
+
+  .disputeModal :global(.ant-modal-title) {
+    font-size: 20px;
+  }
+
+  .disputeModal :global(.ant-modal-body) {
+    max-height: calc(100dvh - 220px);
+    overflow-y: auto;
+    font-size: 15px;
+  }
+
+  .disputeModal :global(.ant-input) {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .disputeModal :global(.ant-modal-footer) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .disputeModal :global(.ant-modal-footer .ant-btn) {
+    width: 100%;
+    height: 46px;
+  }
 }

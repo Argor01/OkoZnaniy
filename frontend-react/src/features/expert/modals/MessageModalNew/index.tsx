@@ -2055,6 +2055,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const handleDeleteSelectedChat = useCallback(() => {
     if (!selectedChat) return;
     Modal.confirm({
+      className: styles.deleteChatConfirmModal,
       title: 'Удалить чат?',
       icon: <ExclamationCircleOutlined />,
       content: hasActiveOffersInSelectedChat

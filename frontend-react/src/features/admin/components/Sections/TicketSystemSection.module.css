@@ -307,3 +307,110 @@
 .ticketSystemSidePanel.exiting {
   animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+.ticketDetailModal:global(.ant-modal),
+.contactBanModal:global(.ant-modal) {
+  max-width: calc(100vw - 24px);
+}
+
+.ticketDetailModal :global(.ant-modal-content),
+.contactBanModal :global(.ant-modal-content) {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ticketDetailModal :global(.ant-modal-body) {
+  max-height: min(76dvh, 760px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ticketDetailModal :global(.ant-space),
+.ticketDetailModal :global(.ant-card),
+.ticketDetailModal :global(.ant-alert),
+.ticketDetailModal :global(.ant-descriptions),
+.ticketDetailModal :global(.ant-input),
+.ticketDetailModal :global(.ant-input-textarea),
+.contactBanModal :global(.ant-picker) {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.ticketDetailModal :global(.ant-descriptions-view) {
+  overflow-x: auto;
+}
+
+.ticketDetailModal :global(.ant-card-body),
+.ticketDetailModal :global(.ant-typography) {
+  overflow-wrap: anywhere;
+}
+
+.ticketDetailModal :global(.ant-btn),
+.contactBanModal :global(.ant-btn) {
+  white-space: normal;
+  height: auto;
+  min-height: 40px;
+}
+
+@media (max-width: 768px) {
+  .ticketDetailModal:global(.ant-modal),
+  .contactBanModal:global(.ant-modal) {
+    top: 8px;
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px);
+    margin: 0 auto;
+    padding-bottom: 8px;
+  }
+
+  .ticketDetailModal :global(.ant-modal-content),
+  .contactBanModal :global(.ant-modal-content) {
+    max-height: calc(100dvh - 16px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ticketDetailModal :global(.ant-modal-header),
+  .contactBanModal :global(.ant-modal-header) {
+    flex: 0 0 auto;
+    padding-right: 40px;
+  }
+
+  .ticketDetailModal :global(.ant-modal-title),
+  .contactBanModal :global(.ant-modal-title) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ticketDetailModal :global(.ant-modal-body),
+  .contactBanModal :global(.ant-modal-body) {
+    flex: 1 1 auto;
+    max-height: calc(100dvh - 88px);
+    padding: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ticketDetailModal :global(.ant-card-body) {
+    padding: 12px !important;
+  }
+
+  .ticketDetailModal :global(.ant-space) {
+    row-gap: 8px !important;
+  }
+
+  .ticketDetailModal :global(.ant-btn) {
+    width: 100%;
+  }
+
+  .contactBanModal :global(.ant-modal-footer) {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .contactBanModal :global(.ant-modal-footer .ant-btn) {
+    width: 100%;
+    margin-inline-start: 0 !important;
+  }
+}

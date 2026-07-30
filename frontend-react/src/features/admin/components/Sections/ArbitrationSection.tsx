@@ -402,16 +402,18 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       </Card>
 
       <Modal
+        className={styles.arbitrationDetailModal}
         title={selectedCase ? `Арбитраж ${selectedCase.case_number}` : 'Арбитраж'}
         open={modalOpen}
         onCancel={closeModal}
         footer={null}
-        width={900}
+        width={isMobile ? 'calc(100vw - 16px)' : 900}
         destroyOnClose
         styles={{
           body: {
             overflowY: 'auto',
-            maxHeight: isMobile ? '100vh' : '70vh',
+            overflowX: 'hidden',
+            maxHeight: isMobile ? 'calc(100dvh - 88px)' : '70vh',
           },
         }}
       >

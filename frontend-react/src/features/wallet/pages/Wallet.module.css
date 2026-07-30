@@ -586,3 +586,64 @@
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)) !important;
   border-color: rgba(245, 158, 11, 0.35) !important;
 }
+
+.topupModal :global(.ant-modal-body) {
+  overflow-x: hidden;
+}
+
+.topupHint,
+.topupMethodLabel,
+.topupMethodHint {
+  overflow-wrap: anywhere;
+}
+
+.topupMethods,
+.topupMethod,
+.topupMethodInner {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .topupModal:global(.ant-modal) {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+    top: 10px !important;
+    margin: 0 auto !important;
+    padding-bottom: 10px !important;
+  }
+
+  .topupModal :global(.ant-modal-content) {
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topupModal :global(.ant-modal-body) {
+    max-height: calc(100dvh - 132px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .topupMethod {
+    padding: 10px !important;
+  }
+
+  .topupMethodInner {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .topupMethodIcon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+
+  .topupSubmit {
+    padding-inline: 10px !important;
+    white-space: normal;
+    line-height: 1.2;
+  }
+}

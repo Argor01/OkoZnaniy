@@ -242,3 +242,71 @@
     justify-content: flex-end;
   }
 }
+
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-card) {
+  background: #171b27;
+  border-color: #293145;
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-card-head) {
+  background: #171b27;
+  border-bottom-color: #293145;
+}
+
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-typography),
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-card-head-title) {
+  color: #f8fafc;
+}
+
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-typography-secondary) {
+  color: #a7b0c3 !important;
+}
+
+:global([data-theme="dark"]) .knowledgeSection :global(.ant-tabs-tab) {
+  color: #a7b0c3;
+}
+
+:global([data-theme="dark"]) .articleCard {
+  background: #171b27;
+  border-color: #293145;
+}
+
+@media (max-width: 768px) {
+  .filtersRow :global(.ant-input-search .ant-input-wrapper) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 52px !important;
+    align-items: center;
+    height: 52px;
+  }
+
+  .filtersRow :global(.ant-input-search .ant-input-group) {
+    display: contents !important;
+  }
+
+  .filtersRow :global(.ant-input-search .ant-input-affix-wrapper) {
+    min-width: 0 !important;
+    height: 52px !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .filtersRow :global(.ant-input-group-addon) {
+    width: 52px !important;
+    min-width: 52px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .filtersRow :global(.ant-input-search-button) {
+    width: 52px !important;
+    min-width: 52px !important;
+    height: 52px !important;
+    border: 0 !important;
+  }
+
+  .filtersRow :global(.ant-select) {
+    width: 100% !important;
+  }
+}

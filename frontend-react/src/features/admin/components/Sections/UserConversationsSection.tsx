@@ -218,8 +218,8 @@ export const UserConversationsSection: React.FC = () => {
 
   const getAccountMeta = (account?: AccountLike | null) => {
     if (!account) return '';
-    if (account.username && account.email) return `@${account.username} • ${account.email}`;
-    if (account.username) return `@${account.username}`;
+    if (account.username && account.email) return `${account.username} • ${account.email}`;
+    if (account.username) return account.username;
     return account.email || '';
   };
 
@@ -281,6 +281,15 @@ export const UserConversationsSection: React.FC = () => {
   const getChatDescription = (chat: UserChat) => {
     if (chat.order_id) return `Заказ #${chat.order_id}`;
     return `${chat.participants.length} участников`;
+  };
+
+  const handleBackToList = () => {
+    setSelectedChat(null);
+    if (isMobile) {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
   };
 
   return (
@@ -424,7 +433,7 @@ export const UserConversationsSection: React.FC = () => {
               {isMobile && (
                 <Button 
                   size="small" 
-                  onClick={() => setSelectedChat(null)}
+                  onClick={handleBackToList}
                   className={styles.chatBackButton}
                 >
                   ←

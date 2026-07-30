@@ -242,7 +242,7 @@ const ProfileV2: React.FC = () => {
             <h1 className={styles.heroName}>
               {me?.first_name || me?.username} {me?.last_name || ''}
             </h1>
-            <div className={styles.heroHandle}>@{me?.username}</div>
+            <div className={styles.heroHandle}>{me?.username}</div>
 
             <div className={styles.heroActions}>
               <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/orders/place-order')} className={styles.heroBtnPrimary}>

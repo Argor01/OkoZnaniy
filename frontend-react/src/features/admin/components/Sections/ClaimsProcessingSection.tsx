@@ -454,7 +454,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
           <Text type="secondary" className={styles.claimsProcessingAdminHandle}>
-            @{record.assigned_admin.username}
+            {record.assigned_admin.username}
           </Text>
         </div>
       ),
@@ -750,7 +750,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                       <Avatar size={32} icon={<UserOutlined />} />
                       <div>
                         <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
-                        <Text type="secondary">@{selectedClaim.user.username}</Text>
+                        <Text type="secondary">{selectedClaim.user.username}</Text>
                         <br />
                         <Text type="secondary">{selectedClaim.user.email}</Text>
                         {selectedClaim.user.phone && (
@@ -772,7 +772,7 @@ export const ClaimsProcessingSection: React.FC<ClaimsProcessingSectionProps> = (
                         <Avatar size={32} icon={<UserOutlined />} />
                         <div>
                           <div>{selectedClaim.expert.first_name} {selectedClaim.expert.last_name}</div>
-                          <Text type="secondary">@{selectedClaim.expert.username}</Text>
+                          <Text type="secondary">{selectedClaim.expert.username}</Text>
                           <br />
                           <Text type="secondary">{selectedClaim.expert.email}</Text>
                           {selectedClaim.expert.phone && (

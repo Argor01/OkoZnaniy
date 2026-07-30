@@ -8,6 +8,10 @@
   flex-direction: column;
 }
 
+.orderCard :global(.ant-card-body) {
+  min-width: 0;
+}
+
 .orderCard:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -24,6 +28,7 @@
 
 .orderCardHeaderInfo {
   flex: 1;
+  min-width: 0;
 }
 
 .orderNumber {
@@ -44,6 +49,10 @@
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .orderCardActions {
@@ -167,6 +176,15 @@
   align-items: center;
   gap: 4px;
   transition: all 0.2s;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.fileTag :global(.ant-tag-content) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fileTag:hover {
@@ -262,6 +280,13 @@
   margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--border-color);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.clientInfo :global(.ant-space) {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .clientAvatar {
@@ -269,10 +294,18 @@
   box-shadow: var(--shadow-sm);
 }
 
+.clientInfoText {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .clientName {
   font-size: 14px;
   margin-bottom: 2px !important;
   display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .clientOrders {
@@ -398,9 +431,10 @@
   
   .orderCardActions {
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: 100%;
     align-items: center;
+    flex-wrap: wrap;
   }
   
   .orderMetaRow {
@@ -434,6 +468,14 @@
 
   .filesGrid {
     gap: 6px;
+  }
+
+  .filesBlock :global(.ant-space) {
+    max-width: 100%;
+  }
+
+  .fileTag {
+    max-width: 100%;
   }
 
   .fileTile {

@@ -96,7 +96,15 @@
   color: #fff;
   font-family: 'Jost-SemiBold', system-ui, sans-serif;
 }
-.heroHandle { font-size: 14px; color: rgba(255, 255, 255, 0.72); margin-bottom: 20px; }
+.heroHandle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 20px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .heroActions { display: flex; gap: 12px; flex-wrap: wrap; }
 .heroBtnPrimary {
   background: linear-gradient(135deg, #f6c14a 0%, #ec4899 100%) !important;

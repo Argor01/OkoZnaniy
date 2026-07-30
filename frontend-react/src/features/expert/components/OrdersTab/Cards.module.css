@@ -10,6 +10,10 @@
   flex-direction: column;
 }
 
+.orderCard :global(.ant-card-body) {
+  min-width: 0;
+}
+
 .orderCard:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
@@ -31,6 +35,7 @@
   gap: 10px;
   flex: 1;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .orderTitle {
@@ -39,6 +44,11 @@
   color: var(--text-primary);
   font-weight: 700;
   line-height: 1.4;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .statusTag {
@@ -101,6 +111,15 @@
   align-items: center;
   gap: 4px;
   transition: all 0.2s;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.fileTag :global(.ant-tag-content) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fileTag:hover {
@@ -133,6 +152,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .orderBottomRight {
@@ -146,6 +166,13 @@
 .clientInfo {
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.clientInfo :global(.ant-space) {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .clientAvatar {
@@ -156,6 +183,10 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .orderMetaIcon {
@@ -185,7 +216,7 @@
   }
 
   .orderCardActionsRow {
-    align-self: flex-end;
+    align-self: flex-start;
   }
 
   .orderBottomRow {
@@ -195,7 +226,8 @@
   }
 
   .orderBottomRight {
-    align-self: flex-end;
+    align-self: flex-start;
+    align-items: flex-start;
   }
 
   .orderBudget {

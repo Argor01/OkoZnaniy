@@ -4193,6 +4193,64 @@
   box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
 }
 
+.deleteChatConfirmModal :global(.ant-modal-content) {
+  overflow: hidden;
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-content) {
+  background: #171b26;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-title),
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-content) {
+  color: #f3f5fb;
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-content) {
+  color: rgba(243, 245, 251, 0.72);
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-btns) {
+  background: transparent;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding-top: 12px;
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-btn-default) {
+  background: #232838;
+  border-color: rgba(148, 163, 184, 0.24);
+  color: #f3f5fb;
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-btn-default:hover) {
+  background: #2b3144;
+  border-color: rgba(167, 139, 250, 0.42);
+  color: #ffffff;
+}
+
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-warning .ant-modal-confirm-body > .anticon),
+:global([data-theme="dark"]) .deleteChatConfirmModal :global(.ant-modal-confirm-body > .anticon) {
+  color: #f59e0b;
+}
+
+@media (max-width: 575px) {
+  .deleteChatConfirmModal {
+    max-width: calc(100vw - 28px);
+  }
+
+  .deleteChatConfirmModal :global(.ant-modal-content) {
+    border-radius: 16px;
+  }
+
+  .deleteChatConfirmModal :global(.ant-modal-confirm-btns) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}
+
 
 /* ===================================================================
    Adaptive + visual refresh ??? appended 2026-07 (reversible block).

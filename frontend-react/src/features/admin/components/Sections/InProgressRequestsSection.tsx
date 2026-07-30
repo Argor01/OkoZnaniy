@@ -412,7 +412,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
               {record.user.first_name} {record.user.last_name}
             </div>
             <Text type="secondary" className={styles.inProgressRequestsUserHandle}>
-              @{record.user.username}
+              {record.user.username}
             </Text>
           </div>
         </div>
@@ -758,7 +758,7 @@ export const InProgressRequestsSection: React.FC<InProgressRequestsSectionProps>
                     <Avatar icon={<UserOutlined />} />
                     <div>
                       <div>{selectedRequest.user.first_name} {selectedRequest.user.last_name}</div>
-                      <Text type="secondary">@{selectedRequest.user.username}</Text>
+                      <Text type="secondary">{selectedRequest.user.username}</Text>
                       <br />
                       <Text type="secondary">{selectedRequest.user.email}</Text>
                     </div>

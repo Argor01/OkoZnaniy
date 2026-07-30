@@ -427,7 +427,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                             className={styles.clientAvatar}
                           />
                           <Text className={styles.clientName}>
-                            {order.client.first_name || getDisplayUsername(order.client)}
+                            {getDisplayUsername(order.client)}
                           </Text>
                         </Space>
                       </div>

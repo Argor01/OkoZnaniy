@@ -282,7 +282,7 @@ export const CompletedClaimsSection: React.FC = () => {
               {record.user.first_name} {record.user.last_name}
             </div>
             <Text type="secondary" className={styles.completedClaimsUserHandle}>
-              @{record.user.username}
+              {record.user.username}
             </Text>
           </div>
         </div>
@@ -298,7 +298,7 @@ export const CompletedClaimsSection: React.FC = () => {
             {record.assigned_admin.first_name} {record.assigned_admin.last_name}
           </div>
           <Text type="secondary" className={styles.completedClaimsAdminHandle}>
-            @{record.assigned_admin.username}
+            {record.assigned_admin.username}
           </Text>
         </div>
       ),
@@ -553,7 +553,7 @@ export const CompletedClaimsSection: React.FC = () => {
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
-                    <Text type="secondary">@{selectedClaim.user.username}</Text>
+                    <Text type="secondary">{selectedClaim.user.username}</Text>
                     <br />
                     <Text type="secondary">{selectedClaim.user.email}</Text>
                   </div>
@@ -566,7 +566,7 @@ export const CompletedClaimsSection: React.FC = () => {
                   <Avatar size={32} icon={<UserOutlined />} />
                   <div>
                     <div>{selectedClaim.assigned_admin.first_name} {selectedClaim.assigned_admin.last_name}</div>
-                    <Text type="secondary">@{selectedClaim.assigned_admin.username}</Text>
+                    <Text type="secondary">{selectedClaim.assigned_admin.username}</Text>
                   </div>
                 </div>
               </div>

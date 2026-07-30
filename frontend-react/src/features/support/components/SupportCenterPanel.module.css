@@ -322,3 +322,50 @@
 :global([data-theme="dark"]) .replyInput:global(.ant-input)::placeholder {
   color: #7f89ab;
 }
+
+@media (max-width: 640px) {
+  .detailsModal:global(.ant-modal) {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    top: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .detailsModal :global(.ant-modal-content) {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .detailsModal :global(.ant-modal-body) {
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .detailsModal :global(.ant-card),
+  .detailsModal :global(.ant-alert),
+  .detailsModal :global(.ant-descriptions),
+  .detailsModal :global(.ant-form),
+  .detailsModal :global(.ant-input),
+  .detailsModal :global(.ant-input-textarea),
+  .detailsModal :global(.ant-space) {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .detailsModal :global(.ant-card-body) {
+    overflow-wrap: anywhere;
+  }
+
+  .detailsModal :global(.ant-btn) {
+    height: auto !important;
+    min-height: 42px;
+    white-space: normal;
+  }
+}

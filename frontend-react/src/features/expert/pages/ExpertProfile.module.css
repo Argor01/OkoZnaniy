@@ -18,6 +18,7 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  min-width: 0;
 }
 
 .headerMeta {
@@ -25,6 +26,7 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 8px;
+  min-width: 0;
 }
 
 .headerAvatar {
@@ -53,6 +55,11 @@
   align-items: center;
   gap: 8px;
   font-size: 20px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .verifiedIcon {
@@ -157,6 +164,7 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  min-width: 0;
 }
 
 .reviewAvatarIcon {
@@ -166,6 +174,11 @@
 .reviewAuthorName {
   font-size: 15px;
   line-height: 1.2;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .reviewAuthorMeta {
@@ -272,4 +285,59 @@
 
 .pageContainer {
   animation: fadeInUp 0.4s ease-out;
+}
+
+@media (max-width: 768px) {
+  .pageContainer {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerMeta {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .headerTitle {
+    font-size: 20px !important;
+    line-height: 1.2;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .statsHeader,
+  .reviewRating {
+    text-align: left;
+  }
+
+  .statsRow,
+  .statsRowLast {
+    align-items: flex-start;
+  }
+
+  .skillsWrap {
+    justify-content: flex-start;
+  }
+
+  .knowledgeStatsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .reviewsCard {
+    margin-top: 16px;
+  }
+
+  .reviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }

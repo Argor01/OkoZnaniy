@@ -225,7 +225,7 @@ export const NewClaimsSection: React.FC = () => {
               {record.user.first_name} {record.user.last_name}
             </div>
             <Text type="secondary" className={styles.newClaimsUserHandle}>
-              @{record.user.username}
+              {record.user.username}
             </Text>
           </div>
         </div>
@@ -413,7 +413,7 @@ export const NewClaimsSection: React.FC = () => {
                 <Avatar size={32} icon={<UserOutlined />} />
                 <div>
                   <div>{selectedClaim.user.first_name} {selectedClaim.user.last_name}</div>
-                  <Text type="secondary">@{selectedClaim.user.username}</Text>
+                  <Text type="secondary">{selectedClaim.user.username}</Text>
                   <br />
                   <Text type="secondary">{selectedClaim.user.email}</Text>
                 </div>

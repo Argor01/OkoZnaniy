@@ -2335,7 +2335,48 @@
 @media (max-width: 600px) {
   .bpHero { padding:110px 0 64px; }
   .bpGrid, .bpSteps { grid-template-columns:1fr; }
-  .bpForm { flex-direction:column; }
+  .bpCta {
+    padding: 64px 0 104px;
+  }
+
+  .bpCtaCard {
+    width: 100%;
+    text-align: left;
+  }
+
+  .bpCtaTag {
+    align-self: flex-start;
+  }
+
+  .bpCtaTitle,
+  .bpCtaSub,
+  .bpFormLegal,
+  .bpFormMsg,
+  .bpFormError {
+    text-align: left;
+  }
+
+  .bpForm {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .bpFormInput,
+  .bpFormBtn {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .bpFormBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+  }
+
   .bpGuarantee { padding:40px 26px; }
   .bpChip { display:none; }
 }

@@ -75,6 +75,7 @@
   border: none;
   background: transparent;
   flex: 1;
+  min-width: 0;
 }
 
 .writeMessageButton {
@@ -130,6 +131,8 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .nameText {
@@ -138,6 +141,11 @@
   font-weight: 700;
   color: var(--color-grey-900);
   margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .verifiedIcon {
@@ -300,11 +308,17 @@
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  min-width: 0;
 }
 
 .reviewUserName {
   font-size: 15px;
   line-height: 1.2;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .reviewUserMeta {
@@ -378,14 +392,20 @@
 
   .profileIdentityCard {
     flex-direction: column;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
     gap: 16px;
     padding: 16px 0;
   }
 
   .profileIdentityMeta {
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+  }
+
+  .nameRow {
+    width: 100%;
   }
 
   .nameText {
@@ -442,6 +462,8 @@
   }
 
   .expertInfoRow {
+    align-items: flex-start;
+    text-align: left;
     padding: 12px;
     background: var(--bg-secondary, #f8f9fa);
     border-radius: 8px;
@@ -449,6 +471,7 @@
   }
 
   .tagList {
+    justify-content: flex-start;
     gap: 6px;
   }
 

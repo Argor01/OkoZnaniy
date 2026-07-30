@@ -226,7 +226,7 @@ const UserProfile: FC = () => {
                     />
                     <div className={styles.profileIdentityMeta}>
                       <div className={styles.nameRow}>
-                        <Text className={styles.nameText}>@{getDisplayUsername(userData)}</Text>
+                        <Text className={styles.nameText}>{getDisplayUsername(userData)}</Text>
                         {userData.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
                       </div>
                       {userData.first_name && userData.last_name ? (
@@ -474,7 +474,7 @@ const UserProfile: FC = () => {
                             />
                             <div>
                               <Text strong className={styles.reviewUserName}>
-                                @{getDisplayUsername(review.client)}
+                                {getDisplayUsername(review.client)}
                               </Text>
                               <br />
                               <Text type="secondary" className={styles.reviewUserMeta}>

@@ -19,6 +19,7 @@ import { AdminLayout } from '@/features/admin/components/Layout';
 import type { MenuKey } from '@/features/admin/types';
 import { expertsApi } from '@/features/expert/api/experts';
 import type { ExpertReview } from '@/features/expert/types/experts';
+import styles from '@/features/admin/TicketDetail.module.css';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -418,7 +419,7 @@ export const TicketDetailPage: React.FC = () => {
 
   return (
     <AdminLayout user={user} selectedMenu="tickets" onMenuSelect={handleMenuSelect} onLogout={handleLogout}>
-      <div style={{ padding: '0 24px' }}>
+      <div className={styles.ticketDetailPageShell}>
         <Breadcrumb style={{ marginBottom: 16 }}>
           <Breadcrumb.Item>
             <a onClick={() => navigate('/admin/dashboard')} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
@@ -483,7 +484,7 @@ export const TicketDetailPage: React.FC = () => {
               </Card>
 
               {/* Единая лента */}
-              <div style={{ minHeight: 200, maxHeight: 520, overflowY: 'auto', padding: '8px 4px', marginBottom: 16, borderTop: '1px solid #f0f0f0' }}>
+              <div className={styles.ticketFeed} style={{ minHeight: 200, maxHeight: 520, overflowY: 'auto', padding: '8px 4px', marginBottom: 16, borderTop: '1px solid #f0f0f0' }}>
                 {feedLoading ? (
                   <div style={{ textAlign: 'center', padding: 32 }}><Spin /></div>
                 ) : feed.length === 0 ? (
@@ -496,7 +497,7 @@ export const TicketDetailPage: React.FC = () => {
 
               {/* Форма ответа */}
               <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+                <div className={styles.ticketReplyActions} style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
                   <TextArea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
@@ -758,6 +759,7 @@ export const TicketDetailPage: React.FC = () => {
 
         {/* Модал: финальный ответ */}
         <Modal
+          className={styles.ticketActionModal}
           title="Финальный ответ и закрытие обращения"
           open={finalModalVisible}
           onOk={sendFinalReply}
@@ -779,7 +781,7 @@ export const TicketDetailPage: React.FC = () => {
         </Modal>
 
         {/* Модал: назначить наблюдателей */}
-        <Modal title="Назначить сотрудников" open={assignModalVisible} onOk={handleAssignUsers} onCancel={() => { setAssignModalVisible(false); setSelectedUserIds([]); }} okText="Назначить" cancelText="Отмена">
+        <Modal className={styles.ticketActionModal} title="Назначить сотрудников" open={assignModalVisible} onOk={handleAssignUsers} onCancel={() => { setAssignModalVisible(false); setSelectedUserIds([]); }} okText="Назначить" cancelText="Отмена">
           <div style={{ maxHeight: 300, overflowY: 'auto' }}>
             {adminUsers.map((u: any) => (
               <div key={u.id} style={{ padding: '8px 0' }}>
@@ -793,6 +795,7 @@ export const TicketDetailPage: React.FC = () => {
 
         {/* Модал: возврат средств */}
         <Modal
+          className={styles.ticketActionModal}
           title="Возврат средств по претензии"
           open={refundModalVisible}
           onOk={handleProcessRefund}
@@ -822,7 +825,7 @@ export const TicketDetailPage: React.FC = () => {
         </Modal>
 
         {/* Модал: добавить тег */}
-        <Modal title="Добавить тег" open={tagModalVisible} onOk={handleAddTag} onCancel={() => { setTagModalVisible(false); setNewTag(''); }} okText="Добавить" cancelText="Отмена">
+        <Modal className={styles.ticketActionModal} title="Добавить тег" open={tagModalVisible} onOk={handleAddTag} onCancel={() => { setTagModalVisible(false); setNewTag(''); }} okText="Добавить" cancelText="Отмена">
           <Input placeholder="Введите тег (например: #негатив, #срочно)" value={newTag} onChange={(e) => setNewTag(e.target.value)} onPressEnter={handleAddTag} prefix={<TagOutlined />} />
           <div style={{ marginTop: 12 }}>
             <Text type="secondary">Популярные теги:</Text>
@@ -836,6 +839,7 @@ export const TicketDetailPage: React.FC = () => {
           </div>
         </Modal>
         <Modal
+          className={styles.ticketActionModal}
           title="Заблокировать пользователя на период"
           open={contactBanPeriodModalVisible}
           onOk={handlePeriodContactBan}
