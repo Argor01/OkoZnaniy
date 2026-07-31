@@ -48,6 +48,22 @@ export const truncateText = (text: string, maxLength: number): string => {
   return text.substring(0, maxLength) + '...';
 };
 
+export const truncateDisplayName = (name: string, maxLength: number = 20): string => {
+  if (!name || name.length <= maxLength) return name;
+  return name.substring(0, maxLength) + '\u2026';
+};
+
+export const truncateFileName = (name: string, maxLength: number = 20): string => {
+  if (!name || name.length <= maxLength) return name;
+  const extIndex = name.lastIndexOf('.');
+  if (extIndex === -1) return name.substring(0, maxLength) + '\u2026';
+  const ext = name.substring(extIndex);
+  const nameWithoutExt = name.substring(0, extIndex);
+  const availableLength = maxLength - ext.length - 1;
+  if (availableLength <= 0) return name.substring(0, maxLength) + '\u2026';
+  return nameWithoutExt.substring(0, availableLength) + '\u2026' + ext;
+};
+
 export const formatUserName = (user: {
   id?: number | string;
   first_name?: string;
@@ -58,12 +74,12 @@ export const formatUserName = (user: {
 }): string => {
   const displayUsername = user.display_username?.trim();
   if (displayUsername) {
-    return displayUsername;
+    return truncateDisplayName(displayUsername);
   }
   if (user.first_name && user.last_name) {
-    return `${user.first_name} ${user.last_name}`;
+    return truncateDisplayName(`${user.first_name} ${user.last_name}`);
   }
-  if (user.first_name) return user.first_name;
+  if (user.first_name) return truncateDisplayName(user.first_name);
   return getDisplayUsername(user);
 };
 
@@ -168,12 +184,12 @@ export const getDisplayUsername = (user: {
 }): string => {
   const displayUsername = user.display_username?.trim();
   if (displayUsername) {
-    return displayUsername.replace(/^@+/, '');
+    return truncateDisplayName(displayUsername.replace(/^@+/, ''));
   }
 
   const username = user.username?.trim();
   if (username && !isEmailLike(username)) {
-    return username.replace(/^@+/, '');
+    return truncateDisplayName(username.replace(/^@+/, ''));
   }
 
   return `user${getStableAnonymousNumber(user)}`;

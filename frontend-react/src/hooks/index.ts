@@ -4,3 +4,4 @@ export { useUserUpdate } from './useUserUpdate';
 export { useWebSocket, type WSEvent, type WSEventType, type WSEventHandler, type UseWebSocketOptions } from './useWebSocket';
 export { useChatWebSocket, type WSMessage } from './useChatWebSocket';
 export { useScrollAnimation } from './useScrollAnimation';
+export { useSortedSubjects, useSortedWorkTypes } from './useSortedCatalog';

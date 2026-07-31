@@ -6,20 +6,9 @@ import {
   FileImageOutlined,
   FileZipOutlined,
 } from '@ant-design/icons';
+import { truncateFileName } from '@/utils/formatters';
 
-export const truncateFileName = (name: string, maxLength: number = 20) => {
-  if (name.length <= maxLength) return name;
-  const extIndex = name.lastIndexOf('.');
-  if (extIndex === -1) return name.substring(0, maxLength) + '...';
-  
-  const ext = name.substring(extIndex);
-  const nameWithoutExt = name.substring(0, extIndex);
-  
-  const availableLength = maxLength - ext.length - 3; 
-  if (availableLength <= 0) return name.substring(0, maxLength) + '...';
-  
-  return nameWithoutExt.substring(0, availableLength) + '...' + ext;
-};
+export { truncateFileName };
 
 export const getFileIconByName = (fileName?: string | null) => {
   const value = String(fileName || '').toLowerCase();

@@ -17,7 +17,7 @@ import { SectionHeader, SurfaceCard } from '@/features/common';
 import PendingReviewsCard from '../components/PendingReviewsCard';
 import styles from './UserProfile.module.css';
 import { logger } from '@/utils/logger';
-import { getDisplayUsername } from '@/utils/formatters';
+import { getDisplayUsername, truncateDisplayName } from '@/utils/formatters';
 import { ROUTES } from '@/utils/constants';
 
 dayjs.extend(relativeTime);
@@ -231,7 +231,7 @@ const UserProfile: FC = () => {
                       </div>
                       {userData.first_name && userData.last_name ? (
                         <Text className={styles.usernameText}>
-                          {`${userData.first_name} ${userData.last_name}`}
+                          {truncateDisplayName(`${userData.first_name} ${userData.last_name}`)}
                         </Text>
                       ) : null}
                     </div>
@@ -478,7 +478,7 @@ const UserProfile: FC = () => {
                               </Text>
                               <br />
                               <Text type="secondary" className={styles.reviewUserMeta}>
-                                {review.client.first_name} {review.client.last_name}
+                                {truncateDisplayName([review.client.first_name, review.client.last_name].filter(Boolean).join(' '))}
                               </Text>
                             </div>
                           </div>

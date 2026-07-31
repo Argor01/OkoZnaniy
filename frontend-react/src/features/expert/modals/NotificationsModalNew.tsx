@@ -18,6 +18,7 @@ import { notificationsApi, Notification } from '@/features/common/api/notificati
 import { ordersApi } from '@/features/orders/api/orders';
 import { apiClient } from '@/api/client';
 import { getMediaUrl } from '@/config/api';
+import { translateStatusInText } from '@/utils/constants';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './NotificationsModalNew.module.css';
@@ -442,10 +443,11 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
       const orderId = extractOrderId(notification);
       return orderId ? `К заказу №${orderId} прикреплен файл` : 'К заказу прикреплен файл';
     }
-    return notification.message
+    const message = notification.message
       .replace(/Ставка:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Ставка: Договорная')
       .replace(/Бюджет:\s*0([.,]0+)?\s*([₽рrub]+|Договорная)?/gi, 'Бюджет: Договорная')
       .replace(/\b0([.,]0+)?\s*([₽рrub]+|Договорная)/gi, 'Договорная');
+    return translateStatusInText(message);
   };
 
   return (

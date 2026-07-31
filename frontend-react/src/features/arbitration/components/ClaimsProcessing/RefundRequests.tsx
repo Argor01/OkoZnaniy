@@ -27,6 +27,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
 import type { Claim, GetClaimsParams } from '@/features/arbitration/api/types';
 import ClaimDetails from './ClaimDetails';
+import { truncateDisplayName } from '@/utils/formatters';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -179,8 +180,8 @@ const RefundRequests: React.FC = () => {
       render: (record: Claim) => (
         <Tooltip title={`${record.client.username}\n${record.client.email}`}>
           <div>
-            <div className="arbitratorTextEllipsis">
-              {record.client.username}
+              <div className="arbitratorTextEllipsis">
+                {truncateDisplayName(record.client.username)}
             </div>
             <Text type="secondary" className="arbitratorTextEllipsisSmall">
               {record.client.email}
@@ -199,7 +200,7 @@ const RefundRequests: React.FC = () => {
           <Tooltip title={`${record.expert.username}\n${record.expert.email}`}>
             <div>
               <div className="arbitratorTextEllipsis">
-                {record.expert.username}
+                {truncateDisplayName(record.expert.username)}
               </div>
               <Text type="secondary" className="arbitratorTextEllipsisSmall">
                 {record.expert.email}

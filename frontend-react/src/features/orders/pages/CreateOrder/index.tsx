@@ -3,24 +3,25 @@ import { Form, Typography, message, Modal, Radio } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { InboxOutlined, PlusOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { catalogApi } from '@/features/common/api/catalog';
 import { ordersApi } from '@/features/orders/api/orders';
-import { Subject, WorkType } from '@/features/common/types/catalog';
 import { CreateOrderRequest } from '@/features/orders/types/orders';
 import { walletApi } from '@/features/wallet/api/wallet';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
-import { AppDatePicker } from '@/components/ui/AppDatePicker';
 import { AppUpload } from '@/components/ui/AppUpload';
+import { DeadlinePicker } from '@/components/ui/DeadlinePicker';
+import { AddNewItemModal } from '@/components/ui/AddNewItemModal';
+import { ALLOWED_FILE_EXTENSIONS } from '@/constants/files';
+import { useSortedSubjects, useSortedWorkTypes } from '@/hooks';
 
 import styles from './CreateOrder.module.css';
 import { logger } from '@/utils/logger';
-import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
 
@@ -33,20 +34,6 @@ interface CreateOrderFormValues {
   budget: number;
   client_note?: string;
 }
-
-interface DeadlineTimeValues {
-  hours: number;
-  minutes: number;
-}
-
-const ALLOWED_FILE_EXTENSIONS = [
-  'doc', 'docx', 'pdf', 'rtf', 'txt',
-  'ppt', 'pptx',
-  'xls', 'xlsx', 'csv',
-  'dwg', 'dxf', 'cdr', 'cdw', 'bak',
-  'jpg', 'jpeg', 'png', 'bmp', 'svg',
-  'zip', 'rar', '7z',
-];
 
 const MAX_ORDER_BUDGET = 99_999_999.99;
 
@@ -83,17 +70,9 @@ const CreateOrder: React.FC = () => {
   };
 
   
-  const {data: subjects = []} = useSubjects();
+  const {data: subjects = []} = useSortedSubjects();
 
-  const {data: workTypes = []} = useWorkTypes();
-
-  const sortedSubjects = [...subjects].sort((a, b) =>
-    (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })
-  );
-
-  const sortedWorkTypes = [...workTypes].sort((a, b) =>
-    (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })
-  );
+  const {data: workTypes = []} = useSortedWorkTypes();
 
   
     const createWorkTypeMutation = useMutation({
@@ -101,9 +80,7 @@ const CreateOrder: React.FC = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['workTypes'] });
       setNewWorkTypeModalVisible(false);
-      setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
-      // Автоматически выбираем созданный тип работы
       if (data?.id) {
         form.setFieldValue('work_type', data.id);
       }
@@ -118,9 +95,7 @@ const CreateOrder: React.FC = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setNewSubjectModalVisible(false);
-      setNewSubjectName('');
       message.success('Новый предмет добавлен');
-      // Автоматически выбираем созданный предмет
       if (data?.id) {
         form.setFieldValue('subject', data.id);
       }
@@ -146,38 +121,7 @@ const CreateOrder: React.FC = () => {
     },
   });
 
-    const handleDeadlineChange = (date: dayjs.Dayjs | null) => {
-    if (date) {
-      const now = dayjs();
-      if (date.isSame(now, 'day')) {
-        // Если сегодня, проверяем время
-        if (deadlineTime.hours < now.hour() || 
-            (deadlineTime.hours === now.hour() && deadlineTime.minutes <= now.minute())) {
-          // Время в прошлом, устанавливаем текущее + 1 час
-          setDeadlineTime({
-            hours: Math.min(now.hour() + 1, 23),
-            minutes: 0
-          });
-        }
-      }
-    }
-  };
-
-  const handleTimeChange = (field: 'hours' | 'minutes', value: number) => {
-    const newTime = { ...deadlineTime, [field]: value };
-    setDeadlineTime(newTime);
-    
-    // Проверяем, не в прошлом ли время (если дата сегодня)
-    const deadlineDate = form.getFieldValue('deadline');
-    if (deadlineDate && deadlineDate.isSame(dayjs(), 'day')) {
-      const now = dayjs();
-      if (newTime.hours < now.hour() || 
-          (newTime.hours === now.hour() && newTime.minutes <= now.minute())) {
-        message.warning('Выбранное время уже прошло');
-      }
-    }
-  };
-
+  
         const onFinish = async (values: CreateOrderFormValues) => {
       if (submitGuardRef.current) return;
       lockSubmit();
@@ -293,16 +237,6 @@ const CreateOrder: React.FC = () => {
     return <FileOutlined className={styles.fileIconDefault} />;
   };
 
-  const formatOrderFileTileName = (filename: string, maxLength = 30) => {
-    if (filename.length <= maxLength) return filename;
-    const extIndex = filename.lastIndexOf('.');
-    if (extIndex <= 0) return `${filename.slice(0, maxLength - 1)}…`;
-    const ext = filename.slice(extIndex);
-    const base = filename.slice(0, extIndex);
-    const allowedBaseLength = Math.max(6, maxLength - ext.length - 1);
-    return `${base.slice(0, allowedBaseLength)}…${ext}`;
-  };
-
   return (
     <div className={styles.container}>
       <AppCard className={styles.card} variant="gradient">
@@ -374,7 +308,7 @@ const CreateOrder: React.FC = () => {
                     </>
                   )}
                 >
-                  {sortedWorkTypes.map((type) => (
+                  {workTypes.map((type) => (
                     <AppSelect.Option key={type.id} value={type.id}>
                       {type.name}
                     </AppSelect.Option>
@@ -412,7 +346,7 @@ const CreateOrder: React.FC = () => {
                     </>
                   )}
                 >
-                  {sortedSubjects.map((subject) => (
+                  {subjects.map((subject) => (
                     <AppSelect.Option key={subject.id} value={subject.id}>
                       {subject.name}
                     </AppSelect.Option>
@@ -438,48 +372,13 @@ const CreateOrder: React.FC = () => {
                   ]}
                   className={styles.dateInputItem}
                 >
-                  <AppDatePicker
-                    placeholder="Дата сдачи"
-                    format="DD.MM.YYYY"
-                    disabledDate={(current) => current && current < dayjs().startOf('day')}
-                    onChange={handleDeadlineChange}
+                  <DeadlinePicker
+                    timeValue={deadlineTime}
+                    onTimeChange={setDeadlineTime}
                     className={styles.dateInput}
+                    timeClassName={styles.timeSelectors}
                   />
                 </Form.Item>
-
-                <div className={styles.timeSelectors}>
-                  <div className={styles.timeFieldWrapper}>
-                    <label className={styles.timeLabel}>Часы</label>
-                    <AppSelect
-                      value={deadlineTime.hours}
-                      onChange={(value) => handleTimeChange('hours', value)}
-                      className={styles.timeSelect}
-                    >
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <AppSelect.Option key={i} value={i}>
-                          {String(i).padStart(2, '0')}
-                        </AppSelect.Option>
-                      ))}
-                    </AppSelect>
-                  </div>
-
-                  <span className={styles.timeSeparator}>:</span>
-
-                  <div className={styles.timeFieldWrapper}>
-                    <label className={styles.timeLabel}>Минуты</label>
-                    <AppSelect
-                      value={deadlineTime.minutes}
-                      onChange={(value) => handleTimeChange('minutes', value)}
-                      className={styles.timeSelect}
-                    >
-                      {Array.from({ length: 60 }, (_, i) => (
-                        <AppSelect.Option key={i} value={i}>
-                          {String(i).padStart(2, '0')}
-                        </AppSelect.Option>
-                      ))}
-                    </AppSelect>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -599,7 +498,7 @@ const CreateOrder: React.FC = () => {
                         {getOrderFileIcon(file.name)}
                       </div>
                       <div className={styles.orderFileName}>
-                        {formatOrderFileTileName(file.name)}
+                        {file.name}
                       </div>
                       <DeleteOutlined className={styles.orderFileDeleteIcon} />
                     </button>
@@ -639,76 +538,26 @@ const CreateOrder: React.FC = () => {
       </AppCard>
 
       
-            <Modal
+            <AddNewItemModal
         title="Добавить новый тип работы"
+        placeholder="Название типа работы"
+        emptyMessage="Введите название типа работы"
         open={newWorkTypeModalVisible}
-        onOk={() => {
-          if (newWorkTypeName.trim()) {
-            // Приводим к правильному регистру: первая буква заглавная, остальные строчные
-            const normalizedName = newWorkTypeName.trim().split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-            createWorkTypeMutation.mutate(normalizedName);
-          } else {
-            message.error('Введите название типа работы');
-          }
-        }}
-        onCancel={() => {
-          setNewWorkTypeModalVisible(false);
-          setNewWorkTypeName('');
-        }}
+        onOk={(name) => createWorkTypeMutation.mutate(name)}
+        onCancel={() => setNewWorkTypeModalVisible(false)}
         confirmLoading={createWorkTypeMutation.isPending}
-      >
-        <AppInput
-          placeholder="Название типа работы"
-          value={newWorkTypeName}
-          onChange={(e) => setNewWorkTypeName(e.target.value)}
-          onPressEnter={() => {
-            if (newWorkTypeName.trim()) {
-              const normalizedName = newWorkTypeName.trim().split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
-              createWorkTypeMutation.mutate(normalizedName);
-            }
-          }}
-        />
-      </Modal>
+      />
 
       
-            <Modal
+            <AddNewItemModal
         title="Добавить новый предмет"
+        placeholder="Название предмета"
+        emptyMessage="Введите название предмета"
         open={newSubjectModalVisible}
-        onOk={() => {
-          if (newSubjectName.trim()) {
-            // Приводим к правильному регистру: первая буква заглавная, остальные строчные
-            const normalizedName = newSubjectName.trim().split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-            createSubjectMutation.mutate(normalizedName);
-          } else {
-            message.error('Введите название предмета');
-          }
-        }}
-        onCancel={() => {
-          setNewSubjectModalVisible(false);
-          setNewSubjectName('');
-        }}
+        onOk={(name) => createSubjectMutation.mutate(name)}
+        onCancel={() => setNewSubjectModalVisible(false)}
         confirmLoading={createSubjectMutation.isPending}
-      >
-        <AppInput
-          placeholder="Название предмета"
-          value={newSubjectName}
-          onChange={(e) => setNewSubjectName(e.target.value)}
-          onPressEnter={() => {
-            if (newSubjectName.trim()) {
-              const normalizedName = newSubjectName.trim().split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
-              createSubjectMutation.mutate(normalizedName);
-            }
-          }}
-        />
-      </Modal>
+      />
     </div>
   );
 };

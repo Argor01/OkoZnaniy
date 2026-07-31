@@ -32,6 +32,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { arbitratorApi } from '@/features/arbitration/api/arbitratorApi';
 import type { Claim, RequestInfoRequest, SendForApprovalRequest } from '@/features/arbitration/api/types';
 import DecisionForm from './DecisionForm';
+import { truncateDisplayName } from '@/utils/formatters';
 import styles from './ClaimDetails.module.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -268,7 +269,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
           </Title>
           <Descriptions bordered column={2} size="small" className="arbitratorSectionSpacing">
             <Descriptions.Item label="Имя пользователя">
-              {claim.client.username}
+              {truncateDisplayName(claim.client.username)}
             </Descriptions.Item>
             <Descriptions.Item label="Email">
               {claim.client.email}
@@ -287,7 +288,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
               </Title>
               <Descriptions bordered column={2} size="small" className="arbitratorSectionSpacing">
                 <Descriptions.Item label="Имя пользователя">
-                  {claim.expert.username}
+                  {truncateDisplayName(claim.expert.username)}
                 </Descriptions.Item>
                 <Descriptions.Item label="Email">
                   {claim.expert.email}
@@ -307,7 +308,7 @@ const ClaimDetails: React.FC<ClaimDetailsProps> = ({
               {claim.messages.map((message) => (
                 <Timeline.Item key={message.id} color="purple">
                   <div>
-                    <Text strong>{message.sender.username}</Text>
+                    <Text strong>{truncateDisplayName(message.sender.username)}</Text>
                     <Text type="secondary" className="arbitratorTimelineDate">
                       ({dayjs(message.created_at).format('DD.MM.YYYY HH:mm')})
                     </Text>

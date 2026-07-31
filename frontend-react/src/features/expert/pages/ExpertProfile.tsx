@@ -11,7 +11,7 @@ import { getMediaUrl } from '@/config/api';
 import styles from './ExpertProfile.module.css';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
-import { getDisplayUsername } from '@/utils/formatters';
+import { getDisplayUsername, truncateDisplayName } from '@/utils/formatters';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -118,7 +118,7 @@ const ExpertProfile: React.FC = () => {
             )}
             <div>
               <Title level={2} className={styles.headerTitle}>
-                {expert.first_name} {expert.last_name}
+                {truncateDisplayName(`${expert.first_name || ''} ${expert.last_name || ''}`.trim())}
                 {expert.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
               </Title>
               <Text type="secondary">{getDisplayUsername(expert)}</Text>
@@ -346,7 +346,7 @@ const ExpertProfile: React.FC = () => {
                       </Text>
                       <br />
                       <Text type="secondary" className={styles.reviewAuthorMeta}>
-                        {review.client.first_name} {review.client.last_name}
+                        {truncateDisplayName([review.client.first_name, review.client.last_name].filter(Boolean).join(' '))}
                       </Text>
                     </div>
                   </div>

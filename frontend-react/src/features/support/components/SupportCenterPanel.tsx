@@ -27,6 +27,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { supportRequestsApi } from '@/features/support/api/requests';
 import { getMediaUrl } from '@/config/api';
+import { truncateFileName } from '@/utils/formatters';
 import styles from './SupportCenterPanel.module.css';
 import type {
   SupportActivityResponse,
@@ -250,7 +251,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                             href={getMediaUrl(file.url)}
                             target="_blank"
                           >
-                            {file.name}
+                            {truncateFileName(file.name)}
                           </Button>
                         ))}
                       </Space>

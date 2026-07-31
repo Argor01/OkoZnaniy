@@ -26,6 +26,7 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
   const [isConnected, setIsConnected] = useState(false);
   const reconnectAttempts = useRef(0);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const onNewMessageRef = useRef(onNewMessage);
   onNewMessageRef.current = onNewMessage;
 
@@ -50,6 +51,13 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
     ws.onopen = () => {
       setIsConnected(true);
       reconnectAttempts.current = 0;
+
+      if (heartbeatRef.current) clearInterval(heartbeatRef.current);
+      heartbeatRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 25000);
     };
 
     ws.onmessage = (event) => {
@@ -65,8 +73,12 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
 
     ws.onclose = () => {
       setIsConnected(false);
-      
-      if (reconnectAttempts.current < 5) {
+      if (heartbeatRef.current) {
+        clearInterval(heartbeatRef.current);
+        heartbeatRef.current = null;
+      }
+
+      if (reconnectAttempts.current < 10) {
         const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 10000);
         reconnectAttempts.current += 1;
         reconnectTimeoutRef.current = setTimeout(connect, delay);
@@ -83,6 +95,10 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
+    }
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
     }
     if (wsRef.current) {
       wsRef.current.close();
@@ -106,6 +122,19 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
       disconnect();
     };
   }, [chatId, connect, disconnect]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && chatId) {
+        if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+          reconnectAttempts.current = 0;
+          connect();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [chatId, connect]);
 
   return {
     isConnected,

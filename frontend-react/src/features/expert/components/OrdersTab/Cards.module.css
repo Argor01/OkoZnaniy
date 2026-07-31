@@ -115,13 +115,6 @@
   min-width: 0;
 }
 
-.fileTag :global(.ant-tag-content) {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .fileTag:hover {
   color: var(--primary-blue);
   border-color: var(--primary-blue);
@@ -232,5 +225,9 @@
 
   .orderBudget {
     font-size: 20px;
+  }
+
+  .fileTag {
+    max-width: 100%;
   }
 }

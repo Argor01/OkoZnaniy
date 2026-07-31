@@ -4,11 +4,11 @@ import { Modal, Typography, Form, message } from 'antd';
 import { CloseOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { catalogApi } from '@/features/common/api/catalog';
-import { AppButton, AppInput, AppSelect, AppDatePicker } from '@/components/ui';
+import { AppButton, AppInput, AppSelect, AppDatePicker, AddNewItemModal } from '@/components/ui';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import styles from './IndividualOfferModal.module.css';
 import modalStyles from '../../../expert/modals/MessageModalNew.module.css';
-import {useSubjects, useWorkTypes } from '@/hooks/queries';
+import { useSortedSubjects, useSortedWorkTypes } from '@/hooks';
 
 const { Text, Title } = Typography;
 
@@ -53,30 +53,19 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
   const { isMobile, isTablet, isDesktop } = useDeviceType();
   const queryClient = useQueryClient();
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
-  const [newSubjectName, setNewSubjectName] = useState('');
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
-  const [newWorkTypeName, setNewWorkTypeName] = useState('');
 
   const isIndividual = variant === 'individual';
 
-  const {data: subjects = [], isLoading: subjectsLoading} = useSubjects();
+  const {data: subjects = [], isLoading: subjectsLoading} = useSortedSubjects();
 
-  const {data: workTypes = [], isLoading: workTypesLoading} = useWorkTypes();
-
-  const normalizeName = (raw: string) =>
-    raw
-      .trim()
-      .split(' ')
-      .filter(Boolean)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+  const {data: workTypes = [], isLoading: workTypesLoading} = useSortedWorkTypes();
 
   const createSubjectMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createSubject(name),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setNewSubjectModalVisible(false);
-      setNewSubjectName('');
       message.success('Новый предмет добавлен');
       if (data?.id) form.setFieldValue('subject_id', data.id);
     },
@@ -90,7 +79,6 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['work-types'] });
       setNewWorkTypeModalVisible(false);
-      setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
       if (data?.id) form.setFieldValue('work_type_id', data.id);
     },
@@ -354,65 +342,25 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
         </Form>
       </div>
 
-      <Modal
+      <AddNewItemModal
         title="Добавить новый предмет"
+        placeholder="Название предмета"
+        emptyMessage="Введите название предмета"
         open={newSubjectModalVisible}
-        onOk={() => {
-          const name = normalizeName(newSubjectName);
-          if (!name) {
-            message.error('Введите название предмета');
-            return;
-          }
-          createSubjectMutation.mutate(name);
-        }}
-        onCancel={() => {
-          setNewSubjectModalVisible(false);
-          setNewSubjectName('');
-        }}
+        onOk={(name) => createSubjectMutation.mutate(name)}
+        onCancel={() => setNewSubjectModalVisible(false)}
         confirmLoading={createSubjectMutation.isPending}
-        okText="Добавить"
-        cancelText="Отмена"
-      >
-        <AppInput
-          placeholder="Название предмета"
-          value={newSubjectName}
-          onChange={(e) => setNewSubjectName(e.target.value)}
-          onPressEnter={() => {
-            const name = normalizeName(newSubjectName);
-            if (name) createSubjectMutation.mutate(name);
-          }}
-        />
-      </Modal>
+      />
 
-      <Modal
+      <AddNewItemModal
         title="Добавить новый тип работы"
+        placeholder="Название типа работы"
+        emptyMessage="Введите название типа работы"
         open={newWorkTypeModalVisible}
-        onOk={() => {
-          const name = normalizeName(newWorkTypeName);
-          if (!name) {
-            message.error('Введите название типа работы');
-            return;
-          }
-          createWorkTypeMutation.mutate(name);
-        }}
-        onCancel={() => {
-          setNewWorkTypeModalVisible(false);
-          setNewWorkTypeName('');
-        }}
+        onOk={(name) => createWorkTypeMutation.mutate(name)}
+        onCancel={() => setNewWorkTypeModalVisible(false)}
         confirmLoading={createWorkTypeMutation.isPending}
-        okText="Добавить"
-        cancelText="Отмена"
-      >
-        <AppInput
-          placeholder="Название типа работы"
-          value={newWorkTypeName}
-          onChange={(e) => setNewWorkTypeName(e.target.value)}
-          onPressEnter={() => {
-            const name = normalizeName(newWorkTypeName);
-            if (name) createWorkTypeMutation.mutate(name);
-          }}
-        />
-      </Modal>
+      />
     </Modal>
   );
 };

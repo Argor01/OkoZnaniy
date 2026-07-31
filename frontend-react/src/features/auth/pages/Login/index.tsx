@@ -14,7 +14,10 @@ import styles from '@/features/auth/Login.module.css';
 const Login: React.FC = () => {
   const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('register');
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const saved = sessionStorage.getItem('auth_active_tab');
+    return saved === 'login' || saved === 'register' ? saved : 'register';
+  });
   const { navigate, isAdminLogin, isDirectorLogin, navigateByRole } = useAuthNavigation();
   const location = window.location;
 
@@ -48,11 +51,13 @@ const Login: React.FC = () => {
     const tab = params.get('tab');
     if (tab === 'login' || tab === 'register') {
       setActiveTab(tab);
+      sessionStorage.setItem('auth_active_tab', tab);
     }
     const refCode = params.get('ref');
     if (refCode) {
       setReferralCode(refCode);
       setActiveTab('register');
+      sessionStorage.setItem('auth_active_tab', 'register');
     } else {
       clearStoredReferralCode();
     }
@@ -292,7 +297,10 @@ const Login: React.FC = () => {
               <Tabs
                 className={styles.antdTabsClean}
                 activeKey={activeTab}
-                onChange={(key) => setActiveTab(key)}
+                onChange={(key) => {
+                  setActiveTab(key);
+                  sessionStorage.setItem('auth_active_tab', key);
+                }}
                 items={[
                   {
                     key: 'register',

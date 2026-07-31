@@ -749,6 +749,16 @@
 
 .openRequestsAttachmentsRow {
   margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.openRequestsAttachmentsRow :global(.ant-tag) {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .openRequestsTagsRow {

@@ -12,6 +12,7 @@ import {
 import { App, Avatar, Button, Empty, message, Skeleton, Tag, Tooltip, Typography } from 'antd';
 import { Segmented } from 'antd';
 import { apiClient } from '@/api/client';
+import { truncateDisplayName } from '@/utils/formatters';
 import { walletApi } from '@/features/wallet/api/wallet';
 import styles from '../ProfileV2.module.css';
 
@@ -240,9 +241,9 @@ const ProfileV2: React.FC = () => {
               </span>
             </div>
             <h1 className={styles.heroName}>
-              {me?.first_name || me?.username} {me?.last_name || ''}
+              {truncateDisplayName(me?.first_name || me?.username || '')} {truncateDisplayName(me?.last_name || '')}
             </h1>
-            <div className={styles.heroHandle}>{me?.username}</div>
+            <div className={styles.heroHandle}>{truncateDisplayName(me?.username || '')}</div>
 
             <div className={styles.heroActions}>
               <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/orders/place-order')} className={styles.heroBtnPrimary}>

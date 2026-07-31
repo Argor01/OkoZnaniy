@@ -15,7 +15,7 @@ import {
 } from '@ant-design/icons';
 import { Order, OrderFile } from '@/features/orders/types/orders';
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/utils/constants';
-import { formatCurrency, getDisplayUsername } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername, truncateFileName } from '@/utils/formatters';
 import { AppButton } from './AppButton';
 import { AppCard } from './AppCard';
 import dayjs from 'dayjs';
@@ -201,7 +201,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
                       onDownloadFile?.(order.id, file);
                     }}
                   >
-                    {fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
+                    {isMobile ? truncateFileName(fileName) : fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
                   </Tag>
                 </Tooltip>
               );

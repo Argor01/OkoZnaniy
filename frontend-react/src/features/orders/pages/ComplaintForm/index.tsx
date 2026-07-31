@@ -8,6 +8,7 @@ import { ordersApi, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
 import { supportRequestsApi } from '@/features/support/api/requests';
 import { AppButton, AppCard } from '@/components/ui';
+import { truncateDisplayName } from '@/utils/formatters';
 import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutlined, ClockCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { formatCurrency } from '@/utils/formatters';
 import styles from './ComplaintForm.module.css';
@@ -228,8 +229,8 @@ const ComplaintForm: React.FC = () => {
                   <div className={styles.partyMeta}>
                     <Text strong className={styles.partyNameLink}>
                       {plaintiff?.first_name && plaintiff?.last_name 
-                        ? `${plaintiff.first_name} ${plaintiff.last_name}`
-                        : plaintiff?.username || 'Неизвестен'}
+                        ? truncateDisplayName(`${plaintiff.first_name} ${plaintiff.last_name}`)
+                        : truncateDisplayName(plaintiff?.username || 'Неизвестен')}
                     </Text>
                     <div className={styles.partySubline}>
                       <span className={styles.partyRolePill}>{isClient ? 'Заказчик' : 'Исполнитель'}</span>
@@ -251,8 +252,8 @@ const ComplaintForm: React.FC = () => {
                   <div className={styles.partyMeta}>
                     <Text strong className={styles.partyNameLink}>
                       {defendant?.first_name && defendant?.last_name 
-                        ? `${defendant.first_name} ${defendant.last_name}`
-                        : defendant?.username || 'Неизвестен'}
+                        ? truncateDisplayName(`${defendant.first_name} ${defendant.last_name}`)
+                        : truncateDisplayName(defendant?.username || 'Неизвестен')}
                     </Text>
                     <div className={styles.partySubline}>
                       <span className={styles.partyRolePill}>{isClient ? 'Исполнитель' : 'Заказчик'}</span>

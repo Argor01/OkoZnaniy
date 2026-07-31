@@ -366,12 +366,15 @@ class ChatViewSet(viewsets.ModelViewSet):
                 except Exception:
                     pass
 
-        # WebSocket СѓРІРµРґРѕРјР»РµРЅРёРµ Рѕ РЅРѕРІРѕРј СЃРѕРѕР±С‰РµРЅРёРё
+        # WebSocket уведомление о новом сообщении
         try:
             message_serializer = MessageSerializer(message, context={'request': request})
             notify_chat_message(chat.id, message_serializer.data)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Failed to send WS chat_message_broadcast for chat %s", chat.id)
 
-            # Уведомляем участников чата через персональные уведомления (создаёт DB + WS)
+        try:
             for participant in chat.participants.exclude(id=request.user.id):
                 sender_name = request.user.get_full_name() or request.user.username
                 chat_label = f"по заказу №{chat.order.id}" if chat.order else "в чате"

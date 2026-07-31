@@ -225,3 +225,11 @@
 .page {
   animation: fadeInUp 0.4s ease-out;
 }
+
+.fileLink {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
