@@ -1437,6 +1437,31 @@
   line-height: 1;
 }
 
+:global([data-theme="dark"]) .attachedFiles {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .attachedFileItem {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+:global([data-theme="dark"]) .attachedFileIcon {
+  color: #a78bfa;
+}
+
+:global([data-theme="dark"]) .attachedFileName {
+  color: #e2e8f0;
+}
+
+:global([data-theme="dark"]) .attachedFileSize {
+  color: #94a3b8;
+}
+
+:global([data-theme="dark"]) .attachedFileRemoveButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
 .messageRow {
   display: flex;
 }

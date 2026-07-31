@@ -374,28 +374,6 @@ class ChatViewSet(viewsets.ModelViewSet):
             import logging
             logging.getLogger(__name__).exception("Failed to send WS chat_message_broadcast for chat %s", chat.id)
 
-        try:
-            for participant in chat.participants.exclude(id=request.user.id):
-                sender_name = request.user.get_full_name() or request.user.username
-                chat_label = f"по заказу №{chat.order.id}" if chat.order else "в чате"
-                text_preview = (message.text or '')[:100]
-                safe_call(
-                    NotificationService.create_notification,
-                    recipient=participant,
-                    type=NotificationType.NEW_MESSAGE,
-                    title=f"Новое сообщение {chat_label}",
-                    message=f"{sender_name}: {text_preview}",
-                    related_object_id=chat.id,
-                    related_object_type='chat',
-                    data={
-                        'chat_id': chat.id,
-                        'message_id': message.id,
-                        'sender_id': request.user.id,
-                    },
-                )
-        except Exception:
-            pass
-
         if message_type == 'offer':
             try:
                 recipient = chat.client

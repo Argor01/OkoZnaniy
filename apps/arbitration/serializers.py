@@ -121,6 +121,7 @@ class ArbitrationCaseListSerializer(serializers.ModelSerializer):
     plaintiff = UserSerializer(read_only=True)
     defendant = UserSerializer(read_only=True)
     assigned_admin = UserSerializer(read_only=True)
+    order = OrderSerializer(read_only=True)
     
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     reason_display = serializers.CharField(source='get_reason_display', read_only=True)
@@ -134,7 +135,7 @@ class ArbitrationCaseListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'case_number', 'plaintiff', 'defendant', 'subject',
             'status', 'status_display', 'priority', 'priority_display',
-            'reason', 'reason_display', 'assigned_admin',
+            'reason', 'reason_display', 'assigned_admin', 'order',
             'created_at', 'updated_at', 'messages_count', 'unread_count'
         ]
     

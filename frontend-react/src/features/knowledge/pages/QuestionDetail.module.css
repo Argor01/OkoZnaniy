@@ -93,7 +93,12 @@
 }
 
 .answerTextarea {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.answerTextarea :global(.ant-input) {
+  padding: 12px 16px;
+  line-height: 1.7;
 }
 
 .submitButton {

@@ -28,6 +28,7 @@ import { ru } from 'date-fns/locale';
 import { supportRequestsApi } from '@/features/support/api/requests';
 import { getMediaUrl } from '@/config/api';
 import { truncateFileName } from '@/utils/formatters';
+import { useCurrentUser } from '@/hooks/queries';
 import styles from './SupportCenterPanel.module.css';
 import type {
   SupportActivityResponse,
@@ -64,6 +65,7 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
   onNavigateToForm,
 }) => {
   const navigate = useNavigate();
+  const { data: currentUser } = useCurrentUser();
   const [items, setItems] = React.useState<SupportConversation[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [selectedType, setSelectedType] = React.useState<'all' | SupportConversationType>('all');
@@ -209,16 +211,17 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
           if (item.kind === 'message') {
             const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
             const isSupportMessage = Boolean(item.is_admin) || item.sender?.role === 'admin';
+            const isMyMessage = Boolean(currentUser && item.sender?.id === currentUser.id);
             const isOrderChat = item.source === 'order_chat';
 
             return (
               <div
                 key={item.id}
-                className={isSupportMessage ? styles.feedRowSupport : styles.feedRowUser}
+                className={isMyMessage ? styles.feedRowUser : styles.feedRowSupport}
               >
                 <Card
                   size="small"
-                  className={`${styles.feedMessageCard} ${isSupportMessage ? styles.feedMessageSupport : styles.feedMessageUser}`}
+                  className={`${styles.feedMessageCard} ${isMyMessage ? styles.feedMessageUser : styles.feedMessageSupport}`}
                   style={{
                     width: 'fit-content',
                     maxWidth: compact ? '100%' : '78%',
@@ -233,9 +236,9 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                         <Tag color="purple">Чат по заказу</Tag>
                       ) : isSupportMessage ? (
                         <Tag color="purple">Поддержка</Tag>
-                      ) : (
+                      ) : isMyMessage ? (
                         <Tag>Вы</Tag>
-                      )}
+                      ) : null}
                       <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
                     </Space>
                     <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>
