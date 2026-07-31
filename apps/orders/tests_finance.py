@@ -734,6 +734,7 @@ class AcceptBidTests(TestCase):
             order=order, expert=self.expert,
             amount=Decimal('2500'), prepayment_percent=50,
         )
+        WalletService.topup(self.client_u, Decimal('2500'))
         self.api.force_authenticate(self.client_u)
         resp = self.api.post(
             f'/api/orders/orders/{order.id}/accept_bid/',

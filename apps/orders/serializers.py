@@ -112,7 +112,7 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'title', 'description', 'budget', 'deadline', 'status', 'created_at',
+            'id', 'title', 'description', 'budget', 'price_type', 'deadline', 'status', 'created_at',
             'subject', 'topic', 'work_type', 'complexity', 'custom_subject', 'custom_work_type',
             'additional_requirements', 'client', 'files', 'responses_count', 'user_has_bid',
             'available_actions'
@@ -153,6 +153,7 @@ class OrderSerializer(serializers.ModelSerializer):
     
     # Явно указываем budget как FloatField для корректной сериализации
     budget = serializers.FloatField(required=False, allow_null=True)
+    price_type = serializers.ChoiceField(choices=Order.PRICE_TYPE_CHOICES, required=False, default='fixed')
 
     # Поля для создания/обновления заказа
     subject_id = serializers.PrimaryKeyRelatedField(
@@ -176,7 +177,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = [
             'id', 'client', 'expert', 'subject', 'topic', 'work_type', 
-            'complexity', 'title', 'description', 'deadline', 'budget', 
+            'complexity', 'title', 'description', 'deadline', 'budget', 'price_type',
             'status', 'created_at', 'updated_at', 'files', 'comments', 'bids',
             'subject_id', 'topic_id', 'work_type_id', 'complexity_id',
             'custom_topic', 'custom_subject', 'custom_work_type', 
@@ -230,19 +231,25 @@ class OrderSerializer(serializers.ModelSerializer):
                     'deadline': 'Дедлайн не может быть в прошлом'
                 })
         
-        # Проверяем цену - бюджет может быть пустым (None, пустая строка, 0), это допустимо
+        # Проверяем цену
         budget = data.get('budget')
+        price_type = data.get('price_type') or 'fixed'
         # Конвертируем пустую строку в None
         if budget == '' or budget is None:
             data['budget'] = None
-        elif budget is not None and budget <= 0:
+        if price_type == 'fixed' and data['budget'] is None:
             raise serializers.ValidationError({
-                'budget': 'Цена должна быть больше 0'
+                'budget': 'Укажите стоимость заказа'
             })
-        elif budget is not None and budget > MAX_ORDER_BUDGET:
-            raise serializers.ValidationError({
-                'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
-            })
+        if data['budget'] is not None:
+            if data['budget'] <= 0:
+                raise serializers.ValidationError({
+                    'budget': 'Цена должна быть больше 0'
+                })
+            if data['budget'] > MAX_ORDER_BUDGET:
+                raise serializers.ValidationError({
+                    'budget': f'Цена не может превышать {MAX_ORDER_BUDGET:,.2f}'.replace(',', ' ')
+                })
         
         return data
 

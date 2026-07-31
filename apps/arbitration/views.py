@@ -344,6 +344,11 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     def send_message(self, request, pk=None):
         """Отправить сообщение в дело"""
         case = self.get_object()
+        if case.status in ['decision_made', 'closed', 'rejected']:
+            return Response(
+                {'error': 'Обращение закрыто. Отправка сообщений недоступна'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         text = request.data.get('message', '').strip()
         is_internal = request.data.get('is_internal', False)
         
@@ -958,6 +963,49 @@ class ComplaintViewSet(viewsets.ModelViewSet):
             is_published=True,
             resolution=resolution,
         )
+        return Response(ComplaintSerializer(complaint).data)
+
+    @action(detail=True, methods=['post'], url_path='appeal')
+    def appeal_complaint(self, request, pk=None):
+        """Обжаловать решение по претензии (доступно истцу и ответчику)"""
+        complaint = self.get_object()
+        user = request.user
+        
+        # Проверяем права - только истец или ответчик могут обжаловать
+        is_plaintiff = complaint.plaintiff_id == user.id
+        is_defendant = complaint.defendant_id == user.id
+        
+        if not (is_plaintiff or is_defendant):
+            return Response(
+                {'detail': 'Только стороны спора могут обжаловать решение'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Можно обжаловать только закрытую или решённую претензию
+        if complaint.status not in ['closed', 'resolved']:
+            return Response(
+                {'detail': 'Можно обжаловать только закрытую или решённую претензию'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        reason = request.data.get('reason', '').strip()
+        
+        try:
+            complaint.appeal(user, reason)
+        except ValueError as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Замораживаем заказ и чаты снова
+        if complaint.order:
+            complaint.order.freeze(f'Претензия #{complaint.id} обжалована')
+        
+        from apps.chat.models import Chat
+        for chat in Chat.objects.filter(order_id=complaint.order_id):
+            chat.freeze(f'Претензия #{complaint.id} обжалована')
+        
         return Response(ComplaintSerializer(complaint).data)
     
     @action(detail=False, methods=['get'], url_path='by-order/(?P<order_id>[^/.]+)')

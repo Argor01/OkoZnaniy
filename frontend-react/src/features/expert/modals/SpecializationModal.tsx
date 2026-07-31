@@ -45,7 +45,7 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
 
 
 
-  const { data: subjects = [] } = useSubjects();
+  const { data: subjects = [], isLoading: subjectsLoading } = useSubjects();
 
   const createSubjectMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createSubject(name),
@@ -204,20 +204,24 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
             getPopupContainer={() => document.body}
             popupStyle={{ zIndex: 2100 }}
             virtual={!isMobile}
+            loading={subjectsLoading}
+            disabled={subjectsLoading}
             popupRender={(menu) => (
               <>
                 {menu}
-                <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border-color, #f0f0f0)' }}>
-                  <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => setNewSubjectModalVisible(true)}
-                    style={{ width: '100%', textAlign: 'left' }}
-                  >
-                    Добавить новый предмет
-                  </Button>
-                </div>
+                {!subjectsLoading && (
+                  <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border-color, #f0f0f0)' }}>
+                    <Button
+                      type="text"
+                      icon={<PlusOutlined />}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => setNewSubjectModalVisible(true)}
+                      style={{ width: '100%', textAlign: 'left' }}
+                    >
+                      Добавить новый предмет
+                    </Button>
+                  </div>
+                )}
               </>
             )}
           />

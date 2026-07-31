@@ -202,6 +202,23 @@ class ArbitrationCaseAPITests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_send_message_on_closed_case_is_blocked(self):
+        for closed_status in ['decision_made', 'closed', 'rejected']:
+            with self.subTest(status=closed_status):
+                case = self._create_case(status=closed_status)
+                self.api_client.force_authenticate(user=self.client_user)
+
+                response = self.api_client.post(
+                    f'/api/arbitration/cases/{case.id}/send-message/',
+                    {'message': 'Message after closing'},
+                    format='json',
+                )
+
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertFalse(
+                    ArbitrationMessage.objects.filter(case=case, text='Message after closing').exists()
+                )
+
     def test_complaint_send_message_creates_order_chat_message(self):
         complaint = self._create_complaint()
         self.api_client.force_authenticate(user=self.client_user)

@@ -133,6 +133,16 @@ class Order(models.Model):
         blank=True,
         validators=[MinValueValidator(Decimal('0.01'))]
     )
+    PRICE_TYPE_CHOICES = [
+        ('fixed', 'Фиксированная цена'),
+        ('negotiable', 'Договорная цена'),
+    ]
+    price_type = models.CharField(
+        max_length=16,
+        choices=PRICE_TYPE_CHOICES,
+        default='fixed',
+        verbose_name="Тип цены"
+    )
     status = models.CharField(
         max_length=32,
         choices=STATUS_CHOICES,

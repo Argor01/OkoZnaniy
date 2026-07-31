@@ -24,12 +24,13 @@ import {
   BellOutlined,
   PushpinOutlined,
   UploadOutlined,
-  WarningOutlined
+  WarningOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './DirectorChatsSection.module.css';
 import { logger } from '@/utils/logger';
-import { createChatRoom, getChatRoomMessages, getChatRooms, sendChatRoomMessage, inviteToChatRoom, updateChatRoom, getDirectorUsers } from '@/features/director/api/directorApi';
+import { createChatRoom, getChatRoomMessages, getChatRooms, sendChatRoomMessage, inviteToChatRoom, updateChatRoom, getDirectorUsers, leaveChatRoom } from '@/features/director/api/directorApi';
 
 const { Text, Title } = Typography;
 const { Search } = Input;
@@ -91,6 +92,7 @@ export const DirectorChatsSection: React.FC = () => {
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
   const [inviteLoading, setInviteLoading] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [leavingChat, setLeavingChat] = useState(false);
   
   const [createRoomForm] = Form.useForm();
   const [inviteUserForm] = Form.useForm();
@@ -236,6 +238,32 @@ export const DirectorChatsSection: React.FC = () => {
       logger.error('Error updating chat room:', error);
       message.error('Ошибка сохранения');
     }
+  };
+
+  const handleLeaveChat = () => {
+    if (!selectedRoom) return;
+    
+    modal.confirm({
+      title: 'Покинуть чат',
+      content: `Вы уверены, что хотите покинуть чат «${selectedRoom.name}»? Вы перестанете получать уведомления от этого чата.`,
+      okText: 'Покинуть',
+      cancelText: 'Отмена',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        setLeavingChat(true);
+        try {
+          await leaveChatRoom(selectedRoom.id);
+          message.success('Вы покинули чат');
+          setSelectedRoom(null);
+          await loadChatRooms();
+        } catch (error) {
+          logger.error('Error leaving chat room:', error);
+          message.error('Ошибка при выходе из чата');
+        } finally {
+          setLeavingChat(false);
+        }
+      },
+    });
   };
 
   const handleFileUpload = async (file: File) => {
@@ -409,6 +437,15 @@ export const DirectorChatsSection: React.FC = () => {
                   size="small" 
                   icon={<SettingOutlined />}
                   onClick={handleOpenSettings}
+                />
+              </Tooltip>
+              <Tooltip title="Покинуть чат">
+                <Button 
+                  size="small" 
+                  danger
+                  icon={<LogoutOutlined />}
+                  onClick={handleLeaveChat}
+                  loading={leavingChat}
                 />
               </Tooltip>
             </Space>

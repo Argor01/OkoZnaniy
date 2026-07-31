@@ -89,6 +89,7 @@ class OrderCreationRegressionTests(TestCase):
             "work_type_id": self.work_type.id,
             "deadline": deadline,
             "budget": "1000",
+            "price_type": "negotiable",
         }
         response = self.api_client.post("/api/orders/orders/", payload, format="json")
         self.assertEqual(
@@ -318,6 +319,7 @@ class OrderChatBootstrapTests(TestCase):
         main_chat = Chat.objects.create(client=self.client_user, expert=self.expert_user)
         main_chat.participants.set([self.client_user, self.expert_user])
         bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"))
+        WalletService.topup(self.client_user, Decimal("3000"))
         self.api_client.force_authenticate(user=self.client_user)
 
         response = self.api_client.post(

@@ -548,9 +548,23 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
             <Card size="small" title="Сообщение по делу">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                <Input.TextArea value={messageText} onChange={(event) => setMessageText(event.target.value)} autoSize={{ minRows: 4, maxRows: 8 }} placeholder="Введите сообщение по арбитражу" />
+                <Input.TextArea
+                  value={messageText}
+                  onChange={(event) => setMessageText(event.target.value)}
+                  autoSize={{ minRows: 4, maxRows: 8 }}
+                  placeholder="Введите сообщение по арбитражу"
+                  disabled={detailData ? ['decision_made', 'closed', 'rejected'].includes(detailData.status) : false}
+                />
                 <div>
-                  <Button type="primary" icon={<SendOutlined />} onClick={handleSendMessage} loading={sending} disabled={!messageText.trim()}>Отправить</Button>
+                  <Button
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={handleSendMessage}
+                    loading={sending}
+                    disabled={!messageText.trim() || (detailData ? ['decision_made', 'closed', 'rejected'].includes(detailData.status) : false)}
+                  >
+                    Отправить
+                  </Button>
                 </div>
               </Space>
             </Card>

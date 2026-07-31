@@ -19,6 +19,7 @@ import {
   CustomerServiceOutlined,
   ExclamationCircleOutlined,
   FileOutlined,
+  LockOutlined,
   MessageOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -279,6 +280,10 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     ? statusMeta[selectedItem.status] ?? { color: 'default', label: selectedItem.status }
     : null;
 
+  const caseClosed =
+    selectedItem?.type === 'arbitration_case' &&
+    ['decision_made', 'closed', 'rejected'].includes(selectedItem.status);
+
   return (
     <>
       <div className={`${styles.container} ${compact ? styles.containerCompact : ''}`}>
@@ -415,26 +420,36 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             {renderFeed()}
 
             <Card className={styles.replyCard} size="small" styles={{ body: { padding: 12 } }}>
-              <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                <Text strong>Ответ по обращению</Text>
-                <Input.TextArea
-                  className={styles.replyInput}
-                  value={reply}
-                  onChange={(event) => setReply(event.target.value)}
-                  autoSize={{ minRows: 4, maxRows: 8 }}
-                  placeholder="Если нужно, оставьте уточнение для поддержки прямо в обращении."
+              {caseClosed ? (
+                <Alert
+                  type="info"
+                  showIcon
+                  icon={<LockOutlined />}
+                  message="Обращение закрыто"
+                  description="Отправка сообщений по закрытому обращению недоступна."
                 />
-                <div>
-                  <Button
-                    type="primary"
-                    onClick={handleSendReply}
-                    loading={sending}
-                    disabled={!reply.trim()}
-                  >
-                    Отправить сообщение
-                  </Button>
-                </div>
-              </Space>
+              ) : (
+                <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                  <Text strong>Ответ по обращению</Text>
+                  <Input.TextArea
+                    className={styles.replyInput}
+                    value={reply}
+                    onChange={(event) => setReply(event.target.value)}
+                    autoSize={{ minRows: 4, maxRows: 8 }}
+                    placeholder="Если нужно, оставьте уточнение для поддержки прямо в обращении."
+                  />
+                  <div>
+                    <Button
+                      type="primary"
+                      onClick={handleSendReply}
+                      loading={sending}
+                      disabled={!reply.trim()}
+                    >
+                      Отправить сообщение
+                    </Button>
+                  </div>
+                </Space>
+              )}
             </Card>
           </Space>
         ) : null}

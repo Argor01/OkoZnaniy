@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Form, Typography, message, Modal } from 'antd';
+import { Form, Typography, message, Modal, Radio } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { InboxOutlined, PlusOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { catalogApi } from '@/features/common/api/catalog';
 import { ordersApi } from '@/features/orders/api/orders';
 import { Subject, WorkType } from '@/features/common/types/catalog';
 import { CreateOrderRequest } from '@/features/orders/types/orders';
+import { walletApi } from '@/features/wallet/api/wallet';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
@@ -61,7 +62,15 @@ const CreateOrder: React.FC = () => {
   const [newWorkTypeName, setNewWorkTypeName] = useState('');
   const [newSubjectName, setNewSubjectName] = useState('');
   const [deadlineTime, setDeadlineTime] = useState<DeadlineTimeValues>({ hours: 12, minutes: 0 });
+  const [priceType, setPriceType] = useState<'fixed' | 'negotiable'>('fixed');
   const submitGuardRef = useRef(false);
+
+  const { data: walletBalance } = useQuery({
+    queryKey: ['wallet-balance'],
+    queryFn: walletApi.me,
+    staleTime: 30_000,
+  });
+  const availableBalance = walletBalance ? Number(walletBalance.available_balance) : 0;
 
   const lockSubmit = () => {
     submitGuardRef.current = true;
@@ -174,6 +183,17 @@ const CreateOrder: React.FC = () => {
       lockSubmit();
       try {
         setIsUploading(true);
+
+        // Проверка баланса для заказа с фиксированной ценой
+        if (priceType === 'fixed' && values.budget) {
+          const need = Number(values.budget);
+          if (need > availableBalance) {
+            message.error(
+              `Недостаточно средств на балансе для создания заказа. Доступно: ${availableBalance.toLocaleString('ru-RU')} ₽. Пополните баланс в разделе «Кошелёк».`
+            );
+            return;
+          }
+        }
       
         // Логируем данные для отладки
         logger.log('📦 Отправляемые данные заказа:', values);
@@ -191,7 +211,8 @@ const CreateOrder: React.FC = () => {
                   deadline: deadlineWithTime.toISOString(),
                   subject_id: values.subject,
                   work_type_id: values.work_type,
-                  budget: values.budget || null,
+                  budget: priceType === 'fixed' ? (values.budget || null) : null,
+                  price_type: priceType,
                   custom_topic: values.title,
                   client_note: values.client_note || undefined,
                 };
@@ -475,35 +496,56 @@ const CreateOrder: React.FC = () => {
               />
             </Form.Item>
 
-
-            
-                        <Form.Item
-              name="budget"
-              label="Стоимость (₽)"
-              rules={[
-                { 
-                  validator: (_, value) => {
-                    if (value !== undefined && value !== null && Number(value) <= 0) {
-                      return Promise.reject(new Error('Стоимость должна быть больше 0'));
-                    }
-                    if (value !== undefined && value !== null && Number(value) > MAX_ORDER_BUDGET) {
-                      return Promise.reject(new Error(`Стоимость не может превышать ${MAX_ORDER_BUDGET.toLocaleString('ru-RU')} ₽`));
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
-            >
-              <AppInput.Number
-                placeholder="Стоимость (необязательно)"
-                min={1}
-                max={MAX_ORDER_BUDGET}
-                className={`${styles.priceInput} ${styles.fullWidth}`}
-              />
+            <Form.Item label="Тип цены">
+              <Radio.Group value={priceType} onChange={(e) => setPriceType(e.target.value)}>
+                <Radio value="fixed">Фиксированная цена</Radio>
+                <Radio value="negotiable">Договорная цена</Radio>
+              </Radio.Group>
             </Form.Item>
 
-            
-                        <Form.Item
+            {priceType === 'fixed' ? (
+              <div className={styles.priceSection}>
+                <Typography.Text type="secondary">
+                  Доступно на балансе: {availableBalance.toLocaleString('ru-RU')} ₽
+                </Typography.Text>
+              </div>
+            ) : (
+              <div className={styles.priceSection}>
+                <Typography.Text type="secondary">
+                  Вы публикуете заказ с договорной ценой — эксперты предложат свою стоимость в откликах.
+                </Typography.Text>
+              </div>
+            )}
+
+            {priceType === 'fixed' && (
+              <Form.Item
+                name="budget"
+                label="Стоимость (₽)"
+                rules={[
+                  { required: true, message: 'Укажите стоимость заказа' },
+                  { 
+                    validator: (_, value) => {
+                      if (value !== undefined && value !== null && Number(value) <= 0) {
+                        return Promise.reject(new Error('Стоимость должна быть больше 0'));
+                      }
+                      if (value !== undefined && value !== null && Number(value) > MAX_ORDER_BUDGET) {
+                        return Promise.reject(new Error(`Стоимость не может превышать ${MAX_ORDER_BUDGET.toLocaleString('ru-RU')} ₽`));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
+              >
+                <AppInput.Number
+                  placeholder="Стоимость"
+                  min={1}
+                  max={MAX_ORDER_BUDGET}
+                  className={`${styles.priceInput} ${styles.fullWidth}`}
+                />
+              </Form.Item>
+            )}
+
+            <Form.Item
               name="files"
               label="Прикрепить файлы (необязательно)"
             >

@@ -483,3 +483,12 @@ class Complaint(models.Model):
         self.resolution = resolution
         self.resolved_at = timezone.now()
         self.save(update_fields=['status', 'resolution', 'resolved_at', 'updated_at'])
+
+    def appeal(self, user, reason: str = ''):
+        """Обжаловать решение по претензии - переводит в статус in_progress"""
+        if self.status not in ['closed', 'resolved']:
+            raise ValueError('Можно обжаловать только закрытую или решённую претензию')
+        self.status = 'in_progress'
+        self.resolution = (self.resolution or '') + f'\n\n[Обжаловано {user.get_full_name() or user.username}: {reason}]'
+        self.resolved_at = None
+        self.save(update_fields=['status', 'resolution', 'resolved_at', 'updated_at'])

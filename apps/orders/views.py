@@ -94,7 +94,7 @@ def _order_payment_amount(order):
 
 def _approve_review_order_atomically(order, user):
     with transaction.atomic():
-        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        locked_order = Order.objects.select_for_update(of=('self',)).select_related('client', 'expert').get(pk=order.pk)
         if locked_order.client_id != user.id:
             raise PermissionDenied('Недостаточно прав.')
         if locked_order.status != 'review':
@@ -120,7 +120,7 @@ def _approve_review_order_atomically(order, user):
 
 def _cancel_overdue_order_atomically(order, user):
     with transaction.atomic():
-        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        locked_order = Order.objects.select_for_update(of=('self',)).select_related('client', 'expert').get(pk=order.pk)
         if locked_order.client_id != user.id:
             raise PermissionDenied('Недостаточно прав.')
         if not locked_order.expert_id:
@@ -141,7 +141,7 @@ def _cancel_overdue_order_atomically(order, user):
 
 def _reject_review_order_atomically(order, user):
     with transaction.atomic():
-        locked_order = Order.objects.select_for_update().select_related('client', 'expert').get(pk=order.pk)
+        locked_order = Order.objects.select_for_update(of=('self',)).select_related('client', 'expert').get(pk=order.pk)
         if locked_order.client_id != user.id:
             raise PermissionDenied('Недостаточно прав.')
         if locked_order.status != 'review':
@@ -234,6 +234,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                     'Используйте архивирование вместо удаления.'
                 )
 
+        # Возврат холда при удалении заказа с фиксированной ценой
+        if instance.price_type == 'fixed':
+            _refund_order_hold_if_any(instance)
+
         instance.delete()
 
     @staticmethod
@@ -310,6 +314,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
+        # Проверка баланса для заказа с фиксированной ценой
+        price_type = request.data.get('price_type') or 'fixed'
+        budget = request.data.get('budget')
+        if price_type == 'fixed' and budget not in (None, ''):
+            try:
+                amount = Decimal(str(budget))
+            except Exception:
+                amount = Decimal('0')
+            if amount > 0:
+                try:
+                    available = WalletService.get_balance(request.user)['available_balance']
+                    if available < amount:
+                        return Response(
+                            {'detail': 'Недостаточно средств на балансе для создания заказа с фиксированной ценой. '
+                                       f'Доступно: {available} ₽. Пополните баланс в разделе «Кошелёк».'},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                except Exception as e:
+                    logger.error(f"[OrderViewSet.create] Balance check failed for user {request.user.id}: {e}", exc_info=True)
         try:
             return super().create(request, *args, **kwargs)
         except Exception as e:
@@ -331,7 +354,16 @@ class OrderViewSet(viewsets.ModelViewSet):
                 'deadline': 'Дедлайн не может быть в прошлом'
             })
         
-        serializer.save(client=self.request.user)
+        order = serializer.save(client=self.request.user)
+        
+        # Холд средств для заказов с фиксированной ценой
+        if order.price_type == 'fixed' and order.budget:
+            try:
+                _reserve_order_hold_if_needed(order, order.budget)
+            except InsufficientFunds:
+                # Если не удалось захолдить - откатываем создание заказа
+                order.delete()
+                raise
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def available(self, request):
@@ -617,7 +649,29 @@ class OrderViewSet(viewsets.ModelViewSet):
             bid = Bid.objects.select_related('expert', 'order').get(id=bid_id, order=order)
         except Bid.DoesNotExist:
             return Response({'detail': 'Ставка не найдена'}, status=status.HTTP_404_NOT_FOUND)
-        
+
+        # Договорную ставку (без конкретной цены) назначить нельзя — только чат.
+        if bid.amount is None or bid.amount <= 0:
+            return Response(
+                {'detail': 'У исполнителя договорная цена. Согласуйте стоимость в чате — '
+                           'назначить исполнителя без конкретной цены нельзя.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Проверка баланса при назначении исполнителя с конкретной ценой.
+        # При недостатке средств назначение запрещено, но чат остаётся доступен.
+        try:
+            available = WalletService.get_balance(user)['available_balance']
+            if available < bid.amount:
+                return Response(
+                    {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
+                               f'Доступно: {available} ₽. Пополните баланс в разделе «Кошелёк» — '
+                               'общение с исполнителем в чате остаётся доступным.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except Exception as e:
+            logger.error(f"[OrderViewSet.accept_bid] Balance check failed for user {user.id}: {e}", exc_info=True)
+
         with transaction.atomic():
             if order.expert_id and order.expert_id != bid.expert_id and order.status == 'awaiting_expert_acceptance':
                 return Response({'detail': 'Заказ уже ожидает ответа другого исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -730,6 +784,10 @@ class OrderViewSet(viewsets.ModelViewSet):
             order.expert = None
             order.status = 'new'
             order.save(update_fields=['expert', 'status', 'updated_at'])
+        
+        # Возврат холда, так как эксперт отказался
+        if order.price_type == 'fixed':
+            _refund_order_hold_if_any(order)
 
         safe_call(
             NotificationService.create_notification,

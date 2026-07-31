@@ -159,8 +159,13 @@ class ComplaintsApi {
     return response.data;
   }
 
-  async sendMessage(complaintId: number, message: string): Promise<ComplaintChatMessage> {
+async sendMessage(complaintId: number, message: string): Promise<ComplaintChatMessage> {
     const response = await apiClient.post(`${this.baseUrl}${complaintId}/send-message/`, { message });
+    return response.data;
+  }
+
+  async appeal(complaintId: number, reason: string): Promise<Complaint> {
+    const response = await apiClient.post(`${this.baseUrl}${complaintId}/appeal/`, { reason });
     return response.data;
   }
 }

@@ -81,10 +81,12 @@ const ComplaintDetails: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [showCloseModal, setShowCloseModal] = useState(false);
+const [showCloseModal, setShowCloseModal] = useState(false);
   const [closeResolution, setCloseResolution] = useState('');
   const [reviewAction, setReviewAction] = useState<'remove' | 'restore' | null>(null);
   const [reviewResolution, setReviewResolution] = useState('');
+  const [showAppealModal, setShowAppealModal] = useState(false);
+  const [appealReason, setAppealReason] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -153,7 +155,7 @@ const ComplaintDetails: React.FC = () => {
     },
   });
 
-  const reviewModerationMutation = useMutation({
+const reviewModerationMutation = useMutation({
     mutationFn: async ({ id, resolution, action }: { id: number; resolution?: string; action: 'remove' | 'restore' }) => {
       if (action === 'remove') {
         return complaintsApi.removeReview(id, resolution);
@@ -173,6 +175,22 @@ const ComplaintDetails: React.FC = () => {
     },
   });
 
+  const appealComplaintMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: number; reason: string }) => {
+      return complaintsApi.appeal(id, reason);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['complaint', complaintId] });
+      queryClient.invalidateQueries({ queryKey: ['complaints'] });
+      antMessage.success('Претензия обжалована, статус изменён на "В работе"');
+      setShowAppealModal(false);
+      setAppealReason('');
+    },
+    onError: (error: any) => {
+      antMessage.error(error?.response?.data?.detail || 'Не удалось обжаловать претензию');
+    },
+  });
+
   const handleCloseComplaint = () => {
     if (!complaint || !closeResolution.trim()) return;
     closeComplaintMutation.mutate({ id: complaint.id, resolution: closeResolution.trim() });
@@ -180,7 +198,7 @@ const ComplaintDetails: React.FC = () => {
     setCloseResolution('');
   };
 
-  const handleReviewAction = () => {
+const handleReviewAction = () => {
     if (!complaint || !reviewAction) return;
 
     reviewModerationMutation.mutate({
@@ -190,12 +208,18 @@ const ComplaintDetails: React.FC = () => {
     });
   };
 
-  const isPlaintiff = currentUserId === complaint?.plaintiff_id;
+  const handleAppealComplaint = () => {
+    if (!complaint || !appealReason.trim()) return;
+    appealComplaintMutation.mutate({ id: complaint.id, reason: appealReason.trim() });
+  };
+
+const isPlaintiff = currentUserId === complaint?.plaintiff_id;
   const isDefendant = currentUserId === complaint?.defendant_id;
   const canClose = (isPlaintiff || isDefendant) && complaint?.status === 'open';
   const isAdmin = userProfile?.role === 'admin';
   const canModerateReview = isAdmin && complaint?.complaint_type === 'unjustified_review' && !!complaint?.review;
   const isReviewPublished = complaint?.review?.is_published;
+  const canAppeal = (isPlaintiff || isDefendant) && (complaint?.status === 'closed' || complaint?.status === 'resolved');
 
   if (isLoading) {
     return (
@@ -254,7 +278,7 @@ const ComplaintDetails: React.FC = () => {
         </AppButton>
 
         {/* Заголовок */}
-        <div className={styles.header}>
+<div className={styles.header}>
           <Space wrap size={12}>
             {canClose && (
               <AppButton 
@@ -272,6 +296,16 @@ const ComplaintDetails: React.FC = () => {
                 loading={reviewModerationMutation.isPending}
               >
                 {isReviewPublished ? 'Удовлетворить жалобу: убрать отзыв' : 'Отклонить жалобу: вернуть отзыв'}
+              </AppButton>
+            )}
+            {canAppeal && (
+              <AppButton
+                variant="primary"
+                danger
+                onClick={() => setShowAppealModal(true)}
+                loading={appealComplaintMutation.isPending}
+              >
+                Обжаловать решение
               </AppButton>
             )}
           </Space>
@@ -558,8 +592,8 @@ const ComplaintDetails: React.FC = () => {
           </div>
         </AppCard>
 
-        {/* Чат арбитража - встроенный снизу */}
-        {(complaint.status === 'open' || complaint.status === 'in_progress') && (
+{/* Чат арбитража - встроенный снизу */}
+        {complaint && (
           <AppCard className={styles.chatCard}>
             <div className={styles.chatHeader}>
               <Title level={4} className={styles.chatTitle}>
@@ -567,7 +601,10 @@ const ComplaintDetails: React.FC = () => {
                 Чат арбитража
               </Title>
               <Text type="secondary" className={styles.chatSubtitle}>
-                {complaint.status === 'open' ? 'Общение между сторонами спора' : 'Чат в работе'}
+                {complaint.status === 'open' ? 'Общение между сторонами спора' :
+                 complaint.status === 'in_progress' ? 'Чат в работе' :
+                 complaint.status === 'resolved' ? 'Претензия решена — чат в режиме чтения' :
+                 'Претензия закрыта — чат в режиме чтения'}
               </Text>
             </div>
 
@@ -605,37 +642,55 @@ const ComplaintDetails: React.FC = () => {
               <div ref={chatEndRef} />
             </div>
 
-            <div className={styles.chatInputWrapper}>
-              <div className={styles.chatInputRow}>
-                <Upload showUploadList={false}>
-                  <Button icon={<PaperClipOutlined />} className={styles.attachButton} />
-                </Upload>
-                <Input.TextArea
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onPressEnter={(e) => {
-                    if (!e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  placeholder="Напишите сообщение... (Enter для отправки, Shift+Enter для новой строки)"
-                  className={styles.chatInput}
-                  autoSize={{ minRows: 1, maxRows: 4 }}
-                  disabled={sendingMessage || (complaint.status as string) === 'closed' || (complaint.status as string) === 'resolved'}
-                />
-                <AppButton
-                  type="primary"
-                  icon={<SendOutlined />}
-                  onClick={handleSendMessage}
-                  loading={sendingMessage}
-                  disabled={!chatInput.trim() || (complaint.status as string) === 'closed' || (complaint.status as string) === 'resolved'}
-                  className={styles.sendButton}
-                >
-                  {isMobile ? '' : 'Отправить'}
-                </AppButton>
+            {(complaint.status === 'open' || complaint.status === 'in_progress') && (
+              <div className={styles.chatInputWrapper}>
+                <div className={styles.chatInputRow}>
+                  <Upload showUploadList={false}>
+                    <Button icon={<PaperClipOutlined />} className={styles.attachButton} />
+                  </Upload>
+                  <Input.TextArea
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onPressEnter={(e) => {
+                      if (!e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                      }
+                    }}
+                    placeholder="Напишите сообщение... (Enter для отправки, Shift+Enter для новой строки)"
+                    className={styles.chatInput}
+                    autoSize={{ minRows: 1, maxRows: 4 }}
+                    disabled={sendingMessage}
+                  />
+                  <AppButton
+                    type="primary"
+                    icon={<SendOutlined />}
+                    onClick={handleSendMessage}
+                    loading={sendingMessage}
+                    disabled={!chatInput.trim()}
+                    className={styles.sendButton}
+                  >
+                    {isMobile ? '' : 'Отправить'}
+                  </AppButton>
+                </div>
               </div>
-        </div>
+            )}
+
+            {(complaint.status === 'closed' || complaint.status === 'resolved') && (
+              <div className={styles.chatClosedNotice}>
+                <Text type="secondary">
+                  Чат доступен только для чтения. 
+                  {canAppeal && (
+                    <a 
+                      onClick={() => setShowAppealModal(true)} 
+                      style={{ marginLeft: 8, color: 'var(--color-brand-blue-500)', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Обжаловать решение
+                    </a>
+                  )}
+                </Text>
+              </div>
+            )}
           </AppCard>
         )}
 
@@ -672,7 +727,7 @@ const ComplaintDetails: React.FC = () => {
           </div>
         </Modal>
 
-        <Modal
+<Modal
           title={reviewAction === 'remove' ? 'Удовлетворить жалобу на отзыв' : 'Отклонить жалобу на отзыв'}
           open={!!reviewAction}
           onCancel={() => {
@@ -699,6 +754,38 @@ const ComplaintDetails: React.FC = () => {
               value={reviewResolution}
               onChange={(e) => setReviewResolution(e.target.value)}
               placeholder="Можно указать причину решения"
+              rows={4}
+              style={{ marginTop: 8 }}
+            />
+          </div>
+        </Modal>
+
+        <Modal
+          title="Обжаловать решение по претензии"
+          open={showAppealModal}
+          onCancel={() => {
+            setShowAppealModal(false);
+            setAppealReason('');
+          }}
+          onOk={handleAppealComplaint}
+          okText="Обжаловать"
+          cancelText="Отмена"
+          okButtonProps={{
+            loading: appealComplaintMutation.isPending,
+            disabled: !appealReason.trim(),
+          }}
+          width={isMobile ? '100%' : 600}
+          centered
+        >
+          <div style={{ padding: '16px 0' }}>
+            <Typography.Paragraph>
+              Вы хотите обжаловать решение по претензии №{complaint?.id}? Статус претензии изменится на «В работе», и чат снова станет доступным для переписки.
+            </Typography.Paragraph>
+            <Typography.Text strong>Причина обжалования:</Typography.Text>
+            <Input.TextArea
+              value={appealReason}
+              onChange={(e) => setAppealReason(e.target.value)}
+              placeholder="Укажите, почему вы не согласны с решением"
               rows={4}
               style={{ marginTop: 8 }}
             />

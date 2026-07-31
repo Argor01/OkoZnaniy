@@ -81,6 +81,7 @@ export interface Order {
   title: string;
   description: string;
   budget: string | number;
+  price_type?: 'fixed' | 'negotiable';
   deadline: string;
   status: string;
   is_overdue?: boolean;
@@ -121,6 +122,7 @@ export interface CreateOrderRequest {
   custom_topic: string;
   work_type_id: number;
   budget: number | null;
+  price_type?: 'fixed' | 'negotiable';
   additional_requirements?: any;
   client_note?: string;
 }

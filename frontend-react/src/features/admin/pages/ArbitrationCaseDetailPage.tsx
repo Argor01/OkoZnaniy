@@ -106,6 +106,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, handleLogout } = useAdminAuth();
   const [caseData, setCaseData] = useState<ArbitrationCaseDetail | null>(null);
+  const caseLocked = caseData ? ['decision_made', 'closed', 'rejected'].includes(caseData.status) : false;
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -621,14 +622,14 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                       handleSendMessage();
                     }
                   }}
-                  disabled={caseData.status === 'closed'}
+                  disabled={caseLocked}
                 />
                 <Button
                   type="primary"
                   icon={<SendOutlined />}
                   onClick={handleSendMessage}
                   loading={sending}
-                  disabled={!messageText.trim() || caseData.status === 'closed'}
+                  disabled={!messageText.trim() || caseLocked}
                   size="large"
                   style={{ marginTop: 12 }}
                 >

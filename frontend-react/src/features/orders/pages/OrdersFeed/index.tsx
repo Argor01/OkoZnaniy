@@ -63,7 +63,7 @@ const OrdersFeed: React.FC = () => {
   const [orderIdSearch, setOrderIdSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
   const [selectedWorkType, setSelectedWorkType] = useState<number | undefined>();
-  const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 30000]);
+  const [budgetRange, setBudgetRange] = useState<[number, number]>([0, 0]);
   const [responsesFilter, setResponsesFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
@@ -104,11 +104,11 @@ const OrdersFeed: React.FC = () => {
     return [];
   };
   
-  // Для клиентов загружаем их собственные заказы
+  // Для клиентов загружаем свои заказы + доступные заказы других клиентов (новые, без эксперта)
   // Для экспертов - доступные для отклика заказы
   const [available, own] = await Promise.all([
     userProfile?.role === 'client'
-      ? ordersApi.getClientOrders({ ordering: '-created_at' }).then(normalizeOrders).catch((): OrdersFeedOrder[] => [])
+      ? ordersApi.getClientOrders({ ordering: '-created_at', include_available: 'true' }).then(normalizeOrders).catch((): OrdersFeedOrder[] => [])
       : ordersApi.getAvailableOrders().then(normalizeOrders).catch((): OrdersFeedOrder[] => []),
     // Дополнительно для клиентов загружаем все их заказы
     userProfile?.role === 'client'
@@ -235,7 +235,7 @@ const OrdersFeed: React.FC = () => {
         const orderBudget = Number(order.budget);
     const matchesBudget =
       !Number.isFinite(orderBudget) || orderBudget === 0 || 
-      (orderBudget >= budgetRange[0] && orderBudget <= budgetRange[1]);
+      (orderBudget >= budgetRange[0] && (budgetRange[1] <= 0 || orderBudget <= budgetRange[1]));
     
     const matchesResponses = 
       responsesFilter === 'all' ||
@@ -447,7 +447,7 @@ const OrdersFeed: React.FC = () => {
                   <AppInput.Number
                     size="large"
                     min={0}
-                    max={budgetRange[1]}
+                    max={budgetRange[1] > 0 ? budgetRange[1] : 100000}
                     value={budgetRange[0]}
                     onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
                     placeholder="0"
@@ -467,8 +467,8 @@ const OrdersFeed: React.FC = () => {
                     min={budgetRange[0]}
                     max={100000}
                     value={budgetRange[1]}
-                    onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 30000])}
-                    placeholder="30000"
+                    onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 0])}
+                    placeholder="Не ограничено"
                     controls={false}
                     className={styles.budgetInput}
                     formatter={(value) => `${value} ₽`}

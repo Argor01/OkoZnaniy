@@ -87,6 +87,7 @@ class OrderCreationRegressionTests(TestCase):
             "work_type_id": self.work_type.id,
             "deadline": deadline,
             "budget": "1000",
+            "price_type": "negotiable",
         }
         response = self.api_client.post("/api/orders/orders/", payload, format="json")
         self.assertEqual(

@@ -610,7 +610,7 @@ export const sendChatRoomMessage = async (roomId: number, message: string): Prom
 
 export const joinChatRoom = async (roomId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/join_room/`);
+    await apiClient.post(`/director/chat-rooms/${roomId}/join-room/`);
   } catch (error) {
     logger.error('Error joining chat room:', error);
     throw error;
@@ -619,7 +619,7 @@ export const joinChatRoom = async (roomId: number): Promise<void> => {
 
 export const leaveChatRoom = async (roomId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/leave_room/`);
+    await apiClient.post(`/director/chat-rooms/${roomId}/leave-room/`);
   } catch (error) {
     logger.error('Error leaving chat room:', error);
     throw error;
@@ -628,7 +628,7 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
 
 export const inviteToChatRoom = async (roomId: number, userId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/invite_user/`, {
+    await apiClient.post(`/director/chat-rooms/${roomId}/invite-user/`, {
       user_id: userId,
     });
   } catch (error) {

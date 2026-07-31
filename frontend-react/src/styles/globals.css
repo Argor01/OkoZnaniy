@@ -923,7 +923,7 @@ html[data-theme="dark"] .ant-message-notice-content span {
     height: auto !important;
     min-height: var(--app-vh, 100dvh) !important;
     padding: max(10px, env(safe-area-inset-top)) 10px max(10px, env(safe-area-inset-bottom)) !important;
-    display: flex !important;
+    display: flex;
     align-items: center;
     justify-content: center;
   }

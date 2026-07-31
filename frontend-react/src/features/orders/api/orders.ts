@@ -12,7 +12,7 @@ export type { Bid, CreateOrderRequest, Order, OrderComment, OrderFile };
 
 export const ordersApi = {
   
-  getClientOrders: async (params?: { status?: string; ordering?: string; inactive?: string | boolean }) => {
+  getClientOrders: async (params?: { status?: string; ordering?: string; inactive?: string | boolean; include_available?: string }) => {
     const response = await apiClient.get(API_ENDPOINTS.orders.clientOrders, { params });
     return response.data;
   },
