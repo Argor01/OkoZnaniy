@@ -24,7 +24,8 @@ import {
   CloseCircleOutlined,
   DownloadOutlined,
   StarOutlined,
-  UserOutlined
+  UserOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useWorks, useWorkActions } from '@/features/admin/hooks';
@@ -81,6 +82,15 @@ export const WorksModerationSection: React.FC = () => {
   const getAuthorName = (work: Work) => {
     const fullName = `${work.author.first_name || ''} ${work.author.last_name || ''}`.trim();
     return fullName || work.author.username;
+  };
+
+  const getModerationStatusIcon = (status: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      pending: <ClockCircleOutlined />,
+      approved: <CheckCircleOutlined />,
+      rejected: <CloseCircleOutlined />,
+    };
+    return icons[status] || null;
   };
 
   const getModerationStatusLabel = (status: string) => {
@@ -148,7 +158,8 @@ export const WorksModerationSection: React.FC = () => {
       width: 120,
       render: (status: string) => (
         <Tag color={getModerationStatusColor(status)}>
-          {getModerationStatusLabel(status)}
+          <span className={styles.statusIcon}>{getModerationStatusIcon(status)}</span>
+          <span className={styles.statusLabel}>{getModerationStatusLabel(status)}</span>
         </Tag>
       ),
     },
@@ -158,7 +169,7 @@ export const WorksModerationSection: React.FC = () => {
       key: 'price',
       width: 100,
       render: (price: number) => (
-        <Text strong>{price.toLocaleString()} ₽</Text>
+        <Text strong style={{ whiteSpace: 'nowrap' }}>{price.toLocaleString()} ₽</Text>
       ),
     },
     {

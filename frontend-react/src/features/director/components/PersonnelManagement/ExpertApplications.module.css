@@ -135,3 +135,19 @@
     font-size: 11px;
   }
 }
+
+:global([data-theme="dark"]) .mobileUserInfo {
+  border-bottom-color: var(--border-color, #293145);
+}
+
+:global([data-theme="dark"]) .mobileUserName {
+  color: var(--text-primary, #f0f0f0);
+}
+
+:global([data-theme="dark"]) .mobileUserEmail {
+  color: var(--text-secondary, #a7b0c3);
+}
+
+:global([data-theme="dark"]) .mobileDate {
+  color: var(--text-secondary, #a7b0c3);
+}

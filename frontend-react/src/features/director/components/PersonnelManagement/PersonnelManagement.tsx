@@ -64,8 +64,8 @@ const PersonnelManagement: React.FC = () => {
     <div>
       <Card
         className={[
-          'personnelManagementCard',
-          isMobile ? 'personnelManagementCardMobile' : '',
+          styles.personnelManagementCard,
+          isMobile ? styles.personnelManagementCardMobile : '',
         ].filter(Boolean).join(' ')}
       >
         <Tabs 
@@ -75,8 +75,8 @@ const PersonnelManagement: React.FC = () => {
           items={items}
           size={isMobile ? 'middle' : 'large'}
           className={[
-            'personnelManagementTabs',
-            isMobile ? 'personnelManagementTabsMobile' : '',
+            styles.personnelManagementTabs,
+            isMobile ? styles.personnelManagementTabsMobile : '',
           ].filter(Boolean).join(' ')}
         />
       </Card>

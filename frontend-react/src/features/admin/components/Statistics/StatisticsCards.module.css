@@ -113,3 +113,26 @@
     font-size: 16px;
   }
 }
+
+:global([data-theme="dark"]) .card {
+  background: #171b27 !important;
+  border-color: #293145 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+:global([data-theme="dark"]) .card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  border-color: #3a4560 !important;
+}
+
+:global([data-theme="dark"]) .card :global(.ant-card-body) {
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .card :global(.ant-statistic-title) {
+  color: #a7b0c3 !important;
+}
+
+:global([data-theme="dark"]) .card :global(.ant-statistic-content) {
+  color: #f8fafc !important;
+}

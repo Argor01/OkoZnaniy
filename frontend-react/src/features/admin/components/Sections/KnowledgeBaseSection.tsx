@@ -490,8 +490,9 @@ export const KnowledgeBaseSection: React.FC = () => {
                 setDeleteArticleId(articleDetail.id);
                 setDeleteModalOpen(true);
               }}
+              className={styles.deleteBtnMobile}
             >
-              Удалить с причиной
+              <span className={styles.deleteBtnText}>Удалить с причиной</span>
             </Button>
           </div>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 16, color: '#888' }}>
@@ -758,13 +759,13 @@ export const KnowledgeBaseSection: React.FC = () => {
                 <Text strong>Причина удаления: </Text>
                 <Text>{deletion.reason}</Text>
                 {deletion.dispute_message && (
-                  <div style={{ marginTop: 8, padding: 12, background: '#fff7e6', borderRadius: 6 }}>
+                  <div className={styles.deletionDispute}>
                     <Text strong style={{ color: '#d48806' }}>Оспаривание автора: </Text>
                     <Text>{deletion.dispute_message}</Text>
                   </div>
                 )}
                 {deletion.admin_final_response && (
-                  <div style={{ marginTop: 8, padding: 12, background: '#f6ffed', borderRadius: 6 }}>
+                  <div className={styles.deletionDecision}>
                     <Text strong style={{ color: '#389e0d' }}>Решение: </Text>
                     <Text>{deletion.admin_final_response}</Text>
                   </div>

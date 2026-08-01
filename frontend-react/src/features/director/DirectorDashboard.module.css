@@ -252,6 +252,14 @@
   margin-bottom: 16px;
 }
 
+:global([data-theme="dark"]) .personnelManagementTabs :global(.ant-tabs-tab) {
+  color: var(--text-secondary, #a7b0c3) !important;
+}
+
+:global([data-theme="dark"]) .personnelManagementTabs :global(.ant-tabs-tab-active) .ant-tabs-tab-btn {
+  color: var(--text-primary, #f0f0f0) !important;
+}
+
 .employeeRegistrationWrapper {
   display: flex;
   justify-content: center;
@@ -1014,4 +1022,95 @@
   .employeeArchiveSearch {
     max-width: 100%;
   }
+}
+
+:global([data-theme="dark"]) .employeeArchiveTable :global(.ant-table-thead) > tr > th {
+  background: var(--bg-tertiary, #202638) !important;
+  border-right-color: var(--border-color, #293145) !important;
+}
+
+:global([data-theme="dark"]) .employeeArchiveTable :global(.ant-table-tbody) > tr > td {
+  border-right-color: var(--border-color, #293145) !important;
+}
+
+:global([data-theme="dark"]) .employeeArchiveTable :global(.ant-table-tbody) > tr:hover > td {
+  border-right-color: var(--border-color, #3a4560) !important;
+}
+
+:global([data-theme="dark"]) .monthlyTurnoverChangeCardPositive {
+  background: rgba(100, 53, 165, 0.15);
+  border-color: #8b5cf6;
+}
+
+:global([data-theme="dark"]) .monthlyTurnoverChangeCardNegative {
+  background: rgba(255, 77, 79, 0.15);
+  border-color: #ff7875;
+}
+
+:global([data-theme="dark"]) .netProfitChangeCardPositive {
+  background: rgba(82, 196, 26, 0.15);
+  border-color: #73d13d;
+}
+
+:global([data-theme="dark"]) .netProfitChangeCardNegative {
+  background: rgba(255, 77, 79, 0.15);
+  border-color: #ff7875;
+}
+
+:global([data-theme="dark"]) .incomeExpenseHighlightCard {
+  background: linear-gradient(135deg, #171b27 0%, rgba(100, 53, 165, 0.15) 100%);
+  border-color: #8b5cf6;
+}
+
+:global([data-theme="dark"]) .incomeExpenseHighlightCardMobile {
+  background: linear-gradient(135deg, #171b27 0%, rgba(100, 53, 165, 0.15) 100%);
+  border-color: #8b5cf6;
+}
+
+:global([data-theme="dark"]) .inProgressRequestsRelatedOrder {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .inProgressRequestsNotesBox {
+  background: rgba(250, 173, 20, 0.1);
+}
+
+:global([data-theme="dark"]) .inProgressRequestsNextAction {
+  background: rgba(100, 53, 165, 0.1);
+}
+
+:global([data-theme="dark"]) .openRequestsRelatedOrderBox {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .completedClaimsSolution {
+  background: rgba(82, 196, 26, 0.1);
+}
+
+:global([data-theme="dark"]) .completedRequestsResolutionBox {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .ticketSystemStatsGrid {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .ticketSystemDescriptionCard {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .ticketSystemMessages {
+  background: var(--bg-secondary, #202638);
+}
+
+:global([data-theme="dark"]) .ticketSystemMessageBubble {
+  background: var(--bg-primary, #171b27);
+}
+
+:global([data-theme="dark"]) .pendingApprovalReasonBox {
+  background: rgba(250, 173, 20, 0.1);
+}
+
+:global([data-theme="dark"]) .pendingApprovalActionBox {
+  background: rgba(82, 196, 26, 0.1);
 }

@@ -64,6 +64,21 @@ const getCaretPositionByDigitsCount = (formattedValue: string, digitsCount: numb
   return formattedValue.length;
 };
 
+const fieldLabels: Record<string, string> = {
+  university: 'ВУЗ',
+  start_year: 'Год начала',
+  end_year: 'Год окончания',
+  degree: 'Степень',
+  educations: 'Образование',
+  full_name: 'ФИО',
+  phone: 'Телефон',
+  email: 'Email',
+  biography: 'Биография',
+  work_experience_years: 'Опыт работы',
+  specializations: 'Специализации',
+  portfolio_url: 'Портфолио',
+};
+
 const extractApiErrorMessage = (
   error: unknown,
   fallback: string
@@ -81,11 +96,25 @@ const extractApiErrorMessage = (
 
   for (const [field, value] of Object.entries(responseData)) {
     if (field === 'detail' || field === 'message' || field === 'non_field_errors') continue;
+    const label = fieldLabels[field] || field;
     if (Array.isArray(value) && value[0]) {
-      return `${field}: ${String(value[0])}`;
+      const first = value[0];
+      if (typeof first === 'object' && first !== null) {
+        const nested: string[] = [];
+        for (const [nestedField, nestedVal] of Object.entries(first)) {
+          const nestedLabel = fieldLabels[nestedField] || nestedField;
+          if (Array.isArray(nestedVal) && nestedVal[0]) {
+            nested.push(`${nestedLabel}: ${String(nestedVal[0])}`);
+          } else if (typeof nestedVal === 'string') {
+            nested.push(`${nestedLabel}: ${nestedVal}`);
+          }
+        }
+        return nested.length > 0 ? `${label}: ${nested.join('; ')}` : `${label}: ошибка валидации`;
+      }
+      return `${label}: ${String(first)}`;
     }
     if (typeof value === 'string' && value) {
-      return `${field}: ${value}`;
+      return `${label}: ${value}`;
     }
   }
 
@@ -236,7 +265,7 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
             });
           
           if (educations.length === 0) {
-            message.error('Добавьте хотя бы одно образование');
+            message.error('Добавьте минимум одно образование');
             return;
           }
           
@@ -463,7 +492,11 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
           />
         </Form.Item>
 
-        <Form.Item label="Образование" required tooltip="Добавьте минимум одно образование">
+        <Form.Item 
+          label="Образование" 
+          required 
+          tooltip="Добавьте минимум одно образование"
+        >
           <Form.List name="educations">
             {(fields, { add, remove }) => (
               <>
@@ -501,7 +534,20 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                         <Form.Item
                           {...restField}
                           name={[name, 'start_year']}
-                          rules={[{ required: true, message: 'Год начала' }]}
+                          rules={[
+                            { required: true, message: 'Год начала обязателен' },
+                            {
+                              validator: (_, value) => {
+                                const num = Number(value);
+                                if (!value || isNaN(num)) {
+                                  return Promise.reject(new Error('Введите год'));
+                                }
+                                if (num < 1950) return Promise.reject(new Error('Не ранее 1950'));
+                                if (num > 2100) return Promise.reject(new Error('Не позднее 2100'));
+                                return Promise.resolve();
+                              }
+                            }
+                          ]}
                           className={styles.applicationModalItemSpacing}
                         >
                           <Input 
@@ -516,12 +562,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                                 e.preventDefault();
                               }
                             }}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value && (parseInt(value) < 1950 || parseInt(value) > 2100)) {
-                                e.target.value = Math.max(1950, Math.min(2100, parseInt(value) || 1950)).toString();
-                              }
-                            }}
                           />
                         </Form.Item>
                       </Col>
@@ -529,6 +569,20 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                         <Form.Item
                           {...restField}
                           name={[name, 'end_year']}
+                          rules={[
+                            {
+                              validator: (_, value) => {
+                                if (value === undefined || value === null || value === '') {
+                                  return Promise.resolve();
+                                }
+                                const num = Number(value);
+                                if (isNaN(num)) return Promise.reject(new Error('Введите год'));
+                                if (num < 1950) return Promise.reject(new Error('Не ранее 1950'));
+                                if (num > 2100) return Promise.reject(new Error('Не позднее 2100'));
+                                return Promise.resolve();
+                              }
+                            }
+                          ]}
                           className={styles.applicationModalItemSpacing}
                         >
                           <Input 
@@ -541,12 +595,6 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                             onKeyPress={(e) => {
                               if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                                 e.preventDefault();
-                              }
-                            }}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (value && (parseInt(value) < 1950 || parseInt(value) > 2100)) {
-                                e.target.value = Math.max(1950, Math.min(2100, parseInt(value) || 1950)).toString();
                               }
                             }}
                           />

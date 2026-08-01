@@ -369,7 +369,27 @@
   width: 150px;
 }
 
+.statusIcon {
+  display: none;
+}
+
+.statusLabel {
+  display: inline;
+}
+
+.worksModerationPrice {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
+  .statusIcon {
+    display: inline;
+  }
+
+  .statusLabel {
+    display: none;
+  }
+
   .worksModerationFiltersRow {
     display: grid;
     grid-template-columns: 1fr;

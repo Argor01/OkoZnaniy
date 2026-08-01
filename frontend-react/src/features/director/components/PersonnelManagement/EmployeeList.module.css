@@ -228,3 +228,31 @@
   max-height: calc(100vh - 55px);
   overflow-y: auto;
 }
+
+:global([data-theme="dark"]) .filtersContainer {
+  background: var(--bg-primary, #171b27);
+  border-color: var(--border-color, #293145);
+}
+
+:global([data-theme="dark"]) .tableWrapper {
+  background: var(--bg-primary, #171b27);
+  border-color: var(--border-color, #293145);
+}
+
+:global([data-theme="dark"]) .employeeCard {
+  background: var(--bg-primary, #171b27);
+}
+
+:global([data-theme="dark"]) .customSearchContainer {
+  background: var(--bg-primary, #171b27);
+  border-color: var(--border-color, #293145);
+}
+
+:global([data-theme="dark"]) .customSearchInput {
+  color: var(--text-primary, #f0f0f0);
+}
+
+:global([data-theme="dark"]) .customSearchButton {
+  background: var(--bg-secondary, #202638);
+  color: var(--text-secondary, #a7b0c3);
+}

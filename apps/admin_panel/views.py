@@ -333,12 +333,19 @@ def _ready_work_status(work):
     return 'approved' if getattr(work, 'is_active', False) else 'rejected'
 
 
-def _serialize_ready_work(work):
+def _serialize_ready_work(work, request=None):
     author = getattr(work, 'author', None)
     files = list(getattr(work, 'files', []).all()) if hasattr(work, 'files') else []
     first_file = files[0] if files else None
     rating = getattr(author, 'rating', None) or getattr(work, 'author_rating', None) or 0
     works_count = getattr(author, 'ready_works', None).count() if author and hasattr(author, 'ready_works') else 0
+
+    def _abs_url(relative_url):
+        if not relative_url:
+            return None
+        if request:
+            return request.build_absolute_uri(relative_url)
+        return relative_url
 
     return {
         'id': work.id,
@@ -359,8 +366,8 @@ def _serialize_ready_work(work):
             'rating': float(rating or 0),
             'works_count': works_count,
         },
-        'file_url': first_file.file.url if first_file and getattr(first_file, 'file', None) else None,
-        'preview_url': work.preview.url if getattr(work, 'preview', None) else None,
+        'file_url': _abs_url(first_file.file.url if first_file and getattr(first_file, 'file', None) else None),
+        'preview_url': _abs_url(work.preview.url if getattr(work, 'preview', None) else None),
     }
 
 
@@ -382,7 +389,7 @@ def get_ready_works(request):
     if search:
         works = works.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
-    return Response([_serialize_ready_work(work) for work in works.order_by('-created_at')])
+    return Response([_serialize_ready_work(work, request) for work in works.order_by('-created_at')])
 
 
 @api_view(['POST'])
@@ -416,7 +423,7 @@ def approve_ready_work(request, work_id):
         object_type='ready_work',
         object_id=work.id,
     )
-    return Response(_serialize_ready_work(work))
+    return Response(_serialize_ready_work(work, request))
 
 
 @api_view(['POST'])
@@ -450,7 +457,7 @@ def reject_ready_work(request, work_id):
         object_type='ready_work',
         object_id=work.id,
     )
-    return Response(_serialize_ready_work(work))
+    return Response(_serialize_ready_work(work, request))
 
 
 @api_view(['POST'])

@@ -87,8 +87,35 @@
   flex-shrink: 0;
 }
 
+.articleActions :global(.ant-btn) {
+  flex: 1;
+  min-width: 0;
+}
+
 :global([data-theme="dark"]) .articleMeta {
   color: #a7b0c3;
+}
+
+.deletionDispute {
+  margin-top: 8px;
+  padding: 12px;
+  background: #fff7e6;
+  border-radius: 6px;
+}
+
+.deletionDecision {
+  margin-top: 8px;
+  padding: 12px;
+  background: #f6ffed;
+  border-radius: 6px;
+}
+
+:global([data-theme="dark"]) .deletionDispute {
+  background: rgba(255, 177, 66, 0.12);
+}
+
+:global([data-theme="dark"]) .deletionDecision {
+  background: rgba(82, 196, 26, 0.12);
 }
 
 @media (max-width: 768px) {
@@ -365,5 +392,9 @@
 
   .filtersRow :global(.ant-select) {
     width: 100% !important;
+  }
+
+  .deleteBtnText {
+    display: none;
   }
 }
