@@ -213,8 +213,11 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
     return actions;
   }
 
+  // Для уведомлений о претензиях (complaint_filed) - убираем кнопки "Ответить на претензию" и "Открыть чат заказа"
+  // Пользователь должен переходить в центр обращений для работы с претензией
   if (isClaim) {
-    actions.push({ key: 'answer-claim', label: 'Ответить на претензию', target: '/messages?support=1', primary: true });
+    // Не добавляем никаких действий - просто переход в центр обращений при клике на уведомление
+    return actions;
   }
 
   if (orderId) {

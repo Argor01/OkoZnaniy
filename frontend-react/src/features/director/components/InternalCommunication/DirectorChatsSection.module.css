@@ -3,8 +3,16 @@
 .chatContainer {
   height: 80vh;
   display: flex;
+  flex-direction: column;
   transition: all 0.3s ease;
   gap: 16px;
+}
+
+@media (min-width: 769px) {
+  .chatContainer {
+    flex-direction: row;
+    height: 80vh;
+  }
 }
 
 .chatListCard {
@@ -26,6 +34,11 @@
 
 .chatListCardHidden {
   display: none;
+  height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: none;
 }
 
 .chatListHeader {
@@ -416,13 +429,18 @@
 
   .chatListCard {
     width: 100%;
-    height: 50vh;
+    height: auto;
+    max-height: 50vh;
+    flex-shrink: 0;
   }
 
   .chatMainCard {
     width: 100%;
-    height: 85vh;
+    flex: 1;
+    min-height: 0;
+    height: auto;
   }
+}
 
   .participantAvatar {
     width: 28px;
@@ -546,12 +564,12 @@
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .chatListCard {
-    width: 280px;
+    flex: 0 0 280px;
   }
 }
 
 @media (min-width: 1025px) {
   .chatListCard {
-    width: 350px;
+    flex: 0 0 350px;
   }
 }

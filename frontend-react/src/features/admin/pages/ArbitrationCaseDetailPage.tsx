@@ -107,6 +107,9 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
   const { user, handleLogout } = useAdminAuth();
   const [caseData, setCaseData] = useState<ArbitrationCaseDetail | null>(null);
   const caseLocked = caseData ? ['decision_made', 'closed', 'rejected'].includes(caseData.status) : false;
+  // Разрешаем действия только если дело взято в работу (статус under_review или in_arbitration или awaiting_response)
+  // Заблокировано для: draft, submitted
+  const canMakeDecisions = caseData ? ['under_review', 'in_arbitration', 'awaiting_response'].includes(caseData.status) : false;
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -447,27 +450,33 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
             {/* Действия */}
             <Card title="Действия" className="info-card">
               <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                <Button
-                  type="primary"
-                  block
-                  size="large"
-                  icon={<CheckCircleOutlined />}
-                  onClick={handleTakeInWork}
-                  disabled={caseData.status === 'closed'}
-                >
-                  Взять в работу
-                </Button>
-
-                {caseData.refund_type !== 'none' && (
+                <Tooltip title={canMakeDecisions ? 'Дело уже в работе' : 'Нажмите, чтобы взять дело в работу и начать рассматривать'}>
                   <Button
+                    type="primary"
                     block
                     size="large"
-                    icon={<DollarOutlined />}
-                    onClick={openRefundModal}
-                    disabled={caseData.status === 'closed'}
+                    icon={<CheckCircleOutlined />}
+                    onClick={handleTakeInWork}
+                    disabled={caseData.status === 'closed' || canMakeDecisions}
                   >
-                    Оформить возврат
+                    Взять в работу
                   </Button>
+                </Tooltip>
+
+                {caseData.refund_type !== 'none' && (
+                  <Tooltip
+                    title={!canMakeDecisions ? 'Сначала возьмите дело в работу' : ''}
+                  >
+                    <Button
+                      block
+                      size="large"
+                      icon={<DollarOutlined />}
+                      onClick={openRefundModal}
+                      disabled={caseData.status === 'closed' || !canMakeDecisions}
+                    >
+                      Оформить возврат
+                    </Button>
+                  </Tooltip>
                 )}
 
                 <Popconfirm
@@ -491,7 +500,7 @@ export const ArbitrationCaseDetailPage: React.FC = () => {
                     size="large"
                     danger
                     icon={<CloseCircleOutlined />}
-                    disabled={caseData.status === 'closed'}
+                    disabled={caseData.status === 'closed' || !canMakeDecisions}
                   >
                     Закрыть дело
                   </Button>

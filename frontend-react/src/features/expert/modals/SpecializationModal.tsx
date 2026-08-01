@@ -151,6 +151,8 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       okButtonProps={{
         className: `${styles.buttonPrimary} ${styles.specializationModalButton} ${isMobile ? styles.specializationModalButtonMobile : styles.specializationModalButtonDesktop}`,
         size: isMobile ? 'middle' : 'large',
+        loading: subjectsLoading,
+        disabled: subjectsLoading,
       }}
       cancelButtonProps={{
         className: `${styles.buttonSecondary} ${styles.specializationModalButton} ${isMobile ? styles.specializationModalButtonMobile : styles.specializationModalButtonDesktop}`,
@@ -164,6 +166,11 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
         form={form}
         layout="vertical"
         onFinish={(values: SpecializationFormValues) => {
+          // Не позволяем отправку, пока не загрузились предметы
+          if (subjectsLoading || subjects.length === 0) {
+            message.error('Список предметов ещё загружается, попробуйте через секунду');
+            return;
+          }
           const selectedSubject = subjects.find((s) => s.id === values.subject_id);
           const dataToSend: CreateSpecializationRequest = {
             subject_id: values.subject_id,
@@ -190,9 +197,10 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           name="subject_id"
           rules={[{ required: true, message: 'Выберите специализацию' }]}
           style={{ marginTop: 10 }}
+          validateTrigger={subjectsLoading || subjects.length === 0 ? 'onBlur' : ['onChange', 'onBlur']}
         >
           <Select
-            placeholder="Выберите предмет из списка"
+            placeholder={subjectsLoading || subjects.length === 0 ? 'Загрузка предметов...' : 'Выберите предмет из списка'}
             className={styles.inputField}
             showSearch
             optionFilterProp="label"
@@ -202,10 +210,10 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               label: subject.name,
             }))}
             getPopupContainer={() => document.body}
-            popupStyle={{ zIndex: 2100 }}
+            dropdownStyle={{ zIndex: 2100 }}
             virtual={!isMobile}
             loading={subjectsLoading}
-            disabled={subjectsLoading}
+            disabled={subjectsLoading || subjects.length === 0}
             popupRender={(menu) => (
               <>
                 {menu}

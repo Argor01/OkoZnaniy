@@ -314,92 +314,92 @@ export const DirectorChatsSection: React.FC = () => {
 
   return (
     <div className={styles.chatContainer}>
-      <Card 
-        className={`${styles.chatListCard} ${isMobile && selectedRoom ? styles.chatListCardHidden : ''}`}
-      >
-        <div className={styles.chatListHeader}>
-          <div className={styles.chatListHeaderRow}>
-            <Title level={5} className={styles.chatListTitle}>
-              {isMobile ? 'Чаты' : 'Внутренняя коммуникация'}
-            </Title>
-            <Button 
-              type="primary" 
-              size="small"
-              icon={<PlusOutlined />}
-              onClick={() => setCreateRoomModalVisible(true)}
-            >
-              {isMobile ? '' : 'Создать'}
-            </Button>
-          </div>
-          
-          <Search
-            placeholder="Поиск чатов"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className={styles.chatListSearch}
-          />
-        </div>
-
-        <div className={styles.chatListScroll}>
-          <List
-            dataSource={filteredRooms}
-            loading={loading}
-            locale={{ emptyText: 'Нет чатов' }}
-            renderItem={(room) => (
-              <List.Item
-                className={`${styles.chatRoomItem} ${selectedRoom?.id === room.id ? styles.chatRoomItemActive : ''}`}
-                onClick={() => setSelectedRoom(room)}
+      {!isMobile || !selectedRoom ? (
+        <Card className={styles.chatListCard}>
+          <div className={styles.chatListHeader}>
+            <div className={styles.chatListHeaderRow}>
+              <Title level={5} className={styles.chatListTitle}>
+                {isMobile ? 'Чаты' : 'Внутренняя коммуникация'}
+              </Title>
+              <Button 
+                type="primary" 
+                size="small"
+                icon={<PlusOutlined />}
+                onClick={() => setCreateRoomModalVisible(true)}
               >
-                <List.Item.Meta
-                  avatar={
-                    <Badge count={room.unread_count}>
-                      <div className={`${styles.chatRoomAvatar} ${
-                        room.type === 'general' ? styles.roomTypeGeneral :
-                        room.type === 'department' ? styles.roomTypeDepartment :
-                        room.type === 'project' ? styles.roomTypeProject :
-                        room.type === 'private' ? styles.roomTypePrivate : ''
-                      }`}>
-                        <TeamOutlined />
-                      </div>
-                    </Badge>
-                  }
-                  title={
-                    <div className={styles.chatRoomTitleRow}>
-                      <span className={room.unread_count > 0 ? styles.chatRoomNameUnread : undefined}>
-                        {room.name}
-                      </span>
-                      <div>
-                        <Tag color={getRoomTypeColor(room.type)}>
-                          {getRoomTypeText(room.type)}
-                        </Tag>
-                        {room.is_muted && <BellOutlined className={styles.chatRoomMutedIcon} />}
-                      </div>
-                    </div>
-                  }
-                  description={
-                    <div>
-                      {room.last_message && (
-                        <div className={styles.chatRoomLastMessage}>
-                          <span className={room.unread_count > 0 ? styles.chatRoomLastMessageUnread : undefined}>
-                            {room.last_message.sender.first_name}: {room.last_message.text.length > 30 
-                              ? `${room.last_message.text.substring(0, 30)}...` 
-                              : room.last_message.text
-                            }
-                          </span>
+                {isMobile ? '' : 'Создать'}
+              </Button>
+            </div>
+            
+            <Search
+              placeholder="Поиск чатов"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className={styles.chatListSearch}
+            />
+          </div>
+
+          <div className={styles.chatListScroll}>
+            <List
+              dataSource={filteredRooms}
+              loading={loading}
+              locale={{ emptyText: 'Нет чатов' }}
+              renderItem={(room) => (
+                <List.Item
+                  className={`${styles.chatRoomItem} ${selectedRoom?.id === room.id ? styles.chatRoomItemActive : ''}`}
+                  onClick={() => setSelectedRoom(room)}
+                >
+                  <List.Item.Meta
+                    avatar={
+                      <Badge count={room.unread_count}>
+                        <div className={`${styles.chatRoomAvatar} ${
+                          room.type === 'general' ? styles.roomTypeGeneral :
+                          room.type === 'department' ? styles.roomTypeDepartment :
+                          room.type === 'project' ? styles.roomTypeProject :
+                          room.type === 'private' ? styles.roomTypePrivate : ''
+                        }`}>
+                          <TeamOutlined />
                         </div>
-                      )}
-                      <div className={styles.chatRoomMeta}>
-                        {room.participants?.length || 0} участников
-                        {room.last_message && ` • ${dayjs(room.last_message.sent_at).format('HH:mm')}`}
+                      </Badge>
+                    }
+                    title={
+                      <div className={styles.chatRoomTitleRow}>
+                        <span className={room.unread_count > 0 ? styles.chatRoomNameUnread : undefined}>
+                          {room.name}
+                        </span>
+                        <div>
+                          <Tag color={getRoomTypeColor(room.type)}>
+                            {getRoomTypeText(room.type)}
+                          </Tag>
+                          {room.is_muted && <BellOutlined className={styles.chatRoomMutedIcon} />}
+                        </div>
                       </div>
-                    </div>
-                  }
-                />
-              </List.Item>
-            )}
-          />
-        </div>
-      </Card>
+                    }
+                    description={
+                      <div>
+                        {room.last_message && (
+                          <div className={styles.chatRoomLastMessage}>
+                            <span className={room.unread_count > 0 ? styles.chatRoomLastMessageUnread : undefined}>
+                              {room.last_message.sender.first_name}: {room.last_message.text.length > 30 
+                                ? `${room.last_message.text.substring(0, 30)}...` 
+                                : room.last_message.text
+                              }
+                            </span>
+                          </div>
+                        )}
+                        <div className={styles.chatRoomMeta}>
+                          {room.participants?.length || 0} участников
+                          {room.last_message && ` • ${dayjs(room.last_message.sent_at).format('HH:mm')}`}
+                        </div>
+                      </div>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+          </div>
+        </Card>
+      ) : null}
 
       {selectedRoom ? (
         <Card className={styles.chatMainCard}>
@@ -408,7 +408,7 @@ export const DirectorChatsSection: React.FC = () => {
               {isMobile && (
                 <Button 
                   size="small" 
-                  onClick={() => setSelectedRoom(null)}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSelectedRoom(null); }}
                   className={styles.chatBackButton}
                 >
                   ←

@@ -11,6 +11,7 @@ import {
   BookOutlined,
   NumberOutlined,
   ExclamationCircleOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -61,6 +62,12 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({ visible, onClose, i
   const openSupportCenter = () => {
     onClose();
     navigate('/support');
+  };
+
+  const handleOrderClick = (e: React.MouseEvent, orderId: number) => {
+    e.stopPropagation();
+    onClose();
+    navigate(`/orders/${orderId}`);
   };
 
   return (
@@ -154,7 +161,12 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({ visible, onClose, i
                         <Text strong className={`${styles.arbitrationModalCardTitle} ${isMobile ? styles.arbitrationModalCardTitleMobile : styles.arbitrationModalCardTitleDesktop}`}>
                           Обращение №{item.ticket_number}
                         </Text>
-                        <Text type="secondary" className={`${styles.arbitrationModalCardMeta} ${isMobile ? styles.arbitrationModalCardMetaMobile : styles.arbitrationModalCardMetaDesktop}`}>
+                        <Text 
+                          type="secondary" 
+                          className={`${styles.arbitrationModalCardMeta} ${isMobile ? styles.arbitrationModalCardMetaMobile : styles.arbitrationModalCardMetaDesktop}`}
+                          onClick={(e) => item.order?.id && handleOrderClick(e, item.order.id)}
+                          style={{ cursor: item.order?.id ? 'pointer' : 'default', textDecoration: item.order?.id ? 'underline' : 'none' }}
+                        >
                           {item.order?.id ? `Заказ №${item.order.id}` : 'Без привязки к заказу'}
                         </Text>
                       </div>
@@ -175,7 +187,15 @@ const ArbitrationModal: React.FC<ArbitrationModalProps> = ({ visible, onClose, i
                         <div>
                           <div className={styles.arbitrationModalGridLabel}>Объект спора</div>
                           <div className={styles.arbitrationModalGridValue}>
-                            {item.order?.id ? `Заказ №${item.order.id}` : 'Не указан'}
+                            {item.order?.id ? (
+                              <Text 
+                                type="secondary" 
+                                onClick={(e) => handleOrderClick(e, item.order.id)}
+                                style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                              >
+                                Заказ №${item.order.id}
+                              </Text>
+                            ) : 'Не указан'}
                           </div>
                         </div>
                       </div>
