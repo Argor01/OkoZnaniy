@@ -209,7 +209,10 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
       <div className={styles.feedList}>
         {feedItems.map((item) => {
           if (item.kind === 'message') {
-            const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim() || 'Пользователь';
+            const author = `${item.sender?.first_name ?? ''} ${item.sender?.last_name ?? ''}`.trim()
+              || item.sender?.display_username
+              || item.sender?.username
+              || 'Пользователь';
             const isSupportMessage = Boolean(item.is_admin) || item.sender?.role === 'admin';
             const isMyMessage = Boolean(currentUser && item.sender?.id === currentUser.id);
             const isOrderChat = item.source === 'order_chat';

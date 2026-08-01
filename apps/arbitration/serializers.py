@@ -233,14 +233,13 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
 
             existing = ArbitrationCase.objects.filter(
                 order_id=order_id,
-                plaintiff=user,
             ).exclude(status__in=['closed', 'rejected']).first()
             if existing is not None:
                 raise serializers.ValidationError({
                     'order_id': (
-                        f'По этому заказу у вас уже есть активная претензия '
-                        f'({existing.case_number}). Подать новую можно после '
-                        f'закрытия предыдущей.'
+                        f'По этому заказу уже открыто арбитражное дело '
+                        f'({existing.case_number}). Новое дело можно создать '
+                        f'после закрытия предыдущего.'
                     ),
                     'existing_case_number': existing.case_number,
                 })

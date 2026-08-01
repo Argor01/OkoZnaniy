@@ -51,12 +51,16 @@ export interface SupportFeedItem {
     id: number;
     first_name: string;
     last_name: string;
+    username?: string;
+    display_username?: string;
     role?: string;
   } | null;
   actor?: {
     id: number | null;
     first_name: string;
     last_name: string;
+    username?: string;
+    display_username?: string;
   } | null;
 }
 
