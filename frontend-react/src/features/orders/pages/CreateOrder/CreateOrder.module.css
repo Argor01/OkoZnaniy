@@ -257,7 +257,9 @@
   color: var(--text-primary);
   text-align: center;
   line-height: 1.2;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   max-width: 100%;
 }
 

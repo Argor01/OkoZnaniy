@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import { useBlockedUsers, useUserActions } from '@/features/admin/hooks';
 import { BlockedUser } from '@/features/admin/types/admin';
 import { logger } from '@/utils/logger';
+import { truncateDisplayName } from '@/utils/formatters';
 import styles from '@/features/admin/AdminDashboard.module.css';
 
 const { Text, Title } = Typography;
@@ -104,9 +105,9 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
       render: (record: BlockedUser) => (
         <Space>
           <div>
-            <div><strong>{record.username}</strong></div>
+            <div><strong>{truncateDisplayName(record.username)}</strong></div>
             <Text type="secondary" className={styles.blockedUsersUserMeta}>
-              {record.first_name} {record.last_name}
+              {truncateDisplayName(`${record.first_name || ''} ${record.last_name || ''}`.trim())}
             </Text>
             <br />
             <Text type="secondary" className={styles.blockedUsersUserMeta}>
@@ -283,7 +284,7 @@ export const BlockedUsersTable: React.FC<BlockedUsersTableProps> = ({
 
       
       <Modal
-        title={`Разблокировать пользователя ${selectedUser?.username}`}
+        title={`Разблокировать пользователя ${truncateDisplayName(selectedUser?.username || '')}`}
         open={unblockModalVisible}
         onOk={handleUnblockConfirm}
         onCancel={() => {

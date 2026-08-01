@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserOutlined } from '@ant-design/icons';
 import { getMediaUrl } from '../../../../config/api';
 import { useAuth } from '@/features/auth';
-import { getDisplayUsername } from '@/utils/formatters';
+import { getDisplayUsername, truncateDisplayName } from '@/utils/formatters';
 
 const { Text, Paragraph } = Typography;
 
@@ -163,7 +163,7 @@ const ReviewsTab: React.FC<ReviewsTabProps> = ({ isMobile, expertId }) => {
                       {getDisplayUsername(review.client || {})}
                     </Text>
                     <Text type="secondary" className={styles.reviewUserMeta}>
-                      {review.client?.first_name} {review.client?.last_name}
+                      {truncateDisplayName([review.client?.first_name, review.client?.last_name].filter(Boolean).join(' '))}
                     </Text>
                   </div>
                 </div>

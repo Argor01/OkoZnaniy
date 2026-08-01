@@ -60,16 +60,6 @@ const OrderContent: React.FC<OrderContentProps> = ({
     return <FileOutlined className={styles.fileIconDefault} />;
   }, []);
 
-  const formatOrderFileTileName = useCallback((filename: string, maxLength = 30) => {
-    if (filename.length <= maxLength) return filename;
-    const extIndex = filename.lastIndexOf('.');
-    if (extIndex <= 0) return `${filename.slice(0, maxLength - 3)}...`;
-    const ext = filename.slice(extIndex);
-    const base = filename.slice(0, extIndex);
-    const allowedBaseLength = Math.max(6, maxLength - ext.length - 3);
-    return `${base.slice(0, allowedBaseLength)}...${ext}`;
-  }, []);
-
   const formatFileDateTime = useCallback((value?: string | null) => {
     if (!value) return '';
     const parsed = new Date(value);
@@ -195,7 +185,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
       </div>
       <div className={styles.orderFileTileBody}>
         <Text className={styles.orderFileName} title={file.filename || file.file_name || 'Файл'}>
-          {formatOrderFileTileName(file.filename || file.file_name || 'Файл')}
+          {file.filename || file.file_name || 'Файл'}
         </Text>
         <Text type="secondary" className={styles.orderFileMeta}>
           {formatFileDateTime(file.created_at)}

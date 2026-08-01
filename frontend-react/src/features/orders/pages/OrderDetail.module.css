@@ -94,6 +94,10 @@
     padding: 4px 10px;
     height: 34px;
   }
+
+  .expertOfferGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .orderTitle {
@@ -135,6 +139,7 @@
 }
 
 .clientAvatar {
+  flex-shrink: 0;
   box-shadow: 0 4px 14px rgba(35, 140, 226, 0.24);
 }
 
@@ -219,6 +224,11 @@
   min-width: 0;
 }
 
+.expertOfferGridText {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .expertOfferGridIcon {
   width: 36px;
   height: 36px;
@@ -277,13 +287,12 @@
 }
 
 .orderFilesGrid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
   gap: 10px;
 }
 
 .orderFileTile {
-  width: 120px;
   min-height: 152px;
   border: 1px solid var(--border-color);
   background: var(--bg-primary);
@@ -297,6 +306,7 @@
   padding: 10px 8px;
   transition: all 0.2s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .orderFileTile:hover {
@@ -321,8 +331,10 @@
   color: var(--text-primary);
   text-align: center;
   line-height: 1.2;
-  word-break: break-word;
-  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .orderFileMeta {
@@ -334,6 +346,21 @@
   color: var(--text-tertiary);
   text-align: center;
   max-width: 100%;
+}
+
+.orderFileTileBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  overflow: hidden;
+  align-items: center;
+}
+
+.orderFileTileActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .deliveredFileName {

@@ -230,9 +230,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [isMobile, isTablet, visible]);
 
   // WebSocket для real-time обновлений чата
+  const selectedChatIdRef = useRef<number | null>(null);
+  selectedChatIdRef.current = selectedChat?.id ?? null;
+
   const handleNewMessage = useCallback((wsMessage: any) => {
-    if (!selectedChat) return;
-    
+    const currentChatId = selectedChatIdRef.current;
+    if (!currentChatId) return;
+
     // Добавляем новое сообщение в текущий чат
     const newMsg: Message = {
       id: wsMessage.id,
@@ -248,17 +252,19 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     };
 
     setSelectedChat((prev) => {
-      if (!prev || prev.id !== selectedChat.id) return prev;
+      if (!prev || prev.id !== currentChatId) return prev;
+      const msgs = prev.messages || [];
+      if (msgs.some((m) => m.id === newMsg.id)) return prev;
       return {
         ...prev,
-        messages: [...(prev.messages || []), newMsg],
+        messages: [...msgs, newMsg],
       };
     });
 
     // Обновляем список чатов (последнее сообщение)
     setChatList((prev) => {
       return prev.map((chat) => {
-        if (chat.id !== selectedChat.id) return chat;
+        if (chat.id !== currentChatId) return chat;
         return {
           ...chat,
           last_message: {
@@ -279,16 +285,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }, 100);
 
     // Отмечаем входящее сообщение прочитанным, если чат открыт
-    if (!newMsg.is_mine && !newMsg.is_read && selectedChat?.id) {
-      const chatIdToMark = selectedChat.id;
+    if (!newMsg.is_mine && !newMsg.is_read && currentChatId) {
       chatApi
-        .markAsRead(chatIdToMark)
+        .markAsRead(currentChatId)
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
         })
         .catch(() => {});
     }
-  }, [selectedChat, queryClient]);
+  }, [queryClient]);
 
   const { isConnected: wsConnected } = useChatWebSocket(
     selectedChat?.id ?? null,
@@ -573,11 +578,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }
     }, []);
 
+  const loadChatDetailForNotificationRef = useRef<((chatId: number) => Promise<any>) | null>(null);
+
   const handleNotificationEvent = useCallback((event: { data?: { chat_id?: number; text?: string; created_at?: string } }) => {
     const chatId = event.data?.chat_id;
     if (!chatId) return;
-    if (selectedChat?.id === chatId) {
-      void loadChats(true);
+    if (selectedChatIdRef.current === chatId) {
+      if (loadChatDetailForNotificationRef.current) {
+        void loadChatDetailForNotificationRef.current(chatId);
+      }
       return;
     }
 
@@ -610,7 +619,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     });
 
     void loadChats(true);
-  }, [loadChats, selectedChat?.id]);
+  }, [loadChats]);
 
   useWebSocket({
     enabled: visible,
@@ -790,7 +799,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       antMessage.error('Не удалось загрузить чат');
       return null;
     }
-  }, [chatList, hydrateClosedOrdersForChat, queryClient, syncChatListItemFromDetail, toPositiveNumber]);
+  }, [hydrateClosedOrdersForChat, queryClient, syncChatListItemFromDetail, toPositiveNumber]);
+
+  loadChatDetailForNotificationRef.current = loadChatDetail;
 
   const loadOrCreateChatByOrderAndUser = useCallback(async (orderId: number, userId: number) => {
     setLoading(true);
@@ -923,19 +934,33 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser, toPositiveNumber, userProfile]);
 
     // Initial load of chat detail
+  const loadChatDetailRef = useRef(loadChatDetail);
+  loadChatDetailRef.current = loadChatDetail;
   useEffect(() => {
     if (!visible || !selectedChat?.id) return;
-    loadChatDetail(selectedChat.id);
-  }, [visible, selectedChat?.id, loadChatDetail]);
+    loadChatDetailRef.current(selectedChat.id);
+  }, [visible, selectedChat?.id]);
 
-        // WebSocket handles real-time message updates.
-        // No polling needed for messages anymore.
+        // Fallback polling for messages when WS is disconnected (every 5s)
+    useEffect(() => {
+    if (!visible || !selectedChat?.id || wsConnected) return;
+    let cancelled = false;
+    const poll = async () => {
+      if (cancelled || document.hidden) return;
+      try {
+        await loadChatDetailRef.current(selectedChat.id!);
+      } catch { /* ignore */ }
+    };
+    const id = window.setInterval(poll, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [visible, selectedChat?.id, wsConnected]);
 
     // Polling for chat list every 30 seconds (reduced from 10s to prevent flickering)
     useEffect(() => {
     if (!visible) return;
-    // Don't poll if document is hidden
-    if (document.hidden) return;
     let cancelled = false;
     const poll = async () => {
       if (cancelled || document.hidden) return;
@@ -946,6 +971,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       cancelled = true;
       window.clearInterval(id);
     };
+  }, [visible, loadChats]);
+
+    // Recover polling and WS when tab becomes visible
+    useEffect(() => {
+    if (!visible) return;
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        void loadChats(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [visible, loadChats]);
 
   const safeChatList = useMemo(() => (Array.isArray(chatList) ? chatList : []), [chatList]);
@@ -1152,20 +1189,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const end = new Date(deadline).getTime();
     if (Number.isNaN(end)) return false;
     return end <= Date.now();
-  };
-
-  const formatOrderStatus = (status?: string) => {
-    if (!status) return '';
-    const map: Record<string, string> = {
-      new: 'Новый',
-      waiting_payment: 'Ожидает оплаты',
-      in_progress: 'В работе',
-      review: 'На проверке',
-      revision: 'На доработке',
-      completed: 'Выполнен',
-      cancelled: 'Отменён',
-    };
-    return map[status] || status;
   };
 
   useEffect(() => {

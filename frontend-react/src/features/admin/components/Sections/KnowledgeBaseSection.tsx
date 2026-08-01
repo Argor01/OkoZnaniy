@@ -26,6 +26,8 @@ import {
   WarningOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  ExpandOutlined,
+  CompressOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -83,6 +85,7 @@ export const KnowledgeBaseSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState('articles');
   const [selectedArticleId, setSelectedArticleId] = useState<number | null>(null);
   const [searchText, setSearchText] = useState('');
+  const [expandedArticles, setExpandedArticles] = useState<Set<number>>(new Set());
   const [selectedWorkType, setSelectedWorkType] = useState<string | undefined>();
   const [selectedSubject, setSelectedSubject] = useState<string | undefined>();
 
@@ -596,9 +599,31 @@ export const KnowledgeBaseSection: React.FC = () => {
                   <span><EyeOutlined /> {article.views_count}</span>
                   {(article.files_count ?? 0) > 0 && <span><FileOutlined /> {article.files_count}</span>}
                 </div>
-                <Text type="secondary" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                <Text
+                  type="secondary"
+                  className={`${styles.articleDesc} ${expandedArticles.has(article.id) ? '' : styles.articleDescClamped}`}
+                >
                   {article.description}
                 </Text>
+                {(article.description?.length ?? 0) > 120 && (
+                  <Button
+                    type="link"
+                    size="small"
+                    icon={expandedArticles.has(article.id) ? <CompressOutlined /> : <ExpandOutlined />}
+                    style={{ padding: '2px 0', fontSize: 13 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedArticles((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(article.id)) next.delete(article.id);
+                        else next.add(article.id);
+                        return next;
+                      });
+                    }}
+                  >
+                    {expandedArticles.has(article.id) ? 'Свернуть' : 'Показать полностью'}
+                  </Button>
+                )}
                 <div className={styles.articleTags}>
                   {article.work_type && <Tag color="purple">{article.work_type}</Tag>}
                   {article.subject && <Tag color="green">{article.subject}</Tag>}

@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import type { Dispute, Arbitrator } from '@/features/admin/types';
 import { TABLE_CONSTANTS } from '@/features/admin/constants';
 import styles from './DisputesSection.module.css';
+import { truncateDisplayName } from '@/utils/formatters';
 
 interface DisputesSectionProps {
   disputes: Dispute[];
@@ -36,14 +37,14 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
       title: `Спор по заказу #${dispute.order.id}`,
       content: (
         <div className={styles.disputeModal}>
-          <p><strong>Клиент:</strong> {dispute.order.client.username}</p>
+          <p><strong>Клиент:</strong> {truncateDisplayName(dispute.order.client.username)}</p>
           {dispute.order.expert && (
-            <p><strong>Эксперт:</strong> {dispute.order.expert.username}</p>
+            <p><strong>Эксперт:</strong> {truncateDisplayName(dispute.order.expert.username)}</p>
           )}
           <p><strong>Причина спора:</strong></p>
           <p className={styles.disputeReason}>{dispute.reason}</p>
           {dispute.arbitrator && (
-            <p><strong>Арбитр:</strong> {dispute.arbitrator.username}</p>
+            <p><strong>Арбитр:</strong> {truncateDisplayName(dispute.arbitrator.username)}</p>
           )}
           {dispute.resolved && dispute.result && (
             <div className={styles.disputeResult}>
@@ -83,7 +84,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
           >
             {arbitrators.map((arbitrator) => (
               <Select.Option key={arbitrator.id} value={arbitrator.id}>
-                {arbitrator.username} ({arbitrator.first_name} {arbitrator.last_name})
+                {truncateDisplayName(arbitrator.username)} ({truncateDisplayName(`${arbitrator.first_name || ''} ${arbitrator.last_name || ''}`.trim())})
               </Select.Option>
             ))}
           </Select>
@@ -125,11 +126,11 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
       render: (record: Dispute) => (
         <div className={styles.participants}>
           <div className={styles.participant}>
-            <UserOutlined /> Клиент: {record.order.client.username}
+            <UserOutlined /> Клиент: {truncateDisplayName(record.order.client.username)}
           </div>
           {record.order.expert && (
             <div className={styles.participant}>
-              <UserOutlined /> Эксперт: {record.order.expert.username}
+              <UserOutlined /> Эксперт: {truncateDisplayName(record.order.expert.username)}
             </div>
           )}
         </div>
@@ -154,7 +155,7 @@ export const DisputesSection: React.FC<DisputesSectionProps> = ({
       key: 'arbitrator',
       render: (record: Dispute) => (
         <span className={styles.arbitrator}>
-          {record.arbitrator?.username || 'Не назначен'}
+          {truncateDisplayName(record.arbitrator?.username || 'Не назначен')}
         </span>
       ),
       filters: [

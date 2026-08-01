@@ -4,25 +4,42 @@
 Используются в views, signals, services для real-time обновлений.
 """
 
+import logging
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
+logger = logging.getLogger(__name__)
 
 channel_layer = get_channel_layer()
+if not channel_layer:
+    logger.warning("[WS] channel_layer is None at import time — WebSocket notifications will be silent")
+
+
+def _ensure_channel_layer():
+    global channel_layer
+    if not channel_layer:
+        channel_layer = get_channel_layer()
+    return channel_layer
 
 
 def send_to_group(group_name: str, event_type: str, data: dict):
     """Отправить событие в группу WebSocket."""
-    if not channel_layer:
+    layer = _ensure_channel_layer()
+    if not layer:
+        logger.error("[WS] channel_layer unavailable — cannot send to group %s", group_name)
         return
 
-    async_to_sync(channel_layer.group_send)(
-        group_name,
-        {
-            "type": event_type,
-            "data": data,
-        },
-    )
+    try:
+        async_to_sync(layer.group_send)(
+            group_name,
+            {
+                "type": event_type,
+                "data": data,
+            },
+        )
+        logger.debug("[WS] Sent %s to group %s", event_type, group_name)
+    except Exception as exc:
+        logger.error("[WS] Failed to send %s to group %s: %s", event_type, group_name, exc)
 
 
 def notify_chat_message(chat_id: int, message_data: dict):
@@ -36,7 +53,7 @@ def notify_chat_message(chat_id: int, message_data: dict):
 
 def notify_typing(chat_id: int, user_id: int, username: str):
     """Отправить индикатор набора текста."""
-    if not channel_layer:
+    if not _ensure_channel_layer():
         return
 
     async_to_sync(channel_layer.group_send)(

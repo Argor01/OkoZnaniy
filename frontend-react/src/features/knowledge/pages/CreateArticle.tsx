@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { articlesApi } from '../api/knowledgeApi';
 import { catalogApi, type WorkType, type Subject } from '@/features/common/api/catalog';
+import { truncateFileName } from '@/utils/formatters';
 import styles from './CreateArticle.module.css';
 import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
@@ -174,7 +175,7 @@ const CreateArticle: React.FC = () => {
                 {files.map((file, idx) => (
                   <div key={idx} className={styles.fileItem}>
                     <FileOutlined />
-                    <span className={styles.fileItemName}>{file.name}</span>
+                    <span className={styles.fileItemName}>{truncateFileName(file.name)}</span>
                     <Button
                       type="text"
                       size="small"

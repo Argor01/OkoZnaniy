@@ -1,0 +1,59 @@
+.deadlineWrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.dateField {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeSelectors {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.timeFieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeLabel {
+  font-size: 12px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.timeSelect {
+  width: 64px;
+}
+
+.timeSeparator {
+  padding-bottom: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+
+@media (max-width: 575px) {
+  .deadlineWrapper {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .timeSelectors {
+    width: 100%;
+  }
+
+  .timeFieldWrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .timeSelect {
+    width: 100%;
+  }
+}

@@ -24,7 +24,7 @@ import { useDashboard } from '@/contexts/DashboardContext';
 import { shopApi } from '@/features/shop/api/shop';
 import type { WorkFile } from '@/features/shop/types';
 import { useCurrentUser } from '@/hooks/queries';
-import { formatCurrency, getDisplayUsername, isEmailLike } from '@/utils/formatters';
+import { formatCurrency, getDisplayUsername, isEmailLike, truncateFileName } from '@/utils/formatters';
 import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
@@ -307,7 +307,7 @@ const ShopWorkDetail: React.FC = () => {
                     >
                       <List.Item.Meta
                         avatar={<FileOutlined className={styles.fileIcon} />}
-                        title={file.name}
+                        title={truncateFileName(file.name)}
                         description={`${file.file_type || 'Неизвестный тип'} • ${formatFileSize(file.file_size || 0)}`}
                       />
                     </List.Item>

@@ -15,6 +15,7 @@ import {
 } from '@ant-design/icons';
 import { truncateFileName, getFileIconByName } from './utils/fileHelpers';
 import { formatMessageTime } from './utils/messageHelpers';
+import { translateStatusInText } from '@/utils/constants';
 import type { GroupedMessage, WorkOfferData } from './types';
 import styles from '../MessageModalNew.module.css';
 
@@ -148,7 +149,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
         </div>
       );
     }
-    const systemText = String(msg.text || '');
+    const systemText = translateStatusInText(String(msg.text || ''));
     const systemTextLower = systemText.toLowerCase();
     const isDangerSystemEvent = /наруш|контакт|заморож|нельзя|блок|violation|blocked/.test(systemTextLower);
     const isSuccessSystemEvent = /принят|разморож|заверш|оплачен|назнач|accepted|completed|paid/.test(systemTextLower);

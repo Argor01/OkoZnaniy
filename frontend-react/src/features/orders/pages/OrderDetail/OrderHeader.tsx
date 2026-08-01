@@ -113,28 +113,28 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
           </div>
           <div className={styles.expertOfferGridItem}>
             <div className={styles.expertOfferGridIcon}><BookOutlined /></div>
-            <div>
+            <div className={styles.expertOfferGridText}>
               <div className={styles.expertOfferLabel}>Предмет</div>
               <div className={styles.expertOfferValue}>{order.subject?.name || 'Не указан'}</div>
             </div>
           </div>
           <div className={styles.expertOfferGridItem}>
             <div className={styles.expertOfferGridIcon}><ReadOutlined /></div>
-            <div>
+            <div className={styles.expertOfferGridText}>
               <div className={styles.expertOfferLabel}>Тип работы</div>
               <div className={styles.expertOfferValue}>{order.work_type?.name || 'Не указан'}</div>
             </div>
           </div>
           <div className={styles.expertOfferGridItem}>
             <div className={styles.expertOfferGridIcon}><ClockCircleOutlined /></div>
-            <div>
+            <div className={styles.expertOfferGridText}>
               <div className={styles.expertOfferLabel}>Срок сдачи</div>
               <div className={styles.expertOfferValue}>{order.deadline ? new Date(order.deadline).toLocaleDateString('ru-RU') : 'Не указан'}</div>
             </div>
           </div>
           <div className={styles.expertOfferGridItem}>
             <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconGreen}`}><DollarOutlined /></div>
-            <div>
+            <div className={styles.expertOfferGridText}>
               <div className={styles.expertOfferLabel}>Цена</div>
               <div className={styles.expertOfferValue}>
                 {(() => {
@@ -147,7 +147,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
           </div>
           <div className={styles.expertOfferGridItem}>
             <div className={styles.expertOfferGridIcon}><DatabaseOutlined /></div>
-            <div>
+            <div className={styles.expertOfferGridText}>
               <div className={styles.expertOfferLabel}>Дата публикации</div>
               <div className={styles.expertOfferValue}>
                 <Text>

@@ -36,6 +36,7 @@ import {
 } from '@/utils/constants';
 import styles from './AllOrdersSection.module.css';
 import { logger } from '@/utils/logger';
+import { truncateDisplayName } from '@/utils/formatters';
 
 const { Text } = Typography;
 const { Search } = Input;
@@ -129,9 +130,9 @@ const OrderParticipants: React.FC<OrderParticipantsProps> = ({ order }) => {
       {participants.map((participant) => (
         <Descriptions.Item
           key={participant.id}
-          label={`${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.username}
+          label={truncateDisplayName(`${participant.first_name || ''} ${participant.last_name || ''}`.trim() || participant.username)}
         >
-          <div><strong>Username:</strong> {participant.username}</div>
+          <div><strong>Username:</strong> {truncateDisplayName(participant.username)}</div>
           <div><strong>Email:</strong> {participant.email || '-'}</div>
           <div><strong>Роль:</strong> {participant.role || '-'}</div>
         </Descriptions.Item>
@@ -247,10 +248,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
       render: (record: Order) => (
         <div>
           <div className={styles.allOrdersPersonName}>
-            {record.client.first_name} {record.client.last_name}
+            {truncateDisplayName(`${record.client.first_name || ''} ${record.client.last_name || ''}`.trim())}
           </div>
           <Text type="secondary" className={styles.allOrdersPersonHandle}>
-            {record.client.username}
+            {truncateDisplayName(record.client.username)}
           </Text>
         </div>
       ),
@@ -263,10 +264,10 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
         record.expert ? (
           <div>
             <div className={styles.allOrdersPersonName}>
-              {record.expert.first_name} {record.expert.last_name}
+              {truncateDisplayName(`${record.expert.first_name || ''} ${record.expert.last_name || ''}`.trim())}
             </div>
             <Text type="secondary" className={styles.allOrdersPersonHandle}>
-              {record.expert.username}
+              {truncateDisplayName(record.expert.username)}
             </Text>
           </div>
         ) : (

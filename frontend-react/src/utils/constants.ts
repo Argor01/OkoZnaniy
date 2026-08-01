@@ -23,9 +23,9 @@ export const ORDER_STATUSES = {
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
-  awaiting_expert_acceptance: 'РћР¶РёРґР°РµС‚ РѕС‚РІРµС‚Р° СЌРєСЃРїРµСЂС‚Р°',
   new: 'Новый',
   confirming: 'На подтверждении',
+  awaiting_expert_acceptance: 'Ожидает ответа эксперта',
   in_progress: 'В работе',
   waiting_payment: 'Ожидает оплаты',
   review: 'На проверке',
@@ -33,9 +33,11 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   revision: 'На доработке',
   download: 'Ожидает скачивания',
   closed: 'Закрыт',
-  cancelled: 'Отменен',
+  cancelled: 'Отменён',
   dispute: 'Спор',
   expired: 'Истёк срок',
+  under_review: 'На проверке',
+  canceled: 'Отменён',
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -141,4 +143,59 @@ export const ROUTES = {
     root: '/support',
     detail: '/support-chat/:chatId',
   },
+};
+
+const STATUS_DISPLAY_NAMES: Record<string, string> = {
+  new: 'Новый',
+  confirming: 'На подтверждении',
+  awaiting_expert_acceptance: 'Ожидает ответа эксперта',
+  in_progress: 'В работе',
+  waiting_payment: 'Ожидает оплаты',
+  review: 'На проверке',
+  completed: 'Завершён',
+  revision: 'На доработке',
+  download: 'Ожидает скачивания',
+  closed: 'Закрыт',
+  cancelled: 'Отменён',
+  canceled: 'Отменён',
+  dispute: 'Спор',
+  expired: 'Истёк срок',
+  under_review: 'На проверке',
+  open: 'Открыт',
+  resolved: 'Решён',
+  pending: 'На рассмотрении',
+  approved: 'Одобрено',
+  rejected: 'Отклонено',
+  sent: 'Отправлено',
+  read: 'Прочитано',
+  replied: 'Ответ получен',
+  draft: 'Черновик',
+  archived: 'В архиве',
+  scheduled: 'Запланировано',
+  pending_approval: 'Ожидает согласования',
+  needs_revision: 'На доработке',
+  deactivated: 'Деактивировано',
+  submitted: 'Подано',
+  investigating: 'Расследуется',
+  awaiting_response: 'Ожидает ответа',
+  in_mediation: 'На медиации',
+  assigned: 'Назначен',
+  waiting_response: 'Ожидает ответа',
+  on_hold: 'Приостановлен',
+  deleted: 'Удалён',
+  disputed: 'Оспорен',
+  upheld: 'Удовлетворён',
+  restored: 'Восстановлен',
+  rejected_order: 'Отклонён',
+};
+
+export const translateStatusInText = (text: string): string => {
+  if (!text) return text;
+  let result = text;
+  for (const [raw, label] of Object.entries(STATUS_DISPLAY_NAMES)) {
+    const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(`['"]\\s*${escaped}\\s*['"]`, 'gi');
+    result = result.replace(pattern, `'${label}'`);
+  }
+  return result;
 };

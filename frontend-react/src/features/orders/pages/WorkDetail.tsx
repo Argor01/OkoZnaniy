@@ -9,7 +9,7 @@ import { authApi } from '@/features/auth/api/auth';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './WorkDetail.module.css';
-import { getDisplayUsername } from '@/utils/formatters';
+import { getDisplayUsername, truncateFileName } from '@/utils/formatters';
 import { logger } from '@/utils/logger';
 import { useCurrentUser } from '@/hooks/queries';
 
@@ -244,6 +244,8 @@ const WorkDetail: React.FC = () => {
                       href={file.view_url || file.file_url || '#'} 
                       target="_blank" 
                       rel="noopener noreferrer"
+                      className={styles.fileLink}
+                      title={file.filename || `Файл ${index + 1}`}
                     >
                       {file.filename || `Файл ${index + 1}`}
                     </a>

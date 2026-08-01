@@ -41,6 +41,7 @@ import styles from './SupportChatsSection.module.css';
 import { useSupportChats, useSupportActions } from '@/features/admin/hooks';
 import { useAdminAuth } from '@/features/admin/hooks/useAdminAuth';
 import { logger } from '@/utils/logger';
+import { truncateFileName } from '@/utils/formatters';
 import supportStyles from '@/features/support/Support.module.css';
 import { getMediaUrl } from '@/config/api';
 

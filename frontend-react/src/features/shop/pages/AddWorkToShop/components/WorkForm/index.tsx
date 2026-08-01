@@ -8,23 +8,17 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { AppUpload } from '@/components/ui/AppUpload';
+import { AddNewItemModal } from '@/components/ui/AddNewItemModal';
+import { ALLOWED_FILE_EXTENSIONS } from '@/constants/files';
 import { catalogApi } from '@/features/common/api/catalog';
 import { Subject, WorkType } from '@/features/common/types/catalog';
 import { RichTextEditor } from '@/features/common';
 import { WorkFormData, WorkFormProps } from '@/features/shop/types';
-import { useSubjects, useWorkTypes } from '@/hooks/queries';
+import { useSortedSubjects, useSortedWorkTypes } from '@/hooks';
 import styles from './WorkForm.module.css';
 
 const { Text } = Typography;
 const { Option } = AppSelect;
-
-const ALLOWED_FILE_EXTENSIONS = [
-  'doc', 'docx', 'pdf', 'rtf', 'txt',
-  'ppt', 'pptx',
-  'xls', 'xlsx', 'csv',
-  'dwg', 'dxf', 'cdr', 'cdw', 'bak',
-  'jpg', 'jpeg', 'png', 'bmp', 'svg',
-];
 
 const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   const queryClient = useQueryClient();
@@ -40,18 +34,15 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
   });
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
-  const [newWorkTypeName, setNewWorkTypeName] = useState('');
-  const [newSubjectName, setNewSubjectName] = useState('');
 
-  const { data: subjects = [] } = useSubjects();
-  const { data: workTypes = [] } = useWorkTypes();
+  const { data: subjects = [] } = useSortedSubjects();
+  const { data: workTypes = [] } = useSortedWorkTypes();
 
   const createWorkTypeMutation = useMutation({
     mutationFn: (name: string) => catalogApi.createWorkType(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workTypes'] });
       setNewWorkTypeModalVisible(false);
-      setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
     },
     onError: () => {
@@ -64,7 +55,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setNewSubjectModalVisible(false);
-      setNewSubjectName('');
       message.success('Новый предмет добавлен');
     },
     onError: () => {
@@ -334,81 +324,25 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
       </Space>
 
-      <Modal
+      <AddNewItemModal
         title="Добавить новый тип работы"
+        placeholder="Название типа работы"
+        emptyMessage="Введите название типа работы"
         open={newWorkTypeModalVisible}
-        onOk={() => {
-          if (newWorkTypeName.trim()) {
-            createWorkTypeMutation.mutate(newWorkTypeName.trim());
-          } else {
-            message.error('Введите название типа работы');
-          }
-        }}
-        onCancel={() => {
-          setNewWorkTypeModalVisible(false);
-          setNewWorkTypeName('');
-        }}
+        onOk={(name) => createWorkTypeMutation.mutate(name)}
+        onCancel={() => setNewWorkTypeModalVisible(false)}
         confirmLoading={createWorkTypeMutation.isPending}
-        wrapClassName={styles.modalWrap}
-        centered
-        width={500}
-        okText="Добавить"
-        cancelText="Отмена"
-        styles={{
-          content: { borderRadius: 24 },
-          header: { borderRadius: '24px 24px 0 0' },
-        }}
-      >
-        <AppInput
-          placeholder="Название типа работы"
-          value={newWorkTypeName}
-          onChange={(e) => setNewWorkTypeName(e.target.value)}
-          onPressEnter={() => {
-            if (newWorkTypeName.trim()) {
-              createWorkTypeMutation.mutate(newWorkTypeName.trim());
-            }
-          }}
-          className={styles.modalInput}
-        />
-      </Modal>
+      />
 
-      <Modal
+      <AddNewItemModal
         title="Добавить новый предмет"
+        placeholder="Название предмета"
+        emptyMessage="Введите название предмета"
         open={newSubjectModalVisible}
-        onOk={() => {
-          if (newSubjectName.trim()) {
-            createSubjectMutation.mutate(newSubjectName.trim());
-          } else {
-            message.error('Введите название предмета');
-          }
-        }}
-        onCancel={() => {
-          setNewSubjectModalVisible(false);
-          setNewSubjectName('');
-        }}
+        onOk={(name) => createSubjectMutation.mutate(name)}
+        onCancel={() => setNewSubjectModalVisible(false)}
         confirmLoading={createSubjectMutation.isPending}
-        wrapClassName={styles.modalWrap}
-        centered
-        width={500}
-        okText="Добавить"
-        cancelText="Отмена"
-        styles={{
-          content: { borderRadius: 24 },
-          header: { borderRadius: '24px 24px 0 0' },
-        }}
-      >
-        <AppInput
-          placeholder="Название предмета"
-          value={newSubjectName}
-          onChange={(e) => setNewSubjectName(e.target.value)}
-          onPressEnter={() => {
-            if (newSubjectName.trim()) {
-              createSubjectMutation.mutate(newSubjectName.trim());
-            }
-          }}
-          className={styles.modalInput}
-        />
-      </Modal>
+      />
     </AppCard>
   );
 };

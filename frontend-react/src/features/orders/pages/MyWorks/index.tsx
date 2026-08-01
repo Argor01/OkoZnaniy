@@ -3,7 +3,7 @@ import { Typography, Table, Tag, Avatar, Space } from 'antd';
 import { SearchOutlined, StarFilled, UserOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AppInput, AppSelect, AppButton } from '@/components/ui';
+import { AppInput, AppSelect, AppButton, BudgetRangeInput } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { expertsApi } from '@/features/expert/api/experts';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
@@ -564,34 +564,10 @@ const MyWorks: React.FC = () => {
             <div className={styles.filtersAdvancedRow}>
               <div className={styles.budgetGroup}>
                 <span className={styles.budgetLabel}>Бюджет:</span>
-                <AppInput.Number
-                  min={0}
-                  max={budgetRange[1]}
-                  value={budgetRange[0]}
-                  onChange={(value) => setBudgetRange([Number(value) || 0, budgetRange[1]])}
-                  placeholder="От"
-                  controls={false}
-                  className={styles.budgetInput}
-                  formatter={(value) => `${value} ₽`}
-                  parser={(value) => {
-                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
-                    return Number.isFinite(num) ? num : 0;
-                  }}
-                />
-                <span>—</span>
-                <AppInput.Number
-                  min={budgetRange[0]}
-                  max={1000000}
-                  value={budgetRange[1]}
-                  onChange={(value) => setBudgetRange([budgetRange[0], Number(value) || 100000])}
-                  placeholder="До"
-                  controls={false}
-                  className={styles.budgetInput}
-                  formatter={(value) => `${value} ₽`}
-                  parser={(value) => {
-                    const num = Number(String(value ?? '').replace(/[^\d.-]/g, ''));
-                    return Number.isFinite(num) ? num : 0;
-                  }}
+                <BudgetRangeInput
+                  value={budgetRange}
+                  onChange={setBudgetRange}
+                  inputClassName={styles.budgetInput}
                 />
               </div>
             </div>

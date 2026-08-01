@@ -1,6 +1,8 @@
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 
+import { ORDER_STATUS_LABELS } from '@/utils/constants';
+
 export const normalizeMessageText = (value: string): string => value.normalize('NFC');
 
 export const hasVisibleMessageContent = (value: string): boolean => {
@@ -69,16 +71,7 @@ export const isDeadlineExpired = (deadline?: string | null, isFrozen?: boolean |
 
 export const formatOrderStatus = (status?: string) => {
   if (!status) return '';
-  const map: Record<string, string> = {
-    new: 'Новый',
-    waiting_payment: 'Ожидает оплаты',
-    in_progress: 'В работе',
-    review: 'На проверке',
-    revision: 'На доработке',
-    completed: 'Выполнен',
-    cancelled: 'Отменён',
-  };
-  return map[status] || status;
+  return ORDER_STATUS_LABELS[status] || status;
 };
 
 export const formatTimestamp = (dateString: string) => {

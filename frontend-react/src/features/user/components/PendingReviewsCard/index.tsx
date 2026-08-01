@@ -17,6 +17,7 @@ import { expertsApi } from '@/features/expert/api/experts';
 import { apiClient } from '@/api/client';
 import { getMediaUrl } from '@/config/api';
 import { SectionHeader, SurfaceCard } from '@/features/common';
+import { truncateDisplayName } from '@/utils/formatters';
 import styles from './styles.module.css';
 
 const { Text, Paragraph } = Typography;
@@ -99,8 +100,8 @@ const PendingReviewsCard = () => {
                 />
                 <div className={styles.expertText}>
                   <Text strong>
-                    {item.expert_full_name ||
-                      `@${item.expert_username || 'expert'}`}
+                    {truncateDisplayName(item.expert_full_name) ||
+                      `@${truncateDisplayName(item.expert_username || 'expert')}`}
                   </Text>
                   <Text type="secondary" className={styles.meta}>
                     {item.order_title}

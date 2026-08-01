@@ -179,14 +179,6 @@
   transition: all 0.2s;
   max-width: 100%;
   min-width: 0;
-  overflow: hidden;
-}
-
-.fileTag :global(.ant-tag-content) {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .fileTag:hover {

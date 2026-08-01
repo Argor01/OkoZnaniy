@@ -8,13 +8,14 @@ import { catalogApi } from '@/features/common/api/catalog';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
-import { AppDatePicker } from '@/components/ui/AppDatePicker';
 import { AppButton } from '@/components/ui/AppButton';
+import { DeadlinePicker } from '@/components/ui/DeadlinePicker';
+import { AddNewItemModal } from '@/components/ui/AddNewItemModal';
 import { useDeviceType } from '@/hooks/useDeviceType';
+import { useSortedSubjects, useSortedWorkTypes } from '@/hooks';
 
 import styles from './EditOrderModal.module.css';
 import { logger } from '@/utils/logger';
-import { useSubjects, useWorkTypes } from '@/hooks/queries';
 
 interface EditOrderFormValues {
   title: string;
@@ -50,9 +51,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   const [submitLocked, setSubmitLocked] = useState(false);
   const [newWorkTypeModalVisible, setNewWorkTypeModalVisible] = useState(false);
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
-  const [newWorkTypeName, setNewWorkTypeName] = useState('');
-  const [newSubjectName, setNewSubjectName] = useState('');
-  const [deadlineTime, setDeadlineTime] = useState<DeadlineTimeValues>({ hours: 12, minutes: 0 });
+  const [deadlineTime, setDeadlineTime] = useState<{ hours: number; minutes: number }>({ hours: 12, minutes: 0 });
   const submitGuardRef = useRef(false);
 
   const lockSubmit = () => {
@@ -69,17 +68,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   const canEdit = order && (!order.expert || order.status === 'new');
 
   // Загрузка данных предмета и типа работы
-  const {data: subjects = []} = useSubjects();
+  const {data: subjects = []} = useSortedSubjects();
 
-  const {data: workTypes = []} = useWorkTypes();
-
-  const sortedSubjects = [...subjects].sort((a, b) =>
-    (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })
-  );
-
-  const sortedWorkTypes = [...workTypes].sort((a, b) =>
-    (a.name ?? '').localeCompare(b.name ?? '', 'ru', { sensitivity: 'base' })
-  );
+  const {data: workTypes = []} = useSortedWorkTypes();
 
   // Инициализация формы данными заказа
   useEffect(() => {
@@ -109,7 +100,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['workTypes'] });
       setNewWorkTypeModalVisible(false);
-      setNewWorkTypeName('');
       message.success('Новый тип работы добавлен');
       if (data?.id) {
         form.setFieldValue('work_type', data.id);
@@ -126,7 +116,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setNewSubjectModalVisible(false);
-      setNewSubjectName('');
       message.success('Новый предмет добавлен');
       if (data?.id) {
         form.setFieldValue('subject', data.id);
@@ -153,35 +142,6 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
       message.error('Ошибка при обновлении заказа. Попробуйте еще раз.');
     },
   });
-
-  const handleDeadlineChange = (date: dayjs.Dayjs | null) => {
-    if (date) {
-      const now = dayjs();
-      if (date.isSame(now, 'day')) {
-        if (deadlineTime.hours < now.hour() ||
-            (deadlineTime.hours === now.hour() && deadlineTime.minutes <= now.minute())) {
-          setDeadlineTime({
-            hours: Math.min(now.hour() + 1, 23),
-            minutes: 0
-          });
-        }
-      }
-    }
-  };
-
-  const handleTimeChange = (field: 'hours' | 'minutes', value: number) => {
-    const newTime = { ...deadlineTime, [field]: value };
-    setDeadlineTime(newTime);
-
-    const deadlineDate = form.getFieldValue('deadline');
-    if (deadlineDate && deadlineDate.isSame(dayjs(), 'day')) {
-      const now = dayjs();
-      if (newTime.hours < now.hour() ||
-          (newTime.hours === now.hour() && newTime.minutes <= now.minute())) {
-        message.warning('Выбранное время уже прошло');
-      }
-    }
-  };
 
   const onFinish = async (values: EditOrderFormValues) => {
     if (!order || !canEdit || submitGuardRef.current) return;
@@ -308,7 +268,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                     </>
                   )}
                 >
-                  {sortedWorkTypes.map((type) => (
+                  {workTypes.map((type) => (
                     <AppSelect.Option key={type.id} value={type.id}>
                       {type.name}
                     </AppSelect.Option>
@@ -347,7 +307,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                     </>
                   )}
                 >
-                  {sortedSubjects.map((subject) => (
+                  {subjects.map((subject) => (
                     <AppSelect.Option key={subject.id} value={subject.id}>
                       {subject.name}
                     </AppSelect.Option>
@@ -373,50 +333,13 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                   ]}
                   className={styles.dateInputItem}
                 >
-                  <AppDatePicker
-                    placeholder="Дата сдачи"
-                    format="DD.MM.YYYY"
-                    disabledDate={(current) => current && current < dayjs().startOf('day')}
-                    onChange={handleDeadlineChange}
+                  <DeadlinePicker
+                    timeValue={deadlineTime}
+                    onTimeChange={setDeadlineTime}
                     className={styles.dateInput}
+                    timeClassName={styles.timeSelectors}
                   />
                 </Form.Item>
-
-                <div className={styles.timeSelectors}>
-                  <div className={styles.timeFieldWrapper}>
-                    <label className={styles.timeLabel}>Часы</label>
-                    <AppSelect
-                      value={deadlineTime.hours}
-                      onChange={(value) => handleTimeChange('hours', value)}
-                      className={styles.timeSelect}
-                      getPopupContainer={() => document.body}
-                    >
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <AppSelect.Option key={i} value={i}>
-                          {String(i).padStart(2, '0')}
-                        </AppSelect.Option>
-                      ))}
-                    </AppSelect>
-                  </div>
-
-                  <span className={styles.timeSeparator}>:</span>
-
-                  <div className={styles.timeFieldWrapper}>
-                    <label className={styles.timeLabel}>Минуты</label>
-                    <AppSelect
-                      value={deadlineTime.minutes}
-                      onChange={(value) => handleTimeChange('minutes', value)}
-                      className={styles.timeSelect}
-                      getPopupContainer={() => document.body}
-                    >
-                      {Array.from({ length: 60 }, (_, i) => (
-                        <AppSelect.Option key={i} value={i}>
-                          {String(i).padStart(2, '0')}
-                        </AppSelect.Option>
-                      ))}
-                    </AppSelect>
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -469,74 +392,26 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
       </Modal>
 
       {/* Модалка для нового типа работы */}
-      <Modal
+      <AddNewItemModal
         title="Добавить новый тип работы"
+        placeholder="Название типа работы"
+        emptyMessage="Введите название типа работы"
         open={newWorkTypeModalVisible}
-        onOk={() => {
-          if (newWorkTypeName.trim()) {
-            const normalizedName = newWorkTypeName.trim().split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-            createWorkTypeMutation.mutate(normalizedName);
-          } else {
-            message.error('Введите название типа работы');
-          }
-        }}
-        onCancel={() => {
-          setNewWorkTypeModalVisible(false);
-          setNewWorkTypeName('');
-        }}
+        onOk={(name) => createWorkTypeMutation.mutate(name)}
+        onCancel={() => setNewWorkTypeModalVisible(false)}
         confirmLoading={createWorkTypeMutation.isPending}
-      >
-        <AppInput
-          placeholder="Название типа работы"
-          value={newWorkTypeName}
-          onChange={(e) => setNewWorkTypeName(e.target.value)}
-          onPressEnter={() => {
-            if (newWorkTypeName.trim()) {
-              const normalizedName = newWorkTypeName.trim().split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
-              createWorkTypeMutation.mutate(normalizedName);
-            }
-          }}
-        />
-      </Modal>
+      />
 
       {/* Модалка для нового предмета */}
-      <Modal
+      <AddNewItemModal
         title="Добавить новый предмет"
+        placeholder="Название предмета"
+        emptyMessage="Введите название предмета"
         open={newSubjectModalVisible}
-        onOk={() => {
-          if (newSubjectName.trim()) {
-            const normalizedName = newSubjectName.trim().split(' ')
-              .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-              .join(' ');
-            createSubjectMutation.mutate(normalizedName);
-          } else {
-            message.error('Введите название предмета');
-          }
-        }}
-        onCancel={() => {
-          setNewSubjectModalVisible(false);
-          setNewSubjectName('');
-        }}
+        onOk={(name) => createSubjectMutation.mutate(name)}
+        onCancel={() => setNewSubjectModalVisible(false)}
         confirmLoading={createSubjectMutation.isPending}
-      >
-        <AppInput
-          placeholder="Название предмета"
-          value={newSubjectName}
-          onChange={(e) => setNewSubjectName(e.target.value)}
-          onPressEnter={() => {
-            if (newSubjectName.trim()) {
-              const normalizedName = newSubjectName.trim().split(' ')
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                .join(' ');
-              createSubjectMutation.mutate(normalizedName);
-            }
-          }}
-        />
-      </Modal>
+      />
     </>
   );
 };

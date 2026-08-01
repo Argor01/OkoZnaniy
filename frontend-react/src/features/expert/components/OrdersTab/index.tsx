@@ -14,7 +14,7 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { logger } from '@/utils/logger';
 import { useCurrentUser } from '@/hooks/queries';
-import { getDisplayUsername } from '@/utils/formatters';
+import { getDisplayUsername, truncateFileName } from '@/utils/formatters';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -405,7 +405,7 @@ const OrdersTab: React.FC<OrdersTabProps> = ({ isMobile }) => {
                                 handleDownloadOrderFile(order.id, file);
                               }}
                             >
-                              {fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
+                              {isMobile ? truncateFileName(fileName) : fileName} <DownloadOutlined className={styles.fileDownloadIcon} />
                             </Tag>
                           </Tooltip>
                         );
