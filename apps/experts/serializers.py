@@ -262,6 +262,17 @@ class EducationSerializer(serializers.ModelSerializer):
         fields = ['id', 'university', 'start_year', 'end_year', 'degree', 'created_at']
         read_only_fields = ['id', 'created_at']
 
+    def validate(self, attrs):
+        start_year = attrs.get('start_year')
+        end_year = attrs.get('end_year')
+
+        if start_year and end_year and end_year < start_year:
+            raise serializers.ValidationError({
+                'end_year': 'Год окончания обучения не может быть раньше года начала'
+            })
+
+        return attrs
+
 
 class ExpertApplicationSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)

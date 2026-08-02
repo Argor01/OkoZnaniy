@@ -228,6 +228,12 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
       ];
     }
 
+    if (notification.type === 'expert_response' && notification.data?.accepted === true) {
+      return [
+        { key: 'open-order', label: 'Открыть заказ', target: `/orders/${orderId}`, primary: true },
+      ];
+    }
+
     const requiresExpertDecision = notification.type === 'expert_invitation' || actionRequired === 'expert_assignment_response';
     if (requiresExpertDecision) {
       return [

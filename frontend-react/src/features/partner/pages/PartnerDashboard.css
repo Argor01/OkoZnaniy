@@ -608,11 +608,19 @@
 
 /* Адаптивная таблица заказов */
 .partnerDashboardOrdersTable {
+  display: block;
+  overflow-x: auto;
   width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .partnerDashboardOrdersTable .ant-table-wrapper {
   overflow-x: auto;
+}
+
+.partnerDashboardOrdersTable .ant-table-container {
+  min-width: 100%;
 }
 
 .partnerDashboardOrdersTable .ant-table {
@@ -650,7 +658,7 @@
 @media (max-width: 768px) {
   .partnerDashboardOrdersTable .ant-table {
     font-size: 12px;
-    min-width: 600px;
+    min-width: 520px;
   }
 
   .partnerDashboardOrdersTable .ant-table-thead > tr > th,
@@ -661,14 +669,44 @@
 }
 
 @media (max-width: 480px) {
+  .partnerDashboardOrdersStatsCard.ant-card {
+    margin: 0;
+  }
+
+  .partnerDashboardOrdersStatsCard > .ant-card-head {
+    min-height: auto;
+    padding: 12px 10px !important;
+  }
+
+  .partnerDashboardOrdersStatsCard > .ant-card-body {
+    padding: 10px !important;
+  }
+
+  .partnerDashboardOrdersStatsRow {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .partnerDashboardOrdersStatsRow .ant-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
   .partnerDashboardOrdersTable .ant-table {
     font-size: 11px;
-    min-width: 500px;
+    min-width: 420px;
   }
 
   .partnerDashboardOrdersTable .ant-table-thead > tr > th,
   .partnerDashboardOrdersTable .ant-table-tbody > tr > td {
-    padding: 6px 4px !important;
+    padding: 7px 8px !important;
+    line-height: 1.25;
+  }
+
+  .partnerDashboardOrdersTable .ant-tag {
+    margin-inline-end: 0;
+    font-size: 10px;
+    line-height: 18px;
   }
 }
 
@@ -780,6 +818,7 @@
 
 [data-theme="dark"] .partnerDashboardCardSpacing.ant-card,
 [data-theme="dark"] .partnerDashboardCardReset.ant-card,
+[data-theme="dark"] .partnerDashboardOrdersStatsCard.ant-card,
 [data-theme="dark"] .partnerDashboardSection .ant-card,
 [data-theme="dark"] .partnerDashboardOrdersStatsRow .partnerDashboardCompactCard.ant-card {
   background: #1d2230 !important;
@@ -788,6 +827,7 @@
 
 [data-theme="dark"] .partnerDashboardCardSpacing .ant-card-head,
 [data-theme="dark"] .partnerDashboardCardReset .ant-card-head,
+[data-theme="dark"] .partnerDashboardOrdersStatsCard > .ant-card-head,
 [data-theme="dark"] .partnerDashboardSection .ant-card-head {
   background: #1d2230 !important;
   border-bottom-color: #2f3750 !important;
@@ -795,6 +835,7 @@
 
 [data-theme="dark"] .partnerDashboardCardSpacing .ant-card-head-title,
 [data-theme="dark"] .partnerDashboardCardReset .ant-card-head-title,
+[data-theme="dark"] .partnerDashboardOrdersStatsCard > .ant-card-head .ant-card-head-title,
 [data-theme="dark"] .partnerDashboardSection .ant-card-head-title,
 [data-theme="dark"] .partnerDashboardSection .ant-typography,
 [data-theme="dark"] .partnerDashboardSection .ant-typography-secondary,
@@ -815,6 +856,13 @@
 [data-theme="dark"] .partnerDashboardOrdersTable .ant-table {
   background: #1d2230 !important;
   color: #e8ebf3 !important;
+}
+
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-container,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-content,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-tbody,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-cell {
+  background: #1d2230 !important;
 }
 
 [data-theme="dark"] .partnerDashboardReferralsTable .ant-table-thead > tr > th,
@@ -846,6 +894,23 @@
 [data-theme="dark"] .partnerDashboardOrdersTable .ant-table-placeholder > td {
   background: #1d2230 !important;
   color: #aab4c8 !important;
+}
+
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-empty-description {
+  color: #aab4c8 !important;
+}
+
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-item,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-prev,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-next {
+  background: #23293a !important;
+  border-color: #36405a !important;
+}
+
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-item a,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-prev button,
+[data-theme="dark"] .partnerDashboardOrdersTable .ant-table-pagination .ant-pagination-next button {
+  color: #d8deeb !important;
 }
 
 [data-theme="dark"] .partnerDashboardRangePicker.ant-picker,

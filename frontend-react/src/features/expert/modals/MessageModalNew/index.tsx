@@ -1314,9 +1314,20 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     return status === 'in_progress' || status === 'revision';
   }, [isOrderExpert, isClosedOrder, order]);
 
+  const hasDeliveredWorkFiles = useMemo(() => {
+    if (!Array.isArray(order?.files)) return false;
+    return order.files.some((file: any) => {
+      const fileType = String(file?.file_type || '').toLowerCase();
+      const description = String(file?.description || '');
+      return fileType === 'solution' || fileType === 'revision' || description.includes('chat_delivery_message_id:');
+    });
+  }, [order?.files]);
+
   const canUploadWorkAction = order?.available_actions?.can_upload_work ?? showExpertUploadButton;
   const canExtendOverdueOrder = order?.available_actions?.can_extend_deadline ?? canOverdueClientActions;
-  const canCancelOverdueOrder = order?.available_actions?.can_cancel_overdue ?? canOverdueClientActions;
+  const canCancelOverdueOrder = (
+    order?.available_actions?.can_cancel_overdue ?? canOverdueClientActions
+  ) && ['in_progress', 'revision'].includes(String(order?.status ?? '')) && !hasDeliveredWorkFiles;
   const canApproveWork = order?.available_actions?.can_approve_work ?? (isOrderClient && order?.status === 'review');
   const canRequestRevisionWork = order?.available_actions?.can_request_revision ?? (isOrderClient && order?.status === 'review');
 

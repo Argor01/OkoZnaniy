@@ -64,6 +64,34 @@
   min-width: 0;
 }
 
+.profileRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 30px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: 'Jost-SemiBold', sans-serif;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px rgba(100, 53, 165, 0.12);
+}
+
+.profileRoleBadge_client {
+  color: #5b21b6;
+  background: linear-gradient(135deg, #f3e8ff 0%, #fff7ed 100%);
+  border-color: rgba(126, 58, 242, 0.24);
+}
+
+.profileRoleBadge_expert {
+  color: #047857;
+  background: linear-gradient(135deg, #dcfce7 0%, #ecfeff 100%);
+  border-color: rgba(16, 185, 129, 0.24);
+}
+
 .profileOnlineDot {
   width: 8px;
   height: 8px;
@@ -223,6 +251,12 @@
   .profileNameTitle {
     font-size: 24px !important;
   }
+
+  .profileRoleBadge {
+    min-height: 28px;
+    padding: 5px 12px;
+    font-size: 13px;
+  }
   
   .profileStatsMeta,
   .profileStatsLine {
@@ -352,6 +386,11 @@
   .profileNameTitle {
     font-size: 22px !important;
   }
+
+  .profileNameRow {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
   
   .profileStatsRow {
     justify-content: space-between;
@@ -411,6 +450,14 @@
   
   .profileNameTitle {
     font-size: 20px !important;
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .profileRoleBadge {
+    min-height: 26px;
+    padding: 5px 10px;
+    font-size: 12px;
   }
   
   .profileStatLabel,
@@ -457,6 +504,20 @@
 
 :global([data-theme="dark"]) .profileOnlineText {
   color: var(--color-text-secondary, #94a3b8);
+}
+
+:global([data-theme="dark"]) .profileRoleBadge_client {
+  color: #d8b4fe;
+  background: rgba(126, 58, 242, 0.14);
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 8px 24px rgba(126, 58, 242, 0.18);
+}
+
+:global([data-theme="dark"]) .profileRoleBadge_expert {
+  color: #86efac;
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(52, 211, 153, 0.35);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.16);
 }
 
 :global([data-theme="dark"]) .profileStatLabel {

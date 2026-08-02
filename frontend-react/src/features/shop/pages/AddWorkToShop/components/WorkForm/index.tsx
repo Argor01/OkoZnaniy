@@ -259,7 +259,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text className={styles.label}>Файлы работы (необязательно)</Text>
+          <Text className={styles.label}>Файлы работы</Text>
           <AppUpload.Dragger
             name="files"
             multiple

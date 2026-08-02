@@ -16,6 +16,7 @@ interface PasswordResetModalProps {
   cooldown?: number;
   onEmailChange: (email: string) => void;
   onCodeChange: (index: number, value: string) => void;
+  onCodePaste: (digits: string[]) => void;
   onNewPasswordChange: (password: string) => void;
   onConfirmPasswordChange: (password: string) => void;
   onRequestCode: () => void;
@@ -37,6 +38,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   cooldown = 0,
   onEmailChange,
   onCodeChange,
+  onCodePaste,
   onNewPasswordChange,
   onConfirmPasswordChange,
   onRequestCode,
@@ -92,27 +94,37 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
 
   const handleCodeInput = (index: number, value: string) => {
     const onlyDigits = value.replace(/[^0-9]/g, '');
+    if (onlyDigits.length > 1) {
+      handlePasteDigits(onlyDigits, index);
+      return;
+    }
+
     onCodeChange(index, onlyDigits);
   };
 
-  const handlePasteCode = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text').slice(0, 6);
-    const digits = pastedData.replace(/[^0-9]/g, '').split('');
-    
+  const handlePasteDigits = (value: string, startIndex = 0) => {
+    const digits = value.replace(/[^0-9]/g, '').slice(0, code.length - startIndex).split('');
+    if (digits.length === 0) return;
+
+    const nextCode = [...code];
     digits.forEach((digit, idx) => {
-      if (idx < code.length) {
-        onCodeChange(idx, digit);
-      }
+      nextCode[startIndex + idx] = digit;
     });
-    
-    const nextIndex = digits.length;
+    onCodePaste(nextCode);
+
+    const nextIndex = startIndex + digits.length;
     if (nextIndex < code.length) {
       const nextInput = document.getElementById(`reset-code-${nextIndex}`);
       nextInput?.focus();
-    } else if (digits.length === code.length) {
-      onVerifyCode();
+      return;
     }
+
+    document.getElementById(`reset-code-${code.length - 1}`)?.focus();
+  };
+
+  const handlePasteCode = (e: React.ClipboardEvent, index = 0) => {
+    e.preventDefault();
+    handlePasteDigits(e.clipboardData.getData('text'), index);
   };
 
   return (
@@ -181,6 +193,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
                 maxLength={1}
                 value={digit}
                 onChange={(e) => handleCodeInput(index, e.target.value)}
+                onPaste={(e) => handlePasteCode(e, index)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={loading}
                 className={styles.codeInput}

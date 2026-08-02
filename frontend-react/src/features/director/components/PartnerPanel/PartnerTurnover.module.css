@@ -857,3 +857,134 @@
     height: 40px;
   }
 }
+
+[data-theme="dark"] .filterCard,
+[data-theme="dark"] .statCard,
+[data-theme="dark"] .chartCard,
+[data-theme="dark"] .topPartnersDetailsCard,
+[data-theme="dark"] .allPartnersCard {
+  background: #171b27;
+  border-color: #2d3448;
+  color: #f5f7fb;
+}
+
+[data-theme="dark"] .filterCard :global(.ant-card-body),
+[data-theme="dark"] .statCard :global(.ant-card-body),
+[data-theme="dark"] .chartCard :global(.ant-card-body),
+[data-theme="dark"] .topPartnersDetailsCard :global(.ant-card-body),
+[data-theme="dark"] .allPartnersCard :global(.ant-card-body) {
+  background: transparent;
+}
+
+[data-theme="dark"] .chartCard :global(.ant-card-head),
+[data-theme="dark"] .topPartnersDetailsCard :global(.ant-card-head),
+[data-theme="dark"] .allPartnersCard :global(.ant-card-head) {
+  background: transparent;
+  border-color: #2d3448;
+}
+
+[data-theme="dark"] .chartCard :global(.ant-card-head-title),
+[data-theme="dark"] .topPartnersDetailsCard :global(.ant-card-head-title),
+[data-theme="dark"] .allPartnersCard :global(.ant-card-head-title),
+[data-theme="dark"] .topPartnerName,
+[data-theme="dark"] .allPartnerName {
+  color: #f5f7fb;
+}
+
+[data-theme="dark"] .statCardHighlightMobile {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(74, 222, 128, 0.5);
+}
+
+[data-theme="dark"] .statisticTurnover :global(.ant-statistic-title),
+[data-theme="dark"] .statisticCommission :global(.ant-statistic-title),
+[data-theme="dark"] .statisticActive :global(.ant-statistic-title) {
+  color: #aab4ca;
+}
+
+[data-theme="dark"] .statisticTurnover :global(.ant-statistic-content-value),
+[data-theme="dark"] .topPartnerTurnoverValue,
+[data-theme="dark"] .allPartnerTurnoverValue,
+[data-theme="dark"] .allPartnersSummaryValueBlue {
+  color: #b78cff;
+}
+
+[data-theme="dark"] .statisticCommission :global(.ant-statistic-content-value),
+[data-theme="dark"] .topPartnerCommissionValue,
+[data-theme="dark"] .allPartnerCommissionValue,
+[data-theme="dark"] .allPartnersSummaryValueGreen {
+  color: #7ee787;
+}
+
+[data-theme="dark"] .statisticActive :global(.ant-statistic-content-value),
+[data-theme="dark"] .topPartnerReferralValue,
+[data-theme="dark"] .allPartnerReferralsValue,
+[data-theme="dark"] .allPartnersSummaryTitle {
+  color: #c084fc;
+}
+
+[data-theme="dark"] .topPartnerCardTop1,
+[data-theme="dark"] .topPartnerCardTop2,
+[data-theme="dark"] .topPartnerCardTop3,
+[data-theme="dark"] .topPartnerCardDefault,
+[data-theme="dark"] .allPartnerCard {
+  background: linear-gradient(135deg, #1d2331 0%, #151923 100%);
+  border-color: #33405a;
+}
+
+[data-theme="dark"] .topPartnerCardTop1 {
+  border-color: rgba(251, 191, 36, 0.65);
+}
+
+[data-theme="dark"] .topPartnerCardTop2 {
+  border-color: rgba(126, 231, 135, 0.55);
+}
+
+[data-theme="dark"] .topPartnerCardTop3 {
+  border-color: rgba(249, 115, 22, 0.58);
+}
+
+[data-theme="dark"] .topPartnerEmailText,
+[data-theme="dark"] .allPartnerEmailText,
+[data-theme="dark"] .topPartnerStatLabel,
+[data-theme="dark"] .allPartnerStatLabel,
+[data-theme="dark"] .topPartnerReferralLabel,
+[data-theme="dark"] .allPartnersSummaryLabel {
+  color: #9aa7bd;
+}
+
+[data-theme="dark"] .topPartnerTurnoverBox,
+[data-theme="dark"] .allPartnerTurnoverBox {
+  background: rgba(139, 92, 246, 0.18);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+}
+
+[data-theme="dark"] .topPartnerCommissionBox,
+[data-theme="dark"] .allPartnerCommissionBox {
+  background: rgba(34, 197, 94, 0.14);
+  border: 1px solid rgba(74, 222, 128, 0.24);
+}
+
+[data-theme="dark"] .topPartnerReferralBox,
+[data-theme="dark"] .allPartnerReferralsBox {
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+[data-theme="dark"] .allPartnersSummaryCard {
+  background: rgba(139, 92, 246, 0.13);
+  border-color: rgba(167, 139, 250, 0.45);
+}
+
+[data-theme="dark"] .mobileRangePicker,
+[data-theme="dark"] .quickSelectButton {
+  background: #202637;
+  border-color: #34405a;
+  color: #f5f7fb;
+}
+
+[data-theme="dark"] .mobileRangePicker :global(input),
+[data-theme="dark"] .mobileRangePicker :global(.ant-picker-separator),
+[data-theme="dark"] .mobileRangePicker :global(.ant-picker-suffix) {
+  color: #f5f7fb;
+}
