@@ -41,6 +41,51 @@ class IsAdminUser(IsAuthenticated):
         return hasattr(request.user, 'role') and request.user.role == 'admin'
 
 
+# Статусы арбитражного дела, в которых админ уже взял его в работу —
+# только тогда разрешено писать сообщения и оформлять возврат.
+ARBITRATION_IN_PROGRESS_STATUSES = (
+    'under_review',
+    'in_arbitration',
+    'awaiting_response',
+)
+
+# Финальные статусы арбитражного дела, после которых переписка и возврат закрыты.
+ARBITRATION_CLOSED_STATUSES = (
+    'decision_made',
+    'closed',
+    'rejected',
+)
+
+# Финальные статусы претензии (Complaint), после которых переписка закрыта.
+COMPLAINT_CLOSED_STATUSES = ('resolved', 'closed')
+
+
+def ensure_case_taken_into_work(case):
+    """Возвращает Response с 400, если дело ещё не взято в работу,
+    иначе None. Используется для блокировки write/refund до 'take_in_work'."""
+    if case.status in ARBITRATION_IN_PROGRESS_STATUSES:
+        return None
+    if case.status == 'submitted':
+        return Response(
+            {'detail': 'Сначала возьмите дело в работу, чтобы писать или оформлять возврат.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return Response(
+        {'detail': f'Действие недоступно для статуса «{case.get_status_display()}».'},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+def ensure_case_not_closed(case):
+    """Возвращает Response с 400, если дело уже в финальном статусе."""
+    if case.status in ARBITRATION_CLOSED_STATUSES:
+        return Response(
+            {'detail': f'Дело завершено ({case.get_status_display()}). Писать и оформлять возврат нельзя.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    return None
+
+
 def log_activity(case, actor, activity_type, description, metadata=None):
     """Записать событие в ленту активности"""
     ArbitrationActivity.objects.create(
@@ -344,22 +389,34 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], url_path='send-message')
     def send_message(self, request, pk=None):
-        """Отправить сообщение в дело"""
+        """Отправить сообщение в дело.
+
+        Правила:
+        - дело должно быть взято в работу (статус in_progress) — иначе писать нельзя
+          ни админу, ни сторонам;
+        - в финальных статусах (decision_made / closed / rejected) переписка закрыта.
+        """
         case = self.get_object()
-        if case.status in ['decision_made', 'closed', 'rejected']:
-            return Response(
-                {'error': 'Обращение закрыто. Отправка сообщений недоступна'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+
+        # 1. Финальный статус — отказ независимо от роли.
+        closed_resp = ensure_case_not_closed(case)
+        if closed_resp is not None:
+            return closed_resp
+
+        # 2. Дело ещё не взято в работу — никто не пишет.
+        taken_resp = ensure_case_taken_into_work(case)
+        if taken_resp is not None:
+            return taken_resp
+
         text = request.data.get('message', '').strip()
         is_internal = request.data.get('is_internal', False)
-        
+
         if not text:
             return Response(
                 {'error': 'Сообщение не может быть пустым'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         # Определяем тип сообщения
         if request.user.role == 'admin':
             message_type = 'admin'
@@ -474,28 +531,37 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     def make_decision(self, request, pk=None):
         """Принять решение по делу (только для админов)"""
         case = self.get_object()
+
+        # Решение можно вынести только если дело взято в работу и ещё не закрыто.
+        taken_resp = ensure_case_taken_into_work(case)
+        if taken_resp is not None:
+            return taken_resp
+        closed_resp = ensure_case_not_closed(case)
+        if closed_resp is not None:
+            return closed_resp
+
         decision_text = request.data.get('decision', '').strip()
         approved_refund_percentage = request.data.get('approved_refund_percentage')
         approved_refund_amount = request.data.get('approved_refund_amount')
-        
+
         if not decision_text:
             return Response(
                 {'error': 'Текст решения обязателен'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         case.decision = decision_text
         case.decision_made_by = request.user
         case.decision_date = timezone.now()
         case.status = 'decision_made'
-        
+
         if approved_refund_percentage is not None:
             case.approved_refund_percentage = approved_refund_percentage
         if approved_refund_amount is not None:
             case.approved_refund_amount = approved_refund_amount
-        
+
         case.save()
-        
+
         log_activity(
             case,
             request.user,
@@ -510,21 +576,60 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             'message': 'Решение принято',
             'case': ArbitrationCaseSerializer(case).data
         })
-    
+
     @action(detail=True, methods=['post'], url_path='process-refund')
     def process_refund(self, request, pk=None):
-        """Оформить возврат средств (только для админов)"""
+        """Оформить возврат средств (только для админов).
+
+        Ограничения:
+        1. Дело должно быть взято в работу.
+        2. Дело не должно быть в финальном статусе (decision_made/closed/rejected).
+        3. Возврат можно оформить только один раз: если approved_refund_percentage
+           уже задан, либо ранее уже логировался activity_type='refund_processed',
+           повторный процесс-рефанд запрещён.
+        """
         case = self.get_object()
+
+        taken_resp = ensure_case_taken_into_work(case)
+        if taken_resp is not None:
+            return taken_resp
+        closed_resp = ensure_case_not_closed(case)
+        if closed_resp is not None:
+            return closed_resp
+
+        # Возврат уже был оформлен ранее? — отказ.
+        if case.approved_refund_percentage is not None and case.approved_refund_percentage != '':
+            return Response(
+                {'detail': f'Возврат по этому делу уже оформлен ранее ({case.approved_refund_percentage}%). Повторное оформление невозможно.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        already_refunded = case.activities.filter(activity_type='refund_processed').exists()
+        if already_refunded:
+            return Response(
+                {'detail': 'По этому делу уже был оформлен возврат. Повторное оформление невозможно.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         refund_percentage = request.data.get('refund_percentage', 0)
         refund_amount = request.data.get('refund_amount')
-        
+
+        try:
+            refund_percentage = float(refund_percentage)
+        except (TypeError, ValueError):
+            refund_percentage = 0
+        if not (1 <= refund_percentage <= 100):
+            return Response(
+                {'detail': 'Процент возврата должен быть от 1 до 100.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         case.approved_refund_percentage = refund_percentage
         if refund_amount:
             case.approved_refund_amount = refund_amount
-        
+
         case.status = 'decision_made'
         case.save()
-        
+
         log_activity(
             case,
             request.user,
@@ -548,18 +653,26 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             )
         except Exception:
             pass
-        
+
         return Response({
             'message': f'Возврат {refund_percentage}% оформлен',
             'case': ArbitrationCaseSerializer(case).data
         })
-    
+
     @action(detail=True, methods=['post'], url_path='close-case')
     def close_case(self, request, pk=None):
         """Закрыть дело (только для админов)"""
         case = self.get_object()
+
+        taken_resp = ensure_case_taken_into_work(case)
+        if taken_resp is not None:
+            return taken_resp
+        closed_resp = ensure_case_not_closed(case)
+        if closed_resp is not None:
+            return closed_resp
+
         final_message = request.data.get('message', '').strip()
-        
+
         if final_message:
             # Отправляем финальное сообщение
             ArbitrationMessage.objects.create(
@@ -569,12 +682,12 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 text=final_message,
                 is_internal=False
             )
-        
+
         case.status = 'closed'
         case.closed_at = timezone.now()
         case.save()
         unfreeze_case_context(case)
-        
+
         log_activity(
             case,
             request.user,
@@ -589,7 +702,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             exclude_user_ids=[request.user.id],
             notification_type=NotificationType.STATUS_CHANGED,
         )
-        
+
         return Response({
             'message': 'Дело закрыто',
             'case': ArbitrationCaseSerializer(case).data
@@ -635,10 +748,16 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'], url_path='activity-feed')
     def activity_feed(self, request, pk=None):
-        """Получить объединенную ленту сообщений и активностей"""
+        """Лента переписки дела: только сообщения арбитража и чат заказа.
+
+        Системные события (ArbitrationActivity) намеренно не включаются —
+        по требованию заказчика админ и стороны видят только переписку и
+        статус самого дела. Изменения статуса заказа/дела уже отражаются в
+        карточке дела, отдельные «activity»-сообщения показывать не нужно.
+        """
         case = self.get_object()
-        
-        # Сообщения
+
+        # Сообщения арбитража
         messages = [
             {
                 'kind': 'message',
@@ -659,64 +778,22 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             for m in case.messages.select_related('sender').all()
             if not m.is_internal or request.user.role == 'admin'
         ]
-        
-        # Активности
-        activities = [
-            {
-                'kind': 'activity',
-                'id': f'act_{a.id}',
-                'activity_type': a.activity_type,
-                'text': a.description,
-                'description': a.description,
-                'metadata': a.metadata,
-                'actor': {
-                    'id': a.actor.id if a.actor else None,
-                    'first_name': a.actor.first_name if a.actor else '',
-                    'last_name': a.actor.last_name if a.actor else '',
-                    'username': a.actor.username if a.actor else '',
-                    'display_username': getattr(a.actor, 'display_username', '') if a.actor else '',
-                } if a.actor else None,
-                'created_at': a.created_at.isoformat(),
-            }
-            for a in case.activities.select_related('actor').all()
-        ]
 
+        # Чат заказа — показываем только админу, как переписку сторон по сделке
         order_chat_messages = []
         if request.user.role == 'admin' and case.order_id:
-            chat_messages = ChatMessage.objects.filter(
-                chat__order_id=case.order_id
-            ).select_related('sender', 'chat').order_by('created_at')
-
-            for chat_message in chat_messages:
-                order_chat_messages.append({
-                    'kind': 'message',
-                    'id': f'chat_{chat_message.id}',
-                    'sender': {
-                        'id': chat_message.sender.id,
-                        'first_name': chat_message.sender.first_name,
-                        'last_name': chat_message.sender.last_name,
-                        'username': chat_message.sender.username,
-                        'display_username': getattr(chat_message.sender, 'display_username', ''),
-                        'role': getattr(chat_message.sender, 'role', ''),
-                    },
-                    'text': chat_message.text or (chat_message.file_name or 'Файл в чате заказа'),
-                    'message_type': chat_message.message_type,
-                    'is_internal': False,
-                    'source': 'order_chat',
-                    'chat_id': chat_message.chat_id,
-                    'created_at': chat_message.created_at.isoformat(),
-                })
             order_chat_messages = build_order_chat_feed(case)
-        
-        # Объединяем и сортируем
-        feed = messages + activities + order_chat_messages
+
+        # Объединяем и сортируем по времени
+        feed = messages + order_chat_messages
         feed.sort(key=lambda x: x['created_at'])
-        
+
         return Response({
             'messages': messages,
-            'activities': activities,
+            'activities': [],  # оставлено для обратной совместимости с фронтом,
+                                # но фактически системные события в ленту не идут
             'order_chat_messages': order_chat_messages,
-            'feed': feed
+            'feed': feed,
         })
 
 
@@ -1060,8 +1137,11 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         if not text:
             return Response({'detail': 'Сообщение не может быть пустым'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if complaint.status in ['closed', 'resolved']:
-            return Response({'detail': 'Претензия уже закрыта'}, status=status.HTTP_400_BAD_REQUEST)
+        if complaint.status in COMPLAINT_CLOSED_STATUSES:
+            return Response(
+                {'detail': 'Претензия уже завершена. Писать в неё нельзя.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = request.user
         is_complainant = user.id == complaint.plaintiff_id
