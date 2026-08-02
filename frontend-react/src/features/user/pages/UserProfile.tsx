@@ -211,8 +211,8 @@ const UserProfile: FC = () => {
                     <Text type="secondary" className={styles.profileLabel}>
                       ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
                     </Text>
-                    <Tag 
-                      className={styles.roleTag}
+                    <Tag
+                      className={`${styles.roleTag} ${styles[`roleTag_${userData.role === 'expert' ? 'expert' : userData.role === 'client' ? 'client' : 'default'}`]}`}
                     >
                       {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
                     </Tag>
@@ -228,6 +228,9 @@ const UserProfile: FC = () => {
                       <div className={styles.nameRow}>
                         <Text className={styles.nameText}>{getDisplayUsername(userData)}</Text>
                         {userData.is_verified && <CheckCircleOutlined className={styles.verifiedIcon} />}
+                        <span className={`${styles.inlineRoleBadge} ${styles[`inlineRoleBadge_${userData.role === 'expert' ? 'expert' : userData.role === 'client' ? 'client' : 'default'}`]}`}>
+                          {userData.role === 'client' ? 'Клиент' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
+                        </span>
                       </div>
                       {userData.first_name && userData.last_name ? (
                         <Text className={styles.usernameText}>

@@ -58,12 +58,32 @@
 }
 
 .roleTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   font-size: 11px;
-  padding: 2px 8px;
-  background-color: rgba(100, 53, 165, 0.12);
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.roleTag_client {
+  background: rgba(24, 144, 255, 0.12);
+  color: #1677ff;
+  border: 1px solid rgba(24, 144, 255, 0.28);
+}
+
+.roleTag_expert {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.32);
+}
+
+.roleTag_default {
+  background: rgba(100, 53, 165, 0.12);
   color: var(--color-brand-blue-700);
   border: 1px solid rgba(100, 53, 165, 0.24);
-  border-radius: 12px;
 }
 
 .profileIdentityCard {
@@ -133,6 +153,7 @@
   margin-bottom: 4px;
   min-width: 0;
   max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .nameText {
@@ -146,6 +167,34 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.inlineRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.inlineRoleBadge_client {
+  background: rgba(24, 144, 255, 0.12);
+  color: #1677ff;
+}
+
+.inlineRoleBadge_expert {
+  background: rgba(16, 185, 129, 0.14);
+  color: #059669;
+}
+
+.inlineRoleBadge_default {
+  background: rgba(100, 53, 165, 0.12);
+  color: var(--color-brand-blue-700);
 }
 
 .verifiedIcon {
@@ -387,7 +436,7 @@
 
   .roleTag {
     font-size: 10px;
-    padding: 2px 6px;
+    padding: 3px 8px;
   }
 
   .profileIdentityCard {
@@ -406,6 +455,12 @@
 
   .nameRow {
     width: 100%;
+  }
+
+  .inlineRoleBadge {
+    font-size: 11px;
+    min-height: 24px;
+    padding: 4px 9px;
   }
 
   .nameText {
@@ -548,7 +603,7 @@
 
   .roleTag {
     font-size: 9px;
-    padding: 1px 4px;
+    padding: 3px 7px;
   }
 
   .profileIdentityCard {

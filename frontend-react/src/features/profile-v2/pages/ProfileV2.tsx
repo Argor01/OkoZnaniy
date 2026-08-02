@@ -195,7 +195,8 @@ const ProfileV2: React.FC = () => {
   const success = total > 0 ? Math.round((completed / total) * 100) : 0;
   const points = me?.knowledge_points ?? 0;
   const rating = Number(me?.rating ?? 0);
-  const role = me?.role === 'expert' ? 'Эксперт' : me?.role === 'partner' ? 'Партнёр' : 'Клиент';
+  const roleKind = me?.role === 'expert' ? 'expert' : me?.role === 'partner' ? 'partner' : 'client';
+  const role = roleKind === 'expert' ? 'Эксперт' : roleKind === 'partner' ? 'Партнёр' : 'Клиент';
   const initials = (me?.first_name?.[0] || me?.username?.[0] || '?').toUpperCase()
     + (me?.last_name?.[0] || '').toUpperCase();
 
@@ -243,7 +244,12 @@ const ProfileV2: React.FC = () => {
             <h1 className={styles.heroName}>
               {truncateDisplayName(me?.first_name || me?.username || '')} {truncateDisplayName(me?.last_name || '')}
             </h1>
-            <div className={styles.heroHandle}>{truncateDisplayName(me?.username || '')}</div>
+            <div className={styles.heroHandleRow}>
+              <span className={styles.heroHandle}>{truncateDisplayName(me?.username || '')}</span>
+              <span className={`${styles.accountRoleBadge} ${styles[`accountRoleBadge_${roleKind}`]}`}>
+                {role}
+              </span>
+            </div>
 
             <div className={styles.heroActions}>
               <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => navigate('/orders/place-order')} className={styles.heroBtnPrimary}>
