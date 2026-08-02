@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Form, Input, Button, Checkbox } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import type { RegisterRequest } from '@/features/auth/api/auth';
 import SocialLoginButtons from '../../components/SocialLoginButtons';
-import styles from '@/features/auth/Login.module.css';
 
 interface RegisterFormProps {
   loading: boolean;
@@ -21,7 +20,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   onTelegramError,
 }) => {
   const [form] = Form.useForm();
-  const [selectedRole, setSelectedRole] = useState<'client' | 'expert'>('client');
 
   useEffect(() => {
     if (referralCode) {
@@ -86,29 +84,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         >
           <Input.Password prefix={<LockOutlined />} placeholder="Подтвердите пароль" />
         </Form.Item>
-        <Form.Item name="role" initialValue="client" rules={[{ required: true, message: 'Выберите роль' }]} hidden>
+        <Form.Item name="role" initialValue="client" hidden>
           <Input type="hidden" />
-        </Form.Item>
-        <Form.Item label="Роль">
-          <div className={styles.roleSwitch} role="group" aria-label="Выбор роли">
-            <div
-              className={`${styles.roleIndicator} ${selectedRole === 'expert' ? styles.expert : ''}`}
-            />
-            <button
-              type="button"
-              className={`${styles.roleOption} ${selectedRole === 'client' ? styles.active : ''}`}
-              onClick={() => { setSelectedRole('client'); form.setFieldsValue({ role: 'client' }); }}
-            >
-              Клиент
-            </button>
-            <button
-              type="button"
-              className={`${styles.roleOption} ${selectedRole === 'expert' ? styles.active : ''}`}
-              onClick={() => { setSelectedRole('expert'); form.setFieldsValue({ role: 'expert' }); }}
-            >
-              Исполнитель
-            </button>
-          </div>
         </Form.Item>
         <Form.Item name="referral_code" label="Реферальный код (необязательно)">
           <Input placeholder="Реферальный код" />
@@ -136,7 +113,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           }]}
         >
           <Checkbox>
-            Я принимаю <a href={selectedRole === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>пользовательское соглашение</a>
+            Я принимаю <a href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#6435a5' }}>пользовательское соглашение</a>
           </Checkbox>
         </Form.Item>
         <Form.Item name="newsletter" valuePropName="checked" style={{ marginBottom: 16 }}>
