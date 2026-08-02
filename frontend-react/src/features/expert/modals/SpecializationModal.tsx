@@ -162,10 +162,11 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
       destroyOnClose
       maskClosable={false}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={(values: SpecializationFormValues) => {
+        <Form
+          form={form}
+          layout="vertical"
+          key={visible ? 'open' : 'closed'}
+          onFinish={(values: SpecializationFormValues) => {
           // Не позволяем отправку, пока не загрузились предметы
           if (subjectsLoading || subjects.length === 0) {
             message.error('Список предметов ещё загружается, попробуйте через секунду');
@@ -196,7 +197,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
           label="Специализация"
           name="subject_id"
           rules={[{ required: true, message: 'Выберите специализацию' }]}
-          style={{ marginTop: 10 }}
           validateTrigger={subjectsLoading || subjects.length === 0 ? 'onBlur' : ['onChange', 'onBlur']}
         >
           <Select
@@ -233,7 +233,6 @@ const SpecializationModal: React.FC<SpecializationModalProps> = ({
               </>
             )}
           />
-          <div style={{ height: 10}} />
         </Form.Item>
 
         <Form.Item
