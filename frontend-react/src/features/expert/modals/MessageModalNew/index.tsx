@@ -143,7 +143,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   // Адаптив: фиксируем модалку при открытии клавиатуры на мобильных
   useEffect(() => {
-    if ((!isMobile && !isTablet) || !visible) return;
+    if ((!isMobile && !isTablet) || (!visible && !renderAsPage)) return;
 
     // Сохраняем позицию скролла и блокируем body
     const scrollY = window.scrollY;
@@ -164,25 +164,29 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       overscrollBehavior: html.style.overscrollBehavior,
     };
 
-    body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
-    body.style.left = '0';
-    body.style.right = '0';
-    body.style.width = '100%';
-    body.style.overflow = 'hidden';
-    body.style.touchAction = 'pan-y';
-    body.style.overscrollBehavior = 'none';
-    html.style.overflow = 'hidden';
-    html.style.overscrollBehavior = 'none';
+    if (!renderAsPage) {
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.left = '0';
+      body.style.right = '0';
+      body.style.width = '100%';
+      body.style.overflow = 'hidden';
+      body.style.touchAction = 'pan-y';
+      body.style.overscrollBehavior = 'none';
+      html.style.overflow = 'hidden';
+      html.style.overscrollBehavior = 'none';
+    }
 
     const updateVh = () => {
       const viewport = window.visualViewport;
       const vh = viewport ? viewport.height : window.innerHeight;
+      const viewportTop = viewport ? Math.max(0, viewport.offsetTop) : 0;
       const keyboardOffset = viewport
         ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
         : 0;
       html.style.setProperty('--app-vh', `${vh}px`);
       html.style.setProperty('--chat-modal-vh', `${vh}px`);
+      html.style.setProperty('--chat-viewport-offset-top', `${viewportTop}px`);
       html.style.setProperty('--chat-keyboard-offset', `${keyboardOffset}px`);
     };
 
@@ -198,9 +202,13 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     // Предотвращаем скролл на window при фокусе (iOS keyboard fix)
     const preventWindowScroll = () => {
-      window.scrollTo(0, scrollY);
+      if (!renderAsPage) {
+        window.scrollTo(0, scrollY);
+      }
     };
-    window.addEventListener('scroll', preventWindowScroll, { passive: false });
+    if (!renderAsPage) {
+      window.addEventListener('scroll', preventWindowScroll, { passive: false });
+    }
 
     return () => {
       if (vv) {
@@ -209,25 +217,30 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       } else {
         window.removeEventListener('resize', updateVh);
       }
-      window.removeEventListener('scroll', preventWindowScroll);
+      if (!renderAsPage) {
+        window.removeEventListener('scroll', preventWindowScroll);
+      }
       html.style.removeProperty('--app-vh');
       html.style.removeProperty('--chat-modal-vh');
+      html.style.removeProperty('--chat-viewport-offset-top');
       html.style.removeProperty('--chat-keyboard-offset');
 
       // Восстанавливаем скролл
-      body.style.position = previousBodyStyles.position;
-      body.style.top = previousBodyStyles.top;
-      body.style.left = previousBodyStyles.left;
-      body.style.right = previousBodyStyles.right;
-      body.style.width = previousBodyStyles.width;
-      body.style.overflow = previousBodyStyles.overflow;
-      body.style.touchAction = previousBodyStyles.touchAction;
-      body.style.overscrollBehavior = previousBodyStyles.overscrollBehavior;
-      html.style.overflow = previousHtmlStyles.overflow;
-      html.style.overscrollBehavior = previousHtmlStyles.overscrollBehavior;
-      window.scrollTo(0, scrollY);
+      if (!renderAsPage) {
+        body.style.position = previousBodyStyles.position;
+        body.style.top = previousBodyStyles.top;
+        body.style.left = previousBodyStyles.left;
+        body.style.right = previousBodyStyles.right;
+        body.style.width = previousBodyStyles.width;
+        body.style.overflow = previousBodyStyles.overflow;
+        body.style.touchAction = previousBodyStyles.touchAction;
+        body.style.overscrollBehavior = previousBodyStyles.overscrollBehavior;
+        html.style.overflow = previousHtmlStyles.overflow;
+        html.style.overscrollBehavior = previousHtmlStyles.overscrollBehavior;
+        window.scrollTo(0, scrollY);
+      }
     };
-  }, [isMobile, isTablet, visible]);
+  }, [isMobile, isTablet, renderAsPage, visible]);
 
   // WebSocket для real-time обновлений чата
   const selectedChatIdRef = useRef<number | null>(null);
@@ -2592,8 +2605,8 @@ const handleOverdueComplaint = async () => {
     ? {
         width: '100%',
         margin: '0 auto',
-        minHeight: isMobile ? 'calc(100dvh - 64px)' : 'calc(100vh - 64px)',
-        maxHeight: isMobile ? 'calc(100dvh - 64px)' : 'calc(100vh - 64px)',
+        minHeight: isMobile ? 'calc(var(--chat-modal-vh, var(--app-vh, 100dvh)) - 64px)' : 'calc(100vh - 64px)',
+        maxHeight: isMobile ? 'calc(var(--chat-modal-vh, var(--app-vh, 100dvh)) - 64px)' : 'calc(100vh - 64px)',
       }
     : undefined;
 
@@ -3846,7 +3859,7 @@ const handleOverdueComplaint = async () => {
     <>
       {renderAsPage ? (
         <div
-          className={`${styles.chatModalWrap} ${styles.chatModalWrapDesktop}`}
+          className={`${styles.chatModalWrap} ${styles.chatPageWrap}`}
           style={{ padding: '0' }}
         >
           {chatShell}

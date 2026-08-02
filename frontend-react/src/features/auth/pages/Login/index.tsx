@@ -226,9 +226,11 @@ const Login: React.FC = () => {
 
   const handleVerificationCodeChange = (index: number, value: string) => {
     if (value && !/^\d$/.test(value)) return;
-    const newCode = [...verificationCode];
-    newCode[index] = value;
-    setVerificationCode(newCode);
+    setVerificationCode((prevCode) => {
+      const newCode = [...prevCode];
+      newCode[index] = value;
+      return newCode;
+    });
     if (value && index < 5) {
       const nextInput = document.getElementById(`verify-code-${index + 1}`);
       if (nextInput) (nextInput as HTMLInputElement).focus();

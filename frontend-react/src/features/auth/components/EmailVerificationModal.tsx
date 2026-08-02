@@ -3,6 +3,7 @@ import { Modal, Button, Typography } from 'antd';
 import styles from './EmailVerificationModal.module.css';
 
 const MOBILE_BREAKPOINT = 576;
+const CODE_LENGTH = 6;
 
 interface EmailVerificationModalProps {
   open: boolean;
@@ -36,33 +37,56 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    const t = setTimeout(() => firstInputRef.current?.focus(), 100);
-    return () => clearTimeout(t);
+    const timeout = setTimeout(() => firstInputRef.current?.focus(), 100);
+    return () => clearTimeout(timeout);
   }, [open]);
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      document.getElementById(`verify-code-${index - 1}`)?.focus();
+  const focusInput = (index: number) => {
+    document.getElementById(`verify-code-${index}`)?.focus();
+  };
+
+  const handlePasteDigits = (value: string, startIndex = 0) => {
+    const digits = value.replace(/[^0-9]/g, '').slice(0, CODE_LENGTH - startIndex).split('');
+    if (digits.length === 0) return;
+
+    digits.forEach((digit, idx) => {
+      const targetIndex = startIndex + idx;
+      if (targetIndex < CODE_LENGTH) {
+        onChangeCode(targetIndex, digit);
+      }
+    });
+
+    focusInput(Math.min(startIndex + digits.length, CODE_LENGTH - 1));
+  };
+
+  const handlePaste = (event: React.ClipboardEvent, index = 0) => {
+    event.preventDefault();
+    handlePasteDigits(event.clipboardData.getData('text'), index);
+  };
+
+  const handleKeyDown = (index: number, event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Backspace' && !code[index] && index > 0) {
+      focusInput(index - 1);
     }
-    if (e.key === 'ArrowLeft' && index > 0) {
-      document.getElementById(`verify-code-${index - 1}`)?.focus();
+    if (event.key === 'ArrowLeft' && index > 0) {
+      focusInput(index - 1);
     }
-    if (e.key === 'ArrowRight' && index < 5) {
-      document.getElementById(`verify-code-${index + 1}`)?.focus();
+    if (event.key === 'ArrowRight' && index < CODE_LENGTH - 1) {
+      focusInput(index + 1);
     }
   };
 
   const handleCodeInput = (index: number, value: string) => {
     const onlyDigits = value.replace(/[^0-9]/g, '');
-    onChangeCode(index, onlyDigits);
-  };
+    if (onlyDigits.length > 1) {
+      handlePasteDigits(onlyDigits, index);
+      return;
+    }
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const digits = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6).split('');
-    digits.forEach((d, i) => { if (i < 6) onChangeCode(i, d); });
-    const next = digits.length < 6 ? digits.length : 5;
-    document.getElementById(`verify-code-${next}`)?.focus();
+    onChangeCode(index, onlyDigits);
+    if (onlyDigits && index < CODE_LENGTH - 1) {
+      focusInput(index + 1);
+    }
   };
 
   return (
@@ -94,8 +118,9 @@ const EmailVerificationModal: React.FC<EmailVerificationModalProps> = ({
               pattern="\d*"
               maxLength={1}
               value={digit}
-              onChange={(e) => handleCodeInput(index, e.target.value)}
-              onKeyDown={(e) => handleKeyDown(index, e)}
+              onChange={(event) => handleCodeInput(index, event.target.value)}
+              onPaste={(event) => handlePaste(event, index)}
+              onKeyDown={(event) => handleKeyDown(index, event)}
               disabled={loading}
               className={styles.codeInput}
               aria-label={`Цифра ${index + 1}`}
