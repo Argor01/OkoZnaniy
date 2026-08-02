@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, Transaction, Dispute, OrderFile, OrderComment, Bid
+from .models import Order, Transaction, TransactionType, Dispute, OrderFile, OrderComment, Bid
 from .services import OrderActionService
 from apps.catalog.models import Subject, Topic, WorkType, Complexity
 from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTypeSerializer, ComplexitySerializer
@@ -149,6 +149,7 @@ class OrderSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     user_has_bid = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
+    payment_status = serializers.SerializerMethodField()
     available_actions = serializers.SerializerMethodField()
     
     # Явно указываем budget как FloatField для корректной сериализации
@@ -183,7 +184,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at',
-            'client_note', 'available_actions'
+            'client_note', 'payment_status', 'available_actions'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -279,6 +280,25 @@ class OrderSerializer(serializers.ModelSerializer):
             return obj.deadline <= timezone.now()
         except Exception:
             return False
+
+    def get_payment_status(self, obj):
+        """Expose whether the order has already been funded.
+
+        Ready-work purchases are paid in full at creation and kept in escrow
+        until acceptance or cancellation.
+        """
+        if getattr(obj, 'is_ready_work_purchase', False):
+            has_full_hold = obj.transactions.filter(
+                type=TransactionType.HOLD,
+                amount=obj.final_price or obj.budget,
+            ).exists()
+            if has_full_hold:
+                return 'paid'
+        if obj.transactions.filter(
+            type__in=[TransactionType.RELEASE, TransactionType.PURCHASE],
+        ).exists():
+            return 'paid'
+        return 'pending'
 
     def get_available_actions(self, obj):
         request = self.context.get('request')

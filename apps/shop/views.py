@@ -11,7 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.chat.services import ensure_order_chat_started
-from apps.orders.models import Order, OrderFile, TransactionType
+from apps.orders.models import Order, TransactionType
 from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
@@ -189,36 +189,6 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             order=order,
             price_paid=work.price,
         )
-
-        # Автоматически «передаём» готовую работу: копируем файлы в OrderFile
-        # (как обычные файлы решения) и ставим первый файл как delivered_file.
-        files_qs = list(work.files.all())
-        primary = files_qs[0] if files_qs else None
-        if primary is not None:
-            with primary.file.open('rb') as src:
-                from django.core.files.base import ContentFile
-                purchase.delivered_file.save(
-                    primary.name or 'ready_work',
-                    ContentFile(src.read()),
-                    save=True,
-                )
-            purchase.delivered_file_name = primary.name or ''
-            purchase.delivered_file_type = primary.file_type or ''
-            purchase.delivered_file_size = primary.file_size or 0
-            purchase.save(update_fields=[
-                'delivered_file', 'delivered_file_name',
-                'delivered_file_type', 'delivered_file_size',
-            ])
-            for f in files_qs:
-                OrderFile.objects.get_or_create(
-                    order=order,
-                    file=f.file,
-                    file_type=OrderFile.FILE_TYPES[1][0],  # 'solution'
-                    defaults={
-                        'uploaded_by': work.author,
-                        'description': f'Готовая работа «{work.title}» ({f.name})',
-                    },
-                )
 
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

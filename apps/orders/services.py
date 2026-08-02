@@ -9,7 +9,7 @@ class OrderActionService:
     """Single place for per-user order action availability."""
 
     CLIENT_REVIEW_STATUSES = {'review'}
-    EXPERT_WORK_STATUSES = {'in_progress', 'revision'}
+    EXPERT_WORK_STATUSES = {'in_progress', 'revision', Order.READY_WORK_TRANSFER}
     CLOSED_STATUSES = {'completed', 'cancelled', 'canceled', 'done'}
 
     @staticmethod
@@ -64,7 +64,7 @@ class OrderActionService:
             'can_decline_assignment': is_invited_expert and order.status == 'awaiting_expert_acceptance' and not is_contact_banned,
             'can_upload_task_files': is_client and not is_closed and not is_contact_banned,
             'can_upload_work': is_expert and order.status in cls.EXPERT_WORK_STATUSES and not deadline_is_overdue and not is_contact_banned,
-            'can_submit_work': is_expert and order.status in cls.EXPERT_WORK_STATUSES and not deadline_is_overdue and not is_contact_banned,
+            'can_submit_work': is_expert and order.status in {'in_progress', 'revision'} and not deadline_is_overdue and not is_contact_banned,
             'can_approve_work': is_client and order.status in cls.CLIENT_REVIEW_STATUSES and not is_contact_banned,
             'can_request_revision': is_client and order.status in cls.CLIENT_REVIEW_STATUSES and not is_contact_banned,
             'can_reject_work': is_client and order.status in cls.CLIENT_REVIEW_STATUSES and not is_contact_banned,

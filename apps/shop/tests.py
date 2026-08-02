@@ -24,7 +24,6 @@ from rest_framework.test import APIClient
 from apps.catalog.models import Subject, WorkType
 from apps.orders.models import Order, Transaction, TransactionType
 from apps.shop.models import Purchase, ReadyWork
-from apps.wallet.services import get_system_account
 
 User = get_user_model()
 
@@ -166,7 +165,7 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertFalse(Order.objects.exists())
         self.assertFalse(Transaction.objects.exists())
 
-    def test_purchase_debits_buyer_pays_author_and_creates_order(self):
+    def test_purchase_is_fully_paid_in_escrow_and_waits_for_expert_upload(self):
         self.buyer.balance = Decimal("1200.00")
         self.buyer.save(update_fields=["balance"])
 
@@ -177,16 +176,48 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         order = purchase.order
         self.buyer.refresh_from_db()
         self.author.refresh_from_db()
-        system_user = get_system_account()
-        system_user.refresh_from_db()
 
-        self.assertEqual(order.status, "completed")
-        self.assertEqual(order.client_id, self.buyer.id)
-        self.assertEqual(order.expert_id, self.author.id)
-        self.assertEqual(self.buyer.balance, Decimal("0.00"))
-        self.assertEqual(self.author.balance, Decimal("1020.00"))
-        self.assertEqual(system_user.balance, Decimal("180.00"))
+        self.assertEqual(order.status, Order.READY_WORK_TRANSFER)
+        self.assertTrue(order.is_ready_work_purchase)
+        self.assertIsNotNone(order.transfer_started_at)
+        self.assertIsNotNone(order.transfer_deadline)
+        self.assertEqual(order.final_price, Decimal("1200.00"))
+        self.assertEqual(self.buyer.balance, Decimal("1200.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("1200.00"))
+        self.assertEqual(self.author.balance, Decimal("0.00"))
         self.assertEqual(
-            set(Transaction.objects.filter(order=order).values_list("type", flat=True)),
-            {TransactionType.HOLD, TransactionType.RELEASE, TransactionType.PAYOUT, TransactionType.COMMISSION},
+            list(Transaction.objects.filter(order=order).values_list("type", flat=True)),
+            [TransactionType.HOLD],
+        )
+        self.assertEqual(order.files.count(), 0)
+
+        order_response = self.api_client.get(f"/api/orders/orders/{order.id}/")
+        self.assertEqual(order_response.status_code, status.HTTP_200_OK, order_response.content)
+        self.assertEqual(order_response.json()["payment_status"], "paid")
+
+        expert_api = APIClient()
+        expert_api.force_authenticate(user=self.author)
+        expert_order_response = expert_api.get(f"/api/orders/orders/{order.id}/")
+        self.assertEqual(expert_order_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(expert_order_response.json()["available_actions"]["can_upload_work"])
+        self.assertFalse(expert_order_response.json()["available_actions"]["can_submit_work"])
+
+    def test_cancel_ready_work_order_returns_full_escrow(self):
+        self.buyer.balance = Decimal("1200.00")
+        self.buyer.save(update_fields=["balance"])
+        purchase_response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+        purchase_id = purchase_response.json()["id"]
+
+        response = self.api_client.post(f"/api/shop/purchases/{purchase_id}/cancel/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        purchase = Purchase.objects.get(pk=purchase_id)
+        purchase.order.refresh_from_db()
+        self.buyer.refresh_from_db()
+        self.assertEqual(purchase.order.status, "cancelled")
+        self.assertEqual(self.buyer.balance, Decimal("1200.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.assertEqual(
+            set(Transaction.objects.filter(order=purchase.order).values_list("type", flat=True)),
+            {TransactionType.HOLD, TransactionType.REFUND},
         )
