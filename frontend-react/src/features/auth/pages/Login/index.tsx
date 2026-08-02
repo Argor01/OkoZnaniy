@@ -88,6 +88,23 @@ const Login: React.FC = () => {
     if (token) navigate('/dashboard');
   }, [navigate]);
 
+  const getLoginErrorMessage = (error: any): string => {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+
+    if (status === 400 || status === 401) {
+      return 'Неверный email или пароль. Проверьте данные и попробуйте ещё раз.';
+    }
+
+    if (typeof data === 'string' && data.trim()) return data;
+    if (data?.detail) return String(data.detail);
+    if (Array.isArray(data?.non_field_errors) && data.non_field_errors[0]) {
+      return String(data.non_field_errors[0]);
+    }
+
+    return 'Не удалось войти. Проверьте данные и попробуйте ещё раз.';
+  };
+
   const onLogin = async (values: LoginRequest) => {
     setLoading(true);
     try {
@@ -103,6 +120,13 @@ const Login: React.FC = () => {
       }
       navigateByRole(role);
     } catch (error: any) {
+      if (error?.response?.status === 400 || error?.response?.status === 401) {
+        message.error(getLoginErrorMessage(error));
+        setTimeout(() => {
+          message.info('Забыли пароль? Используйте ссылку «Забыли пароль?» ниже.');
+        }, 1000);
+        return;
+      }
       const errorData = error.response?.data;
       const errorMessage = errorData?.detail || errorData?.non_field_errors?.[0] || 'Ошибка входа';
       message.error(errorMessage);
@@ -229,6 +253,14 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleResetCodePaste = (digits: string[]) => {
+    const nextCode = [...resetCode];
+    digits.slice(0, nextCode.length).forEach((digit, index) => {
+      nextCode[index] = digit;
+    });
+    setResetCode(nextCode);
+  };
+
   const handleVerifyResetCode = async () => {
     const codeString = resetCode.join('');
     if (codeString.length !== 6) { message.error('Введите 6-значный код'); return; }
@@ -350,6 +382,7 @@ const Login: React.FC = () => {
                 loading={resetLoading}
                 onEmailChange={setResetEmail}
                 onCodeChange={handleResetCodeChange}
+                onCodePaste={handleResetCodePaste}
                 onNewPasswordChange={setNewPassword}
                 onConfirmPasswordChange={setConfirmPassword}
                 onRequestCode={handleRequestPasswordReset}

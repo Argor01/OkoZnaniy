@@ -263,6 +263,17 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                 degree: edu.degree ? String(edu.degree).trim() : '',
               };
             });
+
+          const hasInvalidEducationPeriod = educations.some((edu: Education) => (
+            edu.end_year !== null
+            && edu.end_year !== undefined
+            && Number(edu.end_year) < Number(edu.start_year)
+          ));
+
+          if (hasInvalidEducationPeriod) {
+            message.error('Год окончания обучения не может быть раньше года начала');
+            return;
+          }
           
           if (educations.length === 0) {
             message.error('Добавьте минимум одно образование');
@@ -579,6 +590,10 @@ const ApplicationModal: React.FC<ApplicationModalProps> = ({
                                 if (isNaN(num)) return Promise.reject(new Error('Введите год'));
                                 if (num < 1950) return Promise.reject(new Error('Не ранее 1950'));
                                 if (num > 2100) return Promise.reject(new Error('Не позднее 2100'));
+                                const startYear = applicationForm.getFieldValue(['educations', name, 'start_year']);
+                                if (startYear && num < Number(startYear)) {
+                                  return Promise.reject(new Error('Год окончания не может быть раньше года начала'));
+                                }
                                 return Promise.resolve();
                               }
                             }

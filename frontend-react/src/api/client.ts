@@ -76,6 +76,9 @@ apiClient.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalUrl = originalRequest?.url || '';
+    const originalMethod = (originalRequest?.method || 'get').toLowerCase();
+    const isAuthRequest = originalRequest ? isAuthEndpoint(originalUrl, originalMethod) : false;
 
     // Dev-mode error logging
     if (import.meta.env.DEV) {
@@ -88,6 +91,10 @@ apiClient.interceptors.response.use(
     }
 
     // 401 → try refresh token once
+    if (error.response?.status === 401 && isAuthRequest) {
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -103,7 +110,7 @@ apiClient.interceptors.response.use(
     }
 
     // Final 401 after refresh failed
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       redirectToLoginIfAllowed();

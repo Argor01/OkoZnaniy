@@ -483,7 +483,7 @@ const OrdersStatisticsTable: React.FC<{ data: PartnerDashboardData }> = ({ data 
   const netTotal = totalIncome - totalExpense;
 
   return (
-    <Card title="Детальная статистика по заказам">
+    <Card title="Детальная статистика по заказам" className="partnerDashboardOrdersStatsCard">
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         <Row gutter={[8, 8]} className="partnerDashboardOrdersStatsRow">
           <Col xs={24} sm={8}>

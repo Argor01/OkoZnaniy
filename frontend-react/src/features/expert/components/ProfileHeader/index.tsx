@@ -32,6 +32,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
       ? [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
       : getDisplayUsername(userProfile || {})
   );
+  const roleKind = userProfile?.role === 'expert' ? 'expert' : 'client';
+  const roleLabel = roleKind === 'expert' ? 'Эксперт' : 'Клиент';
 
   const { data: ordersData } = useQuery({
     queryKey: ['expert-success-rate-orders', userProfile?.id],
@@ -108,6 +110,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = React.memo(({
               <Title level={3} className={styles.profileNameTitle}>
                 {displayName}
               </Title>
+              <span className={`${styles.profileRoleBadge} ${styles[`profileRoleBadge_${roleKind}`]}`}>
+                {roleLabel}
+              </span>
               <span className={styles.profileOnlineDot} />
               <Button
                 type="primary"
