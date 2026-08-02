@@ -720,7 +720,7 @@ const FooterDark: React.FC = () => (
           </Link>
           <p className={styles.footerAbout}>
             Платформа подбора экспертов для студентов. Курсовые, дипломы,
-            рефераты — с гарантией, эскроу и поддержкой 24/7.
+            рефераты — с гарантией, эскроу и поддержкой с 10 до 19 по ЕКБ (UTC+5).
           </p>
         </div>
         <div className={styles.footerCol}>
