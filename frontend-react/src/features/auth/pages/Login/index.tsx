@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { authApi, type LoginRequest, type RegisterRequest } from '@/features/auth/api/auth';
@@ -28,7 +28,7 @@ const Login: React.FC = () => {
 
   const [verificationModalVisible, setVerificationModalVisible] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | undefined>(undefined);
-  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationCode, setVerificationCode] = useState<string[]>(['', '', '', '', '', '']);
   const [verificationLoading, setVerificationLoading] = useState(false);
 
   const [passwordResetModalVisible, setPasswordResetModalVisible] = useState(false);
@@ -38,6 +38,8 @@ const Login: React.FC = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const autoVerifyRef = useRef(false);
 
   const [referralCode, setReferralCode] = useState<string>('');
 
@@ -103,6 +105,7 @@ const Login: React.FC = () => {
       }
       navigateByRole(role);
     } catch (error: any) {
+      if (error?.response?.status === 429) return;
       const errorData = error.response?.data;
       const errorMessage = errorData?.detail || errorData?.non_field_errors?.[0] || 'Ошибка входа';
       message.error(errorMessage);
@@ -140,13 +143,14 @@ const Login: React.FC = () => {
       if (values.email) {
         message.success('Регистрация успешна! Мы отправили вам код на email.');
         setVerificationEmail(values.email);
-        setVerificationCode('');
+        setVerificationCode(['', '', '', '', '', '']);
         setVerificationModalVisible(true);
       } else {
         message.success('Регистрация успешна!');
         await onLogin({ username: values.phone || values.email, password: values.password } as LoginRequest);
       }
     } catch (error: any) {
+      if (error?.response?.status === 429) return;
       if (debugEnabled) logger.error('Registration error:', error);
       const errorData = error?.response?.data;
       if (errorData && typeof errorData === 'object') {
@@ -179,18 +183,31 @@ const Login: React.FC = () => {
   };
 
   const handleVerifyEmailCode = async () => {
+    const codeString = verificationCode.join('');
     if (!verificationEmail) { message.error('Не указан email для подтверждения'); return; }
-    if (!verificationCode || verificationCode.trim().length < 4) { message.error('Введите корректный код подтверждения'); return; }
+    if (codeString.length !== 6) { message.error('Введите 6-значный код'); return; }
     setVerificationLoading(true);
     try {
-      const auth = await authApi.verifyEmailCode(verificationEmail, verificationCode.trim());
+      const auth = await authApi.verifyEmailCode(verificationEmail, codeString);
       message.success('Email подтвержден! Вход выполнен.');
       setVerificationModalVisible(false);
       navigateByRole(auth?.user?.role);
     } catch (error: any) {
+      if (error?.response?.status === 429) return;
       message.error(error?.response?.data?.detail || 'Не удалось подтвердить email');
     } finally {
       setVerificationLoading(false);
+    }
+  };
+
+  const handleVerificationCodeChange = (index: number, value: string) => {
+    if (value && !/^\d$/.test(value)) return;
+    const newCode = [...verificationCode];
+    newCode[index] = value;
+    setVerificationCode(newCode);
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`verify-code-${index + 1}`);
+      if (nextInput) (nextInput as HTMLInputElement).focus();
     }
   };
 
@@ -206,12 +223,21 @@ const Login: React.FC = () => {
 
   const handleRequestPasswordReset = async () => {
     if (!resetEmail) { message.error('Введите email'); return; }
+    if (resendCooldown > 0) { message.warning(`Подождите ${resendCooldown} сек. перед повторной отправкой`); return; }
     setResetLoading(true);
     try {
       await authApi.requestPasswordReset(resetEmail);
       message.success('Код отправлен на ваш email');
       setResetStep('code');
+      setResendCooldown(60);
+      const timer = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(timer); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error: any) {
+      if (error?.response?.status === 429) return;
       message.error(error?.response?.data?.error || 'Ошибка отправки кода');
     } finally {
       setResetLoading(false);
@@ -227,20 +253,31 @@ const Login: React.FC = () => {
       const nextInput = document.getElementById(`reset-code-${index + 1}`);
       if (nextInput) (nextInput as HTMLInputElement).focus();
     }
+    const newCodeString = newCode.join('');
+    if (newCodeString.length === 6 && newCode.every(d => d.length === 1) && !autoVerifyRef.current) {
+      autoVerifyRef.current = true;
+      setTimeout(() => doVerifyResetCode(resetEmail, newCodeString), 0);
+    }
+  };
+
+  const doVerifyResetCode = async (email: string, codeString: string) => {
+    if (codeString.length !== 6) { message.error('Введите 6-значный код'); autoVerifyRef.current = false; return; }
+    setResetLoading(true);
+    try {
+      await authApi.verifyResetCode(email, codeString);
+      setResetStep('password');
+    } catch (error: any) {
+      if (error?.response?.status === 429) return;
+      message.error(error?.response?.data?.error || 'Неверный или истекший код');
+      autoVerifyRef.current = false;
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleVerifyResetCode = async () => {
     const codeString = resetCode.join('');
-    if (codeString.length !== 6) { message.error('Введите 6-значный код'); return; }
-    setResetLoading(true);
-    try {
-      await authApi.verifyResetCode(resetEmail, codeString);
-      setResetStep('password');
-    } catch (error: any) {
-      message.error(error?.response?.data?.error || 'Неверный или истекший код');
-    } finally {
-      setResetLoading(false);
-    }
+    await doVerifyResetCode(resetEmail, codeString);
   };
 
   const handleResetPassword = async () => {
@@ -263,11 +300,14 @@ const Login: React.FC = () => {
       setResetCode(['', '', '', '', '', '']);
       setNewPassword('');
       setConfirmPassword('');
+      autoVerifyRef.current = false;
       navigateByRole(auth?.user?.role);
     } catch (error: any) {
+      if (error?.response?.status === 429) return;
       message.error(error?.response?.data?.error || 'Ошибка сброса пароля');
       setResetCode(['', '', '', '', '', '']);
       setResetStep('code');
+      autoVerifyRef.current = false;
     } finally {
       setResetLoading(false);
     }
@@ -335,10 +375,13 @@ const Login: React.FC = () => {
                 email={verificationEmail}
                 code={verificationCode}
                 loading={verificationLoading}
-                onChangeCode={setVerificationCode}
+                onChangeCode={handleVerificationCodeChange}
                 onVerify={handleVerifyEmailCode}
                 onResend={handleResendCode}
-                onCancel={() => setVerificationModalVisible(false)}
+                onCancel={() => {
+                  setVerificationModalVisible(false);
+                  setVerificationCode(['', '', '', '', '', '']);
+                }}
               />
               <PasswordResetModal
                 open={passwordResetModalVisible}
@@ -348,6 +391,7 @@ const Login: React.FC = () => {
                 newPassword={newPassword}
                 confirmPassword={confirmPassword}
                 loading={resetLoading}
+                cooldown={resendCooldown}
                 onEmailChange={setResetEmail}
                 onCodeChange={handleResetCodeChange}
                 onNewPasswordChange={setNewPassword}
@@ -355,9 +399,8 @@ const Login: React.FC = () => {
                 onRequestCode={handleRequestPasswordReset}
                 onVerifyCode={handleVerifyResetCode}
                 onResetPassword={handleResetPassword}
-                onBackToEmail={() => setResetStep('email')}
-                onBackToCode={() => setResetStep('code')}
-                onGoToCodeStep={() => setResetStep('code')}
+                onBackToEmail={() => { setResetStep('email'); autoVerifyRef.current = false; }}
+                onBackToCode={() => { setResetStep('code'); autoVerifyRef.current = false; }}
                 onCancel={() => {
                   setPasswordResetModalVisible(false);
                   setResetStep('email');
@@ -365,6 +408,7 @@ const Login: React.FC = () => {
                   setResetCode(['', '', '', '', '', '']);
                   setNewPassword('');
                   setConfirmPassword('');
+                  autoVerifyRef.current = false;
                 }}
               />
             </div>

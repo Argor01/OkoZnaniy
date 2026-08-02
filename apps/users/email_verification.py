@@ -4,6 +4,7 @@
 import secrets
 import string
 import logging
+import threading
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
@@ -261,14 +262,15 @@ def resend_verification_code(email):
         verification_code = create_verification_code(user, email)
         logger.info(f"[RESEND] Created new code for {email}")
         
-        # Отправляем код
-        send_result = send_verification_code(email, verification_code.code)
-        logger.info(f"[RESEND] Email send result: {send_result}")
+        # Отправляем код в фоне, чтобы не блокировать запрос
+        threading.Thread(
+            target=send_verification_code,
+            args=(email, verification_code.code),
+            daemon=True,
+        ).start()
+        logger.info(f"[RESEND] Email send thread started for {email}")
         
-        if send_result:
-            return True, "Код отправлен на ваш email"
-        else:
-            return False, "Ошибка отправки email"
+        return True, "Код отправлен на ваш email"
             
     except Exception as e:
         logger.error(f"[RESEND ERROR] Ошибка повторной отправки кода: {e}", exc_info=True)

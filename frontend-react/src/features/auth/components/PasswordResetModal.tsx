@@ -1,7 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Input, Button } from 'antd';
 import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import styles from './PasswordResetModal.module.css';
+
+const MOBILE_BREAKPOINT = 576;
 
 interface PasswordResetModalProps {
   open: boolean;
@@ -11,6 +13,7 @@ interface PasswordResetModalProps {
   newPassword: string;
   confirmPassword: string;
   loading: boolean;
+  cooldown?: number;
   onEmailChange: (email: string) => void;
   onCodeChange: (index: number, value: string) => void;
   onNewPasswordChange: (password: string) => void;
@@ -20,7 +23,6 @@ interface PasswordResetModalProps {
   onResetPassword: () => void;
   onBackToEmail: () => void;
   onBackToCode: () => void;
-  onGoToCodeStep: () => void;
   onCancel: () => void;
 }
 
@@ -32,6 +34,7 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   newPassword,
   confirmPassword,
   loading,
+  cooldown = 0,
   onEmailChange,
   onCodeChange,
   onNewPasswordChange,
@@ -46,6 +49,13 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   const emailInputRef = useRef<any>(null);
   const firstCodeInputRef = useRef<HTMLInputElement>(null);
   const newPasswordInputRef = useRef<any>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= MOBILE_BREAKPOINT);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -83,17 +93,6 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
   const handleCodeInput = (index: number, value: string) => {
     const onlyDigits = value.replace(/[^0-9]/g, '');
     onCodeChange(index, onlyDigits);
-    
-    if (onlyDigits && index < code.length - 1) {
-      const nextInput = document.getElementById(`reset-code-${index + 1}`);
-      nextInput?.focus();
-    }
-    
-    const newCode = [...code];
-    newCode[index] = onlyDigits;
-    if (newCode.every(digit => digit.length === 1)) {
-      onVerifyCode();
-    }
   };
 
   const handlePasteCode = (e: React.ClipboardEvent) => {
@@ -122,15 +121,15 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
       open={open}
       onCancel={onCancel}
       footer={null}
-      width={500}
+      width={isMobile ? '100%' : 500}
       wrapClassName={styles.modalWrap}
       centered
       maskClosable={false}
       keyboard={false}
       styles={{
-        content: { borderRadius: 24, overflow: 'hidden' },
-        header: { borderRadius: '24px 24px 0 0' },
-        body: { borderRadius: '0 0 24px 24px' },
+        content: { borderRadius: isMobile ? 20 : 24, overflow: 'hidden' },
+        header: { borderRadius: `${isMobile ? 20 : 24}px ${isMobile ? 20 : 24}px 0 0` },
+        body: { borderRadius: `0 0 ${isMobile ? 20 : 24}px ${isMobile ? 20 : 24}px` },
       }}
     >
       {step === 'email' && (
@@ -151,11 +150,12 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
           <Button
             type="primary"
             loading={loading}
+            disabled={cooldown > 0}
             onClick={onRequestCode}
             size="large"
             block
           >
-            Отправить код
+            {cooldown > 0 ? `Отправить повторно (${cooldown} сек.)` : 'Отправить код'}
           </Button>
         </div>
       )}
@@ -189,15 +189,16 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             ))}
           </div>
 
-          <div className={styles.actionsRow}>
-            <Button onClick={onBackToEmail} disabled={loading}>
-              ← Назад
+          <div className={styles.actionsRow} style={isMobile ? { flexDirection: 'column-reverse', gap: 10 } : undefined}>
+            <Button onClick={onBackToEmail} disabled={loading} block={isMobile}>
+              Назад
             </Button>
             <Button
               type="primary"
               loading={loading}
               onClick={onVerifyCode}
               size="large"
+              block
             >
               Подтвердить код
             </Button>
@@ -231,15 +232,16 @@ const PasswordResetModal: React.FC<PasswordResetModalProps> = ({
             disabled={loading}
           />
 
-          <div className={styles.actionsRow}>
-            <Button onClick={onBackToCode} disabled={loading}>
-              ← Назад
+          <div className={styles.actionsRow} style={isMobile ? { flexDirection: 'column-reverse', gap: 10 } : undefined}>
+            <Button onClick={onBackToCode} disabled={loading} block={isMobile}>
+              Назад
             </Button>
             <Button
               type="primary"
               loading={loading}
               onClick={onResetPassword}
               size="large"
+              block
             >
               Сбросить пароль
             </Button>

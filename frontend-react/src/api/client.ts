@@ -1,8 +1,18 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { notification } from 'antd';
 import { API_URL } from '@/config/api';
 import { ROUTES } from '@/utils/constants';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import { logger } from '@/utils/logger';
+
+const formatThrottleWait = (detail: string): string => {
+  const match = detail.match(/(\d+)\s*seconds?/i);
+  if (!match) return detail;
+  const seconds = parseInt(match[1], 10);
+  if (seconds < 60) return `Попробуйте через ${seconds} сек.`;
+  const minutes = Math.ceil(seconds / 60);
+  return `Попробуйте через ${minutes} мин.`;
+};
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -107,6 +117,18 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       redirectToLoginIfAllowed();
+    }
+
+    // 429 Too Many Requests — throttle
+    if (error.response?.status === 429) {
+      const data = error.response?.data as Record<string, unknown> | undefined;
+      const detail = (data?.detail as string) || 'Слишком много запросов';
+      const message = formatThrottleWait(detail);
+      notification.warning({
+        message: 'Превышен лимит запросов',
+        description: message,
+        duration: 6,
+      });
     }
 
     return Promise.reject(error);

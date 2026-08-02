@@ -65,7 +65,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         <Form.Item
           label="Пароль"
           name="password"
-          rules={[{ required: true, message: 'Введите пароль' }]}
+          rules={[
+            { required: true, message: 'Введите пароль' },
+            { min: 6, message: 'Не менее 6 символов' },
+          ]}
         >
           <Input.Password prefix={<LockOutlined />} placeholder="Пароль" />
         </Form.Item>
@@ -74,6 +77,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           name="password2"
           rules={[
             { required: true, message: 'Подтвердите пароль' },
+            { min: 6, message: 'Не менее 6 символов' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('password') === value) return Promise.resolve();

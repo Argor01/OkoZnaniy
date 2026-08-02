@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.http import Http404
 import logging
+import threading
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -179,7 +180,11 @@ class UserViewSet(viewsets.ModelViewSet):
                 # Если email не подтвержден, отправляем код повторно
                 if not existing_user.email_verified:
                     verification_code = create_verification_code(existing_user)
-                    send_verification_code(existing_user.email, verification_code.code)
+                    threading.Thread(
+                        target=send_verification_code,
+                        args=(existing_user.email, verification_code.code),
+                        daemon=True,
+                    ).start()
 
                     response_data = UserSerializer(existing_user).data
                     response_data['message'] = 'Код подтверждения отправлен повторно на ваш email.'
@@ -207,15 +212,12 @@ class UserViewSet(viewsets.ModelViewSet):
             if user.email:
                 logger.info(f"[Registration] Sending verification code to {user.email}")
                 verification_code = create_verification_code(user)
-                send_result = send_verification_code(user.email, verification_code.code)
-                logger.info(f"[Registration] Email send result: {send_result}")
-                
-                if not send_result:
-                    logger.error(f"[Registration] Failed to send verification code to {user.email}")
-                    response_data = UserSerializer(user).data
-                    response_data['message'] = 'Регистрация успешна, но не удалось отправить код подтверждения. Попробуйте позже или обратитесь в поддержку.'
-                    response_data['email_verification_required'] = True
-                    return Response(response_data, status=status.HTTP_201_CREATED)
+                threading.Thread(
+                    target=send_verification_code,
+                    args=(user.email, verification_code.code),
+                    daemon=True,
+                ).start()
+                logger.info(f"[Registration] Email send thread started for {user.email}")
             else:
                 logger.warning(f"[Registration] User created without email: {user.id}")
             
@@ -512,9 +514,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK
             )
         
-        # Создаем и отправляем код
+        # Создаем и отправляем код в фоне
         code = create_password_reset_code(user)
-        send_password_reset_code(email, code)
+        threading.Thread(
+            target=send_password_reset_code,
+            args=(email, code),
+            daemon=True,
+        ).start()
         
         return Response(
             {'message': 'Код для сброса пароля отправлен на ваш email'},
