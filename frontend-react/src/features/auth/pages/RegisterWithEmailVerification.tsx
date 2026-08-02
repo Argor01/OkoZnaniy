@@ -50,7 +50,7 @@ const RegisterWithEmailVerification: React.FC = () => {
     }
   }, [searchParams]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -229,23 +229,6 @@ const RegisterWithEmailVerification: React.FC = () => {
             />
           </div>
 
-          <div className="register-field">
-            <label htmlFor="role" className="register-label">
-              Я хочу
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="register-select"
-            >
-              <option value="client">Заказывать работы</option>
-              <option value="expert">Выполнять работы</option>
-              <option value="partner">Стать партнером</option>
-            </select>
-          </div>
-
           <div className="register-checkbox-group">
             <div className="register-checkbox-item">
               <input
@@ -273,7 +256,7 @@ const RegisterWithEmailVerification: React.FC = () => {
                 className="register-checkbox"
               />
               <label htmlFor="userAgreement" className="register-checkbox-label">
-                Я принимаю <a href={formData.role === 'client' ? "/docs/user_agreement_client.pdf" : "/docs/user_agreement_expert.pdf"} target="_blank" rel="noopener noreferrer">пользовательское соглашение</a>
+                Я принимаю <a href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">пользовательское соглашение</a>
               </label>
             </div>
 

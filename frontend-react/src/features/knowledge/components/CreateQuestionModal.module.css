@@ -40,8 +40,15 @@
 }
 
 .titleInput {
+  background: #fff !important;
   border-radius: 8px;
   font-size: 16px;
+}
+
+.titleInput:hover,
+.titleInput:focus,
+.titleInput:focus-within {
+  background: #fff !important;
 }
 
 .descriptionTextarea {
@@ -98,6 +105,7 @@
   border-top-color: var(--color-border-base);
 }
 
+:global([data-theme="dark"]) .titleInput,
 :global([data-theme="dark"]) .titleInput :global(.ant-input),
 :global([data-theme="dark"]) .descriptionTextarea :global(.ant-input),
 :global([data-theme="dark"]) .categorySelect :global(.ant-select-selector),

@@ -226,6 +226,15 @@ const OrderContent: React.FC<OrderContentProps> = ({
         </div>
       )}
 
+      {attachedOrderFiles.length > 0 && (
+        <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
+          <Title level={4} className={styles.sectionTitle}>Файлы задания</Title>
+          <div className={styles.orderFilesGrid}>
+            {attachedOrderFiles.map((file: any, index: number) => renderFileTile(file, index, 'attached'))}
+          </div>
+        </div>
+      )}
+
       {canSeeDeliveredWorkBlock ? (
         <div className={`${styles.deliveredWorkSection} ${styles.sectionBlock}`}>
           <Title level={4} className={styles.sectionTitle}>Готовая работа</Title>
@@ -283,15 +292,6 @@ const OrderContent: React.FC<OrderContentProps> = ({
           )}
         </div>
       ) : null}
-
-      {attachedOrderFiles.length > 0 && (
-        <div className={`${styles.orderFilesSection} ${styles.sectionBlock}`}>
-          <Title level={4} className={styles.sectionTitle}>Файлы задания</Title>
-          <div className={styles.orderFilesGrid}>
-            {attachedOrderFiles.map((file: any, index: number) => renderFileTile(file, index, 'attached'))}
-          </div>
-        </div>
-      )}
     </>
   );
 };

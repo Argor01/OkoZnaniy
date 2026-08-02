@@ -96,14 +96,48 @@
   color: #fff;
   font-family: 'Jost-SemiBold', system-ui, sans-serif;
 }
+.heroHandleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
 .heroHandle {
+  display: inline-block;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.72);
-  margin-bottom: 20px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.accountRoleBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.36);
+  box-shadow: 0 10px 22px -14px rgba(0, 0, 0, 0.35);
+}
+.accountRoleBadge_client {
+  background: rgba(125, 211, 252, 0.22);
+  color: #e0f2fe;
+}
+.accountRoleBadge_expert {
+  background: rgba(16, 185, 129, 0.22);
+  color: #d1fae5;
+}
+.accountRoleBadge_partner {
+  background: rgba(246, 193, 74, 0.24);
+  color: #fff7d6;
 }
 .heroActions { display: flex; gap: 12px; flex-wrap: wrap; }
 .heroBtnPrimary {
@@ -410,6 +444,7 @@
   .heroGrid { grid-template-columns: 1fr; text-align: center; gap: 20px; }
   .heroAvatarWrap { justify-self: center; }
   .heroTags { justify-content: center; }
+  .heroHandleRow { justify-content: center; }
   .heroActions { justify-content: center; }
   .heroName { font-size: 28px; }
   .heroLevel { flex-direction: row; gap: 16px; }
