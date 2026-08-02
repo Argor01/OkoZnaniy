@@ -460,7 +460,11 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
     prevAcceptedOrderIdsRef.current = orderIdsForTabs;
     const chatOrderId = toPositiveNumber(selectedChat?.order_id);
-    setActiveOrderId(chatOrderId);
+    setActiveOrderId((prev) => {
+      if (chatOrderId !== null) return chatOrderId;
+      if (prev !== null && orderIdsForTabs.includes(prev)) return prev;
+      return chatOrderId;
+    });
   }, [visible, orderIdsForTabs, selectedChat?.order_id, toPositiveNumber]);
 
   const effectiveOrderId = activeOrderId;
