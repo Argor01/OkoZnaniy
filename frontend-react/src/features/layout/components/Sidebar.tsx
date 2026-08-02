@@ -15,6 +15,7 @@ import {
   UnorderedListOutlined,
   BookOutlined,
   BulbOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { BREAKPOINTS, ROUTES } from '@/utils/constants';
@@ -120,6 +121,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       onImprovementsClick?.();
       return;
     }
+    if (key === 'finance') {
+      navigate('/wallet');
+      return;
+    }
     if (key === 'knowledge') {
       navigate('/knowledge');
       return;
@@ -204,6 +209,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     onMessagesClick,
     onNotificationsClick,
     onArbitrationClick,
+    onFinanceClick,
     onFaqClick,
     onImprovementsClick,
     onLogout,
@@ -245,6 +251,11 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <TrophyOutlined />,
       label: 'Арбитраж',
     },
+    isMobile ? {
+      key: 'finance',
+      icon: <WalletOutlined />,
+      label: 'Финансы',
+    } : null,
     (!isExpert && !isMobile) ? {
       key: 'orders',
       icon: <ShoppingOutlined />,
