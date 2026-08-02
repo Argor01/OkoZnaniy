@@ -11,9 +11,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.chat.services import ensure_order_chat_started
-from apps.orders.models import Order, TransactionType
+from apps.orders.models import Order, OrderFile, TransactionType
 from apps.wallet.services import InsufficientFunds, WalletService
-from .models import FavoriteWork, Purchase, ReadyWork
+from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
 
@@ -144,7 +144,8 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         if work.author == request.user:
             return Response({'error': 'Нельзя купить собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
-        deadline = timezone.now() + timedelta(days=max(work.execution_days, 1))
+        now = timezone.now()
+        transfer_deadline = now + timedelta(days=max(work.execution_days, 1))
         order = Order.objects.create(
             client=request.user,
             expert=work.author,
@@ -152,25 +153,23 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             work_type=work.work_type,
             title=work.title,
             description=work.description,
-            deadline=deadline,
+            deadline=transfer_deadline,
             budget=work.price,
             original_price=work.price,
             final_price=work.price,
-            status='completed',
+            status=Order.READY_WORK_TRANSFER,
+            transfer_started_at=now,
+            transfer_deadline=transfer_deadline,
+            is_ready_work_purchase=True,
         )
         try:
+            # Деньги сразу «оплачены», но лежат в эскроу до передачи работы.
+            # Если заказ отменят — вернём покупателю через WalletService.refund_hold.
             WalletService.hold(
                 request.user,
                 work.price,
                 order=order,
                 description=f'Резерв на покупку готовой работы "{work.title}"',
-            )
-            WalletService.release_to_expert(
-                client=request.user,
-                expert=work.author,
-                amount=work.price,
-                order=order,
-                description=f'Покупка готовой работы "{work.title}"',
             )
         except InsufficientFunds:
             order.delete()
@@ -190,6 +189,37 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             order=order,
             price_paid=work.price,
         )
+
+        # Автоматически «передаём» готовую работу: копируем файлы в OrderFile
+        # (как обычные файлы решения) и ставим первый файл как delivered_file.
+        files_qs = list(work.files.all())
+        primary = files_qs[0] if files_qs else None
+        if primary is not None:
+            with primary.file.open('rb') as src:
+                from django.core.files.base import ContentFile
+                purchase.delivered_file.save(
+                    primary.name or 'ready_work',
+                    ContentFile(src.read()),
+                    save=True,
+                )
+            purchase.delivered_file_name = primary.name or ''
+            purchase.delivered_file_type = primary.file_type or ''
+            purchase.delivered_file_size = primary.file_size or 0
+            purchase.save(update_fields=[
+                'delivered_file', 'delivered_file_name',
+                'delivered_file_type', 'delivered_file_size',
+            ])
+            for f in files_qs:
+                OrderFile.objects.get_or_create(
+                    order=order,
+                    file=f.file,
+                    file_type=OrderFile.FILE_TYPES[1][0],  # 'solution'
+                    defaults={
+                        'uploaded_by': work.author,
+                        'description': f'Готовая работа «{work.title}» ({f.name})',
+                    },
+                )
+
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -211,6 +241,80 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+    @action(detail=True, methods=['post'])
+    @transaction.atomic
+    def cancel(self, request, pk=None):
+        """Покупатель отменяет заказ по готовой работе:
+        деньги возвращаются на кошелёк, статус заказа → cancelled."""
+        purchase = self.get_object()
+        order = purchase.order
+
+        if order is None:
+            return Response(
+                {'detail': 'У покупки нет связанного заказа.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status != Order.READY_WORK_TRANSFER:
+            return Response(
+                {'detail': f'Отменить можно только заказ в статусе «Передача готовой работы». Текущий: «{order.get_status_display()}».'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        refunded = WalletService.refund_hold(
+            request.user,
+            purchase.price_paid,
+            order=order,
+            description=f'Возврат по покупке готовой работы «{purchase.work.title}»',
+        )
+
+        order.status = 'cancelled'
+        order.save(update_fields=['status', 'updated_at'])
+
+        return Response({
+            'status': 'cancelled',
+            'order_status': order.status,
+            'refunded_amount': str(purchase.price_paid),
+            'transaction_id': refunded.id,
+        })
+
+    @action(detail=True, methods=['post'])
+    @transaction.atomic
+    def confirm_received(self, request, pk=None):
+        """Покупатель подтверждает, что готовая работа получена:
+        деньги из эскроу уходят эксперту (минус комиссия платформы),
+        статус заказа → completed."""
+        purchase = self.get_object()
+        order = purchase.order
+
+        if order is None:
+            return Response(
+                {'detail': 'У покупки нет связанного заказа.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status != Order.READY_WORK_TRANSFER:
+            return Response(
+                {'detail': f'Подтвердить можно только заказ в статусе «Передача готовой работы». Текущий: «{order.get_status_display()}».'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        result = WalletService.release_to_expert(
+            client=request.user,
+            expert=purchase.work.author,
+            amount=purchase.price_paid,
+            order=order,
+            description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
+        )
+
+        order.status = 'completed'
+        order.save(update_fields=['status', 'updated_at'])
+
+        return Response({
+            'status': 'completed',
+            'order_status': order.status,
+            'expert_payout': str(result['payout']),
+            'platform_fee': str(result['fee']),
+        })
 
     @action(detail=True, methods=['post'])
     def rate(self, request, pk=None):

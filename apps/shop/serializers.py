@@ -152,6 +152,11 @@ class PurchaseSerializer(serializers.ModelSerializer):
     work_title = serializers.CharField(source='work.title', read_only=True)
     work_detail = ReadyWorkSerializer(source='work', read_only=True)
     delivered_file_available = serializers.SerializerMethodField()
+    order_status = serializers.CharField(source='order.status', read_only=True)
+    order_status_display = serializers.CharField(source='order.get_status_display', read_only=True)
+    transfer_started_at = serializers.DateTimeField(source='order.transfer_started_at', read_only=True)
+    transfer_deadline = serializers.DateTimeField(source='order.transfer_deadline', read_only=True)
+    seconds_left = serializers.SerializerMethodField()
 
     class Meta:
         model = Purchase
@@ -159,6 +164,11 @@ class PurchaseSerializer(serializers.ModelSerializer):
             'id',
             'work',
             'order',
+            'order_status',
+            'order_status_display',
+            'transfer_started_at',
+            'transfer_deadline',
+            'seconds_left',
             'work_title',
             'work_detail',
             'price_paid',
@@ -174,3 +184,13 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
     def get_delivered_file_available(self, obj):
         return bool(obj.delivered_file)
+
+    def get_seconds_left(self, obj):
+        from django.utils import timezone
+        order = obj.order
+        if order is None or order.transfer_deadline is None:
+            return None
+        if order.status != 'ready_work_transfer':
+            return 0
+        delta = order.transfer_deadline - timezone.now()
+        return max(0, int(delta.total_seconds()))

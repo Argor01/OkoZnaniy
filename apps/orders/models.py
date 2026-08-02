@@ -37,7 +37,10 @@ class Order(models.Model):
         ('completed', 'Выполнен'),
         ('cancelled', 'Отменен'),
         ('expired', 'Истёк срок'),
+        ('ready_work_transfer', 'Передача готовой работы'),
     ]
+
+    READY_WORK_TRANSFER = 'ready_work_transfer'
 
     client = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -190,6 +193,25 @@ class Order(models.Model):
         verbose_name="Есть проблемы",
         help_text="Отметка о наличии проблем с заказом"
     )
+    # ----- Флоу «покупка готовой работы»: таймер и метки -----
+    transfer_started_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Момент начала передачи готовой работы",
+        help_text="Когда заказ перешёл в статус 'Передача готовой работы' (старт таймера)",
+    )
+    transfer_deadline = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Дедлайн передачи готовой работы",
+        help_text="Крайний срок, до которого продавец/система должна передать готовую работу покупателю",
+    )
+    is_ready_work_purchase = models.BooleanField(
+        default=False,
+        verbose_name="Это покупка готовой работы",
+        help_text="Заказ создан автоматически из покупки в магазине готовых работ",
+    )
+
     is_frozen = models.BooleanField(
         default=False,
         verbose_name="Заморожен"
