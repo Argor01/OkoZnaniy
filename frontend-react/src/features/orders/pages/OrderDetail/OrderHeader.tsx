@@ -15,11 +15,13 @@ import {
   CloseOutlined,
   DownOutlined,
   MessageOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
 import { ordersApi, type Order } from '@/features/orders/api/orders';
 import { formatCurrency } from '@/utils/formatters';
 import { AppButton, AppCard } from '@/components/ui';
 import { logger } from '@/utils/logger';
+import { useQueryClient } from '@tanstack/react-query';
 import styles from '../OrderDetail.module.css';
 
 const { Title, Text } = Typography;
@@ -50,8 +52,10 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   onEditOrder,
 }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const canEditOrder = (availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'))) && order.status !== 'expired';
   const canCancelOrder = ((availableActions?.can_delete ?? order.status === 'new') && order.status === 'new') && order.status !== 'expired';
+  const isExpired = order.status === 'expired';
 
   return (
     <>
@@ -162,62 +166,89 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       {isOrderOwner && (
         <div className={`${styles.orderActionsSection} ${styles.sectionBlock}`}>
           <Space wrap size={isMobile ? 8 : 16} className={styles.orderActionsRow}>
-            <AppButton
-              icon={<EditOutlined />}
-              size={isMobile ? 'middle' : 'large'}
-              onClick={onEditOrder}
-              disabled={!canEditOrder}
-            >
-              Редактировать заказ
-            </AppButton>
-            <AppButton
-              variant="secondary"
-              icon={<CloseOutlined />}
-              size={isMobile ? 'middle' : 'large'}
-              danger
-              disabled={!canCancelOrder}
-              onClick={() => {
-                Modal.confirm({
-                  title: 'Отмена заказа',
-                  content: 'Вы уверены, что хотите отменить этот заказ?',
-                  okText: 'Отменить',
-                  cancelText: 'Назад',
-                  okType: 'danger',
-                  onOk: async () => {
-                    try {
-                      await ordersApi.deleteOrder(Number(orderId));
-                      message.success('Заказ отменен');
-                      navigate('/orders-feed');
-                    } catch (e: any) {
-                      message.error(e?.response?.data?.detail || 'Не удалось отменить заказ');
-                    }
-                  },
-                });
-              }}
-            >
-              Отменить заказ
-            </AppButton>
-            <Dropdown
-              menu={{
-                items: [
-                  {
-                    key: 'complaint',
-                    label: 'Подать жалобу',
-                    icon: <MessageOutlined />,
-                    onClick: () => navigate(`/orders/${orderId}/complaint`),
-                  },
-                ],
-              }}
-              trigger={['click']}
-            >
+            {isExpired ? (
               <AppButton
-                variant="secondary"
+                icon={<SyncOutlined />}
                 size={isMobile ? 'middle' : 'large'}
-                disabled={!order.expert}
+                onClick={async () => {
+                  try {
+                    await ordersApi.reactivateOrder(Number(orderId));
+                    message.success('Заказ снова опубликован в ленте');
+                    await Promise.all([
+                      queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
+                      queryClient.invalidateQueries({ queryKey: ['inactive-user-orders'] }),
+                      queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
+                      queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
+                      queryClient.invalidateQueries({ queryKey: ['order', orderId] }),
+                    ]);
+                    navigate('/orders-feed');
+                  } catch (e: any) {
+                    message.error(e?.response?.data?.detail || 'Не удалось активировать заказ');
+                  }
+                }}
               >
-                Ещё <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+                Переопубликовать
               </AppButton>
-            </Dropdown>
+            ) : (
+              <>
+                <AppButton
+                  icon={<EditOutlined />}
+                  size={isMobile ? 'middle' : 'large'}
+                  onClick={onEditOrder}
+                  disabled={!canEditOrder}
+                >
+                  Редактировать заказ
+                </AppButton>
+                <AppButton
+                  variant="secondary"
+                  icon={<CloseOutlined />}
+                  size={isMobile ? 'middle' : 'large'}
+                  danger
+                  disabled={!canCancelOrder}
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Отмена заказа',
+                      content: 'Вы уверены, что хотите отменить этот заказ?',
+                      okText: 'Отменить',
+                      cancelText: 'Назад',
+                      okType: 'danger',
+                      onOk: async () => {
+                        try {
+                          await ordersApi.deleteOrder(Number(orderId));
+                          message.success('Заказ отменен');
+                          navigate('/orders-feed');
+                        } catch (e: any) {
+                          message.error(e?.response?.data?.detail || 'Не удалось отменить заказ');
+                        }
+                      },
+                    });
+                  }}
+                >
+                  Отменить заказ
+                </AppButton>
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: 'complaint',
+                        label: 'Подать жалобу',
+                        icon: <MessageOutlined />,
+                        onClick: () => navigate(`/orders/${orderId}/complaint`),
+                      },
+                    ],
+                  }}
+                  trigger={['click']}
+                >
+                  <AppButton
+                    variant="secondary"
+                    size={isMobile ? 'middle' : 'large'}
+                    disabled={!order.expert}
+                  >
+                    Ещё <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+                  </AppButton>
+                </Dropdown>
+              </>
+            )}
           </Space>
         </div>
       )}

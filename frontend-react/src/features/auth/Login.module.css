@@ -858,20 +858,6 @@
   border-bottom-color: #2d3348 !important;
 }
 
-[data-theme="dark"] .roleSwitch {
-  background: #1e2230;
-  border-color: #2d3348;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-[data-theme="dark"] .roleOption {
-  color: #a78bfa;
-}
-
-[data-theme="dark"] .roleOption.active {
-  color: #ffffff;
-}
-
 [data-theme="dark"] .tabBtn {
   background: #1e2230;
   color: #94a3b8;

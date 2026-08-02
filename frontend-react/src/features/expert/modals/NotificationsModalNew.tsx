@@ -235,7 +235,11 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
       ];
     }
 
-    actions.push({ key: 'order-chat', label: 'Открыть чат заказа', target: `/messages?orderId=${orderId}`, primary: actions.length === 0 });
+    if (notification.type === 'order_expired') {
+      actions.push({ key: 'open-order', label: 'Переопубликовать заказ', target: `/orders/${orderId}`, primary: true });
+    } else {
+      actions.push({ key: 'order-chat', label: 'Открыть чат заказа', target: `/messages?orderId=${orderId}`, primary: actions.length === 0 });
+    }
 
     if (notification.type === 'file_uploaded' || source.includes('провер') || source.includes('работ')) {
       actions.push({ key: 'review-work', label: 'Проверить работу', target: `/orders/${orderId}` });
