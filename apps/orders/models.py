@@ -211,6 +211,18 @@ class Order(models.Model):
         verbose_name="Это покупка готовой работы",
         help_text="Заказ создан автоматически из покупки в магазине готовых работ",
     )
+    # ----- Состояния таймера «передачи готовой работы» -----
+    transfer_deadline_notified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Когда эксперту ушло уведомление «таймер истёк, клиент может отменить»",
+        help_text="Чтобы не дублировать уведомление эксперту от периодической задачи",
+    )
+    auto_bad_review_issued = models.BooleanField(
+        default=False,
+        verbose_name="Авто-отзыв 1★ уже выставлен",
+        help_text="Выставляется, когда клиент отменил заказ после истечения таймера передачи",
+    )
 
     is_frozen = models.BooleanField(
         default=False,

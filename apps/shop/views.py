@@ -216,7 +216,14 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
     @transaction.atomic
     def cancel(self, request, pk=None):
         """Покупатель отменяет заказ по готовой работе:
-        деньги возвращаются на кошелёк, статус заказа → cancelled."""
+        деньги возвращаются на кошелёк, статус заказа → cancelled.
+
+        Если таймер передачи уже истёк, дополнительно:
+          • эксперту автоматически выставляется отзыв 1★;
+          • эксперт получает уведомление об отмене и о низком рейтинге;
+          • клиент видит предупреждение об этом до подтверждения (на фронте).
+        До истечения таймера отмена запрещена — деньги лежат в эскроу, пока
+        эксперт не загрузит готовую работу."""
         purchase = self.get_object()
         order = purchase.order
 
@@ -231,21 +238,117 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Клиент может отменить заказ только после истечения таймера передачи.
+        from apps.orders.services import OrderActionService
+        if not OrderActionService.is_transfer_deadline_passed(order):
+            return Response(
+                {'detail': 'Отменить покупку готовой работы можно только после истечения таймера передачи. Дождитесь загрузки работы экспертом или истечения срока.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        expert = order.expert
+        already_auto_reviewed = bool(getattr(order, 'auto_bad_review_issued', False))
+
         refunded = WalletService.refund_hold(
             request.user,
             purchase.price_paid,
             order=order,
-            description=f'Возврат по покупке готовой работы «{purchase.work.title}»',
+            description=(
+                f'Возврат по покупке готовой работы «{purchase.work.title}» '
+                f'(таймер передачи истёк, клиент отменил заказ)'
+            ),
         )
 
         order.status = 'cancelled'
         order.save(update_fields=['status', 'updated_at'])
+
+        # Авто-отзыв 1★ эксперту (если ещё не выставлен) — клиент отменил
+        # покупку после истечения таймера, значит эксперт не выполнил обязательство.
+        auto_review = None
+        if expert is not None and not already_auto_reviewed:
+            try:
+                from apps.experts.models import ExpertReview
+                auto_review, created = ExpertReview.objects.get_or_create(
+                    order=order,
+                    defaults={
+                        'expert': expert,
+                        'client': request.user,
+                        'rating': 1,
+                        'comment': 'Эксперт не загрузил готовую работу в установленный срок.',
+                        'is_published': True,
+                    },
+                )
+                if not created and auto_review.rating != 1:
+                    auto_review.rating = 1
+                    auto_review.comment = 'Эксперт не загрузил готовую работу в установленный срок.'
+                    auto_review.is_published = True
+                    auto_review.save(update_fields=['rating', 'comment', 'is_published', 'updated_at'])
+            except Exception:
+                auto_review = None
+
+            order.auto_bad_review_issued = True
+            order.save(update_fields=['auto_bad_review_issued', 'updated_at'])
+
+        # Уведомления обеим сторонам
+        try:
+            from apps.notifications.services import NotificationService
+            from apps.notifications.models import NotificationType
+
+            if expert is not None:
+                NotificationService.create_notification(
+                    recipient=expert,
+                    type=NotificationType.STATUS_CHANGED,
+                    title='Заказ отменён клиентом',
+                    message=(
+                        f'Клиент отменил заказ №{order.id} «{purchase.work.title}» '
+                        f'после истечения таймера передачи. '
+                        f'Средства возвращены покупателю, эксперту выставлен автоматический отзыв 1★.'
+                    ),
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={
+                        'order_id': order.id,
+                        'old_status': Order.READY_WORK_TRANSFER,
+                        'new_status': 'cancelled',
+                        'reason': 'transfer_deadline_expired',
+                    },
+                )
+
+            NotificationService.create_notification(
+                recipient=request.user,
+                type=NotificationType.STATUS_CHANGED,
+                title='Заказ отменён',
+                message=(
+                    f'Заказ №{order.id} «{purchase.work.title}» отменён. '
+                    f'Средства возвращены на ваш кошелёк. '
+                    f'Эксперту выставлен автоматический отзыв 1★.'
+                ),
+                related_object_id=order.id,
+                related_object_type='order',
+                data={
+                    'order_id': order.id,
+                    'old_status': Order.READY_WORK_TRANSFER,
+                    'new_status': 'cancelled',
+                    'reason': 'transfer_deadline_expired',
+                },
+            )
+        except Exception:
+            pass
+
+        # Пересчёт статистики эксперта, если выставлен авто-отзыв.
+        if expert is not None and auto_review is not None:
+            try:
+                from apps.experts.services import ExpertStatisticsService
+                ExpertStatisticsService.update_expert_statistics(expert)
+            except Exception:
+                pass
 
         return Response({
             'status': 'cancelled',
             'order_status': order.status,
             'refunded_amount': str(purchase.price_paid),
             'transaction_id': refunded.id,
+            'auto_review_issued': bool(auto_review is not None),
         })
 
     @action(detail=True, methods=['post'])

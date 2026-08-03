@@ -31,6 +31,10 @@ app.conf.beat_schedule = {
         'task': 'apps.orders.tasks.expire_old_orders',
         'schedule': crontab(hour='4', minute='0'),  # Каждый день в 4:00
     },
+    'expire-ready-work-transfers': {
+        'task': 'apps.orders.tasks.expire_ready_work_transfers',
+        'schedule': crontab(minute='*/15'),  # Каждые 15 минут — следим за таймером передачи
+    },
 }
 
 @app.task(bind=True)

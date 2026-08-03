@@ -151,6 +151,12 @@ class OrderSerializer(serializers.ModelSerializer):
     is_overdue = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     available_actions = serializers.SerializerMethodField()
+    transfer_deadline = serializers.DateTimeField(read_only=True)
+    transfer_started_at = serializers.DateTimeField(read_only=True)
+    transfer_deadline_passed = serializers.SerializerMethodField()
+    transfer_seconds_left = serializers.SerializerMethodField()
+    auto_bad_review_issued = serializers.BooleanField(read_only=True)
+    is_ready_work_purchase = serializers.BooleanField(read_only=True)
     
     # Явно указываем budget как FloatField для корректной сериализации
     budget = serializers.FloatField(required=False, allow_null=True)
@@ -184,7 +190,9 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at',
-            'client_note', 'payment_status', 'available_actions'
+            'client_note', 'payment_status', 'available_actions',
+            'transfer_deadline', 'transfer_started_at', 'transfer_deadline_passed',
+            'transfer_seconds_left', 'auto_bad_review_issued', 'is_ready_work_purchase'
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -273,6 +281,12 @@ class OrderSerializer(serializers.ModelSerializer):
         try:
             if getattr(obj, 'is_frozen', False):
                 return False
+            # Для «передачи готовой работы» свой таймер — transfer_deadline.
+            if obj.status == Order.READY_WORK_TRANSFER:
+                deadline = getattr(obj, 'transfer_deadline', None)
+                if not deadline:
+                    return False
+                return deadline <= timezone.now()
             if obj.status not in ['in_progress', 'revision']:
                 return False
             if not obj.deadline:
@@ -299,6 +313,26 @@ class OrderSerializer(serializers.ModelSerializer):
         ).exists():
             return 'paid'
         return 'pending'
+
+    def get_transfer_deadline_passed(self, obj):
+        try:
+            from .services import OrderActionService
+            return OrderActionService.is_transfer_deadline_passed(obj)
+        except Exception:
+            return False
+
+    def get_transfer_seconds_left(self, obj):
+        try:
+            deadline = getattr(obj, 'transfer_deadline', None) or obj.deadline
+            if deadline is None:
+                return None
+            if obj.status != Order.READY_WORK_TRANSFER:
+                return 0
+            from django.utils import timezone
+            delta = deadline - timezone.now()
+            return max(0, int(delta.total_seconds()))
+        except Exception:
+            return None
 
     def get_available_actions(self, obj):
         request = self.context.get('request')
