@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Table, Tag, Select, Segmented, Typography, Space, Tooltip, Empty, message } from 'antd';
+import { Table, Tag, Select, Segmented, Typography, Space, Empty, message } from 'antd';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { partnerApplicationsApi, type PartnerApplication } from '@/features/partner/api/partnerApplications';
 import styles from './PartnerApplications.module.css';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const STATUS_META: Record<string, { color: string; label: string }> = {
   new: { color: 'blue', label: 'Новая' },
@@ -63,21 +63,6 @@ const PartnerApplications: React.FC = () => {
           {r.phone && <a href={`tel:${r.phone}`}>{r.phone}</a>}
         </Space>
       ),
-    },
-    {
-      title: 'Комментарий',
-      dataIndex: 'comment',
-      key: 'comment',
-      render: (v: string) =>
-        v ? (
-          <Tooltip title={v}>
-            <Paragraph ellipsis={{ rows: 2 }} style={{ marginBottom: 0, maxWidth: 240 }}>
-              {v}
-            </Paragraph>
-          </Tooltip>
-        ) : (
-          <Text type="secondary">—</Text>
-        ),
     },
     {
       title: 'Дата',

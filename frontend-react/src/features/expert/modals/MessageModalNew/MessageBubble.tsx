@@ -21,6 +21,20 @@ import styles from '../MessageModalNew.module.css';
 
 const { Text } = Typography;
 
+const TECHNICAL_OFFER_DESCRIPTIONS = new Set([
+  'new',
+  'pending',
+  'accepted',
+  'rejected',
+  'delivered',
+  'awaiting_upload',
+]);
+
+const getVisibleOfferDescription = (description?: string | null) => {
+  const trimmed = String(description || '').trim();
+  return trimmed && !TECHNICAL_OFFER_DESCRIPTIONS.has(trimmed.toLowerCase()) ? trimmed : '';
+};
+
 interface MessageBubbleProps {
   msg: GroupedMessage;
   isMobile: boolean;
@@ -95,8 +109,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     ? new Date(msg.created_at).getTime() + 2 * 24 * 60 * 60 * 1000 < Date.now()
     : false;
   const offerStatus = isOffer ? (msg.offer_data?.status || 'new') : 'new';
+  const offerDescription = getVisibleOfferDescription(msg.offer_data?.description);
   const showOfferActions = isOffer && !msg.is_mine && offerStatus === 'new' && !offerExpired;
   const workOfferStatus = isWorkOffer ? ((msg.offer_data as WorkOfferData | null)?.status || 'new') : 'new';
+  const workOfferDescription = getVisibleOfferDescription((msg.offer_data as WorkOfferData | null)?.description);
   const workDeliveryStatus = isWorkOffer
     ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
     : 'pending';
@@ -298,7 +314,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                   </div>
                 </div>
               </div>
-              <div className={styles.offerDescription}>{msg.offer_data?.description}</div>
+              {offerDescription ? (
+                <div className={styles.offerDescription}>{offerDescription}</div>
+              ) : null}
               {offerStatus === 'accepted' ? (
                 <div className={`${styles.messageStatusSuccess} ${styles.messageCardActionsTop}`}><CheckCircleOutlined /> Предложение принято</div>
               ) : offerStatus === 'rejected' ? (
@@ -324,10 +342,10 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
                 {(msg.offer_data as WorkOfferData | null)?.title || headerContextTitle || 'Готовая работа'}
               </div>
             </div>
-            {(msg.offer_data as WorkOfferData | null)?.description ? (
+            {workOfferDescription ? (
               <div className={styles.messageCardSection}>
                 <Text type="secondary">Описание</Text>
-                <div className={styles.messageCardDescription}>{(msg.offer_data as WorkOfferData | null)?.description}</div>
+                <div className={styles.messageCardDescription}>{workOfferDescription}</div>
               </div>
             ) : null}
             {typeof (msg.offer_data as WorkOfferData | null)?.cost === 'number' ? (

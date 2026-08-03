@@ -199,12 +199,12 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
                 >
                   Редактировать заказ
                 </AppButton>
+                {canCancelOrder && (
                 <AppButton
                   variant="secondary"
                   icon={<CloseOutlined />}
                   size={isMobile ? 'middle' : 'large'}
                   danger
-                  disabled={!canCancelOrder}
                   onClick={() => {
                     Modal.confirm({
                       title: 'Отмена заказа',
@@ -226,6 +226,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
                 >
                   Отменить заказ
                 </AppButton>
+                )}
                 <Dropdown
                   menu={{
                     items: [
