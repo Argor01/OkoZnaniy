@@ -80,6 +80,7 @@ interface ArbitrationSectionProps {
   cases: ArbitrationCase[];
   loading: boolean;
   onRefresh: () => void;
+  initialCaseNumber?: string;
   stats?: {
     total_cases: number;
     new_cases: number;
@@ -94,6 +95,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   cases,
   loading,
   onRefresh,
+  initialCaseNumber,
   stats,
 }) => {
   const [searchText, setSearchText] = useState('');
@@ -137,6 +139,18 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
     setFilteredCases(filtered);
   }, [cases, searchText, statusFilter]);
+
+  useEffect(() => {
+    if (!initialCaseNumber || cases.length === 0) return;
+    const matchedCase = cases.find(c => 
+      c.case_number.toLowerCase().includes(initialCaseNumber.toLowerCase()) ||
+      c.id.toString() === initialCaseNumber
+    );
+    if (matchedCase && !modalOpen) {
+      loadCaseDetails(matchedCase);
+      window.history.replaceState({}, '', '/admin/dashboard');
+    }
+  }, [initialCaseNumber, cases]);
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { color: string; icon: React.ReactNode }> = {

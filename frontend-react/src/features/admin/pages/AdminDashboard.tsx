@@ -1,6 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Layout, Spin, Alert, Result, Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   useAdminAuth, 
   useAdminData, 
@@ -102,6 +102,11 @@ const AdminDashboard: React.FC = () => {
 
 
 const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({ user, onLogout }) => {
+  const [searchParams] = useSearchParams();
+  const initialCaseNumber = searchParams.get('case') || undefined;
+  const initialOrderId = searchParams.get('order') ? Number(searchParams.get('order')) : undefined;
+  const menuParam = searchParams.get('menu') as MenuKey | null;
+  
   const adminData = useAdminData(true); 
   
   const { 
@@ -121,6 +126,12 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
     closeFaqModal,
     isMobile,
   } = useAdminUI();
+
+  useEffect(() => {
+    if (menuParam && menuParam !== selectedMenu) {
+      handleMenuClick(menuParam);
+    }
+  }, [menuParam]);
   
   const { 
     markEarningPaid, 
@@ -204,7 +215,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
       
       case 'orders_management':
         return (
-          <AllOrdersSection />
+          <AllOrdersSection initialOrderId={initialOrderId} />
         );
 
       case 'works_moderation':
@@ -226,6 +237,7 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
             loading={arbitrationLoading}
             onRefresh={refetchArbitration}
             stats={arbitrationStats}
+            initialCaseNumber={initialCaseNumber}
           />
         );
 

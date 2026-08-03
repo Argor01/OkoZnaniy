@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -174,14 +175,67 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         if not file:
             return Response({'error': 'Поле file обязательно'}, status=status.HTTP_400_BAD_REQUEST)
 
+        msg_text = request.data.get('message', '').strip()
+        message = PartnerChatMessage.objects.create(
+            room=room,
+            sender=request.user,
+            message=msg_text,
+            file=file,
+            file_name=file.name,
+        )
+        room.members.add(request.user)
+        serializer = PartnerChatMessageSerializer(message, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def pin_message(self, request, pk=None):
+        """Закрепить/открепить сообщение"""
+        room = self.get_object()
+        msg_id = request.data.get('message_id')
+        if not msg_id:
+            return Response({'error': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            msg = PartnerChatMessage.objects.get(id=msg_id, room=room)
+        except PartnerChatMessage.DoesNotExist:
+            return Response({'error': 'Сообщение не найдено'}, status=status.HTTP_404_NOT_FOUND)
+        msg.is_pinned = not msg.is_pinned
+        msg.save(update_fields=['is_pinned'])
+        action_text = 'закрепил(а)' if msg.is_pinned else 'открепил(а)'
+        user_name = request.user.get_full_name() or request.user.username
         PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=f'Загружен файл: {file.name}',
-            is_system=False,
+            message=f'{user_name} {action_text} сообщение',
+            is_system=True,
         )
+        return Response({'is_pinned': msg.is_pinned})
 
-        return Response({'message': 'Файл загружен', 'filename': file.name})
+    @action(detail=True, methods=['post'], url_path='mark_read')
+    def mark_read(self, request, pk=None):
+        """Отметить все сообщения в чате как прочитанные"""
+        room = self.get_object()
+        from .models import RoomReadStatus
+        RoomReadStatus.objects.update_or_create(
+            user=request.user,
+            room=room,
+            defaults={'last_read_at': timezone.now()}
+        )
+        return Response({'status': 'ok'})
+
+    @action(detail=False, methods=['get'])
+    def chat_users(self, request):
+        """Получить список пользователей для приглашения в чат (только staff)"""
+        User = get_user_model()
+        allowed_roles = ['admin', 'director', 'partner']
+        users = User.objects.filter(role__in=allowed_roles).order_by('first_name', 'last_name')
+        return Response([{
+            'id': u.id,
+            'username': u.username,
+            'first_name': u.first_name or '',
+            'last_name': u.last_name or '',
+            'email': u.email or '',
+            'role': u.role,
+        } for u in users])
 
 
 from rest_framework import mixins

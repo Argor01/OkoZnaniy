@@ -1813,12 +1813,12 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def _can_access_director_chats(user):
-        return getattr(user, 'role', None) in ['admin', 'director']
+        return getattr(user, 'role', None) in ['admin', 'director', 'partner']
     
     def get_queryset(self):
         user = self.request.user
         
-        # Только админы и директор могут видеть чаты
+        # Только админы, директора и партнеры могут видеть чаты
         if not self._can_access_director_chats(user):
             return DirectorChatRoom.objects.none()
         
@@ -1918,5 +1918,70 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
         )
         
         return Response({'message': 'Пользователь приглашен'})
+
+    @action(detail=True, methods=['post'])
+    def upload_file(self, request, pk=None):
+        """Загрузить файл в чат"""
+        room = self.get_object()
+        file = request.FILES.get('file')
+        if not file:
+            return Response({'error': 'Файл обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        msg_text = request.data.get('message', '').strip()
+        msg = DirectorChatMessage.objects.create(
+            room=room, sender=request.user, message=msg_text,
+            file=file, file_name=file.name
+        )
+        room.members.add(request.user)
+        serializer = DirectorChatMessageSerializer(msg, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'])
+    def pin_message(self, request, pk=None):
+        """Закрепить/открепить сообщение"""
+        room = self.get_object()
+        msg_id = request.data.get('message_id')
+        if not msg_id:
+            return Response({'error': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            msg = DirectorChatMessage.objects.get(id=msg_id, room=room)
+        except DirectorChatMessage.DoesNotExist:
+            return Response({'error': 'Сообщение не найдено'}, status=status.HTTP_404_NOT_FOUND)
+        msg.is_pinned = not msg.is_pinned
+        msg.save(update_fields=['is_pinned'])
+        action_text = 'закрепил(а)' if msg.is_pinned else 'открепил(а)'
+        user_name = request.user.first_name or request.user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=request.user,
+            message=f'{user_name} {action_text} сообщение', is_system=True
+        )
+        return Response({'is_pinned': msg.is_pinned})
+
+    @action(detail=True, methods=['post'], url_path='mark_read')
+    def mark_read(self, request, pk=None):
+        """Отметить все сообщения в чате как прочитанные"""
+        room = self.get_object()
+        from .models import RoomReadStatus
+        RoomReadStatus.objects.update_or_create(
+            user=request.user,
+            room=room,
+            defaults={'last_read_at': timezone.now()}
+        )
+        return Response({'status': 'ok'})
+
+    @action(detail=False, methods=['get'])
+    def chat_users(self, request):
+        """Получить список пользователей для приглашения в чат (только staff)"""
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        allowed_roles = ['admin', 'director', 'partner']
+        users = User.objects.filter(role__in=allowed_roles).order_by('first_name', 'last_name')
+        return Response([{
+            'id': u.id,
+            'username': u.username,
+            'first_name': u.first_name or '',
+            'last_name': u.last_name or '',
+            'email': u.email or '',
+            'role': u.role,
+        } for u in users])
 
 

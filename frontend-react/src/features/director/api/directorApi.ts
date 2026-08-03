@@ -610,7 +610,7 @@ export const sendChatRoomMessage = async (roomId: number, message: string): Prom
 
 export const joinChatRoom = async (roomId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/join-room/`);
+    await apiClient.post(`/director/chat-rooms/${roomId}/join_room/`);
   } catch (error) {
     logger.error('Error joining chat room:', error);
     throw error;
@@ -619,7 +619,7 @@ export const joinChatRoom = async (roomId: number): Promise<void> => {
 
 export const leaveChatRoom = async (roomId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/leave-room/`);
+    await apiClient.post(`/director/chat-rooms/${roomId}/leave_room/`);
   } catch (error) {
     logger.error('Error leaving chat room:', error);
     throw error;
@@ -628,7 +628,7 @@ export const leaveChatRoom = async (roomId: number): Promise<void> => {
 
 export const inviteToChatRoom = async (roomId: number, userId: number): Promise<void> => {
   try {
-    await apiClient.post(`/director/chat-rooms/${roomId}/invite-user/`, {
+    await apiClient.post(`/director/chat-rooms/${roomId}/invite_user/`, {
       user_id: userId,
     });
   } catch (error) {
@@ -649,7 +649,7 @@ export const updateChatRoom = async (roomId: number, data: { name?: string; desc
 
 export const getDirectorUsers = async (): Promise<any[]> => {
   try {
-    const response = await apiClient.get('/admin-panel/users/');
+    const response = await apiClient.get('/director/chat-rooms/chat_users/');
     return response.data || [];
   } catch (error) {
     logger.error('Error fetching users:', error);
@@ -670,5 +670,13 @@ export const uploadChatRoomFile = async (roomId: number, file: File): Promise<an
   } catch (error) {
     logger.error('Error uploading file:', error);
     throw error;
+  }
+};
+
+export const markChatRoomAsRead = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/mark_read/`);
+  } catch (error) {
+    logger.error('Error marking chat room as read:', error);
   }
 };

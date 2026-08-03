@@ -1181,17 +1181,21 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
                 is_active=True
             ).first()
             if existing_room:
-                # Возвращаем существующий чат вместо создания нового
                 staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
                 existing_room.members.add(*staff)
                 existing_room.save()
-                # Вызываем исключение, чтобы остановить создание нового чата
                 from rest_framework.exceptions import ValidationError
                 raise ValidationError({'name': 'Чат с таким названием уже существует'})
 
         room = serializer.save(created_by=self.request.user)
         staff = User.objects.filter(role__in=['admin', 'director'], is_active=True)
         room.members.set(staff)
+
+        user_name = self.request.user.first_name or self.request.user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=self.request.user,
+            message=f'{user_name} создал(а) чат «{room.name}»', is_system=True
+        )
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -1215,6 +1219,11 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
         """Присоединиться к чату"""
         room = self.get_object()
         room.members.add(request.user)
+        user_name = request.user.first_name or request.user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=request.user,
+            message=f'{user_name} присоединился(ась) к чату', is_system=True
+        )
         return Response({'message': 'Вы присоединились к чату'})
 
     @action(detail=True, methods=['post'])
@@ -1229,6 +1238,11 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
     def leave_room(self, request, pk=None):
         """Покинуть чат"""
         room = self.get_object()
+        user_name = request.user.first_name or request.user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=request.user,
+            message=f'{user_name} покинул(а) чат', is_system=True
+        )
         room.members.remove(request.user)
         return Response({'message': 'Вы покинули чат'})
 
@@ -1265,7 +1279,61 @@ class AdminChatRoomViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Пользователь не найден'}, status=404)
 
         room.members.add(user)
+        inviter_name = request.user.first_name or request.user.username
+        user_display = user.first_name or user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=request.user,
+            message=f'{inviter_name} пригласил(а) {user_display}', is_system=True
+        )
         return Response({'message': f'{user.first_name} {user.last_name} добавлен в чат'})
+
+    @action(detail=True, methods=['post'])
+    def pin_message(self, request, pk=None):
+        """Закрепить/открепить сообщение"""
+        room = self.get_object()
+        msg_id = request.data.get('message_id')
+        if not msg_id:
+            return Response({'error': 'message_id обязателен'}, status=400)
+        try:
+            msg = DirectorChatMessage.objects.get(id=msg_id, room=room)
+        except DirectorChatMessage.DoesNotExist:
+            return Response({'error': 'Сообщение не найдено'}, status=404)
+        msg.is_pinned = not msg.is_pinned
+        msg.save(update_fields=['is_pinned'])
+        action_text = 'закрепил(а)' if msg.is_pinned else 'открепил(а)'
+        user_name = request.user.first_name or request.user.username
+        DirectorChatMessage.objects.create(
+            room=room, sender=request.user,
+            message=f'{user_name} {action_text} сообщение', is_system=True
+        )
+        return Response({'is_pinned': msg.is_pinned})
+
+    @action(detail=True, methods=['post'])
+    def upload_file(self, request, pk=None):
+        """Загрузить файл в чат"""
+        room = self.get_object()
+        file = request.FILES.get('file')
+        if not file:
+            return Response({'error': 'Файл обязателен'}, status=400)
+        msg_text = request.data.get('message', '').strip()
+        msg = DirectorChatMessage.objects.create(
+            room=room, sender=request.user, message=msg_text,
+            file=file, file_name=file.name
+        )
+        room.members.add(request.user)
+        serializer = DirectorChatMessageSerializer(msg, context={'request': request})
+        return Response(serializer.data, status=201)
+
+    @action(detail=True, methods=['post'])
+    def mark_read(self, request, pk=None):
+        """Отметить все сообщения в комнате как прочитанные"""
+        room = self.get_object()
+        from apps.director.models import RoomReadStatus
+        status, _ = RoomReadStatus.objects.update_or_create(
+            user=request.user, room=room,
+            defaults={'last_read_at': timezone.now()}
+        )
+        return Response({'message': 'Отмечено как прочитанное'})
 
 
 # ============= ПРЯМЫЕ ЧАТЫ (личные сообщения между сотрудниками) =============

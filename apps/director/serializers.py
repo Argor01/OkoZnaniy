@@ -84,26 +84,35 @@ class DirectorChatMessageSerializer(serializers.ModelSerializer):
     """Сериализатор для сообщений в чатах директора"""
     
     sender = UserBasicSerializer(read_only=True)
-    text = serializers.CharField(source='message', read_only=True)  # Алиас для фронтенда
-    sent_at = serializers.DateTimeField(source='created_at', read_only=True)  # Алиас для фронтенда
+    text = serializers.CharField(source='message', read_only=True)
+    sent_at = serializers.DateTimeField(source='created_at', read_only=True)
+    file_url = serializers.SerializerMethodField()
     
     class Meta:
         model = DirectorChatMessage
-        fields = ['id', 'sender', 'message', 'text', 'is_system', 'is_pinned', 'created_at', 'sent_at']
+        fields = ['id', 'sender', 'message', 'text', 'file', 'file_name', 'file_url', 'is_system', 'is_pinned', 'created_at', 'sent_at']
         read_only_fields = ['id', 'sender', 'is_system', 'created_at']
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 
 class DirectorChatRoomSerializer(serializers.ModelSerializer):
     """Сериализатор для чат-комнат директора"""
     
     members = UserBasicSerializer(many=True, read_only=True)
-    participants = UserBasicSerializer(many=True, read_only=True, source='members')  # Алиас для фронтенда
+    participants = UserBasicSerializer(many=True, read_only=True, source='members')
     created_by = UserBasicSerializer(read_only=True)
     messages = DirectorChatMessageSerializer(many=True, read_only=True)
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
-    type = serializers.CharField(source='room_type', required=False)  # Алиас для фронтенда
-    is_muted = serializers.SerializerMethodField()  # Добавляем поле для фронтенда
+    type = serializers.CharField(source='room_type', required=False)
+    is_muted = serializers.SerializerMethodField()
     
     class Meta:
         model = DirectorChatRoom
@@ -117,13 +126,21 @@ class DirectorChatRoomSerializer(serializers.ModelSerializer):
     def get_last_message(self, obj):
         last_msg = obj.messages.last()
         if last_msg:
-            return DirectorChatMessageSerializer(last_msg).data
+            return DirectorChatMessageSerializer(last_msg, context=self.context).data
         return None
     
     def get_unread_count(self, obj):
-        # Можно добавить логику подсчета непрочитанных сообщений
-        return 0
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return 0
+        from .models import RoomReadStatus
+        status = RoomReadStatus.objects.filter(user=request.user, room=obj).first()
+        if status:
+            return obj.messages.filter(created_at__gt=status.last_read_at, is_system=False).count()
+        return obj.messages.filter(is_system=False).count()
     
+    def get_is_muted(self, obj):
+        return False
     def get_is_muted(self, obj):
         # Можно добавить логику для отключения уведомлений
         return False

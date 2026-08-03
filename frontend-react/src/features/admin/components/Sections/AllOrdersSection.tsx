@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   Table,
@@ -145,12 +145,14 @@ interface AllOrdersTableProps {
   orders?: Order[];
   loading?: boolean;
   onViewOrder?: (orderId: number) => void;
+  initialOrderId?: number;
 }
 
 const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   orders = [],
   loading = false,
   onViewOrder,
+  initialOrderId,
 }) => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -158,6 +160,16 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderModalVisible, setOrderModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (initialOrderId && orders.length > 0 && !selectedOrder) {
+      const order = orders.find(o => o.id === initialOrderId);
+      if (order) {
+        setSelectedOrder(order);
+        setOrderModalVisible(true);
+      }
+    }
+  }, [initialOrderId, orders]);
 
   const dataSource = orders;
 
@@ -500,13 +512,14 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   );
 };
 
-export const AllOrdersSection: React.FC = () => {
+export const AllOrdersSection: React.FC<{ initialOrderId?: number }> = ({ initialOrderId }) => {
   const { orders, loading } = useAllOrders();
 
   return (
     <AllOrdersTable
       orders={orders as Order[]}
       loading={loading}
+      initialOrderId={initialOrderId}
     />
   );
 };

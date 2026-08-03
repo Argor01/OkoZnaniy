@@ -66,6 +66,8 @@ class PartnerChatMessage(models.Model):
     message = models.TextField(verbose_name='Сообщение')
     is_system = models.BooleanField(default=False, verbose_name='Системное сообщение')
     is_pinned = models.BooleanField(default=False, verbose_name='Закреплено')
+    file = models.FileField(upload_to='partner_chat_files/', blank=True, null=True, verbose_name='Файл')
+    file_name = models.CharField(max_length=255, blank=True, null=True, verbose_name='Имя файла')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
 
     class Meta:
@@ -80,6 +82,36 @@ class PartnerChatMessage(models.Model):
 
     def __str__(self):
         return f"Сообщение от {self.sender.username} в {self.room.name}"
+
+
+class RoomReadStatus(models.Model):
+    """Отслеживание последнего прочитанного сообщения пользователя в комнате"""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='partner_room_read_statuses',
+        verbose_name='Пользователь'
+    )
+    room = models.ForeignKey(
+        PartnerChatRoom,
+        on_delete=models.CASCADE,
+        related_name='read_statuses',
+        verbose_name='Комната'
+    )
+    last_read_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время последнего прочтения'
+    )
+
+    class Meta:
+        db_table = 'partner_chat_read_statuses'
+        verbose_name = 'Статус прочтения'
+        verbose_name_plural = 'Статусы прочтения'
+        unique_together = ['user', 'room']
+
+    def __str__(self):
+        return f"{self.user.username} read {self.room.name} at {self.last_read_at}"
 
 
 class PartnerApplication(models.Model):

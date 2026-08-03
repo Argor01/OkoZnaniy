@@ -283,7 +283,17 @@ class DirectorChatMessage(models.Model):
         verbose_name='Отправитель'
     )
     message = models.TextField(
+        blank=True, default='',
         verbose_name='Сообщение'
+    )
+    file = models.FileField(
+        upload_to='director_chat_files/',
+        blank=True, null=True,
+        verbose_name='Файл'
+    )
+    file_name = models.CharField(
+        max_length=255, blank=True, default='',
+        verbose_name='Имя файла'
     )
     is_system = models.BooleanField(
         default=False,
@@ -311,6 +321,36 @@ class DirectorChatMessage(models.Model):
     
     def __str__(self):
         return f"{self.sender.username}: {self.message[:50]}"
+
+
+class RoomReadStatus(models.Model):
+    """Отслеживание последнего прочитанного сообщения пользователя в комнате"""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='room_read_statuses',
+        verbose_name='Пользователь'
+    )
+    room = models.ForeignKey(
+        DirectorChatRoom,
+        on_delete=models.CASCADE,
+        related_name='read_statuses',
+        verbose_name='Комната'
+    )
+    last_read_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время последнего прочтения'
+    )
+    
+    class Meta:
+        db_table = 'director_chat_read_statuses'
+        verbose_name = 'Статус прочтения'
+        verbose_name_plural = 'Статусы прочтения'
+        unique_together = ['user', 'room']
+    
+    def __str__(self):
+        return f"{self.user.username} read {self.room.name} at {self.last_read_at}"
 
 
 class ManualIncome(models.Model):

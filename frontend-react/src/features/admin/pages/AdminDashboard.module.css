@@ -74,6 +74,66 @@
   padding: 20px;
 }
 
+/* Глобальные стили модальных окон (перенесено из AdminChatsSection) */
+:global(.ant-modal) {
+  max-width: calc(100vw - 16px);
+  width: 90vw;
+}
+
+:global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+:global(.ant-modal-header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
+  background: var(--color-bg-container, #fafafa);
+}
+
+:global(.ant-modal-title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-heading, #262626);
+}
+
+:global(.ant-modal-body) {
+  padding: 24px;
+  background: var(--color-bg-container, #fff);
+}
+
+:global(.ant-modal-footer) {
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-border-secondary, #f0f0f0);
+  text-align: right;
+  background: var(--color-bg-container, #fafafa);
+}
+
+:global(.ant-form-item) {
+  margin-bottom: 20px;
+}
+
+:global(.ant-input) {
+  height: 40px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+:global(.ant-input.ant-input-textarea) {
+  min-height: 80px;
+  height: auto;
+}
+
+:global(.ant-select) {
+  font-size: 14px;
+}
+
+:global(.ant-select-selector) {
+  min-height: 40px !important;
+  border-radius: 6px !important;
+}
+
 /* Адаптивность для планшетов */
 @media (max-width: 1024px) {
   :global(.adminPageCenterPadded) {
@@ -211,6 +271,10 @@
   :global(.ant-input-affix-wrapper .ant-input) {
     border: 1px solid var(--color-border-base, #d9d9d9) !important;
     border-radius: 8px;
+  }
+  
+  :global([data-theme="dark"]) :global(.ant-input-affix-wrapper .ant-input) {
+    border-color: transparent !important;
   }
   
   :global(textarea.ant-input) {
@@ -397,6 +461,10 @@
   :global(.ant-input-affix-wrapper .ant-input) {
     border: 1px solid var(--color-border-base, #d9d9d9) !important;
     border-radius: 8px;
+  }
+
+  :global([data-theme="dark"]) :global(.ant-input-affix-wrapper .ant-input) {
+    border-color: transparent !important;
   }
   
   :global(textarea.ant-input) {
