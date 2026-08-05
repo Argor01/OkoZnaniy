@@ -96,11 +96,22 @@ export const arbitrationApi = {
     return response.data;
   },
 
-  processRefund: async (caseId: number, refundPercentage: number, refundAmount?: number) => {
+  processRefund: async (caseId: number, refundPercentage: number, refundAmount?: number, requireApproval?: boolean) => {
     const response = await apiClient.post(API_ENDPOINTS.admin.arbitration.cases.processRefund(caseId), {
       refund_percentage: refundPercentage,
       refund_amount: refundAmount,
+      require_approval: requireApproval || false,
     });
+    return response.data;
+  },
+
+  approveRefund: async (caseId: number) => {
+    const response = await apiClient.post(API_ENDPOINTS.admin.arbitration.cases.approveRefund(caseId));
+    return response.data;
+  },
+
+  rejectRefund: async (caseId: number, reason?: string) => {
+    const response = await apiClient.post(API_ENDPOINTS.admin.arbitration.cases.rejectRefund(caseId), { reason });
     return response.data;
   },
 

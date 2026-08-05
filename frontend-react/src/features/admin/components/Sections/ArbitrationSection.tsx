@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Badge,
+  Avatar,
   Button,
   Card,
   Col,
@@ -112,6 +113,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   const [refundPercentage, setRefundPercentage] = useState<number>(50);
   const [refundForm] = Form.useForm();
   const [refundProcessing, setRefundProcessing] = useState(false);
+  const [approveRefundProcessing, setApproveRefundProcessing] = useState(false);
+  const [rejectRefundProcessing, setRejectRefundProcessing] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
 
   useEffect(() => {
@@ -159,11 +162,63 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       under_review: { color: 'processing', icon: <ClockCircleOutlined /> },
       awaiting_response: { color: 'warning', icon: <ClockCircleOutlined /> },
       in_arbitration: { color: 'orange', icon: <ExclamationCircleOutlined /> },
+      pending_approval: { color: 'gold', icon: <ClockCircleOutlined /> },
       decision_made: { color: 'success', icon: <CheckCircleOutlined /> },
       closed: { color: 'default', icon: <CheckCircleOutlined /> },
       rejected: { color: 'error', icon: <CloseCircleOutlined /> },
     };
     return configs[status] || { color: 'default', icon: <FileTextOutlined /> };
+  };
+
+  const getFeedAuthorName = (item: any) => {
+    if (item.sender) {
+      const full = `${item.sender.first_name ?? ''} ${item.sender.last_name ?? ''}`.trim();
+      if (full) return full;
+      if (item.sender.username) return item.sender.username;
+      if (item.sender.display_username) return item.sender.display_username;
+    }
+    return item.kind === 'message' ? 'Участник' : 'Система';
+  };
+
+  const getFeedAuthorInitials = (item: any) => {
+    const name = getFeedAuthorName(item);
+    const parts = name.split(' ').filter(Boolean);
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const getFeedSide = (item: any): 'plaintiff' | 'defendant' | 'admin' | 'system' => {
+    if (item.kind === 'message') {
+      if (item.source === 'order_chat') {
+        const senderId = item.sender?.id;
+        if (item.sender?.role === 'admin') return 'admin';
+        if (detailData?.defendant?.id && senderId === detailData.defendant.id) return 'defendant';
+        if (detailData?.plaintiff?.id && senderId === detailData.plaintiff.id) return 'plaintiff';
+        return 'system';
+      }
+      if (item.message_type === 'plaintiff') return 'plaintiff';
+      if (item.message_type === 'defendant') return 'defendant';
+      if (item.message_type === 'admin') return 'admin';
+    }
+    return 'system';
+  };
+
+  const getFeedSideLabel = (item: any) => {
+    const side = getFeedSide(item);
+    if (side === 'plaintiff') return 'Истец';
+    if (side === 'defendant') return 'Ответчик';
+    if (side === 'admin') return 'Администратор';
+    return 'Система';
+  };
+
+  const getFeedAuthorColor = (item: any) => {
+    const side = getFeedSide(item);
+    if (side === 'plaintiff') return '#1677ff';
+    if (side === 'defendant') return '#fa8c16';
+    if (side === 'admin') return '#722ed1';
+    return '#8c8c8c';
   };
 
   const loadCaseDetails = async (caseItem: ArbitrationCase) => {
@@ -210,6 +265,20 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
     }
   };
 
+  const handleTakeInWork = async () => {
+    if (!detailData?.id) return;
+    try {
+      setStatusUpdating(true);
+      await arbitrationApi.takeInWork(detailData.id);
+      await refreshSelectedCase();
+      message.success('Дело принято в работу');
+    } catch {
+      message.error('Не удалось принять дело в работу');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!detailData?.id || !messageText.trim()) return;
     try {
@@ -236,11 +305,15 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       
       const orderAmount = detailData.order.budget || 0;
       const refundAmount = Math.round((orderAmount * refundPercentage) / 100);
+      const requireApproval = refundForm.getFieldValue('requireApproval') || false;
       
-      // Здесь должен быть вызов API для возврата средств
-      await arbitrationApi.processRefund(detailData.id, refundPercentage, refundAmount);
+      await arbitrationApi.processRefund(detailData.id, refundPercentage, refundAmount, requireApproval);
       
-      message.success(`Возврат ${refundAmount.toLocaleString()} ₽ (${refundPercentage}%) оформлен`);
+      if (requireApproval) {
+        message.success(`Возврат ${refundAmount.toLocaleString()} ₽ (${refundPercentage}%) отправлен на согласование директору`);
+      } else {
+        message.success(`Возврат ${refundAmount.toLocaleString()} ₽ (${refundPercentage}%) оформлен`);
+      }
       await refreshSelectedCase();
       refundForm.resetFields();
       setRefundPercentage(50);
@@ -249,6 +322,34 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       message.error('Не удалось оформить возврат');
     } finally {
       setRefundProcessing(false);
+    }
+  };
+
+  const handleApproveRefund = async () => {
+    if (!detailData?.id) return;
+    try {
+      setApproveRefundProcessing(true);
+      await arbitrationApi.approveRefund(detailData.id);
+      message.success('Возврат согласован');
+      await refreshSelectedCase();
+    } catch {
+      message.error('Не удалось согласовать возврат');
+    } finally {
+      setApproveRefundProcessing(false);
+    }
+  };
+
+  const handleRejectRefund = async () => {
+    if (!detailData?.id) return;
+    try {
+      setRejectRefundProcessing(true);
+      await arbitrationApi.rejectRefund(detailData.id);
+      message.success('Согласование возврата отклонено');
+      await refreshSelectedCase();
+    } catch {
+      message.error('Не удалось отклонить возврат');
+    } finally {
+      setRejectRefundProcessing(false);
     }
   };
 
@@ -456,12 +557,28 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
             <Card size="small" title="Действия">
               <Space wrap>
-                <Button onClick={() => handleStatusChange('under_review')} disabled={detailData.status === 'under_review' || detailData.status === 'closed'} loading={statusUpdating}>Взять в работу</Button>
-                <Button type="primary" onClick={() => handleStatusChange('closed')} disabled={detailData.status === 'closed'} loading={statusUpdating}>Закрыть дело</Button>
+                {detailData.status === 'pending_approval' ? (
+                  <>
+                    <Button type="primary" onClick={handleApproveRefund} loading={approveRefundProcessing}>Согласовать возврат</Button>
+                    <Button danger onClick={handleRejectRefund} loading={rejectRefundProcessing}>Отклонить возврат</Button>
+                  </>
+                ) : (
+                  <>
+                    <Button onClick={handleTakeInWork} disabled={detailData.status === 'under_review' || detailData.status === 'closed'} loading={statusUpdating}>Взять в работу</Button>
+                    <Button
+                      type="primary"
+                      onClick={() => handleStatusChange('closed')}
+                      disabled={detailData.status === 'closed' || detailData.status === 'rejected'}
+                      loading={statusUpdating}
+                    >
+                      Закрыть дело
+                    </Button>
+                  </>
+                )}
               </Space>
             </Card>
 
-            {detailData.order && (
+            {detailData.order && detailData.status !== 'pending_approval' && (
               <Card size="small" title={<Space><DollarOutlined />Возврат средств</Space>}>
                 <Form form={refundForm} layout="vertical">
                   <Space direction="vertical" size={16} style={{ width: '100%' }}>
@@ -487,6 +604,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                         step={5}
                         value={refundPercentage}
                         onChange={setRefundPercentage}
+                        disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
                         marks={{
                           0: '0%',
                           25: '25%',
@@ -510,11 +628,12 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                         placeholder={`Возврат ${refundPercentage}% от суммы заказа`}
                         maxLength={300}
                         showCount
+                        disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
                       />
                     </Form.Item>
 
                     <Form.Item name="requireApproval" initialValue={false} style={{ marginBottom: 0 }}>
-                      <Radio.Group>
+                      <Radio.Group disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}>
                         <Radio value={false}>Оформить возврат сразу</Radio>
                         <Radio value={true}>Отправить на согласование</Radio>
                       </Radio.Group>
@@ -525,6 +644,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                       icon={<DollarOutlined />}
                       onClick={handleRefund}
                       loading={refundProcessing}
+                      disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
                       size="large"
                       block
                     >
@@ -535,27 +655,84 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               </Card>
             )}
 
+            {detailData.status === 'pending_approval' && detailData.order && (
+              <Card size="small" title={<Space><DollarOutlined />Ожидает согласования возврата</Space>} style={{ borderColor: '#faad14' }}>
+                <Space direction="vertical" size={8}>
+                  <Text>Предложенный возврат: <Text strong>{detailData.approved_refund_percentage}%</Text>
+                    ({Math.round(((detailData.order.budget || 0) * (detailData.approved_refund_percentage || 0)) / 100).toLocaleString()} ₽)
+                  </Text>
+                </Space>
+              </Card>
+            )}
+
             <Card size="small" title="Переписка и история">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
                 {feedData.length === 0 ? (
                   <Empty description="История пока пуста" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 ) : (
-                  feedData.map((item) => (
-                    <Card key={item.id} size="small" styles={{ body: { padding: 12 } }}>
-                      <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                        <Space wrap>
-                          <Text strong>{item.sender ? `${item.sender.first_name ?? ''} ${item.sender.last_name ?? ''}`.trim() || 'Участник' : 'Система'}</Text>
-                          {item.kind === 'message'
-                            ? item.source === 'order_chat'
-                              ? <Tag color="purple">Чат по заказу</Tag>
-                              : (item.is_internal ? <Tag color="purple">Внутреннее</Tag> : <Tag color="purple">Сообщение</Tag>)
-                            : <Tag>Событие</Tag>}
-                          <Text type="secondary">{new Date(item.created_at).toLocaleString('ru-RU')}</Text>
-                        </Space>
-                        <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{item.text || item.description || 'Обновление дела'}</Paragraph>
-                      </Space>
-                    </Card>
-                  ))
+                  feedData.map((item) => {
+                    const side = getFeedSide(item);
+                    const authorColor = getFeedAuthorColor(item);
+                    const isOrderChat = item.source === 'order_chat';
+                    const isInternal = item.is_internal;
+
+                    if (side === 'system') {
+                      return (
+                        <div key={item.id} className={styles.feedSystem}>
+                          <Tag color="default" className={styles.feedSystemTag}>
+                            {item.text || item.description || 'Обновление дела'}
+                          </Tag>
+                          <Text type="secondary" className={styles.feedSystemTime}>
+                            {new Date(item.created_at).toLocaleString('ru-RU')}
+                          </Text>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`${styles.feedRow} ${side === 'plaintiff' ? styles.feedRowLeft : styles.feedRowRight}`}
+                      >
+                        {side === 'plaintiff' && (
+                          <Avatar
+                            size={40}
+                            style={{ backgroundColor: authorColor, flexShrink: 0 }}
+                            icon={!getFeedAuthorName(item) ? <UserOutlined /> : undefined}
+                          >
+                            {getFeedAuthorInitials(item)}
+                          </Avatar>
+                        )}
+
+                        <div className={`${styles.feedBubble} ${styles[`feedBubble${side[0].toUpperCase()}${side.slice(1)}`]}`}>
+                          <div className={styles.feedBubbleHeader}>
+                            <Tag className={styles.feedSideBadge} icon={<UserOutlined />} style={{ backgroundColor: authorColor, borderColor: authorColor }}>
+                              {getFeedSideLabel(item)}
+                            </Tag>
+                            <Text strong className={styles.feedAuthorName}>{getFeedAuthorName(item)}</Text>
+                            {isInternal && <Tag color="purple">Внутреннее</Tag>}
+                            {isOrderChat && <Tag color="blue">Чат по заказу</Tag>}
+                          </div>
+                          <div className={styles.feedBubbleText}>
+                            {item.text || item.description || 'Обновление дела'}
+                          </div>
+                          <div className={styles.feedBubbleTime}>
+                            {new Date(item.created_at).toLocaleString('ru-RU')}
+                          </div>
+                        </div>
+
+                        {side !== 'plaintiff' && (
+                          <Avatar
+                            size={40}
+                            style={{ backgroundColor: authorColor, flexShrink: 0 }}
+                            icon={!getFeedAuthorName(item) ? <UserOutlined /> : undefined}
+                          >
+                            {getFeedAuthorInitials(item)}
+                          </Avatar>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </Space>
             </Card>

@@ -109,7 +109,7 @@ export const TicketDetailPage: React.FC = () => {
   const { adminUsers } = useAdminUsers();
   const { feed, loading: feedLoading, refetch: refetchFeed } =
     useTicketActivity(ticket?.id ?? null, ticket?.type ?? null);
-  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority, assignUsers, addTag, removeTag } = useTicketActions();
+  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, updatePriority: updateTicketPriority, assignUsers, addTag, removeTag, takeInWork: takeTicketInWork } = useTicketActions();
 
   const handleMenuSelect = (key: MenuKey) => {
     try {
@@ -299,6 +299,15 @@ export const TicketDetailPage: React.FC = () => {
     if (!ticket) return;
     try { await updateTicketPriority(ticket.id, p, ticket.type); doRefetch(); }
     catch { message.error('Не удалось обновить приоритет'); }
+  };
+
+  const handleTakeInWork = async () => {
+    if (!ticket) return;
+    try {
+      await takeTicketInWork(ticket.id, ticket.type);
+      doRefetch();
+      message.success('Обращение взято в работу');
+    } catch { message.error('Не удалось взять обращение в работу'); }
   };
 
   const handleAssignUsers = async () => {
@@ -703,7 +712,7 @@ export const TicketDetailPage: React.FC = () => {
 
             <Card title="Быстрые действия" size="small">
               <Space direction="vertical" style={{ width: '100%' }}>
-                <Button block onClick={() => handleUpdateStatus('in_progress')} disabled={ticket.status === 'in_progress'}>Взять в работу</Button>
+                <Button block onClick={handleTakeInWork} disabled={ticket.status === 'in_progress'}>Взять в работу</Button>
                 <Button block onClick={() => handleUpdatePriority('high')} disabled={ticket.priority === 'high' || ticket.priority === 'urgent'}>Повысить приоритет</Button>
                 {ticket.reason === 'contact_violation' && contactViolationUserId && (
                   <>

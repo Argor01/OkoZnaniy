@@ -22,6 +22,7 @@ class ArbitrationCase(models.Model):
         ('under_review', 'На рассмотрении'),
         ('awaiting_response', 'Ожидает ответа'),
         ('in_arbitration', 'В арбитраже'),
+        ('pending_approval', 'Ожидает согласования возврата'),
         ('decision_made', 'Решение принято'),
         ('closed', 'Закрыто'),
         ('rejected', 'Отклонено'),

@@ -432,3 +432,168 @@
     width: 100%;
   }
 }
+
+/* Баблы переписки */
+.feedRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+}
+
+.feedRowLeft {
+  justify-content: flex-start;
+}
+
+.feedRowRight {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.feedBubble {
+  max-width: 78%;
+  min-width: 0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-sizing: border-box;
+}
+
+.feedBubblePlaintiff {
+  background: rgba(22, 119, 255, 0.08);
+  border: 1px solid rgba(22, 119, 255, 0.25);
+  border-bottom-left-radius: 4px;
+}
+
+.feedBubbleDefendant {
+  background: rgba(250, 140, 22, 0.08);
+  border: 1px solid rgba(250, 140, 22, 0.25);
+  border-bottom-right-radius: 4px;
+}
+
+.feedBubbleAdmin {
+  background: rgba(114, 46, 209, 0.08);
+  border: 1px solid rgba(114, 46, 209, 0.25);
+}
+
+.feedBubbleHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.feedSideBadge {
+  border: none;
+  color: #fff !important;
+  font-weight: 600;
+  background-color: var(--badge-bg, #8c8c8c) !important;
+  border-color: var(--badge-bg, #8c8c8c) !important;
+}
+
+.feedAuthorName {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.feedBubbleText {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.feedBubbleTime {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 768px) {
+  .feedBubble {
+    max-width: 100%;
+  }
+}
+
+/* Системные сообщения */
+.feedSystem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 0;
+}
+
+.feedSystemTag {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.55);
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 13px;
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.4;
+}
+
+.feedSystemTime {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Тёмная тема */
+:global([data-theme="dark"]) .feedBubble {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+:global([data-theme="dark"]) .feedBubblePlaintiff {
+  background: rgba(22, 119, 255, 0.16);
+  border-color: rgba(22, 119, 255, 0.45);
+}
+
+:global([data-theme="dark"]) .feedBubbleDefendant {
+  background: rgba(250, 140, 22, 0.16);
+  border-color: rgba(250, 140, 22, 0.45);
+}
+
+:global([data-theme="dark"]) .feedBubbleAdmin {
+  background: rgba(114, 46, 209, 0.16);
+  border-color: rgba(114, 46, 209, 0.45);
+}
+
+:global([data-theme="dark"]) .feedBubbleText {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+:global([data-theme="dark"]) .feedAuthorName,
+:global([data-theme="dark"]) .feedAuthorName :global(.ant-typography) {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+
+:global([data-theme="dark"]) .feedBubbleTime {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+:global([data-theme="dark"]) .feedSideBadge :global(.ant-tag) {
+  color: #fff !important;
+}
+
+:global([data-theme="dark"]) .feedBubbleHeader :global(.ant-tag) {
+  color: #fff !important;
+}
+
+:global([data-theme="dark"]) .feedBubble :global(.ant-typography) {
+  color: inherit;
+}
+
+:global([data-theme="dark"]) .feedSystemTag {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+:global([data-theme="dark"]) .feedSystemTime {
+  color: rgba(255, 255, 255, 0.45);
+}

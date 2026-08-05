@@ -1,10 +1,11 @@
 import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
+import { DashboardLayout } from '@/features/layout';
 import { ProtectedRoute } from '@/features/auth';
 import { ROUTES } from '@/utils/constants';
 
 const DirectorDashboard = lazy(() => import('@/features/director/pages/DirectorDashboard'));
-const ArbitratorDashboard = lazy(() => import('@/features/arbitration/pages/ArbitratorDashboard'));
+const MyDisputes = lazy(() => import('@/features/arbitration/pages/MyDisputes'));
 
 export const directorRoutes = (
   <>
@@ -17,10 +18,12 @@ export const directorRoutes = (
       }
     />
     <Route
-      path="/arbitrator"
+      path={ROUTES.arbitrator.root}
       element={
         <ProtectedRoute>
-          <ArbitratorDashboard />
+          <DashboardLayout>
+            <MyDisputes />
+          </DashboardLayout>
         </ProtectedRoute>
       }
     />

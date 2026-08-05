@@ -23,6 +23,16 @@ export const supportApi = {
     }
   },
 
+  takeTicketInWork: async (ticketId: number, type: 'support_request' | 'claim') => {
+    if (type === 'support_request') {
+      const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.take(ticketId));
+      return response.data;
+    } else {
+      const response = await apiClient.post(API_ENDPOINTS.admin.support.claims.take(ticketId));
+      return response.data;
+    }
+  },
+
   assignTicketAdmin: async (ticketId: number, adminId: number, type: 'support_request' | 'claim') => {
     if (type === 'support_request') {
       const response = await apiClient.post(API_ENDPOINTS.admin.support.requests.assign(ticketId), { admin_id: adminId });

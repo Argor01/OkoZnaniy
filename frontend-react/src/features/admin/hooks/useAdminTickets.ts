@@ -193,6 +193,16 @@ export const useTicketActions = () => {
     onError: () => message.error('Ошибка при обновлении приоритета'),
   });
 
+  const { mutateAsync: takeInWork } = useMutation({
+    mutationFn: ({ ticketId, ticketType }: { ticketId: number; ticketType: 'support_request' | 'claim' }) =>
+      supportApi.takeTicketInWork(ticketId, ticketType),
+    onSuccess: () => {
+      message.success('Ответственный назначен, обращение взято в работу');
+      invalidateTickets();
+    },
+    onError: () => message.error('Ошибка при взятии в работу'),
+  });
+
   const { mutateAsync: assignAdmin } = useMutation({
     mutationFn: ({ ticketId, adminId, ticketType }: { ticketId: number; adminId: number; ticketType: 'support_request' | 'claim' }) =>
       adminPanelApi.assignTicketAdmin(ticketId, adminId, ticketType),
@@ -256,6 +266,7 @@ export const useTicketActions = () => {
   return { 
     sendMessage: (ticketId: number, message: string, ticketType: 'support_request' | 'claim') => sendMessage({ ticketId, message, ticketType }), 
     updateStatus: (ticketId: number, status: string, ticketType: 'support_request' | 'claim') => updateStatus({ ticketId, status, ticketType }), 
+    takeInWork: (ticketId: number, ticketType: 'support_request' | 'claim') => takeInWork({ ticketId, ticketType }),
     updatePriority: (ticketId: number, priority: string, ticketType: 'support_request' | 'claim') => updatePriority({ ticketId, priority, ticketType }), 
     assignAdmin: (ticketId: number, adminId: number, ticketType: 'support_request' | 'claim') => assignAdmin({ ticketId, adminId, ticketType }),
     assignUsers: (ticketId: number, userIds: number[], ticketType: 'support_request' | 'claim') => assignUsers({ ticketId, userIds, ticketType }),

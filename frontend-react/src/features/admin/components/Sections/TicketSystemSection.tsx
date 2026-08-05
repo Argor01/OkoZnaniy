@@ -88,7 +88,7 @@ interface ReviewAppealInfo {
 
 export const TicketSystemSection: React.FC = () => {
   const { tickets: rawTickets = [], loading, refetch } = useTickets(true);
-  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus } = useTicketActions();
+  const { sendMessage: sendTicketMessage, updateStatus: updateTicketStatus, takeInWork: takeTicketInWork } = useTicketActions();
   const tickets = rawTickets as unknown as TicketRow[];
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -294,6 +294,19 @@ export const TicketSystemSection: React.FC = () => {
       message.success(status === 'completed' ? 'Обращение закрыто' : 'Обращение взято в работу');
     } catch {
       message.error('Не удалось обновить статус');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleTakeInWork = async () => {
+    if (!selectedTicket) return;
+    try {
+      setUpdatingStatus(true);
+      await takeTicketInWork(selectedTicket.id, selectedTicket.type);
+      await Promise.all([refetch(), refetchTicket()]);
+    } catch {
+      message.error('Не удалось взять обращение в работу');
     } finally {
       setUpdatingStatus(false);
     }
@@ -885,7 +898,7 @@ export const TicketSystemSection: React.FC = () => {
 
             <Card size="small" title="Действия">
               <Space wrap>
-                <Button onClick={() => handleStatusChange('in_progress')} disabled={selectedTicket.status === 'in_progress' || selectedTicket.status === 'completed'} loading={updatingStatus}>Взять в работу</Button>
+                <Button onClick={handleTakeInWork} disabled={selectedTicket.status === 'in_progress' || selectedTicket.status === 'completed'} loading={updatingStatus}>Взять в работу</Button>
                 <Button type="primary" onClick={() => handleStatusChange('completed')} disabled={selectedTicket.status === 'completed'} loading={updatingStatus}>Закрыть обращение</Button>
               </Space>
               {isContactViolation && contactViolationUserId ? (

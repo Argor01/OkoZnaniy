@@ -47,6 +47,7 @@ ARBITRATION_IN_PROGRESS_STATUSES = (
     'under_review',
     'in_arbitration',
     'awaiting_response',
+    'pending_approval',
 )
 
 # Финальные статусы арбитражного дела, после которых переписка и возврат закрыты.
@@ -469,16 +470,48 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'], url_path='update-status')
     def update_status(self, request, pk=None):
-        """Обновить статус дела (только для админов)"""
+        """Обновить статус дела (только для админов)
+
+        Валидные переходы:
+        - submitted → under_review, closed, rejected
+        - under_review → in_arbitration, awaiting_response, closed, rejected
+        - awaiting_response → in_arbitration, under_review, closed, rejected
+        - in_arbitration → awaiting_response, under_review, pending_approval, decision_made, closed, rejected
+        - pending_approval → in_arbitration, decision_made, closed, rejected
+        - decision_made → closed
+        """
         case = self.get_object()
         new_status = request.data.get('status')
-        
+
         if not new_status:
             return Response(
                 {'error': 'Статус обязателен'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
+        valid_statuses = {s[0] for s in ArbitrationCase.STATUS_CHOICES}
+        if new_status not in valid_statuses:
+            return Response(
+                {'error': f'Неверный статус. Допустимые: {", ".join(valid_statuses)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        VALID_TRANSITIONS = {
+            'submitted':       ['under_review', 'closed', 'rejected'],
+            'under_review':    ['in_arbitration', 'awaiting_response', 'closed', 'rejected'],
+            'awaiting_response': ['in_arbitration', 'under_review', 'closed', 'rejected'],
+            'in_arbitration':  ['awaiting_response', 'under_review', 'pending_approval', 'decision_made', 'closed', 'rejected'],
+            'pending_approval': ['in_arbitration', 'decision_made', 'closed', 'rejected'],
+            'decision_made':   ['closed'],
+        }
+
+        allowed = VALID_TRANSITIONS.get(case.status, [])
+        if new_status not in allowed:
+            return Response(
+                {'error': f'Нельзя перевести из «{case.get_status_display()}» в «{dict(ArbitrationCase.STATUS_CHOICES).get(new_status, new_status)}»'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         old_status = case.status
         case.status = new_status
         
@@ -612,6 +645,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
 
         refund_percentage = request.data.get('refund_percentage', 0)
         refund_amount = request.data.get('refund_amount')
+        require_approval = request.data.get('require_approval', False)
 
         try:
             refund_percentage = float(refund_percentage)
@@ -623,6 +657,40 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        if require_approval:
+            # Отправить на согласование — сохраняем предложенные суммы,
+            # переводим в pending_approval. Финальное оформление — через
+            # approve-refund.
+            case.approved_refund_percentage = refund_percentage
+            if refund_amount:
+                case.approved_refund_amount = refund_amount
+            case.status = 'pending_approval'
+            case.save()
+
+            log_activity(
+                case,
+                request.user,
+                'refund_processed',
+                f'Возврат {refund_percentage}% отправлен на согласование',
+                {
+                    'refund_percentage': str(refund_percentage),
+                    'refund_amount': str(refund_amount) if refund_amount else None,
+                    'require_approval': True,
+                }
+            )
+            notify_case_participants(
+                case,
+                title=f'Арбитраж {case.case_number} — возврат на согласовании',
+                message_text=f'Возврат {refund_percentage}% отправлен на согласование директору.',
+                exclude_user_ids=[request.user.id],
+                notification_type=NotificationType.STATUS_CHANGED,
+            )
+            return Response({
+                'message': f'Возврат {refund_percentage}% отправлен на согласование',
+                'case': ArbitrationCaseSerializer(case).data
+            })
+
+        # Без согласования — оформляем сразу
         case.approved_refund_percentage = refund_percentage
         if refund_amount:
             case.approved_refund_amount = refund_amount
@@ -656,6 +724,126 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
 
         return Response({
             'message': f'Возврат {refund_percentage}% оформлен',
+            'case': ArbitrationCaseSerializer(case).data
+        })
+
+    @action(detail=True, methods=['post'], url_path='approve-refund')
+    def approve_refund(self, request, pk=None):
+        """Согласовать возврат (директор). Дело должно быть в pending_approval."""
+        case = self.get_object()
+
+        if case.status != 'pending_approval':
+            return Response(
+                {'detail': 'Возврат не ожидает согласования.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        case.status = 'decision_made'
+        case.decision_made_by = request.user
+        case.decision_date = timezone.now()
+        case.save()
+
+        log_activity(
+            case,
+            request.user,
+            'refund_processed',
+            f'Возврат {case.approved_refund_percentage}% согласован директором',
+            {
+                'refund_percentage': str(case.approved_refund_percentage),
+                'refund_amount': str(case.approved_refund_amount) if case.approved_refund_amount else None,
+                'approved_by_director': True,
+            }
+        )
+        try:
+            from apps.admin_panel.views import log_admin_action
+            log_admin_action(
+                request.user,
+                'arbitration_refund_approved',
+                f'Approved arbitration refund {case.approved_refund_percentage}% for case {case.case_number}',
+                target_user=getattr(case, 'plaintiff', None),
+                object_type='arbitration_case',
+                object_id=case.id,
+                meta={
+                    'refund_percentage': str(case.approved_refund_percentage),
+                    'refund_amount': str(case.approved_refund_amount) if case.approved_refund_amount else None,
+                },
+            )
+        except Exception:
+            pass
+
+        notify_case_participants(
+            case,
+            title=f'Арбитраж {case.case_number} — возврат согласован',
+            message_text=f'Возврат {case.approved_refund_percentage}% согласован директором.',
+            exclude_user_ids=[request.user.id],
+            notification_type=NotificationType.STATUS_CHANGED,
+        )
+
+        return Response({
+            'message': f'Возврат {case.approved_refund_percentage}% согласован',
+            'case': ArbitrationCaseSerializer(case).data
+        })
+
+    @action(detail=True, methods=['post'], url_path='reject-refund')
+    def reject_refund(self, request, pk=None):
+        """Отклонить согласование возврата (директор). Возвращает дело в in_arbitration."""
+        case = self.get_object()
+
+        if case.status != 'pending_approval':
+            return Response(
+                {'detail': 'Возврат не ожидает согласования.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = request.data.get('reason', '').strip()
+
+        # Сохраняем предложенные суммы для лога, затем очищаем
+        refused_percentage = case.approved_refund_percentage
+        refused_amount = case.approved_refund_amount
+
+        case.approved_refund_percentage = None
+        case.approved_refund_amount = None
+        case.status = 'in_arbitration'
+        case.save()
+
+        log_activity(
+            case,
+            request.user,
+            'status_changed',
+            f'Директор отклонил согласование возврата {refused_percentage}%'
+            + (f'. Причина: {reason}' if reason else ''),
+            {
+                'old_status': 'pending_approval',
+                'new_status': 'in_arbitration',
+                'refused_refund_percentage': str(refused_percentage) if refused_percentage else None,
+                'refused_refund_amount': str(refused_amount) if refused_amount else None,
+                'reason': reason,
+            }
+        )
+        try:
+            from apps.admin_panel.views import log_admin_action
+            log_admin_action(
+                request.user,
+                'arbitration_refund_rejected',
+                f'Rejected arbitration refund {refused_percentage}% for case {case.case_number}',
+                target_user=getattr(case, 'plaintiff', None),
+                object_type='arbitration_case',
+                object_id=case.id,
+                meta={'reason': reason},
+            )
+        except Exception:
+            pass
+
+        notify_case_participants(
+            case,
+            title=f'Арбитраж {case.case_number} — возврат отклонён',
+            message_text='Директор отклонил предложенный возврат. Дело продолжается.',
+            exclude_user_ids=[request.user.id],
+            notification_type=NotificationType.STATUS_CHANGED,
+        )
+
+        return Response({
+            'message': 'Согласование возврата отклонено',
             'case': ArbitrationCaseSerializer(case).data
         })
 

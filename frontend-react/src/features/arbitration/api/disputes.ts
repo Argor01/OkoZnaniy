@@ -23,7 +23,14 @@ export const disputesApi = {
   // Получение споров, назначенных текущему арбитру
   getMyDisputes: async (): Promise<Dispute[]> => {
     const response = await apiClient.get('/orders/disputes/my_disputes/');
-    return response.data;
+    const data = response.data;
+    if (data?.results && Array.isArray(data.results)) {
+      return data.results;
+    }
+    if (Array.isArray(data)) {
+      return data;
+    }
+    return [];
   },
 
 

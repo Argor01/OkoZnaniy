@@ -6,7 +6,6 @@ import { ROUTES } from '@/utils/constants';
 const AdminDashboard = lazy(() => import('@/features/admin/pages/AdminDashboard'));
 const AdminLogin = lazy(() => import('@/features/admin/pages/AdminLogin'));
 const TicketDetailPage = lazy(() => import('@/features/admin/pages/TicketDetailPage'));
-const ArbitrationDetailPage = lazy(() => import('@/features/admin/pages/ArbitrationDetailPage'));
 
 export const adminRoutes = (
   <>
@@ -25,9 +24,5 @@ export const adminRoutes = (
       }
     />
     <Route path="/admin/tickets/:ticketId" element={<TicketDetailPage />} />
-    <Route
-      path="/admin/arbitration/:ticketId"
-      element={<ArbitrationDetailPage />}
-    />
   </>
 );
