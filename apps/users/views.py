@@ -147,7 +147,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        if self.action in ['create', 'request_password_reset', 'reset_password_with_code', 'public_stats']:
+        if self.action in ['create', 'request_password_reset', 'verify_reset_code', 'reset_password_with_code', 'public_stats']:
             return [permissions.AllowAny()]
         if self.action == 'retrieve':
             return [permissions.AllowAny()]  # Публичный доступ к профилям
