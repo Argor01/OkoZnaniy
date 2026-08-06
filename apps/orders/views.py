@@ -1550,6 +1550,13 @@ class BidViewSet(viewsets.ModelViewSet):
         if not _is_order_action_allowed(order, user, 'can_bid'):
             raise PermissionDenied('Action is not available for the current order state.')
 
+        # Удаляем старые неактивные ставки (rejected/cancelled), чтобы создать новую
+        # с актуальным created_at и без устаревших данных
+        Bid.objects.filter(
+            order=order,
+            expert=user,
+        ).exclude(status=BidStatus.ACTIVE).delete()
+
         bid, created = Bid.objects.get_or_create(
             order=order, 
             expert=user, 

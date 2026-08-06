@@ -95,6 +95,7 @@ export function useOrderDetail(orderId?: string) {
       queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
       queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
       queryClient.invalidateQueries({ queryKey: ['order', orderId] }),
+      queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] }),
     ]);
   }, [orderId, queryClient, refetchOrder]);
 

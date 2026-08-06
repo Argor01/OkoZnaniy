@@ -202,9 +202,11 @@ const OrderDetail: React.FC = () => {
               onEditOrder={() => setEditOrderModalVisible(true)}
             />
 
-            <div className={styles.sectionBlock}>
-              <OrderTimeline order={order} onReviewClick={() => setReviewModalOpen(true)} />
-            </div>
+            {(isOrderOwner || isOrderExpert) && (
+              <div className={styles.sectionBlock}>
+                <OrderTimeline order={order} onReviewClick={() => setReviewModalOpen(true)} />
+              </div>
+            )}
 
             <OrderContent
               order={order}
@@ -298,7 +300,7 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
-            {userHasBid && (
+            {userHasBid && currentUserBid?.status !== 'rejected' && currentUserBid?.status !== 'cancelled' && (
               <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
                 <Tag
                   color={currentUserBid?.status === 'invited' ? 'blue' : currentUserBid?.status === 'accepted' ? 'green' : 'success'}

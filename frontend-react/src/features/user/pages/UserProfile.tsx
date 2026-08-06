@@ -211,11 +211,6 @@ const UserProfile: FC = () => {
                     <Text type="secondary" className={styles.profileLabel}>
                       ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
                     </Text>
-                    <Tag
-                      className={`${styles.roleTag} ${styles[`roleTag_${userData.role === 'expert' ? 'expert' : userData.role === 'client' ? 'client' : 'default'}`]}`}
-                    >
-                      {userData.role === 'client' ? 'Заказчик' : userData.role === 'expert' ? 'Эксперт' : 'Пользователь'}
-                    </Tag>
                   </div>
                   <div className={styles.profileIdentityCard}>
                     <Avatar

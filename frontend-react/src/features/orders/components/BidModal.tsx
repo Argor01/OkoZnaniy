@@ -38,6 +38,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['orders-feed'] });
       queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     },
     onError: (error: unknown) => {
       const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
