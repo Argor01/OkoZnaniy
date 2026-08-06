@@ -1304,7 +1304,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     if (!selectedChat) return null;
     const id =
       (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
-      (selectedChat as { client_id?: unknown } | null)?.client_id;
+      (selectedChat as { client_id?: unknown } | null)?.client_id ??
+      (selectedChat as { other_user?: { id?: unknown } | null } | null)?.other_user?.id;
     return id ? Number(id) : null;
   }, [selectedChat]);
 

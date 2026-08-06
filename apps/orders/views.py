@@ -398,9 +398,9 @@ class OrderViewSet(viewsets.ModelViewSet):
     def client_available_orders(self, request):
         """Заказы клиента, доступные для привязки оффера.
 
-        Возвращает заказы указанного клиента со статусом ``new``,
-        договорной ценой и без назначенного эксперта.
-        Доступно экспертам и.staff.
+        Возвращает заказы указанного клиента со статусом ``new``
+        (без назначенного эксперта или с назначенным текущим экспертом).
+        Доступно экспертам и staff.
         """
         user = request.user
         if not user.is_staff and getattr(user, 'role', None) not in ('expert', 'admin'):
@@ -415,13 +415,14 @@ class OrderViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             return Response({'detail': 'client_id должен быть числом.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        from django.db.models import Q
         orders = (
             Order.objects.filter(
-                client_id=client_id,
-                status='new',
-                expert__isnull=True,
+                Q(client_id=client_id, status='new', expert__isnull=True) |
+                Q(client_id=client_id, status='new', expert=user)
             )
             .select_related('subject', 'work_type')
+            .distinct()
             .order_by('-created_at')
         )
 
