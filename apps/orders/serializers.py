@@ -4,14 +4,14 @@ from .services import OrderActionService
 from apps.catalog.models import Subject, Topic, WorkType, Complexity
 from apps.catalog.serializers import SubjectSerializer, TopicSerializer, WorkTypeSerializer, ComplexitySerializer
 from apps.catalog.services import PricingService
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserProfileSerializer
 from django.utils import timezone
 from rest_framework.reverse import reverse
 
 MAX_ORDER_BUDGET = 99_999_999.99
 
 class OrderFileSerializer(serializers.ModelSerializer):
-    uploaded_by = UserSerializer(read_only=True)
+    uploaded_by = PublicUserProfileSerializer(read_only=True)
     file_type_display = serializers.CharField(source='get_file_type_display', read_only=True)
     file_url = serializers.SerializerMethodField()
     view_url = serializers.SerializerMethodField()
@@ -69,7 +69,7 @@ class OrderFileSerializer(serializers.ModelSerializer):
         return "0 B"
 
 class OrderCommentSerializer(serializers.ModelSerializer):
-    author = UserSerializer(read_only=True)
+    author = PublicUserProfileSerializer(read_only=True)
 
     class Meta:
         model = OrderComment
@@ -77,7 +77,7 @@ class OrderCommentSerializer(serializers.ModelSerializer):
         read_only_fields = ['author']
 
 class BidSerializer(serializers.ModelSerializer):
-    expert = UserSerializer(read_only=True)
+    expert = PublicUserProfileSerializer(read_only=True)
     expert_rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -103,7 +103,7 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
     work_type = WorkTypeSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     complexity = ComplexitySerializer(read_only=True)
-    client = UserSerializer(read_only=True)
+    client = PublicUserProfileSerializer(read_only=True)
     files = OrderFileSerializer(many=True, read_only=True)
     responses_count = serializers.IntegerField(read_only=True)
     user_has_bid = serializers.SerializerMethodField()
@@ -136,8 +136,8 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
         return OrderActionService.for_user(obj, user)
 
 class OrderSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    expert = UserSerializer(read_only=True)
+    client = PublicUserProfileSerializer(read_only=True)
+    expert = PublicUserProfileSerializer(read_only=True)
     subject = SubjectSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     work_type = WorkTypeSerializer(read_only=True)
@@ -473,7 +473,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return None
 
 class TransactionSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = PublicUserProfileSerializer(read_only=True)
     type_display = serializers.CharField(source='get_type_display', read_only=True)
     
     class Meta:
@@ -482,7 +482,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ['timestamp']
 
 class DisputeSerializer(serializers.ModelSerializer):
-    arbitrator = UserSerializer(read_only=True)
+    arbitrator = PublicUserProfileSerializer(read_only=True)
     order = serializers.SerializerMethodField()
     
     class Meta:

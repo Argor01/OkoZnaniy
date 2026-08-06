@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Chat, Message, SupportChat, SupportMessage, ContactViolationLog, ChatPin
 from .services import readable_messages_for_chat, unread_messages_for_user
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserProfileSerializer
 
 
 OWN_CONTACT_BAN_REASON = 'Аккаунт находится на проверке правил безопасности.'
@@ -12,7 +12,7 @@ OTHER_CONTACT_BAN_REASON = (
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
+    sender = PublicUserProfileSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
     file_url = serializers.FileField(source='file', read_only=True)
     
@@ -29,9 +29,9 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class ChatListSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    expert = UserSerializer(read_only=True)
-    participants = UserSerializer(many=True, read_only=True)
+    client = PublicUserProfileSerializer(read_only=True)
+    expert = PublicUserProfileSerializer(read_only=True)
+    participants = PublicUserProfileSerializer(many=True, read_only=True)
     order_id = serializers.IntegerField(read_only=True)
     order_status = serializers.SerializerMethodField()
     last_message = serializers.SerializerMethodField()
@@ -51,7 +51,7 @@ class ChatListSerializer(serializers.ModelSerializer):
         if request and request.user:
             other = obj.participants.exclude(id=request.user.id).first()
             if other:
-                return UserSerializer(other).data
+                return PublicUserProfileSerializer(other).data
         return None
 
     def get_order_status(self, obj):
@@ -107,9 +107,9 @@ class ChatListSerializer(serializers.ModelSerializer):
 
 
 class ChatDetailSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    expert = UserSerializer(read_only=True)
-    participants = UserSerializer(many=True, read_only=True)
+    client = PublicUserProfileSerializer(read_only=True)
+    expert = PublicUserProfileSerializer(read_only=True)
+    participants = PublicUserProfileSerializer(many=True, read_only=True)
     messages = serializers.SerializerMethodField()
     order_id = serializers.IntegerField(read_only=True)
     order_status = serializers.SerializerMethodField()
@@ -128,7 +128,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
         if request and request.user:
             other = obj.participants.exclude(id=request.user.id).first()
             if other:
-                return UserSerializer(other).data
+                return PublicUserProfileSerializer(other).data
         return None
 
     def get_order_status(self, obj):
@@ -174,7 +174,7 @@ class ChatDetailSerializer(serializers.ModelSerializer):
 
 
 class SupportMessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
+    sender = PublicUserProfileSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
     file_url = serializers.FileField(source='file', read_only=True)
     
@@ -191,8 +191,8 @@ class SupportMessageSerializer(serializers.ModelSerializer):
 
 
 class SupportChatSerializer(serializers.ModelSerializer):
-    client = UserSerializer(read_only=True)
-    admin = UserSerializer(read_only=True)
+    client = PublicUserProfileSerializer(read_only=True)
+    admin = PublicUserProfileSerializer(read_only=True)
     support_messages = SupportMessageSerializer(many=True, read_only=True)
     unread_count = serializers.SerializerMethodField()
     
@@ -218,10 +218,10 @@ class SupportChatSerializer(serializers.ModelSerializer):
 
 
 class ContactViolationSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = PublicUserProfileSerializer(read_only=True)
     chat = ChatListSerializer(read_only=True)
     message = MessageSerializer(read_only=True)
-    reviewed_by = UserSerializer(read_only=True)
+    reviewed_by = PublicUserProfileSerializer(read_only=True)
     detected_contacts_summary = serializers.CharField(
         source='get_detected_contacts_summary', 
         read_only=True

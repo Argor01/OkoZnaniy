@@ -1,14 +1,14 @@
 from decimal import Decimal
 from rest_framework import serializers
 from .models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Complaint
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserProfileSerializer
 from apps.orders.serializers import OrderSerializer
 from apps.orders.models import Order, OrderFile
 from django.contrib.auth import get_user_model
 
 
 class ArbitrationMessageSerializer(serializers.ModelSerializer):
-    sender = UserSerializer(read_only=True)
+    sender = PublicUserProfileSerializer(read_only=True)
     
     class Meta:
         model = ArbitrationMessage
@@ -20,7 +20,7 @@ class ArbitrationMessageSerializer(serializers.ModelSerializer):
 
 
 class ArbitrationActivitySerializer(serializers.ModelSerializer):
-    actor = UserSerializer(read_only=True)
+    actor = PublicUserProfileSerializer(read_only=True)
     activity_type_display = serializers.CharField(source='get_activity_type_display', read_only=True)
     
     class Meta:
@@ -33,11 +33,11 @@ class ArbitrationActivitySerializer(serializers.ModelSerializer):
 
 
 class ArbitrationCaseSerializer(serializers.ModelSerializer):
-    plaintiff = UserSerializer(read_only=True)
-    defendant = UserSerializer(read_only=True)
-    assigned_admin = UserSerializer(read_only=True)
-    assigned_users = UserSerializer(many=True, read_only=True)
-    decision_made_by = UserSerializer(read_only=True)
+    plaintiff = PublicUserProfileSerializer(read_only=True)
+    defendant = PublicUserProfileSerializer(read_only=True)
+    assigned_admin = PublicUserProfileSerializer(read_only=True)
+    assigned_users = PublicUserProfileSerializer(many=True, read_only=True)
+    decision_made_by = PublicUserProfileSerializer(read_only=True)
     order = OrderSerializer(read_only=True)
     
     messages = ArbitrationMessageSerializer(many=True, read_only=True)
@@ -118,9 +118,9 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
 
 class ArbitrationCaseListSerializer(serializers.ModelSerializer):
     """Упрощенный сериализатор для списка дел"""
-    plaintiff = UserSerializer(read_only=True)
-    defendant = UserSerializer(read_only=True)
-    assigned_admin = UserSerializer(read_only=True)
+    plaintiff = PublicUserProfileSerializer(read_only=True)
+    defendant = PublicUserProfileSerializer(read_only=True)
+    assigned_admin = PublicUserProfileSerializer(read_only=True)
     order = serializers.SerializerMethodField()
     
     status_display = serializers.CharField(source='get_status_display', read_only=True)
@@ -299,8 +299,8 @@ class ComplaintFileSerializer(serializers.ModelSerializer):
 
 class ComplaintSerializer(serializers.ModelSerializer):
     """Сериализатор для претензии (Complaint)"""
-    plaintiff = UserSerializer(read_only=True)
-    defendant = UserSerializer(read_only=True)
+    plaintiff = PublicUserProfileSerializer(read_only=True)
+    defendant = PublicUserProfileSerializer(read_only=True)
     order = OrderSerializer(read_only=True)
     files = serializers.SerializerMethodField()
     review = serializers.SerializerMethodField()
