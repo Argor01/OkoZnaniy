@@ -947,6 +947,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 order,
                 sender=client_user,
                 text=message.text or f'Заказ #{order.id} принят в работу',
+                original_offer_data=offer_data,
             )
 
             try:

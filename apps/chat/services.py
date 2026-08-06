@@ -517,6 +517,7 @@ def build_order_offer_data(order: Order) -> dict:
         "subject": order.custom_subject or (order.subject.name if order.subject else None),
         "work_type_id": order.work_type_id,
         "work_type": order.custom_work_type or (order.work_type.name if order.work_type else None),
+        "prepayment_percent": 50,
         "expert_id": order.expert_id,
         "expert_username": order.expert.username if order.expert else None,
         "client_id": order.client_id,
@@ -529,6 +530,7 @@ def ensure_order_chat_started(
     *,
     sender=None,
     text: Optional[str] = None,
+    original_offer_data: Optional[dict] = None,
 ) -> Tuple[Chat, Chat, Message]:
     if not order.client_id or not order.expert_id:
         raise ValueError("order chat bootstrap requires assigned client and expert")
@@ -554,7 +556,7 @@ def ensure_order_chat_started(
         sender=sender or order.client,
         text=text or f"Заказ #{order.id} принят в работу",
         message_type="offer",
-        offer_data=build_order_offer_data(order),
+        offer_data=original_offer_data or build_order_offer_data(order),
     )
     message.full_clean()
     message.save()
