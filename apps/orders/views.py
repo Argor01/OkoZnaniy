@@ -659,16 +659,20 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
 
         # Проверка баланса при назначении исполнителя с конкретной ценой.
-        # При недостатке средств назначение запрещено, но чат остаётся доступен.
+        # Для фиксированных заказов средства уже заморожены при создании,
+        # поэтому проверяем только недостающую сумму.
         try:
-            available = WalletService.get_balance(user)['available_balance']
-            if available < bid.amount:
-                return Response(
-                    {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
-                               f'Доступно: {available} ₽. Пополните баланс в разделе «Кошелёк» — '
-                               'общение с исполнителем в чате остаётся доступным.'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            active_hold = _active_order_hold(order)
+            additional_needed = Decimal(str(bid.amount)) - Decimal(str(active_hold))
+            if additional_needed > 0:
+                available = WalletService.get_balance(user)['available_balance']
+                if available < additional_needed:
+                    return Response(
+                        {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
+                                   f'Не хватает: {additional_needed} ₽. Пополните баланс в разделе «Кошелёк» — '
+                                   'общение с исполнителем в чате остаётся доступным.'},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
         except Exception as e:
             logger.error(f"[OrderViewSet.accept_bid] Balance check failed for user {user.id}: {e}", exc_info=True)
 

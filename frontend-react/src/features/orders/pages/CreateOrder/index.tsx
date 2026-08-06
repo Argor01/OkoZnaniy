@@ -395,7 +395,7 @@ const CreateOrder: React.FC = () => {
               />
             </Form.Item>
 
-            <Form.Item label="Тип цены">
+            <Form.Item label="Тип цены" className={styles.priceTypeItem}>
               <Radio.Group value={priceType} onChange={(e) => setPriceType(e.target.value)}>
                 <Radio value="fixed">Фиксированная цена</Radio>
                 <Radio value="negotiable">Договорная цена</Radio>

@@ -29,6 +29,9 @@ from apps.chat.websocket_utils import (
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
+from apps.wallet.services import WalletService
+from apps.orders.views import _active_order_hold
+from decimal import Decimal
 
 User = get_user_model()
 
@@ -84,6 +87,66 @@ def ensure_case_not_closed(case):
             {'detail': f'Дело завершено ({case.get_status_display()}). Писать и оформлять возврат нельзя.'},
             status=status.HTTP_400_BAD_REQUEST,
         )
+    return None
+
+
+def _process_arbitration_refund(case, refund_percentage):
+    """Финализация финансового решения по арбитражу.
+
+    Распределяет замороженные средства заказа:
+    - refund_percentage% → клиенту (refund_hold)
+    - остальное → эксперту (release_to_expert с комиссией 15%)
+
+    Если эксперта нет — вся сумма возвращается клиенту.
+    Если замороженных средств нет — возвращает ошибку.
+
+    Возвращает None при успехе или Response с ошибкой.
+    """
+    order = case.order
+    if not order or not order.client:
+        return Response(
+            {'detail': 'Заказ или клиент не найдены.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    active_hold = _active_order_hold(order)
+    if active_hold <= 0:
+        return Response(
+            {'detail': 'Нет замороженных средств по заказу для возврата.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    refund_decimal = Decimal(str(refund_percentage))
+    client_amount = (active_hold * refund_decimal / Decimal('100')).quantize(Decimal('0.01'))
+    expert_amount = active_hold - client_amount
+
+    try:
+        if client_amount > 0:
+            WalletService.refund_hold(
+                order.client,
+                client_amount,
+                order=order,
+                description=f'Арбитраж {case.case_number}: возврат клиенту {refund_percentage}%',
+            )
+
+        if expert_amount > 0 and order.expert:
+            WalletService.release_to_expert(
+                client=order.client,
+                expert=order.expert,
+                amount=expert_amount,
+                order=order,
+                description=f'Арбитраж {case.case_number}: выплата эксперту',
+            )
+
+        order.status = 'cancelled'
+        order.save()
+
+    except Exception as e:
+        return Response(
+            {'detail': f'Ошибка при работе с кошельком: {str(e)}'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     return None
 
 
@@ -393,8 +456,8 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         """Отправить сообщение в дело.
 
         Правила:
-        - дело должно быть взято в работу (статус in_progress) — иначе писать нельзя
-          ни админу, ни сторонам;
+        - истец может писать даже до взятия в работу (чтобы дополнить информацию);
+        - админ и ответчик — только после взятия в работу;
         - в финальных статусах (decision_made / closed / rejected) переписка закрыта.
         """
         case = self.get_object()
@@ -403,11 +466,6 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         closed_resp = ensure_case_not_closed(case)
         if closed_resp is not None:
             return closed_resp
-
-        # 2. Дело ещё не взято в работу — никто не пишет.
-        taken_resp = ensure_case_taken_into_work(case)
-        if taken_resp is not None:
-            return taken_resp
 
         text = request.data.get('message', '').strip()
         is_internal = request.data.get('is_internal', False)
@@ -429,6 +487,14 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             return Response(
                 {'error': 'У вас нет прав для отправки сообщений в это дело'},
                 status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 2. До взятия в работу — только стороны (истец и ответчик) могут писать.
+        if case.status == 'submitted' and message_type == 'admin':
+            return Response(
+                {'error': 'Дело ещё не взято в работу. Стороны могут писать, '
+                          'но администратор — пока нет.'},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         
         # Создаем сообщение
@@ -595,6 +661,20 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
 
         case.save()
 
+        # Движение денег, если указан процент возврата
+        if approved_refund_percentage is not None:
+            wallet_error = _process_arbitration_refund(case, approved_refund_percentage)
+            if wallet_error is not None:
+                # Откатываем статус дела обратно
+                case.status = 'in_arbitration'
+                case.decision = ''
+                case.decision_made_by = None
+                case.decision_date = None
+                case.approved_refund_percentage = None
+                case.approved_refund_amount = None
+                case.save()
+                return wallet_error
+
         log_activity(
             case,
             request.user,
@@ -698,6 +778,16 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         case.status = 'decision_made'
         case.save()
 
+        # Движение денег через кошелёк
+        wallet_error = _process_arbitration_refund(case, refund_percentage)
+        if wallet_error is not None:
+            # Откатываем статус дела обратно
+            case.status = 'in_arbitration'
+            case.approved_refund_percentage = None
+            case.approved_refund_amount = None
+            case.save()
+            return wallet_error
+
         log_activity(
             case,
             request.user,
@@ -742,6 +832,16 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         case.decision_made_by = request.user
         case.decision_date = timezone.now()
         case.save()
+
+        # Движение денег через кошелёк
+        wallet_error = _process_arbitration_refund(case, case.approved_refund_percentage)
+        if wallet_error is not None:
+            # Откатываем статус дела обратно
+            case.status = 'pending_approval'
+            case.decision_made_by = None
+            case.decision_date = None
+            case.save()
+            return wallet_error
 
         log_activity(
             case,

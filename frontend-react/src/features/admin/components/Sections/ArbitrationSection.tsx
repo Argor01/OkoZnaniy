@@ -564,7 +564,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                   </>
                 ) : (
                   <>
-                    <Button onClick={handleTakeInWork} disabled={detailData.status === 'under_review' || detailData.status === 'closed'} loading={statusUpdating}>Взять в работу</Button>
+                    <Button onClick={handleTakeInWork} disabled={!['submitted', 'draft', 'awaiting_response'].includes(detailData.status)} loading={statusUpdating}>Взять в работу</Button>
                     <Button
                       type="primary"
                       onClick={() => handleStatusChange('closed')}
@@ -578,82 +578,93 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               </Space>
             </Card>
 
-            {detailData.order && detailData.status !== 'pending_approval' && (
-              <Card size="small" title={<Space><DollarOutlined />Возврат средств</Space>}>
-                <Form form={refundForm} layout="vertical">
-                  <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                    <div>
-                      <Text strong>Сумма заказа: </Text>
-                      <Text style={{ fontSize: 16, color: '#6435a5' }}>
-                        {(detailData.order.budget || 0).toLocaleString()} ₽
-                      </Text>
-                    </div>
+            {detailData.order && ['under_review', 'in_arbitration', 'awaiting_response'].includes(detailData.status) && (() => {
+              const refundAlreadyDone = detailData.approved_refund_percentage != null && detailData.approved_refund_percentage !== '';
+              return (
+                <Card size="small" title={<Space><DollarOutlined />Возврат средств</Space>}>
+                  <Form form={refundForm} layout="vertical">
+                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                      {refundAlreadyDone && (
+                        <div style={{ padding: '8px 12px', background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 6 }}>
+                          <Text style={{ color: '#d46b08' }}>
+                            Возврат уже был оформлен ({detailData.approved_refund_percentage}%). Повторное оформление невозможно.
+                          </Text>
+                        </div>
+                      )}
 
-                    <div>
-                      <div style={{ marginBottom: 8 }}>
-                        <Text strong>Процент возврата: {refundPercentage}%</Text>
-                      </div>
-                      <div style={{ marginBottom: 8 }}>
-                        <Text style={{ fontSize: 18, color: '#52c41a', fontWeight: 600 }}>
-                           {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                      <div>
+                        <Text strong>Сумма заказа: </Text>
+                        <Text style={{ fontSize: 16, color: '#6435a5' }}>
+                          {(detailData.order.budget || 0).toLocaleString()} ₽
                         </Text>
                       </div>
-                      <Slider
-                        min={0}
-                        max={100}
-                        step={5}
-                        value={refundPercentage}
-                        onChange={setRefundPercentage}
-                        disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
-                        marks={{
-                          0: '0%',
-                          25: '25%',
-                          50: '50%',
-                          75: '75%',
-                          100: '100%',
-                        }}
-                        tooltip={{
-                          formatter: (value) => `${value}% (${Math.round(((detailData.order.budget || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
-                        }}
-                      />
-                    </div>
 
-                    <Form.Item
-                      name="reason"
-                      label="Обоснование (опционально)"
-                      style={{ marginBottom: 0 }}
-                    >
-                      <Input.TextArea
-                        rows={2}
-                        placeholder={`Возврат ${refundPercentage}% от суммы заказа`}
-                        maxLength={300}
-                        showCount
-                        disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
-                      />
-                    </Form.Item>
+                      <div>
+                        <div style={{ marginBottom: 8 }}>
+                          <Text strong>Процент возврата: {refundPercentage}%</Text>
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
+                          <Text style={{ fontSize: 18, color: '#52c41a', fontWeight: 600 }}>
+                             {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                          </Text>
+                        </div>
+                        <Slider
+                          min={0}
+                          max={100}
+                          step={5}
+                          value={refundPercentage}
+                          onChange={setRefundPercentage}
+                          disabled={refundAlreadyDone}
+                          marks={{
+                            0: '0%',
+                            25: '25%',
+                            50: '50%',
+                            75: '75%',
+                            100: '100%',
+                          }}
+                          tooltip={{
+                            formatter: (value) => `${value}% (${Math.round(((detailData.order.budget || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
+                          }}
+                        />
+                      </div>
 
-                    <Form.Item name="requireApproval" initialValue={false} style={{ marginBottom: 0 }}>
-                      <Radio.Group disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}>
-                        <Radio value={false}>Оформить возврат сразу</Radio>
-                        <Radio value={true}>Отправить на согласование</Radio>
-                      </Radio.Group>
-                    </Form.Item>
+                      <Form.Item
+                        name="reason"
+                        label="Обоснование (опционально)"
+                        style={{ marginBottom: 0 }}
+                      >
+                        <Input.TextArea
+                          rows={2}
+                          placeholder={`Возврат ${refundPercentage}% от суммы заказа`}
+                          maxLength={300}
+                          showCount
+                          disabled={refundAlreadyDone}
+                        />
+                      </Form.Item>
 
-                    <Button
-                      type="primary"
-                      icon={<DollarOutlined />}
-                      onClick={handleRefund}
-                      loading={refundProcessing}
-                      disabled={detailData.status === 'decision_made' || detailData.status === 'closed' || detailData.status === 'rejected'}
-                      size="large"
-                      block
-                    >
-                      Оформить возврат {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
-                    </Button>
-                  </Space>
-                </Form>
-              </Card>
-            )}
+                      <Form.Item name="requireApproval" initialValue={false} style={{ marginBottom: 0 }}>
+                        <Radio.Group disabled={refundAlreadyDone}>
+                          <Radio value={false}>Оформить возврат сразу</Radio>
+                          <Radio value={true}>Отправить на согласование</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+
+                      <Button
+                        type="primary"
+                        icon={<DollarOutlined />}
+                        onClick={handleRefund}
+                        loading={refundProcessing}
+                        disabled={refundAlreadyDone}
+                        size="large"
+                        block
+                      >
+                        Оформить возврат {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                      </Button>
+                    </Space>
+                  </Form>
+                </Card>
+              );
+            })()}
 
             {detailData.status === 'pending_approval' && detailData.order && (
               <Card size="small" title={<Space><DollarOutlined />Ожидает согласования возврата</Space>} style={{ borderColor: '#faad14' }}>

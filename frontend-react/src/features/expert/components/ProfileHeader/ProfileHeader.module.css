@@ -69,15 +69,13 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-height: 30px;
-  padding: 5px 14px;
+  padding: 4px 14px;
   border-radius: 999px;
   font-family: 'Jost-SemiBold', sans-serif;
   font-size: 14px;
-  line-height: 1;
+  line-height: 1.2;
   letter-spacing: 0.01em;
   border: 1px solid transparent;
-  box-shadow: 0 8px 22px rgba(100, 53, 165, 0.12);
 }
 
 .profileRoleBadge_client {
@@ -98,7 +96,6 @@
   border-radius: 50%;
   background-color: #10b981;
   display: inline-block;
-  margin-bottom: 10px;
 }
 
 .profileOnlineText {
@@ -253,8 +250,7 @@
   }
 
   .profileRoleBadge {
-    min-height: 28px;
-    padding: 5px 12px;
+    padding: 3px 12px;
     font-size: 13px;
   }
   
@@ -455,8 +451,7 @@
   }
 
   .profileRoleBadge {
-    min-height: 26px;
-    padding: 5px 10px;
+    padding: 3px 10px;
     font-size: 12px;
   }
   
@@ -510,14 +505,12 @@
   color: #d8b4fe;
   background: rgba(126, 58, 242, 0.14);
   border-color: rgba(168, 85, 247, 0.35);
-  box-shadow: 0 8px 24px rgba(126, 58, 242, 0.18);
 }
 
 :global([data-theme="dark"]) .profileRoleBadge_expert {
   color: #86efac;
   background: rgba(16, 185, 129, 0.14);
   border-color: rgba(52, 211, 153, 0.35);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.16);
 }
 
 :global([data-theme="dark"]) .profileStatLabel {

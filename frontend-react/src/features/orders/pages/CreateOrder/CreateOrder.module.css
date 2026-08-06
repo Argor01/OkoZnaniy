@@ -79,8 +79,8 @@
 
 .timeSelectors {
   display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+  align-items: flex-end;
+  gap: 8px;
 }
 
 .timeFieldWrapper {
@@ -88,10 +88,11 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .timeLabel {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-secondary);
   font-family: var(--font-display);
 }
@@ -101,16 +102,19 @@
 }
 
 .timeSeparator {
-  font-size: 24px;
+  font-size: 18px;
   color: var(--text-secondary);
-  padding-bottom: 4px;
-  font-weight: 300;
-  align-self: flex-end;
+  margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .priceSection {
-  margin-top: var(--spacing-xl);
+  margin-top: 2px;
   margin-bottom: var(--spacing-lg);
+}
+
+.priceTypeItem {
+  margin-bottom: 4px !important;
 }
 
 .priceInput {
