@@ -291,7 +291,8 @@ class ChatViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                if linked_order.client_id != chat.client_id:
+                chat_participant_ids = list(chat.participants.values_list('id', flat=True))
+                if linked_order.client_id not in chat_participant_ids:
                     return Response(
                         {'detail': 'Этот заказ принадлежит другому клиенту.'},
                         status=status.HTTP_400_BAD_REQUEST
@@ -303,7 +304,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                if linked_order.expert_id is not None:
+                if linked_order.expert_id is not None and linked_order.expert_id != request.user.id:
                     return Response(
                         {'detail': 'У этого заказа уже есть назначенный эксперт.'},
                         status=status.HTTP_400_BAD_REQUEST

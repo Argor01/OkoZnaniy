@@ -18,12 +18,9 @@ export const ordersApi = {
   },
 
   getClientAvailableOrders: async (clientId: number): Promise<Order[]> => {
-    const url = API_ENDPOINTS.orders.clientAvailableOrders;
-    console.log('[API] getClientAvailableOrders →', { url, clientId, fullUrl: `${url}?client_id=${clientId}` });
-    const response = await apiClient.get(url, {
+    const response = await apiClient.get(API_ENDPOINTS.orders.clientAvailableOrders, {
       params: { client_id: clientId },
     });
-    console.log('[API] getClientAvailableOrders ←', { status: response.status, data: response.data });
     return response.data;
   },
 

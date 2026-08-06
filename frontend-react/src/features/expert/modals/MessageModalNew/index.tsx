@@ -911,14 +911,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     setLoading(true);
     try {
       const chatData = await chatApi.getOrCreateByUser(userId, chatContextTitle);
-      console.log('[chatData]', {
-        id: chatData.id,
-        client: chatData.client,
-        expert: chatData.expert,
-        other_user: chatData.other_user,
-        participants: chatData.participants?.map((p: { id: unknown; username?: unknown }) => ({ id: p.id, username: p.username })),
-        order_id: chatData.order_id,
-      });
       logger.log('🔧 Chat data received:', chatData);
       await hydrateClosedOrdersForChat(chatData);
       setSelectedChat(chatData);
@@ -1311,25 +1303,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const chatClientId = useMemo(() => {
     if (!selectedChat) return null;
     const otherUserId = (selectedChat as { other_user?: { id?: unknown } | null } | null)?.other_user?.id;
-    if (otherUserId) {
-      console.log('[chatClientId] using other_user.id:', otherUserId, 'currentUserId:', currentUserId);
-      return Number(otherUserId);
-    }
+    if (otherUserId) return Number(otherUserId);
     const clientId =
       (selectedChat as { client?: { id?: unknown } | null } | null)?.client?.id ??
       (selectedChat as { client_id?: unknown } | null)?.client_id;
-    if (clientId && Number(clientId) !== currentUserId) {
-      console.log('[chatClientId] using client.id:', clientId, 'currentUserId:', currentUserId);
-      return Number(clientId);
-    }
+    if (clientId && Number(clientId) !== currentUserId) return Number(clientId);
     const expertId =
       (selectedChat as { expert?: { id?: unknown } | null } | null)?.expert?.id ??
       (selectedChat as { expert_id?: unknown } | null)?.expert_id;
-    if (expertId && Number(expertId) !== currentUserId) {
-      console.log('[chatClientId] using expert.id:', expertId, 'currentUserId:', currentUserId);
-      return Number(expertId);
-    }
-    console.log('[chatClientId] fallback to clientId:', clientId, 'currentUserId:', currentUserId);
+    if (expertId && Number(expertId) !== currentUserId) return Number(expertId);
     return clientId ? Number(clientId) : null;
   }, [selectedChat, currentUserId]);
 
