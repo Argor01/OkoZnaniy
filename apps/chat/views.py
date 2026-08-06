@@ -317,7 +317,8 @@ class ChatViewSet(viewsets.ModelViewSet):
                     )
 
                 from apps.orders.models import Bid
-                if Bid.objects.filter(order=linked_order, expert=request.user).exists():
+                existing_bid = Bid.objects.filter(order=linked_order, expert=request.user).exists()
+                if existing_bid and getattr(linked_order, 'price_type', None) != 'negotiable':
                     return Response(
                         {'detail': 'Вы уже оставляли отклик на этот заказ.'},
                         status=status.HTTP_400_BAD_REQUEST
