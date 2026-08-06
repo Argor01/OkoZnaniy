@@ -5,6 +5,7 @@ from apps.chat.models import Chat, SupportChat
 from apps.orders.models import Order
 from apps.arbitration.models import ArbitrationCase, ArbitrationMessage, ArbitrationActivity, Complaint
 from apps.admin_panel.models import Claim, ClaimMessage
+from apps.payments.models import Payment
 
 
 class Command(BaseCommand):
@@ -33,6 +34,7 @@ class Command(BaseCommand):
         no_support = bool(options.get("no_support"))
 
         order_count = Order.objects.count()
+        payment_count = Payment.objects.count()
         chat_count = Chat.objects.count()
         support_chat_count = SupportChat.objects.count()
         arb_case_count = ArbitrationCase.objects.count()
@@ -44,6 +46,7 @@ class Command(BaseCommand):
 
         self.stdout.write("Текущее состояние:")
         self.stdout.write(f"- Заказы: {order_count}")
+        self.stdout.write(f"- Платежи: {payment_count}")
         self.stdout.write(f"- Обычные чаты: {chat_count}")
         self.stdout.write(f"- Чаты поддержки: {support_chat_count}")
         self.stdout.write(f"- Арбитражные дела: {arb_case_count}")
@@ -71,6 +74,9 @@ class Command(BaseCommand):
             deleted_claim_msg = ClaimMessage.objects.all().delete()
             deleted_claim = Claim.objects.all().delete()
 
+            # Платежи (PROTECT на order — удаляем первыми)
+            deleted_payment_result = Payment.objects.all().delete()
+
             # Чаты и заказы (транзакции, ставки удалятся каскадно с заказов)
             deleted_chat_result = Chat.objects.all().delete()
             deleted_order_result = Order.objects.all().delete()
@@ -85,6 +91,7 @@ class Command(BaseCommand):
         self.stdout.write(f"- Претензии (арбитраж): {deleted_complaint}")
         self.stdout.write(f"- Сообщения претензий: {deleted_claim_msg}")
         self.stdout.write(f"- Претензии (поддержка): {deleted_claim}")
+        self.stdout.write(f"- Платежи: {deleted_payment_result}")
         self.stdout.write(f"- Удаление обычных чатов: {deleted_chat_result}")
         self.stdout.write(f"- Удаление заказов: {deleted_order_result}")
         if no_support:
