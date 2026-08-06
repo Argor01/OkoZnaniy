@@ -76,9 +76,6 @@
 
 .dateField {
   grid-column: 1 / -1;
-  display: flex;
-  gap: 12px;
-  align-items: center;
 }
 
 .dateInputItem {
@@ -88,17 +85,26 @@
 
 .dateInputItem :global(.ant-form-item-control-input-content) {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .dateInput {
   width: 100%;
-  min-width: 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.dateInput :global(.ant-picker) {
+  flex: 1;
+  min-width: 0;
 }
 
 .timeSelectors {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
   flex-shrink: 0;
 }
@@ -327,9 +333,12 @@
   }
 
   .dateField {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 8px !important;
+    grid-column: 1 / -1;
+  }
+
+  .dateInput {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .timeSelectors {

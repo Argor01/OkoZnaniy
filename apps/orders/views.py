@@ -355,15 +355,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             })
         
         order = serializer.save(client=self.request.user)
-        
-        # Холд средств для заказов с фиксированной ценой
-        if order.price_type == 'fixed' and order.budget:
-            try:
-                _reserve_order_hold_if_needed(order, order.budget)
-            except InsufficientFunds:
-                # Если не удалось захолдить - откатываем создание заказа
-                order.delete()
-                raise
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def available(self, request):
@@ -658,36 +649,28 @@ class OrderViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Проверка баланса при назначении исполнителя с конкретной ценой.
-        # Для фиксированных заказов средства уже заморожены при создании,
-        # поэтому проверяем только недостающую сумму.
         try:
-            active_hold = _active_order_hold(order)
-            additional_needed = Decimal(str(bid.amount)) - Decimal(str(active_hold))
-            if additional_needed > 0:
-                available = WalletService.get_balance(user)['available_balance']
-                if available < additional_needed:
-                    return Response(
-                        {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
-                                   f'Не хватает: {additional_needed} ₽. Пополните баланс в разделе «Кошелёк» — '
-                                   'общение с исполнителем в чате остаётся доступным.'},
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-        except Exception as e:
-            logger.error(f"[OrderViewSet.accept_bid] Balance check failed for user {user.id}: {e}", exc_info=True)
+            with transaction.atomic():
+                if order.expert_id and order.expert_id != bid.expert_id and order.status == 'awaiting_expert_acceptance':
+                    return Response({'detail': 'Заказ уже ожидает ответа другого исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
+                if order.status not in ['new', 'awaiting_expert_acceptance']:
+                    return Response({'detail': 'Выбрать исполнителя можно только для нового заказа.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        with transaction.atomic():
-            if order.expert_id and order.expert_id != bid.expert_id and order.status == 'awaiting_expert_acceptance':
-                return Response({'detail': 'Заказ уже ожидает ответа другого исполнителя.'}, status=status.HTTP_400_BAD_REQUEST)
-            if order.status not in ['new', 'awaiting_expert_acceptance']:
-                return Response({'detail': 'Выбрать исполнителя можно только для нового заказа.'}, status=status.HTTP_400_BAD_REQUEST)
+                order.expert = bid.expert
+                order.budget = bid.amount
+                order.status = 'awaiting_expert_acceptance'
+                order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
 
-            order.expert = bid.expert
-            order.budget = bid.amount
-            order.status = 'awaiting_expert_acceptance'
-            order.save(update_fields=['expert', 'budget', 'status', 'updated_at'])
+                Bid.objects.filter(order=order, expert=bid.expert).update(status=BidStatus.INVITED)
 
-            Bid.objects.filter(order=order, expert=bid.expert).update(status=BidStatus.INVITED)
+                _reserve_order_hold_if_needed(order, bid.amount)
+        except InsufficientFunds:
+            return Response(
+                {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
+                           'Пополните баланс в разделе «Кошелёк» — '
+                           'общение с исполнителем в чате остаётся доступным.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         logger.info(f"Заказ {order.id} ожидает ответа эксперта {bid.expert.id}")
 
