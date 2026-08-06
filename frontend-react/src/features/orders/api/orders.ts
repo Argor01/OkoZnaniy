@@ -17,6 +17,13 @@ export const ordersApi = {
     return response.data;
   },
 
+  getClientAvailableOrders: async (clientId: number): Promise<Order[]> => {
+    const response = await apiClient.get('/orders/client_available_orders/', {
+      params: { client_id: clientId },
+    });
+    return response.data;
+  },
+
   
   getAvailableOrders: async (params?: { ordering?: string; page?: number }) => {
     const firstResponse = await apiClient.get(API_ENDPOINTS.orders.available, { params });

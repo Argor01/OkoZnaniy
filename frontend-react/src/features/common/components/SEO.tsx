@@ -75,53 +75,50 @@ const SEO: React.FC<SEOProps> = ({
       }
       linkElement.setAttribute('href', canonical);
     }
-    
-    
-    const orgScript = document.createElement('script');
-    orgScript.type = 'application/ld+json';
-    orgScript.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Око Знаний",
-      "url": "https://okoznaniy.ru",
-      "logo": "https://okoznaniy.ru/assets/logo.png",
-      "description": "Онлайн сервис помощи студентам",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "RU"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer service",
-        "availableLanguage": "Russian"
-      }
-    });
-    document.head.appendChild(orgScript);
-    
-    
-    const websiteScript = document.createElement('script');
-    websiteScript.type = 'application/ld+json';
-    websiteScript.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Око Знаний",
-      "url": "https://okoznaniy.ru",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://okoznaniy.ru/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    });
-    document.head.appendChild(websiteScript);
-    
-    
-    return () => {
-      document.head.removeChild(orgScript);
-      document.head.removeChild(websiteScript);
-    };
   }, [title, description, keywords, ogTitle, ogDescription, ogImage, ogUrl, canonical]);
-  
-  return null;
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Око Знаний",
+    "url": "https://okoznaniy.ru",
+    "logo": "https://okoznaniy.ru/assets/logo.png",
+    "description": "Онлайн сервис помощи студентам",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "RU"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "availableLanguage": "Russian"
+    }
+  };
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Око Знаний",
+    "url": "https://okoznaniy.ru",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://okoznaniy.ru/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+    </>
+  );
 };
 
 export default SEO;

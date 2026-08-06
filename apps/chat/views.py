@@ -277,9 +277,50 @@ class ChatViewSet(viewsets.ModelViewSet):
 
             if getattr(chat, 'expert_id', None) and int(chat.expert_id) != int(request.user.id) and not getattr(request.user, 'is_staff', False):
                 return Response(
-                    {'detail': 'РўРѕР»СЊРєРѕ СЌРєСЃРїРµСЂС‚ СЌС‚РѕРіРѕ С‡Р°С‚Р° РјРѕР¶РµС‚ РѕС‚РїСЂР°РІР»СЏС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Рµ РїСЂРµРґР»РѕР¶РµРЅРёСЏ.'},
+                    {'detail': 'Только эксперт этого чата может отправлять индивидуальные предложения.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
+
+            linked_order_id = offer_data.get('linked_order_id') if isinstance(offer_data, dict) else None
+            if linked_order_id:
+                try:
+                    linked_order = Order.objects.get(pk=linked_order_id)
+                except (Order.DoesNotExist, TypeError, ValueError):
+                    return Response(
+                        {'detail': 'Указанный заказ не найден.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if linked_order.client_id != chat.client_id:
+                    return Response(
+                        {'detail': 'Этот заказ принадлежит другому клиенту.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if linked_order.status != 'new':
+                    return Response(
+                        {'detail': 'Привязать можно только заказ в статусе «Новый».'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if linked_order.expert_id is not None:
+                    return Response(
+                        {'detail': 'У этого заказа уже есть назначенный эксперт.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if getattr(linked_order, 'price_type', None) != 'negotiable':
+                    return Response(
+                        {'detail': 'Привязка доступна только для заказов с договорной ценой.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                from apps.orders.models import Bid
+                if Bid.objects.filter(order=linked_order, expert=request.user).exists():
+                    return Response(
+                        {'detail': 'Вы уже оставляли отклик на этот заказ.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
         if message_type == 'work_offer':
             if getattr(request.user, 'role', None) != 'expert' and not getattr(request.user, 'is_staff', False):
@@ -854,23 +895,38 @@ class ChatViewSet(viewsets.ModelViewSet):
                 message = Message.objects.select_for_update().get(pk=message.pk)
                 offer_data = message.offer_data or {}
                 if not isinstance(offer_data, dict):
-                    return Response({'detail': 'Р СњР ВµР С”Р С•РЎР‚РЎР‚Р ВµР С”РЎвЂљР Р…РЎвЂ№Р Вµ Р Т‘Р В°Р Р…Р Р…РЎвЂ№Р Вµ Р С—РЎР‚Р ВµР Т‘Р В»Р С•Р В¶Р ВµР Р…Р С‘РЎРЏ'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'detail': 'Некорректные данные предложения'}, status=status.HTTP_400_BAD_REQUEST)
                 if offer_data.get('status', 'new') != 'new':
-                    return Response({'detail': 'Р СџРЎР‚Р ВµР Т‘Р В»Р С•Р В¶Р ВµР Р…Р С‘Р Вµ РЎС“Р В¶Р Вµ Р С•Р В±РЎР‚Р В°Р В±Р С•РЎвЂљР В°Р Р…Р С•'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
 
-                order = Order.objects.create(
-                    client=client_user,
-                    expert=expert_user,
-                    subject_id=subject_id if subject_id else None,
-                    work_type_id=work_type_id if work_type_id else None,
-                    custom_subject=offer_data.get('subject') if not subject_id else None,
-                    custom_work_type=offer_data.get('work_type') if not work_type_id else None,
-                    title=offer_data.get('title') or None,
-                    description=offer_data.get('description'),
-                    budget=cost,
-                    deadline=deadline,
-                    status='in_progress'
-                )
+                linked_order_id = offer_data.get('linked_order_id')
+
+                if linked_order_id:
+                    order = Order.objects.select_for_update().get(pk=linked_order_id)
+                    if order.status != 'new':
+                        return Response({'detail': 'Заказ уже взят в работу.'}, status=status.HTTP_400_BAD_REQUEST)
+                    if order.expert_id is not None:
+                        return Response({'detail': 'У заказа уже есть эксперт.'}, status=status.HTTP_400_BAD_REQUEST)
+                    order.expert = expert_user
+                    order.budget = cost
+                    order.deadline = deadline
+                    order.status = 'in_progress'
+                    order.save(update_fields=['expert', 'budget', 'deadline', 'status', 'updated_at'])
+                else:
+                    order = Order.objects.create(
+                        client=client_user,
+                        expert=expert_user,
+                        subject_id=subject_id if subject_id else None,
+                        work_type_id=work_type_id if work_type_id else None,
+                        custom_subject=offer_data.get('subject') if not subject_id else None,
+                        custom_work_type=offer_data.get('work_type') if not work_type_id else None,
+                        title=offer_data.get('title') or None,
+                        description=offer_data.get('description'),
+                        budget=cost,
+                        deadline=deadline,
+                        status='in_progress'
+                    )
+
                 if cost > 0:
                     WalletService.hold(
                         client_user,
@@ -954,6 +1010,37 @@ class ChatViewSet(viewsets.ModelViewSet):
             message.offer_data = offer_data
             message.save(update_fields=['offer_data'])
         
+        return Response({'status': 'success'})
+
+    @action(detail=True, methods=['post'])
+    def cancel_offer(self, request, pk=None):
+        """Отменить своё индивидуальное предложение (только для эксперта-автора)."""
+        chat = self.get_object()
+        blocked = _contact_ban_response(request.user, 'Действие')
+        if blocked is not None:
+            return blocked
+
+        message_id = request.data.get('message_id')
+        if not message_id:
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            message = get_object_or_404(Message.objects.select_for_update(), id=message_id, chat=chat)
+
+            if message.message_type != 'offer':
+                return Response({'detail': 'Это сообщение не является предложением'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if message.sender_id != request.user.id and not getattr(request.user, 'is_staff', False):
+                return Response({'detail': 'Вы можете отменить только своё предложение'}, status=status.HTTP_403_FORBIDDEN)
+
+            offer_data = message.offer_data or {}
+            if offer_data.get('status', 'new') != 'new':
+                return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
+
+            offer_data['status'] = 'cancelled'
+            message.offer_data = offer_data
+            message.save(update_fields=['offer_data'])
+
         return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])

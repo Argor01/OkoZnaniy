@@ -394,6 +394,41 @@ class OrderViewSet(viewsets.ModelViewSet):
                 'error': 'Произошла ошибка при загрузке заказов. Попробуйте позже.'
             }, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def client_available_orders(self, request):
+        """Заказы клиента, доступные для привязки оффера.
+
+        Возвращает заказы указанного клиента со статусом ``new``,
+        договорной ценой и без назначенного эксперта.
+        Доступно экспертам и.staff.
+        """
+        user = request.user
+        if not user.is_staff and getattr(user, 'role', None) not in ('expert', 'admin'):
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+
+        client_id = request.query_params.get('client_id')
+        if not client_id:
+            return Response({'detail': 'Параметр client_id обязателен.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            client_id = int(client_id)
+        except (TypeError, ValueError):
+            return Response({'detail': 'client_id должен быть числом.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        orders = (
+            Order.objects.filter(
+                client_id=client_id,
+                status='new',
+                price_type='negotiable',
+                expert__isnull=True,
+            )
+            .select_related('subject', 'work_type')
+            .order_by('-created_at')
+        )
+
+        serializer = OrderSerializer(orders, many=True, context={'request': request})
+        return Response(serializer.data)
+
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def reactivate(self, request, pk=None):
         order = self.get_object()

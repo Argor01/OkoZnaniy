@@ -107,6 +107,11 @@ export const chatApi = {
     return response.data;
   },
 
+  cancelOffer: async (chatId: number, messageId: number): Promise<any> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/cancel_offer/`, { message_id: messageId });
+    return response.data;
+  },
+
   acceptWorkOffer: async (chatId: number, messageId: number): Promise<any> => {
     const response = await apiClient.post(`/chat/chats/${chatId}/accept_work_offer/`, { message_id: messageId });
     return response.data;

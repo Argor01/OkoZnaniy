@@ -22,6 +22,7 @@ import {
   FileZipOutlined,
   FileTextOutlined,
   CloseCircleOutlined,
+  StopOutlined,
   UploadOutlined,
   ExclamationCircleOutlined,
   MoreOutlined,
@@ -1298,7 +1299,15 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   }, [userProfile]);
     const isGlobalExpert = currentUserRole === 'expert';
   const canUseExpertOfferButtons = isGlobalExpert && isChatExpert && !isChatInitiator;
-  
+
+  const chatClientId = useMemo(() => {
+    if (!selectedChat) return null;
+    const id =
+      (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
+      (selectedChat as { client_id?: unknown } | null)?.client_id;
+    return id ? Number(id) : null;
+  }, [selectedChat]);
+
   const isOrderClient = useMemo(() => {
     // Если заказ загружен, проверяем по ID клиента заказа
     const clientId = order?.client?.id ?? order?.client_id;
@@ -1377,14 +1386,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const handleOfferSubmit = async (data: OfferData) => {
     if (!selectedChat) return;
-    try {
-      await chatApi.sendMessage(selectedChat.id, '', undefined, 'offer', data);
-      setOfferModalOpen(false);
-      await loadChatDetail(selectedChat.id);
-      await loadChats();
-      antMessage.success('Предложение отправлено');
-    } catch {
-      antMessage.error('Не удалось отправить предложение');
+
+    const linkedOrderId = (data as any).linked_order_id;
+    const cost = (data as any).cost;
+
+    const doSend = async () => {
+      try {
+        await chatApi.sendMessage(selectedChat.id, '', undefined, 'offer', data);
+        setOfferModalOpen(false);
+        await loadChatDetail(selectedChat.id);
+        await loadChats();
+        antMessage.success('Предложение отправлено');
+      } catch {
+        antMessage.error('Не удалось отправить предложение');
+      }
+    };
+
+    if (linkedOrderId) {
+      Modal.confirm({
+        title: 'Подтвердите привязку к заказу',
+        content: (
+          <div>
+            <p>Вы уверены, что хотите привязать предложение к заказу <strong>#{linkedOrderId}</strong>?</p>
+            <p>Стоимость: <strong>{cost} ₽</strong></p>
+          </div>
+        ),
+        okText: 'Отправить',
+        cancelText: 'Отмена',
+        onOk: doSend,
+      });
+    } else {
+      await doSend();
     }
   };
 
@@ -1587,6 +1619,37 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       antMessage.success('Предложение отклонено');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Ошибка отклонения предложения');
+    }
+  };
+
+  const handleCancelOffer = async (messageId: number) => {
+    if (!selectedChat) return;
+    try {
+      setSelectedChat((prev) =>
+        prev
+          ? {
+              ...prev,
+              messages: Array.isArray(prev.messages)
+                ? prev.messages.map((m) => {
+                    if (m.id !== messageId) return m;
+                    return {
+                      ...m,
+                      offer_data: {
+                        ...(m.offer_data || {}),
+                        status: 'cancelled',
+                      },
+                    };
+                  })
+                : prev.messages,
+            }
+          : prev
+      );
+      await chatApi.cancelOffer(selectedChat.id, messageId);
+      await loadChatDetail(selectedChat.id);
+      await loadChats();
+      antMessage.success('Предложение отменено');
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Ошибка отмены предложения');
     }
   };
 
@@ -3162,25 +3225,7 @@ const handleOverdueComplaint = async () => {
               </div>
             ) : selectedChat ? (
               <div className={`${styles.chatMessagesContent} ${isMobile ? styles.chatMessagesContentMobile : ''}`}>
-                {isMainChatLocked ? (
-                  <div className={styles.chatOrderRedirectNotice}>
-                    <Text className={styles.chatOrderRedirectTitle}>Основной чат временно закрыт</Text>
-                    <Text className={styles.chatOrderRedirectText}>
-                      По активному заказу общение продолжается внутри чата заказа.
-                    </Text>
-                    <Button
-                      type="primary"
-                      className={styles.goToOrderButton}
-                      onClick={() => {
-                        if (primaryOrderId) {
-                          void handleOpenOrderConversation(primaryOrderId);
-                        }
-                      }}
-                    >
-                      {primaryOrderId ? `Перейти в чат заказа #${primaryOrderId}` : 'Перейти в чат заказа'}
-                    </Button>
-                  </div>
-                ) : isChatFrozen ? (
+                {isChatFrozen ? (
                   <div className={styles.chatFrozenNotice}>
                     <Text className={styles.chatFrozenTitle}>Переписка временно недоступна</Text>
                     <Text className={styles.chatFrozenReason}>Обнаружен обмен контактами</Text>
@@ -3493,6 +3538,10 @@ const handleOverdueComplaint = async () => {
                                 <div className={`${styles.messageStatusDanger} ${styles.messageCardActionsTop}`}>
                                   <CloseCircleOutlined /> Предложение отклонено
                                 </div>
+                              ) : offerStatus === 'cancelled' ? (
+                                <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>
+                                  <StopOutlined /> Предложение отменено
+                                </div>
                               ) : offerExpired ? (
                                 <div className={`${styles.messageStatusMuted} ${styles.messageCardActionsTop}`}>Срок предложения истек</div>
                               ) : showOfferActions ? (
@@ -3507,6 +3556,12 @@ const handleOverdueComplaint = async () => {
                                   </Button>
                                   <Button danger onClick={() => handleRejectOffer(msg.id)} block>
                                     Отказаться
+                                  </Button>
+                                </div>
+                              ) : msg.is_mine && offerStatus === 'new' && !offerExpired ? (
+                                <div className={`${styles.messageCardActions} ${styles.messageCardActionsTop}`}>
+                                  <Button danger onClick={() => handleCancelOffer(msg.id)} block>
+                                    Отменить предложение
                                   </Button>
                                 </div>
                               ) : (
@@ -3733,7 +3788,7 @@ const handleOverdueComplaint = async () => {
           </div>
 
           
-          {selectedChat && !isChatFrozen && !isMainChatLocked && (
+          {selectedChat && !isChatFrozen && (
             <div 
               key={`chat-input-${selectedChat.id}-${isChatFrozen}`}
               className={`${styles.chatInputContainer} ${isMobile ? styles.chatInputContainerMobile : ''}`}
@@ -4203,6 +4258,7 @@ const handleOverdueComplaint = async () => {
         open={offerModalOpen}
         onClose={() => setOfferModalOpen(false)}
         onSubmit={handleOfferSubmit}
+        clientId={chatClientId ?? undefined}
       />
       <IndividualOfferModal
         open={workOfferModalOpen}

@@ -19,7 +19,7 @@ export interface Message {
     cost?: number;
     prepayment_percent?: number;
     deadline?: string;
-    status?: 'new' | 'accepted' | 'rejected';
+    status?: 'new' | 'accepted' | 'rejected' | 'cancelled';
     order_id?: number;
     title?: string;
     delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
