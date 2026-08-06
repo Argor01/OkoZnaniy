@@ -68,6 +68,20 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
     enabled: open && linkToOrder && !!clientId,
   });
 
+  useEffect(() => {
+    if (linkToOrder) {
+      console.log('[IndividualOfferModal]', {
+        open,
+        clientId,
+        linkToOrder,
+        queryEnabled: open && linkToOrder && !!clientId,
+        ordersCount: availableOrders.length,
+        ordersLoading,
+        orders: availableOrders,
+      });
+    }
+  }, [linkToOrder, open, clientId, availableOrders, ordersLoading]);
+
   const selectedOrder = availableOrders.find((o) => o.id === selectedOrderId);
 
   useEffect(() => {
