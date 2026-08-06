@@ -20,7 +20,7 @@ def create_password_reset_code(user):
     Создает код для сброса пароля и сохраняет в кеш на 15 минут
     """
     code = generate_reset_code()
-    cache_key = f'password_reset_{user.email}'
+    cache_key = f'password_reset_{user.email.lower()}'
     
     # Сохраняем код в кеш на 15 минут
     cache.set(cache_key, {
@@ -69,7 +69,7 @@ def verify_password_reset_code(email, code):
     Проверяет код сброса пароля
     Возвращает user_id если код верный, иначе None
     """
-    cache_key = f'password_reset_{email}'
+    cache_key = f'password_reset_{email.lower()}'
     reset_data = cache.get(cache_key)
     
     if not reset_data:
@@ -83,5 +83,5 @@ def verify_password_reset_code(email, code):
 
 def delete_password_reset_code(email):
     """Удаляет код сброса пароля из кеша"""
-    cache_key = f'password_reset_{email}'
+    cache_key = f'password_reset_{email.lower()}'
     cache.delete(cache_key)

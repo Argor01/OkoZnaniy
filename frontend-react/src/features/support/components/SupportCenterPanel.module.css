@@ -135,16 +135,30 @@
 .feedMessageCard:global(.ant-card) {
   box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
   min-width: 0;
+  border-radius: 12px !important;
 }
 
 .feedMessageSupport:global(.ant-card) {
-  background: linear-gradient(180deg, #f6f0ff 0%, #efe6ff 100%);
-  border-color: #d7c2ff;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  border-color: #7c3aed;
+  border-bottom-left-radius: 4px !important;
+  color: #fff;
+}
+
+.feedMessageSupport:global(.ant-card) :global(.ant-typography) {
+  color: #fff !important;
+}
+
+.feedMessageSupport:global(.ant-card) :global(.ant-tag) {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: #fff !important;
 }
 
 .feedMessageUser:global(.ant-card) {
-  background: linear-gradient(180deg, #fff7e8 0%, #ffefc7 100%);
-  border-color: #f3d17c;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-color: #d1d5db;
+  border-bottom-right-radius: 4px !important;
 }
 
 .feedEvent:global(.ant-alert) {
@@ -285,13 +299,23 @@
 }
 
 :global([data-theme="dark"]) .feedMessageSupport:global(.ant-card) {
-  background: linear-gradient(180deg, rgba(77, 61, 138, 0.4), rgba(57, 47, 104, 0.44));
-  border-color: rgba(154, 122, 255, 0.24);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.85) 0%, rgba(109, 40, 217, 0.9) 100%);
+  border-color: rgba(154, 122, 255, 0.4);
+}
+
+:global([data-theme="dark"]) .feedMessageSupport:global(.ant-card) :global(.ant-typography) {
+  color: #fff !important;
+}
+
+:global([data-theme="dark"]) .feedMessageSupport:global(.ant-card) :global(.ant-tag) {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #fff !important;
 }
 
 :global([data-theme="dark"]) .feedMessageUser:global(.ant-card) {
-  background: linear-gradient(180deg, rgba(88, 76, 36, 0.42), rgba(68, 58, 26, 0.46));
-  border-color: rgba(244, 194, 82, 0.24);
+  background: linear-gradient(135deg, rgba(55, 60, 78, 0.96) 0%, rgba(40, 44, 60, 0.98) 100%);
+  border-color: rgba(154, 122, 255, 0.18);
 }
 
 :global([data-theme="dark"]) .feedEvent:global(.ant-alert) {
