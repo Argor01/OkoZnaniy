@@ -1302,12 +1302,18 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const chatClientId = useMemo(() => {
     if (!selectedChat) return null;
-    const id =
-      (selectedChat as { client?: { id?: unknown } | null; client_id?: unknown } | null)?.client?.id ??
-      (selectedChat as { client_id?: unknown } | null)?.client_id ??
-      (selectedChat as { other_user?: { id?: unknown } | null } | null)?.other_user?.id;
-    return id ? Number(id) : null;
-  }, [selectedChat]);
+    const otherUserId = (selectedChat as { other_user?: { id?: unknown } | null } | null)?.other_user?.id;
+    if (otherUserId) return Number(otherUserId);
+    const clientId =
+      (selectedChat as { client?: { id?: unknown } | null } | null)?.client?.id ??
+      (selectedChat as { client_id?: unknown } | null)?.client_id;
+    if (clientId && Number(clientId) !== currentUserId) return Number(clientId);
+    const expertId =
+      (selectedChat as { expert?: { id?: unknown } | null } | null)?.expert?.id ??
+      (selectedChat as { expert_id?: unknown } | null)?.expert_id;
+    if (expertId && Number(expertId) !== currentUserId) return Number(expertId);
+    return clientId ? Number(clientId) : null;
+  }, [selectedChat, currentUserId]);
 
   const isOrderClient = useMemo(() => {
     // Если заказ загружен, проверяем по ID клиента заказа
