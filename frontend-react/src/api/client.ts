@@ -28,6 +28,9 @@ const AUTH_ENDPOINTS = [
   API_ENDPOINTS.auth.telegramAuth,
   API_ENDPOINTS.auth.verifyEmailCode,
   API_ENDPOINTS.auth.resendVerificationCode,
+  API_ENDPOINTS.auth.requestPasswordReset,
+  API_ENDPOINTS.auth.verifyResetCode,
+  API_ENDPOINTS.auth.resetPasswordWithCode,
 ];
 
 const isAuthEndpoint = (url: string, method: string): boolean => {
