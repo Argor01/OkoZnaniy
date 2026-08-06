@@ -107,7 +107,7 @@ const MessageList: React.FC<MessageListProps> = ({
             </div>
           ) : (
             <>
-              {orderIntroByChatId[selectedChat.id] ? (
+              {effectiveOrderId && orderIntroByChatId[selectedChat.id] ? (
                 <div className={styles.chatIntroWrapper}>
                   <div className={`${styles.chatIntroBubble} ${isMobile ? styles.chatIntroBubbleMobile : ''}`}>
                     {orderIntroByChatId[selectedChat.id]}

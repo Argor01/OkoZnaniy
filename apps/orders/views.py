@@ -419,7 +419,6 @@ class OrderViewSet(viewsets.ModelViewSet):
             Order.objects.filter(
                 client_id=client_id,
                 status='new',
-                price_type='negotiable',
                 expert__isnull=True,
             )
             .select_related('subject', 'work_type')
