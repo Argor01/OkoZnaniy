@@ -57,6 +57,7 @@ export const API_ENDPOINTS = {
     createReview: (id: number) => `/orders/orders/${id}/create_review/`,
     freeze: (id: number) => `/orders/orders/${id}/freeze/`,
     unfreeze: (id: number) => `/orders/orders/${id}/unfreeze/`,
+    clientAvailableOrders: '/orders/orders/client_available_orders/',
   },
   admin: {
     users: {
