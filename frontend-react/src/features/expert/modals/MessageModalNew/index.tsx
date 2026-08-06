@@ -2539,12 +2539,7 @@ const handleOverdueComplaint = async () => {
 
   const hasMainChat = Boolean(selectedConversationGroup?.mainChat);
 
-  const isMainChatLocked = Boolean(
-    selectedChat &&
-    !selectedChat.order_id &&
-    activeConversationOrderChats.length > 0 &&
-    !isSupportChatSelected
-  );
+  const isMainChatLocked = false;
 
   const handleOpenMainConversation = useCallback(() => {
     if (!selectedConversationGroup?.key) return;
