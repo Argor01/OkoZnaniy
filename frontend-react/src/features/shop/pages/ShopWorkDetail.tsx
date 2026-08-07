@@ -11,6 +11,7 @@ import {
   ShoppingCartOutlined,
   StarOutlined,
   UserOutlined,
+  WarningOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Avatar, List, Modal, Popconfirm, Rate, Space, Spin, Tag, Tooltip, Typography, message } from 'antd';
@@ -29,7 +30,7 @@ import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
 
-const READY_WORK_PURCHASE_WARNING = '\u0413\u043e\u0442\u043e\u0432\u044b\u0435 \u0440\u0430\u0431\u043e\u0442\u044b \u0432\u043e\u0437\u0432\u0440\u0430\u0442\u0443 \u043d\u0435 \u043f\u043e\u0434\u043b\u0435\u0436\u0430\u0442, \u0434\u0430\u043b\u044c\u043d\u0435\u0439\u0448\u0438\u0435 \u043a\u043e\u0440\u0440\u0435\u043a\u0442\u0438\u0440\u043e\u0432\u043a\u0438 \u0438 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0438 \u0431\u0443\u0434\u0443\u0442 \u0437\u0430 \u0434\u043e\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u0443\u044e \u043f\u043b\u0430\u0442\u0443';
+const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 3 дней можно открыть спор, если работа не устраивает.';
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
@@ -89,6 +90,31 @@ const ShopWorkDetail: React.FC = () => {
       message.error('Не удалось сохранить оценку');
     },
   });
+
+  const disputeMutation = useMutation({
+    mutationFn: (purchaseId: number) => shopApi.disputePurchase(purchaseId),
+    onSuccess: () => {
+      message.success('Спор открыт. Средства заморожены до разрешения.');
+      queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
+    },
+    onError: (error: any) => {
+      const detail = error?.response?.data?.detail;
+      message.error(detail || 'Не удалось открыть спор');
+    },
+  });
+
+  const handleDispute = () => {
+    if (!purchase) return;
+    Modal.confirm({
+      title: 'Открыть спор?',
+      content: 'Вы уверены, что хотите открыть спор? Доступ к файлу будет отозван до разрешения спора.',
+      okText: 'Да, открыть спор',
+      cancelText: 'Отмена',
+      okType: 'danger',
+      centered: true,
+      onOk: () => disputeMutation.mutate(purchase.id),
+    });
+  };
 
   if (isWorkLoading) {
     return (
@@ -301,6 +327,20 @@ const ShopWorkDetail: React.FC = () => {
               </div>
             )}
 
+            {purchase && purchase.status === 'paid' && purchase.seconds_until_hold_end && purchase.seconds_until_hold_end > 0 && (
+              <AppCard size="small" style={{ background: '#fff7e6', borderColor: '#ffd591' }}>
+                <Space>
+                  <WarningOutlined style={{ color: '#fa8c16', fontSize: 16 }} />
+                  <Text>
+                    Возврат возможен ещё{' '}
+                    <Text strong style={{ color: '#fa8c16' }}>
+                      {Math.floor(purchase.seconds_until_hold_end / 86400)}д {Math.floor((purchase.seconds_until_hold_end % 86400) / 3600)}ч
+                    </Text>
+                  </Text>
+                </Space>
+              </AppCard>
+            )}
+
             {work.files && work.files.length > 0 && (
               <div>
                 <Title level={4}>Прикрепленные файлы</Title>
@@ -360,12 +400,25 @@ const ShopWorkDetail: React.FC = () => {
                   </AppButton>
                 </Popconfirm>
               ) : purchase ? (
-                <Tooltip title={!purchase.delivered_file_available ? 'Работа ещё не загружена продавцом. Откройте чат заказа и нажмите «Принять» для скачивания.' : undefined}>
+                <Space>
+                  {purchase.status === 'paid' && purchase.seconds_until_hold_end && purchase.seconds_until_hold_end > 0 && (
+                    <AppButton
+                      variant="outline"
+                      danger
+                      size="large"
+                      icon={<WarningOutlined />}
+                      onClick={handleDispute}
+                      loading={disputeMutation.isPending}
+                      className={styles.actionButton}
+                    >
+                      Спор
+                    </AppButton>
+                  )}
                   <AppButton
                     variant="primary"
                     size="large"
                     icon={<DownloadOutlined />}
-                    disabled={!purchase.delivered_file_available}
+                    disabled={!purchase.delivered_file_available || purchase.status === 'disputed'}
                     onClick={async () => {
                       if (!purchase.delivered_file_available) return;
                       try {
@@ -391,7 +444,7 @@ const ShopWorkDetail: React.FC = () => {
                   >
                     Скачать
                   </AppButton>
-                </Tooltip>
+                </Space>
               ) : (
                 <AppButton
                   variant="primary"
