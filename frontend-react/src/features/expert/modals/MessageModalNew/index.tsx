@@ -1703,7 +1703,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         'work_delivery',
         { files: uploadedFiles.filter((f) => !!f.url) }
       );
-      await ordersApi.submitOrder(effectiveOrderId);
+      const currentOrderStatus = String(order?.status ?? '');
+      if (currentOrderStatus !== 'ready_work_transfer') {
+        await ordersApi.submitOrder(effectiveOrderId);
+      }
       await Promise.all([loadChatDetail(selectedChat.id), loadChats(), refreshOrder()]);
       antMessage.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
     } catch (error: unknown) {
@@ -3281,17 +3284,17 @@ const handleOverdueComplaint = async () => {
                   const showOfferActions = isOffer && !msg.is_mine && offerStatus === 'new' && !offerExpired;
                   const workOfferStatus = isWorkOffer ? ((msg.offer_data as WorkOfferData | null)?.status || 'new') : 'new';
                   const workOfferDescription = getVisibleOfferDescription((msg.offer_data as WorkOfferData | null)?.description);
-                  const workDeliveryStatus = isWorkOffer
-                    ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
-                    : 'pending';
-                  const showWorkOfferActions =
-                    isWorkOffer && !msg.is_mine && isOrderClient && workOfferStatus === 'new';
-                  const showWorkDeliveryActions =
-                    isWorkOffer &&
-                    !msg.is_mine &&
-                    isOrderClient &&
-                    workOfferStatus === 'accepted' &&
-                    workDeliveryStatus === 'delivered';
+const workDeliveryStatus = isWorkOffer
+                      ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
+                      : (isWorkDelivery ? (msg.offer_data?.delivery_status || 'delivered') : 'pending');
+                    const showWorkOfferActions =
+                      isWorkOffer && !msg.is_mine && isOrderClient && workOfferStatus === 'new';
+                    const showWorkDeliveryActions =
+                      isWorkDelivery &&
+                      !msg.is_mine &&
+                      isOrderClient &&
+                      workDeliveryStatus !== 'accepted' &&
+                      workDeliveryStatus !== 'rejected';
                   const showExpertUploadForWorkOffer =
                     isWorkOffer &&
                     msg.is_mine &&
@@ -3418,7 +3421,25 @@ const handleOverdueComplaint = async () => {
                                 ? 'Вы отправили работу на проверку'
                                 : 'Эксперт отправил работу на проверку'}
                             </div>
-                            {showWorkActions ? (
+                            {showWorkDeliveryActions ? (
+                              <div className={styles.messageCardActions}>
+                                <Button
+                                  type="primary"
+                                  className={styles.buttonSuccess}
+                                  onClick={() => handleAcceptWorkDelivery(msg.id)}
+                                  block
+                                >
+                                  Принять
+                                </Button>
+                                <Button
+                                  danger
+                                  onClick={() => handleRejectWorkDelivery(msg.id)}
+                                  block
+                                >
+                                  Отказаться
+                                </Button>
+                              </div>
+                            ) : showWorkActions ? (
                               <div className={styles.messageCardActions}>
                                 <Button
                                   type="primary"
@@ -3607,6 +3628,10 @@ const handleOverdueComplaint = async () => {
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'rejected' ? (
                               <div className={styles.messageStatusDanger}>
                                 <CloseCircleOutlined /> Работа отклонена
+                              </div>
+                            ) : (isWorkDelivery && (msg.offer_data?.delivery_status === 'delivered' || msg.offer_data?.delivery_status === 'pending')) ? (
+                              <div className={styles.messageStatusInfo}>
+                                Работа отправлена, ожидает решения покупателя
                               </div>
                             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'delivered' ? (
                               <div className={styles.messageStatusInfo}>

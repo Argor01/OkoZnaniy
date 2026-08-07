@@ -231,6 +231,18 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
                     'order_id': 'По заказу пока не назначен исполнитель'
                 })
 
+            # Нельзя подать жалобу на заказ, ожидающий ответа эксперта
+            if order_status == 'awaiting_expert_acceptance':
+                raise serializers.ValidationError({
+                    'order_id': 'Нельзя подать жалобу на заказ, ожидающий ответа эксперта'
+                })
+
+            # Нельзя подать жалобу на отмененный заказ
+            if order_status == 'cancelled':
+                raise serializers.ValidationError({
+                    'order_id': 'Нельзя подать жалобу на отмененный заказ'
+                })
+
             existing = ArbitrationCase.objects.filter(
                 order_id=order_id,
             ).exclude(status__in=['closed', 'rejected']).first()

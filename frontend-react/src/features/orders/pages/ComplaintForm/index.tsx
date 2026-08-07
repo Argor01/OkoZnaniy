@@ -82,6 +82,12 @@ const ComplaintForm: React.FC = () => {
       return;
     }
 
+    if (order?.status === 'awaiting_expert_acceptance') {
+      message.error('Нельзя подать жалобу на заказ, ожидающий ответа эксперта');
+      setIsSubmitting(false);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -321,14 +327,12 @@ const ComplaintForm: React.FC = () => {
                 <div className={`${styles.expertOfferGridIcon} ${styles.expertOfferGridIconDefault}`}>
                   <DatabaseOutlined />
                 </div>
-                <div>
-                  <div className={styles.expertOfferLabel}>Статус заказа</div>
-                  <div className={styles.expertOfferValue}>
-                    {order.status === 'new' ? 'Новый' : 
-                     order.status === 'in_progress' ? 'В работе' : 
-                     order.status === 'completed' ? 'Завершен' : order.status}
-                  </div>
-                </div>
+<div>
+                   <div className={styles.expertOfferLabel}>Статус заказа</div>
+                   <div className={styles.expertOfferValue}>
+                     {ORDER_STATUS_LABELS[order?.status] || order?.status || '—'}
+                   </div>
+                 </div>
               </div>
             </div>
           </div>

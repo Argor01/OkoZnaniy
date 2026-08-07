@@ -115,14 +115,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
   const workOfferDescription = getVisibleOfferDescription((msg.offer_data as WorkOfferData | null)?.description);
   const workDeliveryStatus = isWorkOffer
     ? ((msg.offer_data as WorkOfferData | null)?.delivery_status || 'pending')
-    : 'pending';
+    : (isWorkDelivery ? (msg.offer_data?.delivery_status || 'delivered') : 'pending');
   const showWorkOfferActions = isWorkOffer && !msg.is_mine && isOrderClient && workOfferStatus === 'new';
   const showWorkDeliveryActions =
-    isWorkOffer &&
+    isWorkDelivery &&
     !msg.is_mine &&
     isOrderClient &&
-    workOfferStatus === 'accepted' &&
-    workDeliveryStatus === 'delivered';
+    workDeliveryStatus !== 'accepted' &&
+    workDeliveryStatus !== 'rejected';
   const showExpertUploadForWorkOffer =
     isWorkOffer &&
     msg.is_mine &&
@@ -238,7 +238,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
             <div className={styles.messageCardInfo}>
               {msg.is_mine ? 'Вы отправили работу на проверку' : 'Эксперт отправил работу на проверку'}
             </div>
-            {showWorkActions ? (
+            {showWorkDeliveryActions ? (
+              <div className={styles.messageCardActions}>
+                <Button type="primary" className={styles.buttonSuccess} onClick={() => onAcceptWorkDelivery(msg.id)} block>Принять</Button>
+                <Button danger onClick={() => onRejectWorkDelivery(msg.id)} block>Отказаться</Button>
+              </div>
+            ) : showWorkActions ? (
               <div className={styles.messageCardActions}>
                 <Button type="primary" onClick={goToOrder} block>Перейти в заказ</Button>
               </div>
@@ -364,6 +369,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
               <div className={styles.messageStatusSuccess}><CheckCircleOutlined /> Работа принята</div>
             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'rejected' ? (
               <div className={styles.messageStatusDanger}><CloseCircleOutlined /> Работа отклонена</div>
+            ) : (isWorkDelivery && (msg.offer_data?.delivery_status === 'delivered' || msg.offer_data?.delivery_status === 'pending')) ? (
+              <div className={styles.messageStatusInfo}>Работа отправлена, ожидает решения покупателя</div>
             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'delivered' ? (
               <div className={styles.messageStatusInfo}>Работа отправлена, ожидает решения покупателя</div>
             ) : workOfferStatus === 'accepted' && workDeliveryStatus === 'awaiting_upload' ? (

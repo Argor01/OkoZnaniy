@@ -230,12 +230,14 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
                 <Dropdown
                   menu={{
                     items: [
-                      {
-                        key: 'complaint',
-                        label: 'Подать жалобу',
-                        icon: <MessageOutlined />,
-                        onClick: () => navigate(`/orders/${orderId}/complaint`),
-                      },
+                      ...(!['cancelled', 'awaiting_expert_acceptance'].includes(order.status)
+                        ? [{
+                            key: 'complaint',
+                            label: 'Подать жалобу',
+                            icon: <MessageOutlined />,
+                            onClick: () => navigate(`/orders/${orderId}/complaint`),
+                          }]
+                        : []),
                     ],
                   }}
                   trigger={['click']}

@@ -170,7 +170,7 @@ const MyWorks: React.FC = () => {
     if (order?.is_frozen) return false;
     if (order?.is_overdue === true) return true;
     const status = String(order?.status ?? '');
-    if (!(status === 'in_progress' || status === 'revision')) return false;
+    if (!(status === 'in_progress' || status === 'revision' || status === 'ready_work_transfer')) return false;
     const deadlineRaw = order?.deadline;
     if (typeof deadlineRaw !== 'string') return false;
     const d = dayjs(deadlineRaw);
@@ -263,10 +263,6 @@ const MyWorks: React.FC = () => {
       : '0.0';
 
   const getStatusLabel = (status: string) => {
-    if (status === 'awaiting_expert_acceptance') return 'Ожидает подтверждения';
-    if (status === 'in_progress') return 'В работе';
-    if (status === 'completed') return 'Выполнено';
-    if (status === 'review' || status === 'under_review') return 'На проверке';
     return ORDER_STATUS_LABELS[status] || status;
   };
 

@@ -345,6 +345,12 @@ class ChatViewSet(viewsets.ModelViewSet):
             offer_data.setdefault('status', 'new')
             offer_data.setdefault('delivery_status', 'pending')
 
+        if message_type == 'work_delivery':
+            if not isinstance(offer_data, dict):
+                offer_data = {}
+            offer_data.setdefault('delivery_status', 'delivered')
+            offer_data.setdefault('delivered_at', timezone.now().isoformat())
+
         file_name = ''
         if uploaded_file:
             allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [
@@ -529,21 +535,32 @@ class ChatViewSet(viewsets.ModelViewSet):
             uploaded_file = None
             text = (request.data.get('text') or '').strip()
 
-        if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
         if not uploaded_file:
             return Response({'detail': 'file РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
-        offer_message = get_object_or_404(Message, id=message_id, chat=chat)
-        if offer_message.message_type != 'work_offer' or not offer_message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+        # Проверка: это магазин готовых работ (прямая доставка без предварительного work_offer)
+        is_ready_work_purchase = chat.order_id and getattr(chat.order, 'is_ready_work_purchase', False)
+        is_ready_work_transfer = chat.order_id and getattr(chat.order, 'status', None) == 'ready_work_transfer'
 
-        if request.user != offer_message.sender and not getattr(request.user, 'is_staff', False):
-            return Response({'detail': 'РўРѕР»СЊРєРѕ Р°РІС‚РѕСЂ РїСЂРµРґР»РѕР¶РµРЅРёСЏ РјРѕР¶РµС‚ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_403_FORBIDDEN)
-
-        offer_data = offer_message.offer_data or {}
-        if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'awaiting_upload':
-            return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        offer_message = None
+        if message_id:
+            # Классический флоу: есть предварительный work_offer
+            offer_message = get_object_or_404(Message, id=message_id, chat=chat)
+            if offer_message.message_type != 'work_offer' or not offer_message.offer_data:
+                return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+            if request.user != offer_message.sender and not getattr(request.user, 'is_staff', False):
+                return Response({'detail': 'РўРѕР»СЊРєРѕ Р°РІС‚РѕСЂ РїСЂРµРґР»РѕР¶РµРЅРёСЏ РјРѕР¶РµС‚ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_403_FORBIDDEN)
+            offer_data = offer_message.offer_data or {}
+            if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'awaiting_upload':
+                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        elif is_ready_work_purchase and is_ready_work_transfer:
+            # Прямая доставка для покупки готовой работы: проверяем, что текущий пользователь — эксперт заказа
+            if chat.order.expert_id != request.user.id and not getattr(request.user, 'is_staff', False):
+                return Response({'detail': 'Только эксперт этого заказа может отправить работу'}, status=status.HTTP_403_FORBIDDEN)
+            offer_message = None
+            offer_data = {}
+        else:
+            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
         allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [
             'pdf', 'doc', 'docx', 'txt', 'rtf', 'odt',
@@ -568,6 +585,26 @@ class ChatViewSet(viewsets.ModelViewSet):
         delivery_text = text or 'Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР°'
 
         try:
+            delivery_offer_data = None
+            if offer_message:
+                delivery_offer_data = {'work_offer_message_id': offer_message.id}
+            else:
+                from apps.shop.models import Purchase, ReadyWork
+                work_id = None
+                if chat.order_id:
+                    purchase = Purchase.objects.filter(order_id=chat.order_id).first()
+                    if purchase:
+                        work_id = purchase.work_id
+                if not work_id:
+                    import re
+                    m = re.search(r'work:(\d+)', str(chat.context_title))
+                    if m:
+                        work_id = int(m.group(1))
+                delivery_offer_data = {
+                    'delivery_status': 'delivered',
+                    'delivered_at': timezone.now().isoformat(),
+                    'work_id': work_id,
+                }
             delivery_message = Message(
                 chat=chat,
                 sender=request.user,
@@ -575,7 +612,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 file=uploaded_file,
                 file_name=file_name,
                 message_type='work_delivery',
-                offer_data={'work_offer_message_id': int(offer_message.id)}
+                offer_data=delivery_offer_data
             )
             delivery_message.full_clean()
             delivery_message.save()
@@ -586,11 +623,12 @@ class ChatViewSet(viewsets.ModelViewSet):
             )
 
         from django.utils import timezone
-        offer_data['delivery_status'] = 'delivered'
-        offer_data['delivered_message_id'] = delivery_message.id
-        offer_data['delivered_at'] = timezone.now().isoformat()
-        offer_message.offer_data = offer_data
-        offer_message.save(update_fields=['offer_data'])
+        if offer_message:
+            offer_data['delivery_status'] = 'delivered'
+            offer_data['delivered_message_id'] = delivery_message.id
+            offer_data['delivered_at'] = timezone.now().isoformat()
+            offer_message.offer_data = offer_data
+            offer_message.save(update_fields=['offer_data'])
 
         delivery_order = chat.order if chat.order_id and chat.order else None
         if not delivery_order:
@@ -633,16 +671,19 @@ class ChatViewSet(viewsets.ModelViewSet):
             return blocked
         message_id = request.data.get('message_id')
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
-        offer_message = get_object_or_404(Message, id=message_id, chat=chat)
-        if offer_message.message_type != 'work_offer' or not offer_message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+        delivery_message = get_object_or_404(Message, id=message_id, chat=chat)
+        is_direct_delivery = delivery_message.message_type == 'work_delivery'
+        is_work_offer_delivery = delivery_message.message_type == 'work_offer'
+
+        if not is_direct_delivery and not is_work_offer_delivery:
+            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РґРѕСЃС‚Р°РІРєРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
             return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
 
-        if request.user == offer_message.sender:
+        if request.user == delivery_message.sender:
             return Response({'detail': 'РќРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЃРІРѕСЋ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
 
         rating = request.data.get('rating', None)
@@ -656,20 +697,37 @@ class ChatViewSet(viewsets.ModelViewSet):
         else:
             rating = None
 
-        offer_data = offer_message.offer_data or {}
-        if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'delivered':
-            return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        delivery_data = delivery_message.offer_data or {}
+
+        if is_work_offer_delivery:
+            if delivery_data.get('status') != 'accepted' or delivery_data.get('delivery_status') != 'delivered':
+                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if delivery_data.get('delivery_status') not in ('delivered', 'pending'):
+                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
-        offer_data['delivery_status'] = 'accepted'
-        offer_data['delivery_accepted_at'] = timezone.now().isoformat()
+        delivery_data['delivery_status'] = 'accepted'
+        delivery_data['delivery_accepted_at'] = timezone.now().isoformat()
         if rating is not None:
-            offer_data['rating'] = rating
-        offer_message.offer_data = offer_data
-        offer_message.save(update_fields=['offer_data'])
+            delivery_data['rating'] = rating
+        delivery_message.offer_data = delivery_data
+        delivery_message.save(update_fields=['offer_data'])
+
+        # Для работы с файлом: при прямой доставке файл лежит прямо в work_delivery сообщении,
+        # при классическом флоу — в отдельном сообщении (delivered_message_id)
+        work_file_message = delivery_message if is_direct_delivery else None
+        delivered_message_id = delivery_data.get('delivered_message_id')
+        if delivered_message_id:
+            work_file_message = Message.objects.filter(id=delivered_message_id, chat=chat).first()
 
         try:
-            work_id = offer_data.get('work_id')
+            work_id = delivery_data.get('work_id')
+            if not work_id and chat.order_id:
+                from apps.shop.models import Purchase
+                purchase = Purchase.objects.filter(order_id=chat.order_id).first()
+                if purchase:
+                    work_id = purchase.work_id
             if not work_id and chat.context_title:
                 import re
                 m = re.search(r'work:(\d+)', str(chat.context_title))
@@ -693,25 +751,47 @@ class ChatViewSet(viewsets.ModelViewSet):
                             price_paid=work.price,
                         )
 
-                    delivered_message_id = offer_data.get('delivered_message_id')
-                    delivered_message = None
-                    if delivered_message_id:
-                        delivered_message = Message.objects.filter(id=delivered_message_id, chat=chat).first()
-                    if delivered_message and delivered_message.file:
-                        file_name = delivered_message.file_name or ''
-                        if not file_name and getattr(delivered_message.file, 'name', None):
-                            file_name = str(delivered_message.file.name).split('/')[-1]
+                    if work_file_message and work_file_message.file:
+                        file_name = work_file_message.file_name or ''
+                        if not file_name and getattr(work_file_message.file, 'name', None):
+                            file_name = str(work_file_message.file.name).split('/')[-1]
                         ext = ''
                         if file_name and '.' in file_name:
                             ext = file_name.split('.')[-1].lower()
 
-                        purchase.delivered_file = delivered_message.file
+                        purchase.delivered_file = work_file_message.file
                         purchase.delivered_file_name = file_name or purchase.delivered_file_name
                         purchase.delivered_file_type = ext or purchase.delivered_file_type
                         try:
-                            purchase.delivered_file_size = int(delivered_message.file.size or 0)
+                            purchase.delivered_file_size = int(work_file_message.file.size or 0)
                         except Exception:
                             purchase.delivered_file_size = 0
+                    elif chat.order_id and not purchase.delivered_file:
+                        # Кнопка «Выгрузить работу» загружает файлы в заказ (OrderFile),
+                        # а не прикрепляет к сообщению — берём файл из заказа.
+                        from apps.orders.models import OrderFile
+                        order_file = (
+                            OrderFile.objects.filter(
+                                order_id=chat.order_id,
+                                file_type='solution',
+                            )
+                            .order_by('-id')
+                            .first()
+                        )
+                        if order_file and order_file.file:
+                            file_name = order_file.file_name or ''
+                            if not file_name and getattr(order_file.file, 'name', None):
+                                file_name = str(order_file.file.name).split('/')[-1]
+                            ext = ''
+                            if file_name and '.' in file_name:
+                                ext = file_name.split('.')[-1].lower()
+                            purchase.delivered_file = order_file.file
+                            purchase.delivered_file_name = file_name or purchase.delivered_file_name
+                            purchase.delivered_file_type = ext or purchase.delivered_file_type
+                            try:
+                                purchase.delivered_file_size = int(order_file.file.size or 0)
+                            except Exception:
+                                purchase.delivered_file_size = 0
 
                     if rating is not None:
                         purchase.rating = rating
@@ -730,23 +810,20 @@ class ChatViewSet(viewsets.ModelViewSet):
             pass
 
         try:
-            delivered_message_id = offer_data.get('delivered_message_id')
-            if chat.order_id and delivered_message_id:
-                delivered_message = Message.objects.filter(id=delivered_message_id, chat=chat).first()
-                if delivered_message and delivered_message.file:
-                    marker = f'chat_delivery_message_id:{delivered_message.id}'
-                    already_attached = OrderFile.objects.filter(
-                        order_id=chat.order_id,
+            if chat.order_id and work_file_message and work_file_message.file:
+                marker = f'chat_delivery_message_id:{work_file_message.id}'
+                already_attached = OrderFile.objects.filter(
+                    order_id=chat.order_id,
+                    description=marker
+                ).exists()
+                if not already_attached:
+                    OrderFile.objects.create(
+                        order=chat.order,
+                        file=work_file_message.file,
+                        file_type='solution',
+                        uploaded_by=work_file_message.sender,
                         description=marker
-                    ).exists()
-                    if not already_attached:
-                        OrderFile.objects.create(
-                            order=chat.order,
-                            file=delivered_message.file,
-                            file_type='solution',
-                            uploaded_by=delivered_message.sender,
-                            description=marker
-                        )
+                    )
         except Exception:
             pass
 
@@ -769,6 +846,27 @@ class ChatViewSet(viewsets.ModelViewSet):
                 logger = logging.getLogger(__name__)
                 logger.error(f"РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ ExpertReview: {str(e)}")
 
+        # Для покупки готовой работы: завершаем заказ и выплачиваем эксперту
+        if is_direct_delivery and chat.order_id and chat.order and getattr(chat.order, 'is_ready_work_purchase', False):
+            try:
+                from apps.shop.models import Purchase
+                from apps.wallet.services import WalletService
+                purchase = Purchase.objects.filter(order_id=chat.order_id).first()
+                if purchase and chat.order.status in (Order.READY_WORK_TRANSFER, 'review'):
+                    WalletService.release_to_expert(
+                        client=request.user,
+                        expert=chat.order.expert,
+                        amount=purchase.price_paid,
+                        order=chat.order,
+                        description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
+                    )
+                    chat.order.status = 'completed'
+                    chat.order.save(update_fields=['status', 'updated_at'])
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"РћС€РёР±РєР° завершения покупки готовой работы: {str(e)}")
+
         return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])
@@ -781,25 +879,32 @@ class ChatViewSet(viewsets.ModelViewSet):
         if not message_id:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
-        offer_message = get_object_or_404(Message, id=message_id, chat=chat)
-        if offer_message.message_type != 'work_offer' or not offer_message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+        delivery_message = get_object_or_404(Message, id=message_id, chat=chat)
+        is_direct_delivery = delivery_message.message_type == 'work_delivery'
+        is_work_offer_delivery = delivery_message.message_type == 'work_offer'
+
+        if not is_direct_delivery and not is_work_offer_delivery:
+            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РґРѕСЃС‚Р°РІРєРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
             return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
 
-        if request.user == offer_message.sender:
+        if request.user == delivery_message.sender:
             return Response({'detail': 'РќРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЃРІРѕСЋ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
 
-        offer_data = offer_message.offer_data or {}
-        if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'delivered':
-            return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        delivery_data = delivery_message.offer_data or {}
+        if is_work_offer_delivery:
+            if delivery_data.get('status') != 'accepted' or delivery_data.get('delivery_status') != 'delivered':
+                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if delivery_data.get('delivery_status') not in ('delivered', 'pending'):
+                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
-        offer_data['delivery_status'] = 'rejected'
-        offer_data['delivery_rejected_at'] = timezone.now().isoformat()
-        offer_message.offer_data = offer_data
-        offer_message.save(update_fields=['offer_data'])
+        delivery_data['delivery_status'] = 'rejected'
+        delivery_data['delivery_rejected_at'] = timezone.now().isoformat()
+        delivery_message.offer_data = delivery_data
+        delivery_message.save(update_fields=['offer_data'])
         return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])

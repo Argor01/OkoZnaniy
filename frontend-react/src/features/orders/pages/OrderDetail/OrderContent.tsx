@@ -129,7 +129,7 @@ const OrderContent: React.FC<OrderContentProps> = ({
   const canUploadDeliveredWork = useMemo(() => {
     if (typeof availableActions?.can_upload_work === 'boolean') return availableActions.can_upload_work;
     if (!isOrderExpert) return false;
-    if (order.status === 'in_progress' || order.status === 'revision') return true;
+    if (order.status === 'in_progress' || order.status === 'revision' || order.status === 'ready_work_transfer') return true;
     if (order.status === 'review' && deliveredWorkFiles.length === 0) return true;
     return false;
   }, [availableActions?.can_upload_work, deliveredWorkFiles.length, isOrderExpert, order.status]);
