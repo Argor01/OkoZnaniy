@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('orders', '0027_order_transfer_deadline_notified_and_more'),
+        ('orders', '0028_alter_order_auto_bad_review_issued_and_more'),
     ]
 
     operations = [
