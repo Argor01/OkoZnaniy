@@ -36,7 +36,6 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Отменён',
   dispute: 'Спор',
   expired: 'Истёк срок',
-  ready_work_transfer: 'Передача готовой работы',
   under_review: 'На проверке',
   canceled: 'Отменён',
 };

@@ -10,11 +10,11 @@ from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.chat.services import ensure_order_chat_started
-from apps.orders.models import Order, TransactionType
 from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
+
+HOLD_DAYS = 3
 
 
 class IsExpertOrStaff(permissions.BasePermission):
@@ -145,50 +145,34 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Нельзя купить собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
         now = timezone.now()
-        transfer_deadline = now + timedelta(days=max(work.execution_days, 1))
-        order = Order.objects.create(
-            client=request.user,
-            expert=work.author,
-            subject=work.subject,
-            work_type=work.work_type,
-            title=work.title,
-            description=work.description,
-            deadline=transfer_deadline,
-            budget=work.price,
-            original_price=work.price,
-            final_price=work.price,
-            status=Order.READY_WORK_TRANSFER,
-            transfer_started_at=now,
-            transfer_deadline=transfer_deadline,
-            is_ready_work_purchase=True,
-        )
+        hold_until = now + timedelta(days=HOLD_DAYS)
+
         try:
-            # Деньги сразу «оплачены», но лежат в эскроу до передачи работы.
-            # Если заказ отменят — вернём покупателю через WalletService.refund_hold.
             WalletService.hold(
                 request.user,
                 work.price,
-                order=order,
-                description=f'Резерв на покупку готовой работы "{work.title}"',
+                description=f'Покупка готовой работы «{work.title}»',
             )
         except InsufficientFunds:
-            order.delete()
             return Response(
                 {'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        ensure_order_chat_started(
-            order,
-            sender=request.user,
-            text=f'Создан заказ по готовой работе "{work.title}"',
-        )
 
-        purchase = Purchase.objects.create(
+        first_file = work.files.first()
+        purchase = Purchase(
             work=work,
             buyer=request.user,
-            order=order,
             price_paid=work.price,
+            hold_until=hold_until,
         )
+        if first_file and first_file.file:
+            purchase.delivered_file = first_file.file
+            purchase.delivered_file_name = first_file.name or first_file.file.name.split('/')[-1]
+            purchase.delivered_file_type = first_file.file_type or ''
+            purchase.delivered_file_size = first_file.file_size or 0
+
+        purchase.save()
 
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -204,7 +188,6 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
             'work__subject',
             'work__work_type',
             'work__author',
-            'order',
         )
 
     def get_serializer_context(self):
@@ -214,179 +197,55 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['post'])
     @transaction.atomic
-    def cancel(self, request, pk=None):
-        """Покупатель отменяет заказ по готовой работе:
-        деньги возвращаются на кошелёк, статус заказа → cancelled.
-
-        Если таймер передачи уже истёк, дополнительно:
-          • эксперту автоматически выставляется отзыв 1★;
-          • эксперт получает уведомление об отмене и о низком рейтинге;
-          • клиент видит предупреждение об этом до подтверждения (на фронте).
-        До истечения таймера отмена запрещена — деньги лежат в эскроу, пока
-        эксперт не загрузит готовую работу."""
+    def dispute(self, request, pk=None):
         purchase = self.get_object()
-        order = purchase.order
 
-        if order is None:
+        if purchase.status != Purchase.Status.PAID:
             return Response(
-                {'detail': 'У покупки нет связанного заказа.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if order.status != Order.READY_WORK_TRANSFER:
-            return Response(
-                {'detail': f'Отменить можно только заказ в статусе «Передача готовой работы». Текущий: «{order.get_status_display()}».'},
+                {'detail': 'Спор можно открыть только для оплаченной покупки.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Клиент может отменить заказ только после истечения таймера передачи.
-        from apps.orders.services import OrderActionService
-        if not OrderActionService.is_transfer_deadline_passed(order):
+        now = timezone.now()
+        if purchase.hold_until and now > purchase.hold_until:
             return Response(
-                {'detail': 'Отменить покупку готовой работы можно только после истечения таймера передачи. Дождитесь загрузки работы экспертом или истечения срока.'},
+                {'detail': 'Срок подачи спора истёк (3 дня с момента покупки).'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        expert = order.expert
-        already_auto_reviewed = bool(getattr(order, 'auto_bad_review_issued', False))
+        purchase.status = Purchase.Status.DISPUTED
+        purchase.delivered_file = None
+        purchase.delivered_file_name = ''
+        purchase.delivered_file_type = ''
+        purchase.delivered_file_size = 0
+        purchase.save(update_fields=[
+            'status', 'delivered_file', 'delivered_file_name',
+            'delivered_file_type', 'delivered_file_size', 'updated_at',
+        ])
 
-        refunded = WalletService.refund_hold(
-            request.user,
-            purchase.price_paid,
-            order=order,
-            description=(
-                f'Возврат по покупке готовой работы «{purchase.work.title}» '
-                f'(таймер передачи истёк, клиент отменил заказ)'
-            ),
-        )
-
-        order.status = 'cancelled'
-        order.save(update_fields=['status', 'updated_at'])
-
-        # Авто-отзыв 1★ эксперту (если ещё не выставлен) — клиент отменил
-        # покупку после истечения таймера, значит эксперт не выполнил обязательство.
-        auto_review = None
-        if expert is not None and not already_auto_reviewed:
-            try:
-                from apps.experts.models import ExpertReview
-                auto_review, created = ExpertReview.objects.get_or_create(
-                    order=order,
-                    defaults={
-                        'expert': expert,
-                        'client': request.user,
-                        'rating': 1,
-                        'comment': 'Эксперт не загрузил готовую работу в установленный срок.',
-                        'is_published': True,
-                    },
-                )
-                if not created and auto_review.rating != 1:
-                    auto_review.rating = 1
-                    auto_review.comment = 'Эксперт не загрузил готовую работу в установленный срок.'
-                    auto_review.is_published = True
-                    auto_review.save(update_fields=['rating', 'comment', 'is_published', 'updated_at'])
-            except Exception:
-                auto_review = None
-
-            order.auto_bad_review_issued = True
-            order.save(update_fields=['auto_bad_review_issued', 'updated_at'])
-
-        # Уведомления обеим сторонам
         try:
             from apps.notifications.services import NotificationService
             from apps.notifications.models import NotificationType
 
-            if expert is not None:
-                NotificationService.create_notification(
-                    recipient=expert,
-                    type=NotificationType.STATUS_CHANGED,
-                    title='Заказ отменён клиентом',
-                    message=(
-                        f'Клиент отменил заказ №{order.id} «{purchase.work.title}» '
-                        f'после истечения таймера передачи. '
-                        f'Средства возвращены покупателю, эксперту выставлен автоматический отзыв 1★.'
-                    ),
-                    related_object_id=order.id,
-                    related_object_type='order',
-                    data={
-                        'order_id': order.id,
-                        'old_status': Order.READY_WORK_TRANSFER,
-                        'new_status': 'cancelled',
-                        'reason': 'transfer_deadline_expired',
-                    },
-                )
-
             NotificationService.create_notification(
-                recipient=request.user,
+                recipient=purchase.work.author,
                 type=NotificationType.STATUS_CHANGED,
-                title='Заказ отменён',
+                title='Открыт спор по покупке',
                 message=(
-                    f'Заказ №{order.id} «{purchase.work.title}» отменён. '
-                    f'Средства возвращены на ваш кошелёк. '
-                    f'Эксперту выставлен автоматический отзыв 1★.'
+                    f'Покупатель {request.user.username} открыл спор по покупке '
+                    f'«{purchase.work.title}». Доступ к файлу отозван, средства '
+                    f'заморожены до разрешения спора.'
                 ),
-                related_object_id=order.id,
-                related_object_type='order',
-                data={
-                    'order_id': order.id,
-                    'old_status': Order.READY_WORK_TRANSFER,
-                    'new_status': 'cancelled',
-                    'reason': 'transfer_deadline_expired',
-                },
+                related_object_id=purchase.id,
+                related_object_type='purchase',
+                data={'purchase_id': purchase.id, 'reason': 'dispute_opened'},
             )
         except Exception:
             pass
 
-        # Пересчёт статистики эксперта, если выставлен авто-отзыв.
-        if expert is not None and auto_review is not None:
-            try:
-                from apps.experts.services import ExpertStatisticsService
-                ExpertStatisticsService.update_expert_statistics(expert)
-            except Exception:
-                pass
-
         return Response({
-            'status': 'cancelled',
-            'order_status': order.status,
-            'refunded_amount': str(purchase.price_paid),
-            'transaction_id': refunded.id,
-            'auto_review_issued': bool(auto_review is not None),
-        })
-
-    @action(detail=True, methods=['post'])
-    @transaction.atomic
-    def confirm_received(self, request, pk=None):
-        """Покупатель подтверждает, что готовая работа получена:
-        деньги из эскроу уходят эксперту (минус комиссия платформы),
-        статус заказа → completed."""
-        purchase = self.get_object()
-        order = purchase.order
-
-        if order is None:
-            return Response(
-                {'detail': 'У покупки нет связанного заказа.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if order.status != Order.READY_WORK_TRANSFER:
-            return Response(
-                {'detail': f'Подтвердить можно только заказ в статусе «Передача готовой работы». Текущий: «{order.get_status_display()}».'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        result = WalletService.release_to_expert(
-            client=request.user,
-            expert=purchase.work.author,
-            amount=purchase.price_paid,
-            order=order,
-            description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
-        )
-
-        order.status = 'completed'
-        order.save(update_fields=['status', 'updated_at'])
-
-        return Response({
-            'status': 'completed',
-            'order_status': order.status,
-            'expert_payout': str(result['payout']),
-            'platform_fee': str(result['fee']),
+            'status': 'disputed',
+            'detail': 'Спор открыт. Средства заморожены до разрешения.',
         })
 
     @action(detail=True, methods=['post'])

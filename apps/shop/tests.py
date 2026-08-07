@@ -24,9 +24,8 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
-from apps.notifications.models import Notification, NotificationType
-from apps.orders.models import Order, Transaction, TransactionType
-from apps.shop.models import Purchase, ReadyWork
+from apps.orders.models import Transaction, TransactionType
+from apps.shop.models import Purchase, ReadyWork, ReadyWorkFile
 
 User = get_user_model()
 
@@ -165,204 +164,180 @@ class ReadyWorkPurchaseWalletTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(Purchase.objects.exists())
-        self.assertFalse(Order.objects.exists())
         self.assertFalse(Transaction.objects.exists())
 
-    def test_purchase_is_fully_paid_in_escrow_and_waits_for_expert_upload(self):
+    def test_purchase_holds_funds_and_copies_file(self):
         self.buyer.balance = Decimal("1200.00")
         self.buyer.save(update_fields=["balance"])
+
+        rfile = SimpleUploadedFile("work.docx", b"file-content", content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        ReadyWorkFile.objects.create(
+            work=self.work,
+            name="work.docx",
+            file=rfile,
+            file_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_size=12,
+        )
 
         response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
-        purchase = Purchase.objects.get(pk=response.json()["id"])
-        order = purchase.order
+        body = response.json()
+        purchase = Purchase.objects.get(pk=body["id"])
         self.buyer.refresh_from_db()
         self.author.refresh_from_db()
 
-        self.assertEqual(order.status, Order.READY_WORK_TRANSFER)
-        self.assertTrue(order.is_ready_work_purchase)
-        self.assertIsNotNone(order.transfer_started_at)
-        self.assertIsNotNone(order.transfer_deadline)
-        self.assertEqual(order.final_price, Decimal("1200.00"))
-        self.assertEqual(self.buyer.balance, Decimal("1200.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("1200.00"))
-        self.assertEqual(self.author.balance, Decimal("0.00"))
-        self.assertEqual(
-            list(Transaction.objects.filter(order=order).values_list("type", flat=True)),
-            [TransactionType.HOLD],
-        )
-        self.assertEqual(order.files.count(), 0)
+        self.assertEqual(purchase.status, Purchase.Status.PAID)
+        self.assertIsNotNone(purchase.paid_at)
+        self.assertIsNotNone(purchase.hold_until)
+        self.assertTrue(purchase.hold_until > timezone.now())
 
-        order_response = self.api_client.get(f"/api/orders/orders/{order.id}/")
-        self.assertEqual(order_response.status_code, status.HTTP_200_OK, order_response.content)
-        self.assertEqual(order_response.json()["payment_status"], "paid")
-
-        expert_api = APIClient()
-        expert_api.force_authenticate(user=self.author)
-        expert_order_response = expert_api.get(f"/api/orders/orders/{order.id}/")
-        self.assertEqual(expert_order_response.status_code, status.HTTP_200_OK)
-        self.assertTrue(expert_order_response.json()["available_actions"]["can_upload_work"])
-        self.assertFalse(expert_order_response.json()["available_actions"]["can_submit_work"])
-
-    def test_cancel_ready_work_order_returns_full_escrow(self):
-        self.buyer.balance = Decimal("1200.00")
-        self.buyer.save(update_fields=["balance"])
-        purchase_response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
-        purchase_id = purchase_response.json()["id"]
-
-        response = self.api_client.post(f"/api/shop/purchases/{purchase_id}/cancel/")
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        purchase = Purchase.objects.get(pk=purchase_id)
-        purchase.order.refresh_from_db()
-        self.buyer.refresh_from_db()
-        self.assertEqual(purchase.order.status, "cancelled")
-        self.assertEqual(self.buyer.balance, Decimal("1200.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
-        self.assertEqual(
-            set(Transaction.objects.filter(order=purchase.order).values_list("type", flat=True)),
-            {TransactionType.HOLD, TransactionType.REFUND},
-        )
-
-    def test_cancel_before_transfer_deadline_is_rejected(self):
-        """Пока таймер передачи не истёк, клиент не может отменить заказ —
-        деньги лежат в эскроу, эксперт ещё может успеть загрузить работу."""
-        self.buyer.balance = Decimal("1200.00")
-        self.buyer.save(update_fields=["balance"])
-        purchase_response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
-        purchase_id = purchase_response.json()["id"]
-
-        response = self.api_client.post(f"/api/shop/purchases/{purchase_id}/cancel/")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST, response.content)
-        purchase = Purchase.objects.get(pk=purchase_id)
-        purchase.order.refresh_from_db()
-        self.buyer.refresh_from_db()
-        self.assertEqual(purchase.order.status, Order.READY_WORK_TRANSFER)
         self.assertEqual(self.buyer.balance, Decimal("0.00"))
         self.assertEqual(self.buyer.frozen_balance, Decimal("1200.00"))
-        self.assertFalse(
-            Transaction.objects.filter(order=purchase.order, type=TransactionType.REFUND).exists()
-        )
+        self.assertEqual(self.author.balance, Decimal("0.00"))
 
-    def test_cancel_after_transfer_deadline_refunds_and_writes_one_star_review(self):
-        """После истечения таймера клиент может отменить заказ:
-        деньги возвращаются, эксперту автоматически выставляется 1★,
-        обе стороны получают уведомления."""
-        from apps.experts.models import ExpertReview
+        self.assertTrue(bool(purchase.delivered_file))
+        self.assertEqual(purchase.delivered_file_name, "work.docx")
+        self.assertEqual(purchase.delivered_file_size, 12)
 
+        self.assertIsNone(purchase.order_id)
+
+        self.assertEqual(body["status"], "paid")
+        self.assertTrue(body["delivered_file_available"])
+
+    def test_purchase_copies_first_file(self):
         self.buyer.balance = Decimal("1200.00")
         self.buyer.save(update_fields=["balance"])
-        purchase_response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
-        purchase_id = purchase_response.json()["id"]
-        purchase = Purchase.objects.get(pk=purchase_id)
-        order = purchase.order
 
-        # Имитируем истечение таймера передачи.
-        order.transfer_deadline = timezone.now() - timedelta(hours=1)
-        order.save(update_fields=['transfer_deadline', 'updated_at'])
+        rfile1 = SimpleUploadedFile("first.docx", b"first", content_type="application/octet-stream")
+        rfile2 = SimpleUploadedFile("second.pdf", b"second", content_type="application/pdf")
+        ReadyWorkFile.objects.create(work=self.work, name="second.pdf", file=rfile2, file_type="application/pdf", file_size=6)
+        ReadyWorkFile.objects.create(work=self.work, name="first.docx", file=rfile1, file_type="application/octet-stream", file_size=5)
 
-        response = self.api_client.post(f"/api/shop/purchases/{purchase_id}/cancel/")
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
-        body = response.json()
-        self.assertEqual(body['status'], 'cancelled')
-        self.assertTrue(body.get('auto_review_issued'))
+        purchase = Purchase.objects.get(pk=response.json()["id"])
+        self.assertEqual(purchase.delivered_file_name, "first.docx")
 
-        purchase = Purchase.objects.get(pk=purchase_id)
-        purchase.order.refresh_from_db()
-        self.buyer.refresh_from_db()
-        self.author.refresh_from_db()
-
-        # Деньги вернулись на кошелёк.
-        self.assertEqual(self.buyer.balance, Decimal("1200.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
-        self.assertEqual(purchase.order.status, "cancelled")
-
-        # Авто-отзыв 1★ выставлен и опубликован.
-        review = ExpertReview.objects.get(order=purchase.order)
-        self.assertEqual(review.rating, 1)
-        self.assertEqual(review.expert_id, self.author.id)
-        self.assertEqual(review.client_id, self.buyer.id)
-        self.assertTrue(review.is_published)
-        self.assertTrue(purchase.order.auto_bad_review_issued)
-
-        # Транзакции: HOLD + REFUND.
-        self.assertEqual(
-            set(Transaction.objects.filter(order=purchase.order).values_list("type", flat=True)),
-            {TransactionType.HOLD, TransactionType.REFUND},
-        )
-
-        # Уведомления обеим сторонам.
-        self.assertTrue(
-            Notification.objects.filter(
-                recipient=self.author,
-                related_object_id=purchase.order.id,
-                related_object_type='order',
-            ).exists()
-        )
-        self.assertTrue(
-            Notification.objects.filter(
-                recipient=self.buyer,
-                related_object_id=purchase.order.id,
-                related_object_type='order',
-            ).exists()
-        )
-
-    def test_available_actions_flag_transfer_deadline_passed(self):
-        """Сериализатор заказа выставляет can_cancel_ready_work и
-        transfer_deadline_passed для клиента после истечения таймера."""
+    def test_purchase_no_order_created(self):
         self.buyer.balance = Decimal("1200.00")
         self.buyer.save(update_fields=["balance"])
-        self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
-        order = Order.objects.get(is_ready_work_purchase=True)
 
-        # До истечения таймера — действия нет.
-        response = self.api_client.get(f"/api/orders/orders/{order.id}/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        body = response.json()
-        self.assertTrue(body['is_ready_work_purchase'])
-        self.assertFalse(body['transfer_deadline_passed'])
-        self.assertFalse(body['available_actions']['can_cancel_ready_work'])
-        self.assertGreater(body['transfer_seconds_left'], 0)
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        # После истечения таймера — действие становится доступным.
-        order.transfer_deadline = timezone.now() - timedelta(minutes=1)
-        order.save(update_fields=['transfer_deadline', 'updated_at'])
+        purchase = Purchase.objects.get(pk=response.json()["id"])
+        self.assertIsNone(purchase.order_id)
 
-        response = self.api_client.get(f"/api/orders/orders/{order.id}/")
-        body = response.json()
-        self.assertTrue(body['transfer_deadline_passed'])
-        self.assertEqual(body['transfer_seconds_left'], 0)
-        self.assertTrue(body['available_actions']['can_cancel_ready_work'])
+    def test_cannot_purchase_own_work(self):
+        self.api_client.force_authenticate(user=self.author)
+        self.author.balance = Decimal("1200.00")
+        self.author.save(update_fields=["balance"])
+
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
-class ReadyWorkTransferExpiryTaskTests(TestCase):
-    """Периодическая задача: когда у заказа из магазина истекает таймер
-    передачи, эксперту уходит уведомление «клиент может отменить» — однократно."""
-
+class ReadyWorkDisputeTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.subject = Subject.objects.create(name="Task subject")
-        cls.work_type = WorkType.objects.create(name="Task work type")
+        cls.subject = Subject.objects.create(name="Dispute subject")
+        cls.work_type = WorkType.objects.create(name="Dispute work type")
         cls.author = User.objects.create_user(
-            username="expiry_author",
-            email="expiry_author@example.com",
+            username="dispute_author",
+            email="dispute_author@example.com",
             password="pwd",
             role="expert",
         )
         cls.buyer = User.objects.create_user(
-            username="expiry_buyer",
-            email="expiry_buyer@example.com",
+            username="dispute_buyer",
+            email="dispute_buyer@example.com",
+            password="pwd",
+            role="client",
+        )
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.buyer)
+        self.work = ReadyWork.objects.create(
+            title="Dispute work",
+            description="Description",
+            price=Decimal("500.00"),
+            subject=self.subject,
+            work_type=self.work_type,
+            author=self.author,
+            is_active=True,
+            moderation_status=ReadyWork.ModerationStatus.APPROVED,
+        )
+
+    def _purchase(self):
+        self.buyer.balance = Decimal("500.00")
+        self.buyer.save(update_fields=["balance"])
+        response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        return Purchase.objects.get(pk=response.json()["id"])
+
+    def test_dispute_within_3_days_refunds(self):
+        purchase = self._purchase()
+
+        response = self.api_client.post(f"/api/shop/purchases/{purchase.id}/dispute/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+
+        purchase.refresh_from_db()
+        self.buyer.refresh_from_db()
+        self.assertEqual(purchase.status, Purchase.Status.DISPUTED)
+        self.assertFalse(bool(purchase.delivered_file))
+        self.assertEqual(self.buyer.balance, Decimal("500.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+
+        self.assertEqual(
+            set(Transaction.objects.filter(user=self.buyer).values_list("type", flat=True)),
+            {TransactionType.HOLD, TransactionType.REFUND},
+        )
+
+    def test_dispute_after_3_days_is_rejected(self):
+        purchase = self._purchase()
+        purchase.hold_until = timezone.now() - timedelta(hours=1)
+        purchase.save(update_fields=["hold_until"])
+
+        response = self.api_client.post(f"/api/shop/purchases/{purchase.id}/dispute/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        purchase.refresh_from_db()
+        self.assertEqual(purchase.status, Purchase.Status.PAID)
+
+    def test_dispute_only_for_paid_purchases(self):
+        purchase = self._purchase()
+        purchase.status = Purchase.Status.COMPLETED
+        purchase.save(update_fields=["status"])
+
+        response = self.api_client.post(f"/api/shop/purchases/{purchase.id}/dispute/")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ReadyWorkAutoReleaseTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.subject = Subject.objects.create(name="Release subject")
+        cls.work_type = WorkType.objects.create(name="Release work type")
+        cls.author = User.objects.create_user(
+            username="release_author",
+            email="release_author@example.com",
+            password="pwd",
+            role="expert",
+        )
+        cls.buyer = User.objects.create_user(
+            username="release_buyer",
+            email="release_buyer@example.com",
             password="pwd",
             role="client",
         )
 
     def setUp(self):
         self.work = ReadyWork.objects.create(
-            title="Tasked work",
+            title="Release work",
             description="Description",
             price=Decimal("500.00"),
             subject=self.subject,
@@ -379,48 +354,29 @@ class ReadyWorkTransferExpiryTaskTests(TestCase):
         client.force_authenticate(user=self.buyer)
         response = client.post(f"/api/shop/works/{self.work.id}/purchase/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
-        return Order.objects.get(is_ready_work_purchase=True)
+        return Purchase.objects.get(pk=response.json()["id"])
 
-    def test_task_notifies_expert_once(self):
-        from apps.orders.tasks import expire_ready_work_transfers
+    def test_auto_release_after_3_days(self):
+        from apps.shop.tasks import release_ready_work_holds
 
-        order = self._purchase()
-        order.transfer_deadline = timezone.now() - timedelta(minutes=5)
-        order.save(update_fields=['transfer_deadline', 'updated_at'])
+        purchase = self._purchase()
+        purchase.hold_until = timezone.now() - timedelta(minutes=1)
+        purchase.save(update_fields=["hold_until"])
 
-        result = expire_ready_work_transfers()
-        self.assertIn("Уведомлений о просрочке передачи: 1", result)
+        result = release_ready_work_holds()
+        self.assertIn("Автовыплачено: 1", result)
 
-        order.refresh_from_db()
-        self.assertIsNotNone(order.transfer_deadline_notified_at)
-        self.assertEqual(
-            Notification.objects.filter(
-                recipient=self.author,
-                type=NotificationType.EXPERT_VIOLATION,
-                related_object_id=order.id,
-            ).count(),
-            1,
-        )
+        purchase.refresh_from_db()
+        self.buyer.refresh_from_db()
+        self.author.refresh_from_db()
 
-        # Повторный запуск — уведомлений больше нет, флаг проставлен.
-        result2 = expire_ready_work_transfers()
-        self.assertIn("Уведомлений о просрочке передачи: 0", result2)
-        self.assertEqual(
-            Notification.objects.filter(
-                recipient=self.author,
-                type=NotificationType.EXPERT_VIOLATION,
-                related_object_id=order.id,
-            ).count(),
-            1,
-        )
+        self.assertEqual(purchase.status, Purchase.Status.COMPLETED)
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.assertEqual(self.author.balance, Decimal("475.00"))
 
-    def test_task_does_not_notify_for_active_timer(self):
-        from apps.orders.tasks import expire_ready_work_transfers
+    def test_no_release_for_active_hold(self):
+        from apps.shop.tasks import release_ready_work_holds
 
         self._purchase()
-        # Таймер в будущем — заказ не должен попасть под таску.
-        result = expire_ready_work_transfers()
-        self.assertIn("Уведомлений о просрочке передачи: 0", result)
-        self.assertFalse(
-            Notification.objects.filter(type=NotificationType.EXPERT_VIOLATION).exists()
-        )
+        result = release_ready_work_holds()
+        self.assertIn("Автовыплачено: 0", result)

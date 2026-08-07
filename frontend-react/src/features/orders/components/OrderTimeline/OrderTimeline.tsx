@@ -35,7 +35,6 @@ const statusRank: Record<string, number> = {
   new: 0,
   awaiting_expert_acceptance: 1,
   waiting_payment: 2,
-  ready_work_transfer: 3,
   in_progress: 3,
   review: 5,
   revision: 6,
@@ -73,7 +72,6 @@ const getNextStep = (order: TimelineOrder) => {
 
   if (actions.can_accept_assignment) return 'Примите заказ или отклоните назначение';
   if (actions.can_accept_bid) return 'Выберите эксперта, чтобы запустить работу';
-  if (status === 'ready_work_transfer') return 'Эксперту нужно загрузить готовую работу';
   if (status === 'waiting_payment') return 'Оплатите заказ, чтобы эксперт начал работу';
   if (actions.can_upload_work) return 'Загрузите готовую работу в заказ';
   if (actions.can_approve_work || actions.can_request_revision) return 'Проверьте работу и примите решение';

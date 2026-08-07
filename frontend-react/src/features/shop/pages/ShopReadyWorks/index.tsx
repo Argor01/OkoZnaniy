@@ -85,21 +85,10 @@ const ShopReadyWorks: React.FC = () => {
   }, [apiWorks]);
 
   const processPurchase = async (id: number) => {
-    const work = processedWorks.find((item) => item.id === id);
-    const sellerId = work?.author?.id;
-    if (!work || !sellerId) {
-      message.error('Не удалось оформить покупку: неизвестен продавец');
-      return;
-    }
-
     try {
-      const purchase = await shopApi.purchaseWork(id);
+      await shopApi.purchaseWork(id);
       queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
-      if (purchase.order) {
-        navigate(`/orders/${purchase.order}`);
-        return;
-      }
-      dashboard.openContextChat(sellerId, work.title, id);
+      message.success('Работа куплена! Файл доступен для скачивания.');
     } catch (error: any) {
       const detail = error?.response?.data?.error || error?.response?.data?.detail;
       message.error(detail || 'Не удалось купить работу');
@@ -108,10 +97,10 @@ const ShopReadyWorks: React.FC = () => {
 
   const handlePurchase = (id: number) => {
     Modal.confirm({
-      title: '\u0412\u0430\u0436\u043d\u043e\u0435 \u043f\u0440\u0435\u0434\u0443\u043f\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u0435',
+      title: 'Покупка готовой работы',
       content: READY_WORK_PURCHASE_WARNING,
-      okText: '\u042f \u0441\u043e\u0433\u043b\u0430\u0441\u0435\u043d',
-      cancelText: '\u041e\u0442\u043c\u0435\u043d\u0430',
+      okText: 'Купить',
+      cancelText: 'Отмена',
       centered: true,
       onOk: () => processPurchase(id),
     });

@@ -101,6 +101,21 @@
   border-bottom: 1px solid var(--color-border-secondary, #f0f0f0);
 }
 
+.ratingSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.ratingLabel {
+  font-size: 12px;
+}
+
+.userRating {
+  font-size: 16px;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;

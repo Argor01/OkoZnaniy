@@ -40,8 +40,9 @@ export interface WorkFormProps {
 
 export interface PurchasedWork {
   id: number;
+  purchaseId: number;
   workId: number;
-  orderId?: number | null;
+  status: 'paid' | 'completed' | 'refunded' | 'disputed';
   subjectId: number;
   workTypeId: number;
   title: string;
@@ -53,6 +54,7 @@ export interface PurchasedWork {
   subject: string;
   workType: string;
   rating: number;
+  userRating?: number | null;
   reviewsCount: number;
   viewsCount: number;
   purchasesCount: number;
@@ -69,6 +71,8 @@ export interface PurchasedWork {
   deliveredFileName?: string;
   deliveredFileType?: string;
   deliveredFileSize?: number;
+  holdUntil?: string;
+  secondsUntilHoldEnd?: number | null;
   tags: string[];
   createdAt: string;
   updatedAt: string;

@@ -63,7 +63,7 @@ export interface CreateWorkPayload {
 export interface Purchase {
   id: number;
   work: number;
-  order?: number | null;
+  status: 'paid' | 'completed' | 'refunded' | 'disputed';
   work_title?: string;
   work_detail?: Work;
   price_paid: string | number;
@@ -73,5 +73,8 @@ export interface Purchase {
   delivered_file_name?: string;
   delivered_file_type?: string;
   delivered_file_size?: number;
+  paid_at?: string;
+  hold_until?: string;
+  seconds_until_hold_end?: number | null;
   created_at: string;
 }

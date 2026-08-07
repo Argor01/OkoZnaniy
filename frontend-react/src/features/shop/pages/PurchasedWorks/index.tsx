@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import Filters from './components/Filters';
@@ -15,6 +15,7 @@ const { Title } = Typography;
 
 const PurchasedWorks: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<FiltersState>({ sortBy: 'date' });
 
   
@@ -37,7 +38,9 @@ const PurchasedWorks: React.FC = () => {
           const workTypeId = Number(w.work_type ?? w.work_type_id ?? 0);
           return {
             id: p.id,
+            purchaseId: p.id,
             workId: p.work,
+            status: p.status || 'paid',
             subjectId: Number.isFinite(subjectId) ? subjectId : 0,
             workTypeId: Number.isFinite(workTypeId) ? workTypeId : 0,
             title: String(w.title ?? p.work_title ?? 'Работа'),
@@ -48,7 +51,8 @@ const PurchasedWorks: React.FC = () => {
             category: String(w.work_type_name ?? w.category ?? w.workType ?? 'Другое'),
             subject: String(w.subject_name ?? w.subject ?? '—'),
             workType: String(w.work_type_name ?? w.workType ?? 'Другое'),
-            rating: typeof p.rating === 'number' ? p.rating : (typeof w.rating === 'number' ? w.rating : 0),
+            rating: typeof w.rating === 'number' ? w.rating : 0,
+            userRating: typeof p.rating === 'number' ? p.rating : null,
             reviewsCount: typeof w.reviewsCount === 'number' ? w.reviewsCount : 0,
             viewsCount: typeof w.viewsCount === 'number' ? w.viewsCount : 0,
             purchasesCount: typeof w.purchasesCount === 'number' ? w.purchasesCount : 0,
@@ -65,6 +69,8 @@ const PurchasedWorks: React.FC = () => {
             deliveredFileName: p.delivered_file_name || undefined,
             deliveredFileType: p.delivered_file_type || undefined,
             deliveredFileSize: typeof p.delivered_file_size === 'number' ? p.delivered_file_size : undefined,
+            holdUntil: p.hold_until || undefined,
+            secondsUntilHoldEnd: typeof p.seconds_until_hold_end === 'number' ? p.seconds_until_hold_end : null,
             tags: Array.isArray(w.tags) ? w.tags : [],
             createdAt: String(w.created_at ?? w.createdAt ?? p.created_at),
             updatedAt: String(w.updated_at ?? w.updatedAt ?? p.created_at),
@@ -143,6 +149,38 @@ const PurchasedWorks: React.FC = () => {
     }
   };
 
+  const rateMutation = useMutation({
+    mutationFn: ({ purchaseId, rating }: { purchaseId: number; rating: number }) =>
+      shopApi.ratePurchase(purchaseId, rating),
+    onSuccess: () => {
+      message.success('Оценка сохранена');
+      queryClient.invalidateQueries({ queryKey: ['purchased-works'] });
+    },
+    onError: () => {
+      message.error('Не удалось сохранить оценку');
+    },
+  });
+
+  const disputeMutation = useMutation({
+    mutationFn: (purchaseId: number) => shopApi.disputePurchase(purchaseId),
+    onSuccess: () => {
+      message.success('Спор открыт. Средства заморожены до разрешения.');
+      queryClient.invalidateQueries({ queryKey: ['purchased-works'] });
+    },
+    onError: (error: any) => {
+      const detail = error?.response?.data?.detail;
+      message.error(detail || 'Не удалось открыть спор');
+    },
+  });
+
+  const handleRate = (purchaseId: number, rating: number) => {
+    rateMutation.mutate({ purchaseId, rating });
+  };
+
+  const handleDispute = (purchaseId: number) => {
+    disputeMutation.mutate(purchaseId);
+  };
+
   const handleViewDetails = (workId: number) => {
     navigate(`/shop/works/${workId}`);
   };
@@ -167,6 +205,8 @@ const PurchasedWorks: React.FC = () => {
           works={filteredWorks}
           loading={isLoading}
           onDownload={handleDownload}
+          onRate={handleRate}
+          onDispute={handleDispute}
           onView={handleViewDetails}
         />
       )}

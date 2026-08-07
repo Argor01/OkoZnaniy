@@ -2,7 +2,6 @@ from django.conf import settings
 from django.db import models
 
 from apps.catalog.models import Subject, WorkType
-from apps.orders.models import Order
 
 
 class ReadyWork(models.Model):
@@ -78,6 +77,12 @@ class ReadyWorkFile(models.Model):
 
 
 class Purchase(models.Model):
+    class Status(models.TextChoices):
+        PAID = "paid", "Оплачена"
+        COMPLETED = "completed", "Завершена"
+        REFUNDED = "refunded", "Возврат"
+        DISPUTED = "disputed", "Спор"
+
     work = models.ForeignKey(
         ReadyWork,
         on_delete=models.CASCADE,
@@ -89,13 +94,12 @@ class Purchase(models.Model):
         verbose_name="Покупатель",
         related_name="purchases",
     )
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="Заказ",
-        related_name="shop_purchases",
+    status = models.CharField(
+        "Статус",
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PAID,
+        db_index=True,
     )
     price_paid = models.DecimalField("Оплаченная цена", max_digits=10, decimal_places=2)
     delivered_file = models.FileField("Файл работы", upload_to="purchases/", blank=True, null=True)
@@ -104,6 +108,11 @@ class Purchase(models.Model):
     delivered_file_size = models.PositiveIntegerField("Размер файла", default=0)
     rating = models.PositiveSmallIntegerField("Оценка", blank=True, null=True)
     rated_at = models.DateTimeField("Дата оценки", blank=True, null=True)
+    paid_at = models.DateTimeField("Дата оплаты", auto_now_add=True)
+    hold_until = models.DateTimeField(
+        "Удержание до",
+        help_text="До этой даты покупатель может открыть спор. После — средства переводятся эксперту.",
+    )
     created_at = models.DateTimeField("Дата покупки", auto_now_add=True)
 
     class Meta:

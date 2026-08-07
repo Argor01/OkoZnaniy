@@ -1703,10 +1703,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         'work_delivery',
         { files: uploadedFiles.filter((f) => !!f.url) }
       );
-      const currentOrderStatus = String(order?.status ?? '');
-      if (currentOrderStatus !== 'ready_work_transfer') {
-        await ordersApi.submitOrder(effectiveOrderId);
-      }
+      await ordersApi.submitOrder(effectiveOrderId);
       await Promise.all([loadChatDetail(selectedChat.id), loadChats(), refreshOrder()]);
       antMessage.success(files.length > 1 ? 'Работы отправлены на проверку' : 'Работа отправлена на проверку');
     } catch (error: unknown) {

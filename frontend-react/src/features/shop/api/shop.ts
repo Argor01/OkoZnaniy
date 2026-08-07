@@ -46,6 +46,11 @@ export const shopApi = {
     return response.data;
   },
 
+  disputePurchase: async (purchaseId: number): Promise<{ status: string; detail: string }> => {
+    const response = await apiClient.post(`/shop/purchases/${purchaseId}/dispute/`);
+    return response.data;
+  },
+
   createWork: async (data: CreateWorkPayload): Promise<Work> => {
     const formData = new FormData();
     

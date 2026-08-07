@@ -9,10 +9,12 @@ interface WorksListProps {
   works: PurchasedWork[];
   loading?: boolean;
   onDownload: (id: number) => void;
+  onRate?: (purchaseId: number, rating: number) => void;
+  onDispute?: (purchaseId: number) => void;
   onView?: (workId: number) => void;
 }
 
-const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload, onView }) => {
+const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload, onRate, onDispute, onView }) => {
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -34,7 +36,7 @@ const WorksList: React.FC<WorksListProps> = ({ works, loading, onDownload, onVie
     <Row gutter={[16, 16]} className={styles.grid}>
       {works.map((work) => (
         <Col key={work.id} xs={24} sm={12} md={12} lg={12}>
-          <PurchasedWorkCard work={work} onDownload={onDownload} onView={onView} />
+          <PurchasedWorkCard work={work} onDownload={onDownload} onRate={onRate} onDispute={onDispute} onView={onView} />
         </Col>
       ))}
     </Row>

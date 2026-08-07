@@ -170,7 +170,7 @@ const MyWorks: React.FC = () => {
     if (order?.is_frozen) return false;
     if (order?.is_overdue === true) return true;
     const status = String(order?.status ?? '');
-    if (!(status === 'in_progress' || status === 'revision' || status === 'ready_work_transfer')) return false;
+    if (!(status === 'in_progress' || status === 'revision')) return false;
     const deadlineRaw = order?.deadline;
     if (typeof deadlineRaw !== 'string') return false;
     const d = dayjs(deadlineRaw);

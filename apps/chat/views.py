@@ -538,10 +538,6 @@ class ChatViewSet(viewsets.ModelViewSet):
         if not uploaded_file:
             return Response({'detail': 'file РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Проверка: это магазин готовых работ (прямая доставка без предварительного work_offer)
-        is_ready_work_purchase = chat.order_id and getattr(chat.order, 'is_ready_work_purchase', False)
-        is_ready_work_transfer = chat.order_id and getattr(chat.order, 'status', None) == 'ready_work_transfer'
-
         offer_message = None
         if message_id:
             # Классический флоу: есть предварительный work_offer
@@ -553,12 +549,6 @@ class ChatViewSet(viewsets.ModelViewSet):
             offer_data = offer_message.offer_data or {}
             if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'awaiting_upload':
                 return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
-        elif is_ready_work_purchase and is_ready_work_transfer:
-            # Прямая доставка для покупки готовой работы: проверяем, что текущий пользователь — эксперт заказа
-            if chat.order.expert_id != request.user.id and not getattr(request.user, 'is_staff', False):
-                return Response({'detail': 'Только эксперт этого заказа может отправить работу'}, status=status.HTTP_403_FORBIDDEN)
-            offer_message = None
-            offer_data = {}
         else:
             return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -845,27 +835,6 @@ class ChatViewSet(viewsets.ModelViewSet):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.error(f"РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ ExpertReview: {str(e)}")
-
-        # Для покупки готовой работы: завершаем заказ и выплачиваем эксперту
-        if is_direct_delivery and chat.order_id and chat.order and getattr(chat.order, 'is_ready_work_purchase', False):
-            try:
-                from apps.shop.models import Purchase
-                from apps.wallet.services import WalletService
-                purchase = Purchase.objects.filter(order_id=chat.order_id).first()
-                if purchase and chat.order.status in (Order.READY_WORK_TRANSFER, 'review'):
-                    WalletService.release_to_expert(
-                        client=request.user,
-                        expert=chat.order.expert,
-                        amount=purchase.price_paid,
-                        order=chat.order,
-                        description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
-                    )
-                    chat.order.status = 'completed'
-                    chat.order.save(update_fields=['status', 'updated_at'])
-            except Exception as e:
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"РћС€РёР±РєР° завершения покупки готовой работы: {str(e)}")
 
         return Response({'status': 'success'})
 

@@ -13,7 +13,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Avatar, List, Modal, Popconfirm, Rate, Space, Spin, Tag, Typography, message } from 'antd';
+import { Avatar, List, Modal, Popconfirm, Rate, Space, Spin, Tag, Tooltip, Typography, message } from 'antd';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -78,6 +78,18 @@ const ShopWorkDetail: React.FC = () => {
     },
   });
 
+  const rateMutation = useMutation({
+    mutationFn: ({ purchaseId, rating }: { purchaseId: number; rating: number }) =>
+      shopApi.ratePurchase(purchaseId, rating),
+    onSuccess: () => {
+      message.success('Оценка сохранена');
+      queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
+    },
+    onError: () => {
+      message.error('Не удалось сохранить оценку');
+    },
+  });
+
   if (isWorkLoading) {
     return (
       <div className={styles.centered}>
@@ -112,21 +124,11 @@ const ShopWorkDetail: React.FC = () => {
   };
 
   const processPurchase = () => {
-    const sellerId = work.author?.id;
-    if (!sellerId) {
-      message.error('Не удалось оформить покупку: неизвестен продавец');
-      return;
-    }
-
     shopApi
       .purchaseWork(work.id)
-      .then((createdPurchase) => {
+      .then(() => {
         queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
-        if (createdPurchase.order) {
-          navigate(`/orders/${createdPurchase.order}`);
-          return;
-        }
-        dashboard.openContextChat(sellerId, work.title, work.id);
+        message.success('Работа куплена! Файл доступен для скачивания.');
       })
       .catch((error: unknown) => {
         const detail = (error as { response?: { data?: { error?: string; detail?: string } } })?.response?.data?.error ||
@@ -137,10 +139,10 @@ const ShopWorkDetail: React.FC = () => {
 
   const handlePurchase = () => {
     Modal.confirm({
-      title: '\u0412\u0430\u0436\u043d\u043e\u0435 \u043f\u0440\u0435\u0434\u0443\u043f\u0440\u0435\u0436\u0434\u0435\u043d\u0438\u0435',
+      title: 'Покупка готовой работы',
       content: READY_WORK_PURCHASE_WARNING,
-      okText: '\u042f \u0441\u043e\u0433\u043b\u0430\u0441\u0435\u043d',
-      cancelText: '\u041e\u0442\u043c\u0435\u043d\u0430',
+      okText: 'Купить',
+      cancelText: 'Отмена',
       centered: true,
       onOk: processPurchase,
     });
@@ -281,6 +283,24 @@ const ShopWorkDetail: React.FC = () => {
               />
             </div>
 
+            {purchase && purchase.delivered_file_available && (
+              <div>
+                <Title level={4}>Ваша оценка</Title>
+                {purchase.rating ? (
+                  <Rate disabled value={purchase.rating} />
+                ) : (
+                  <Rate
+                    value={0}
+                    onChange={(value) => {
+                      if (purchase) {
+                        rateMutation.mutate({ purchaseId: purchase.id, rating: value });
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            )}
+
             {work.files && work.files.length > 0 && (
               <div>
                 <Title level={4}>Прикрепленные файлы</Title>
@@ -340,36 +360,38 @@ const ShopWorkDetail: React.FC = () => {
                   </AppButton>
                 </Popconfirm>
               ) : purchase ? (
-                <AppButton
-                  variant="primary"
-                  size="large"
-                  icon={<DownloadOutlined />}
-                  disabled={!purchase.delivered_file_available}
-                  onClick={async () => {
-                    if (!purchase.delivered_file_available) return;
-                    try {
-                      const blob = await shopApi.downloadPurchaseFile(purchase.id);
-                      const blobUrl = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = blobUrl;
-                      a.download = purchase.delivered_file_name || 'file';
-                      document.body.appendChild(a);
-                      a.click();
-                      a.remove();
-                      window.URL.revokeObjectURL(blobUrl);
-                    } catch (e: unknown) {
-                      const status = (e as { response?: { status?: number } })?.response?.status;
-                      if (status === 401) {
-                        message.error('Не авторизовано для скачивания файла');
-                      } else {
-                        message.error('Ошибка при скачивании файла');
+                <Tooltip title={!purchase.delivered_file_available ? 'Работа ещё не загружена продавцом. Откройте чат заказа и нажмите «Принять» для скачивания.' : undefined}>
+                  <AppButton
+                    variant="primary"
+                    size="large"
+                    icon={<DownloadOutlined />}
+                    disabled={!purchase.delivered_file_available}
+                    onClick={async () => {
+                      if (!purchase.delivered_file_available) return;
+                      try {
+                        const blob = await shopApi.downloadPurchaseFile(purchase.id);
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = blobUrl;
+                        a.download = purchase.delivered_file_name || 'file';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(blobUrl);
+                      } catch (e: unknown) {
+                        const status = (e as { response?: { status?: number } })?.response?.status;
+                        if (status === 401) {
+                          message.error('Не авторизовано для скачивания файла');
+                        } else {
+                          message.error('Ошибка при скачивании файла');
+                        }
                       }
-                    }
-                  }}
-                  className={`${styles.actionButton} ${styles.downloadButton}`}
-                >
-                  Скачать
-                </AppButton>
+                    }}
+                    className={`${styles.actionButton} ${styles.downloadButton}`}
+                  >
+                    Скачать
+                  </AppButton>
+                </Tooltip>
               ) : (
                 <AppButton
                   variant="primary"

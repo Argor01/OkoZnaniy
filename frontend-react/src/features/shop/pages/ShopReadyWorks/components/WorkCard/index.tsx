@@ -1,6 +1,6 @@
 import React from 'react';
 import DOMPurify from 'dompurify';
-import { Tag, Space, Typography, Rate, Popconfirm, Avatar } from 'antd';
+import { Tag, Space, Typography, Rate, Popconfirm, Avatar, Tooltip } from 'antd';
 import { EyeOutlined, ShoppingCartOutlined, DeleteOutlined, UserOutlined, DownloadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { Work } from '@/features/shop/types';
@@ -135,21 +135,23 @@ const WorkCard: React.FC<WorkCardProps> = ({ work, onView, onPurchase, onDownloa
           </Text>
         </div>
         {!allowDelete && (
-          <AppButton
-            variant="primary"
-            icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
-            disabled={isPurchased ? !canDownload : false}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (isPurchased) {
-                onDownload?.(work.id);
-                return;
-              }
-              onPurchase(work.id);
-            }}
-          >
-            {isPurchased ? 'Скачать' : 'Купить'}
-          </AppButton>
+          <Tooltip title={isPurchased && !canDownload ? 'Работа ещё не загружена продавцом. Откройте чат заказа и нажмите «Принять» для скачивания.' : undefined}>
+            <AppButton
+              variant="primary"
+              icon={isPurchased ? <DownloadOutlined /> : <ShoppingCartOutlined />}
+              disabled={isPurchased ? !canDownload : false}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isPurchased) {
+                  onDownload?.(work.id);
+                  return;
+                }
+                onPurchase(work.id);
+              }}
+            >
+              {isPurchased ? 'Скачать' : 'Купить'}
+            </AppButton>
+          </Tooltip>
         )}
       </div>
     </AppCard>

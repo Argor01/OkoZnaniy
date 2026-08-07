@@ -9,7 +9,7 @@ class OrderActionService:
     """Single place for per-user order action availability."""
 
     CLIENT_REVIEW_STATUSES = {'review'}
-    EXPERT_WORK_STATUSES = {'in_progress', 'revision', Order.READY_WORK_TRANSFER}
+    EXPERT_WORK_STATUSES = {'in_progress', 'revision'}
     CLOSED_STATUSES = {'completed', 'cancelled', 'canceled', 'done'}
 
     @staticmethod
@@ -26,19 +26,6 @@ class OrderActionService:
             return bool(getattr(user, 'is_banned_for_contacts', False))
         except Exception:
             return bool(getattr(user, 'is_banned_for_contacts', False))
-
-    @classmethod
-    def is_transfer_deadline_passed(cls, order: Order) -> bool:
-        """True, когда заказ в режиме «передача готовой работы» и таймер истёк."""
-        if order.status != Order.READY_WORK_TRANSFER:
-            return False
-        deadline = getattr(order, 'transfer_deadline', None)
-        if deadline is None:
-            # fallback на обычный дедлайн заказа, если таймер не выставлен
-            deadline = order.deadline
-        if deadline is None:
-            return False
-        return bool(deadline <= timezone.now())
 
     @classmethod
     def for_user(cls, order: Order, user) -> dict[str, bool]:
@@ -65,16 +52,6 @@ class OrderActionService:
         has_active_bid = bool(user_bid and user_bid.status in (BidStatus.ACTIVE, BidStatus.INVITED, BidStatus.ACCEPTED))
         is_invited_expert = bool(is_expert and user_bid and user_bid.status == BidStatus.INVITED)
         deadline_is_overdue = bool(order.deadline and order.deadline <= timezone.now())
-        transfer_deadline_passed = cls.is_transfer_deadline_passed(order)
-
-        # Клиент может отменить покупку готовой работы после истечения таймера:
-        # деньги возвращаются, эксперту выставляется авто-отзыв 1★.
-        can_cancel_ready_work = (
-            is_client
-            and order.status == Order.READY_WORK_TRANSFER
-            and transfer_deadline_passed
-            and not is_contact_banned
-        )
 
         return {
             'can_view': is_authenticated and (is_staff or is_client or is_expert or is_available_order or role == 'client'),
@@ -93,8 +70,6 @@ class OrderActionService:
             'can_reject_work': is_client and order.status in cls.CLIENT_REVIEW_STATUSES and not is_contact_banned,
             'can_extend_deadline': is_client and bool(order.expert_id) and order.status in cls.EXPERT_WORK_STATUSES and deadline_is_overdue and not is_contact_banned,
             'can_cancel_overdue': is_client and bool(order.expert_id) and order.status in cls.EXPERT_WORK_STATUSES and deadline_is_overdue and not is_contact_banned,
-            'can_cancel_ready_work': can_cancel_ready_work,
-            'transfer_deadline_passed': transfer_deadline_passed,
             'can_open_dispute': is_client and order.status in ('completed', 'review') and not hasattr(order, 'dispute') and not is_contact_banned,
             'can_create_review': is_client and order.status == 'completed' and bool(order.expert_id) and not is_contact_banned,
             'can_open_order_chat': bool(order.expert_id) and (is_client or is_expert or is_staff) and not is_contact_banned,
