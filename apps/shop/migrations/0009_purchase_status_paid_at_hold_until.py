@@ -34,7 +34,6 @@ class Migration(migrations.Migration):
             name='hold_until',
             field=models.DateTimeField(
                 help_text='До этой даты покупатель может открыть спор. После — средства переводятся эксперту.',
-                null=True,
                 verbose_name='Удержание до',
             ),
         ),
