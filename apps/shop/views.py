@@ -79,6 +79,19 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated()]
         return super().get_permissions()
 
+    def destroy(self, request, *args, **kwargs):
+        work = self.get_object()
+        active_purchases = Purchase.objects.filter(
+            work=work,
+            status=Purchase.Status.PAID,
+        ).exists()
+        if active_purchases:
+            return Response(
+                {'detail': 'Невозможно удалить работу: есть активные покупки. Дождитесь завершения удержания (3 дня) или разрешения споров.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
     def create(self, request, *args, **kwargs):
         import logging
 
