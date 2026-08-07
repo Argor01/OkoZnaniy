@@ -702,6 +702,14 @@
   font-size: 13px;
 }
 
+.expertRoleBadge {
+  font-size: 12px;
+  height: 20px;
+  padding: 0 8px;
+  line-height: 1;
+  margin-top: -6px;
+}
+
 .expertRow {
   width: 100%;
   display: flex;

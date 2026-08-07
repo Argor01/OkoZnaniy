@@ -488,9 +488,6 @@ const UserProfile: FC = () => {
                             </Text>
                           </div>
                         </div>
-                        <Text type="secondary" className={styles.reviewOrderTitle}>
-                          {review.order?.title}
-                        </Text>
                         <Paragraph className={styles.reviewText}>
                           {review.text || review.comment}
                         </Paragraph>

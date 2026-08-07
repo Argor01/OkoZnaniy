@@ -147,37 +147,25 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         type="file"
         className={styles.hiddenInput}
       />
-      {canUseExpertOfferButtons && !isSupportChatSelected ? (
-        headerContextTitle ? (
-          <Button
-            type="primary"
-            size={isMobile ? 'small' : 'middle'}
-            icon={uploadableWorkOffer ? <UploadOutlined /> : <FileTextOutlined />}
-            loading={workOfferUploading}
-            onClick={() => {
-              if (uploadableWorkOffer) {
-                workOfferFileInputRef.current?.click();
-              } else {
-                onSetWorkOfferModalOpen(true);
-              }
-            }}
-            className={styles.buttonSuccess}
-          >
-            {uploadableWorkOffer
-              ? (isMobile ? 'Работа' : 'Отправить работу')
-              : (isMobile ? 'Работа' : 'Предложить работу')}
-          </Button>
-        ) : !isChatInitiator ? (
-          <Button
-            type="primary"
-            size={isMobile ? 'small' : 'middle'}
-            icon={<FileTextOutlined />}
-            className={styles.buttonSuccess}
-            onClick={() => onSetOfferModalOpen(true)}
-          >
-            {isMobile ? 'Предложение' : 'Индивидуальное предложение'}
-          </Button>
-        ) : null
+      {canUseExpertOfferButtons && !isSupportChatSelected && headerContextTitle ? (
+        <Button
+          type="primary"
+          size={isMobile ? 'small' : 'middle'}
+          icon={uploadableWorkOffer ? <UploadOutlined /> : <FileTextOutlined />}
+          loading={workOfferUploading}
+          onClick={() => {
+            if (uploadableWorkOffer) {
+              workOfferFileInputRef.current?.click();
+            } else {
+              onSetWorkOfferModalOpen(true);
+            }
+          }}
+          className={styles.buttonSuccess}
+        >
+          {uploadableWorkOffer
+            ? (isMobile ? 'Работа' : 'Отправить работу')
+            : (isMobile ? 'Работа' : 'Предложить работу')}
+        </Button>
       ) : null}
       {isSupportChatSelected ? (
         <Button

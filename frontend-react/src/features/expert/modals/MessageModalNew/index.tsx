@@ -2931,48 +2931,45 @@ const handleOverdueComplaint = async () => {
                   }}
                 />
                 <div className={styles.chatHeaderActions}>
-                  {canUseExpertOfferButtons && !isSupportChatSelected && !isMainChatLocked ? (
-                    headerContextTitle ? (
-                      <Button
-                        type="primary"
-                        size={isMobile ? 'small' : 'middle'}
-                        icon={
-                          uploadableWorkOffer
-                            ? <UploadOutlined />
-                            : <FileTextOutlined />
+                  {canUseExpertOfferButtons && !isSupportChatSelected && !headerContextTitle && !isChatInitiator ? (
+                    <Button
+                      type="primary"
+                      size={isMobile ? 'small' : 'middle'}
+                      icon={<FileTextOutlined />}
+                      className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
+                      onClick={() => setOfferModalOpen(true)}
+                      title="Индивидуальное предложение"
+                      aria-label="Индивидуальное предложение"
+                    >
+                      {isMobile ? null : 'Индивидуальное предложение'}
+                    </Button>
+                  ) : null}
+                  <input
+                    ref={workOfferFileInputRef}
+                    type="file"
+                    className={styles.hiddenInput}
+                  />
+                  {canUseExpertOfferButtons && !isSupportChatSelected && headerContextTitle ? (
+                    <Button
+                      type="primary"
+                      size={isMobile ? 'small' : 'middle'}
+                      icon={uploadableWorkOffer ? <UploadOutlined /> : <FileTextOutlined />}
+                      loading={workOfferUploading}
+                      onClick={() => {
+                        if (uploadableWorkOffer) {
+                          workOfferFileInputRef.current?.click();
+                        } else {
+                          setWorkOfferModalOpen(true);
                         }
-                        loading={workOfferUploading}
-                        onClick={() => {
-                          if (uploadableWorkOffer) {
-                            workOfferFileInputRef.current?.click();
-                          } else {
-                            setWorkOfferModalOpen(true);
-                          }
-                        }}
-                        className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
-                        title={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
-                        aria-label={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
-                      >
-                        {isMobile
-                          ? null
-                          : (() => {
-                              if (uploadableWorkOffer) return 'Отправить работу';
-                              return 'Предложить работу';
-                            })()}
-                      </Button>
-                    ) : !isChatInitiator ? (
-                      <Button
-                        type="primary"
-                        size={isMobile ? 'small' : 'middle'}
-                        icon={<FileTextOutlined />}
-                        className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
-                        onClick={() => setOfferModalOpen(true)}
-                        title="Индивидуальное предложение"
-                        aria-label="Индивидуальное предложение"
-                      >
-                        {isMobile ? null : 'Индивидуальное предложение'}
-                      </Button>
-                    ) : null
+                      }}
+                      className={`${styles.buttonSuccess} ${isMobile ? styles.chatHeaderActionButtonMobile : styles.chatHeaderActionButton}`}
+                      title={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
+                      aria-label={uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу'}
+                    >
+                      {isMobile
+                        ? (uploadableWorkOffer ? 'Работа' : 'Работа')
+                        : (uploadableWorkOffer ? 'Отправить работу' : 'Предложить работу')}
+                    </Button>
                   ) : null}
                   {selectedChat && !isSupportChatSelected && (
                     <Dropdown

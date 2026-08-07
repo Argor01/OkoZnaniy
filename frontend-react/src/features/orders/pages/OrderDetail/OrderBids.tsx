@@ -247,8 +247,9 @@ const OrderBids: React.FC<OrderBidsProps> = ({
               >
                 <Text strong className={styles.expertName}>{getDisplayUsername(order.expert)}</Text>
               </AppButton>
-              <br />
-              <Text type="secondary" className={styles.expertRole}>Эксперт</Text>
+              <Tag className={styles.expertRoleBadge} color="blue">
+                Эксперт
+              </Tag>
               {expertReview ? (
                 <div className={styles.expertReviewBlock}>
                   <span className={styles.expertReviewRating}>
