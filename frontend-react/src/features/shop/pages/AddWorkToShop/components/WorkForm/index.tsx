@@ -92,7 +92,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     <AppCard className={styles.card} variant="gradient">
       <Space direction="vertical" className={styles.spaceFullWidth} size="large">
         <Row gutter={16}>
-          <Col xs={24} sm={12}>
+          <Col xs={24} sm={18}>
             <Text className={`${styles.label} ${styles.labelRequired}`}>Название работы</Text>
             <AppInput
               placeholder="Введите название работы"
@@ -101,11 +101,11 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               className={styles.input}
             />
           </Col>
-          <Col xs={24} sm={12}>
-            <Text className={`${styles.label} ${styles.labelRequired}`}>Стоимость работы</Text>
+          <Col xs={24} sm={6}>
+            <Text className={`${styles.label} ${styles.labelRequired}`}>Стоимость</Text>
             <div className={styles.priceInputWrap}>
               <AppInput.Number
-                placeholder="Введите стоимость работы"
+                placeholder="0"
                 value={formData.price}
                 onChange={(value) => setFormData({ ...formData, price: Number(value) || 0 })}
                 className={styles.priceInput}
@@ -150,9 +150,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
               ))}
             </AppSelect>
           </Col>
-        </Row>
-
-        <Row gutter={16}>
           <Col xs={24} sm={12}>
             <Text className={`${styles.label} ${styles.labelRequired}`}>Предмет</Text>
             <AppSelect
@@ -247,7 +244,7 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
         </div>
 
         <div>
-          <Text className={styles.label}>Файлы работы</Text>
+          <Text className={`${styles.label} ${styles.labelRequired}`}>Файлы работы</Text>
           <AppUpload.Dragger
             name="files"
             multiple
