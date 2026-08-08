@@ -1068,12 +1068,10 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         """Закрыть дело (только для админов)"""
         case = self.get_object()
 
-        taken_resp = ensure_case_taken_into_work(case)
-        if taken_resp is not None:
-            return taken_resp
-        closed_resp = ensure_case_not_closed(case)
-        if closed_resp is not None:
-            return closed_resp
+        if case.status in ('closed', 'rejected'):
+            return Response({'detail': 'Дело уже завершено.'}, status=status.HTTP_400_BAD_REQUEST)
+        if case.status not in ARBITRATION_IN_PROGRESS_STATUSES + ('decision_made',):
+            return Response({'detail': 'Сначала возьмите дело в работу.'}, status=status.HTTP_400_BAD_REQUEST)
 
         final_message = request.data.get('message', '').strip()
 

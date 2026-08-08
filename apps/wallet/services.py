@@ -347,6 +347,8 @@ class WalletService:
             if not earning.is_paid:
                 earning.is_paid = True
                 earning.save(update_fields=['is_paid'])
+            from apps.users.signals import update_partner_statistics
+            update_partner_statistics(r)
         return {'release_tx': release, 'payout': base_amount, 'service_fee': service_fee, 'partner_id': partner.pk if partner else None}
 
     @staticmethod

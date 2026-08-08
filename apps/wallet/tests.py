@@ -177,8 +177,8 @@ class WalletOrderLedgerTests(TestCase):
 
     def test_approve_releases_order_hold_to_expert_with_commission(self):
         order = self._order()
-        WalletService.topup(self.client_user, Decimal('1000.00'))
-        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+        WalletService.topup(self.client_user, Decimal('1250.00'))
+        WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
 
         self.api.force_authenticate(self.client_user)
         response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
@@ -193,16 +193,16 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(order.status, 'completed')
         self.assertEqual(self.client_user.balance, Decimal('0.00'))
         self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
-        self.assertEqual(self.expert.balance, Decimal('850.00'))
-        self.assertEqual(system_user.balance, Decimal('150.00'))
+        self.assertEqual(self.expert.balance, Decimal('1000.00'))
+        self.assertEqual(system_user.balance, Decimal('250.00'))
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.RELEASE).exists())
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PAYOUT).exists())
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.COMMISSION).exists())
 
     def test_reject_refunds_order_hold_to_available_balance(self):
         order = self._order()
-        WalletService.topup(self.client_user, Decimal('1000.00'))
-        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+        WalletService.topup(self.client_user, Decimal('1250.00'))
+        WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
 
         self.api.force_authenticate(self.client_user)
         response = self.api.post(f'/api/orders/orders/{order.id}/reject/')
@@ -213,7 +213,7 @@ class WalletOrderLedgerTests(TestCase):
         self.expert.refresh_from_db()
 
         self.assertEqual(order.status, 'cancelled')
-        self.assertEqual(self.client_user.balance, Decimal('1000.00'))
+        self.assertEqual(self.client_user.balance, Decimal('1250.00'))
         self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
         self.assertEqual(self.expert.balance, Decimal('0.00'))
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists())
@@ -239,8 +239,8 @@ class WalletOrderLedgerTests(TestCase):
 
         self.assertEqual(payment.status, PaymentStatus.COMPLETED)
         self.assertEqual(order.status, 'in_progress')
-        self.assertEqual(self.client_user.balance, Decimal('1000.00'))
-        self.assertEqual(self.client_user.frozen_balance, Decimal('1000.00'))
+        self.assertEqual(self.client_user.balance, Decimal('1250.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('1250.00'))
         self.assertEqual(
             Transaction.objects.filter(order=order, payment=payment, type=TransactionType.TOPUP).count(),
             1,
@@ -256,7 +256,7 @@ class WalletOrderLedgerTests(TestCase):
             email='ledger_partner@example.com',
             password='pwd',
             role='partner',
-            partner_commission_rate=Decimal('7.50'),
+            partner_commission_rate=Decimal('25.00'),
         )
         director = User.objects.create_user(
             username='ledger_director',
@@ -271,11 +271,12 @@ class WalletOrderLedgerTests(TestCase):
             role='admin',
         )
         self.client_user.partner = partner
-        self.client_user.save(update_fields=['partner'])
+        self.client_user.partner_linked_at = timezone.now()
+        self.client_user.save(update_fields=['partner', 'partner_linked_at'])
 
         order = self._order()
-        WalletService.topup(self.client_user, Decimal('1000.00'))
-        WalletService.hold(self.client_user, Decimal('1000.00'), order=order)
+        WalletService.topup(self.client_user, Decimal('1250.00'))
+        WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
 
         self.api.force_authenticate(self.client_user)
         response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
@@ -283,21 +284,21 @@ class WalletOrderLedgerTests(TestCase):
 
         earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
         self.assertEqual(earning.source_amount, Decimal('1000.00'))
-        self.assertEqual(earning.commission_rate, Decimal('7.50'))
-        self.assertEqual(earning.amount, Decimal('75.0000'))
-        self.assertFalse(earning.is_paid)
+        self.assertEqual(earning.commission_rate, Decimal('25.00'))
+        self.assertEqual(earning.amount, Decimal('250.0000'))
+        self.assertTrue(earning.is_paid)
 
         partner.refresh_from_db()
         self.assertEqual(partner.total_referrals, 1)
         self.assertEqual(partner.active_referrals, 1)
-        self.assertEqual(partner.total_earnings, Decimal('75.0000'))
-        self.assertEqual(partner.balance, Decimal('0.00'))
-        self.assertEqual(partner.pending_balance, Decimal('75.00'))
+        self.assertEqual(partner.total_earnings, Decimal('250.0000'))
+        self.assertEqual(partner.balance, Decimal('250.00'))
+        self.assertEqual(partner.pending_balance, Decimal('0.00'))
 
         self.api.force_authenticate(partner)
         dashboard = self.api.get('/api/users/partner_dashboard/')
         self.assertEqual(dashboard.status_code, status.HTTP_200_OK, dashboard.content)
-        self.assertEqual(Decimal(str(dashboard.json()['partner_info']['total_earnings'])), Decimal('75.0000'))
+        self.assertEqual(Decimal(str(dashboard.json()['partner_info']['total_earnings'])), Decimal('250.0000'))
         self.assertEqual(len(dashboard.json()['recent_earnings']), 1)
 
         start = (timezone.now() - timedelta(days=1)).date().isoformat()
@@ -307,18 +308,18 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(turnover.status_code, status.HTTP_200_OK, turnover.content)
         partner_row = next(item for item in turnover.json()['partners'] if item['id'] == partner.id)
         self.assertEqual(Decimal(str(partner_row['turnover'])), Decimal('1000.0'))
-        self.assertEqual(Decimal(str(partner_row['commission'])), Decimal('75.0'))
+        self.assertEqual(Decimal(str(partner_row['commission'])), Decimal('250.0'))
 
         self.api.force_authenticate(admin_user)
         admin_earnings = self.api.get('/api/users/admin_earnings/')
         self.assertEqual(admin_earnings.status_code, status.HTTP_200_OK, admin_earnings.content)
         earnings_data = admin_earnings.json()['earnings']
         admin_row = next(item for item in earnings_data if item['id'] == earning.id)
-        self.assertEqual(Decimal(str(admin_row['amount'])), Decimal('75.00'))
-        self.assertFalse(admin_row['is_paid'])
+        self.assertEqual(Decimal(str(admin_row['amount'])), Decimal('250.00'))
+        self.assertTrue(admin_row['is_paid'])
 
         mark_paid = self.api.post('/api/users/admin_mark_earning_paid/', {'earning_id': earning.id}, format='json')
-        self.assertEqual(mark_paid.status_code, status.HTTP_200_OK, mark_paid.content)
+        self.assertEqual(mark_paid.status_code, status.HTTP_400_BAD_REQUEST, mark_paid.content)
         earning.refresh_from_db()
         self.assertTrue(earning.is_paid)
 
@@ -328,11 +329,12 @@ class WalletOrderLedgerTests(TestCase):
             email='ledger_partner_full_flow@example.com',
             password='pwd',
             role='partner',
-            partner_commission_rate=Decimal('10.00'),
+            partner_commission_rate=Decimal('25.00'),
         )
         self.client_user.partner = partner
-        self.client_user.save(update_fields=['partner'])
-        WalletService.topup(self.client_user, Decimal('1200.00'))
+        self.client_user.partner_linked_at = timezone.now()
+        self.client_user.save(update_fields=['partner', 'partner_linked_at'])
+        WalletService.topup(self.client_user, Decimal('1500.00'))
 
         order = Order.objects.create(
             client=self.client_user,
@@ -358,13 +360,15 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(accepted.status_code, status.HTTP_200_OK, accepted.content)
 
         self.client_user.refresh_from_db()
-        self.assertEqual(self.client_user.balance, Decimal('1200.00'))
-        self.assertEqual(self.client_user.frozen_balance, Decimal('1200.00'))
+        self.assertEqual(self.client_user.balance, Decimal('1500.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('750.00'))
         self.assertEqual(Transaction.objects.filter(order=order, type=TransactionType.HOLD).count(), 1)
 
+        self.api.force_authenticate(self.client_user)
+        paid = self.api.post(f'/api/orders/orders/{order.id}/pay-remaining/', {}, format='json')
+        self.assertEqual(paid.status_code, status.HTTP_200_OK, paid.content)
         order.status = 'review'
         order.save(update_fields=['status', 'updated_at'])
-        self.api.force_authenticate(self.client_user)
         approved = self.api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(approved.status_code, status.HTTP_200_OK, approved.content)
 
@@ -378,17 +382,17 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(order.status, 'completed')
         self.assertEqual(self.client_user.balance, Decimal('0.00'))
         self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
-        self.assertEqual(self.expert.balance, Decimal('1020.00'))
-        self.assertEqual(system_user.balance, Decimal('180.00'))
+        self.assertEqual(self.expert.balance, Decimal('1200.00'))
+        self.assertEqual(system_user.balance, Decimal('0.00'))
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.RELEASE).exists())
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PAYOUT).exists())
-        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.COMMISSION).exists())
+        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PARTNER_PAYOUT).exists())
 
         earning = PartnerEarning.objects.get(partner=partner, referral=self.client_user, order=order)
-        self.assertEqual(earning.amount, Decimal('120.0000'))
-        self.assertEqual(partner.total_earnings, Decimal('120.0000'))
-        self.assertEqual(partner.balance, Decimal('0.00'))
-        self.assertEqual(partner.pending_balance, Decimal('120.00'))
+        self.assertEqual(earning.amount, Decimal('300.0000'))
+        self.assertEqual(partner.total_earnings, Decimal('300.0000'))
+        self.assertEqual(partner.balance, Decimal('300.00'))
+        self.assertEqual(partner.pending_balance, Decimal('0.00'))
 
 
 class PartnerPayoutTests(TestCase):
@@ -404,7 +408,8 @@ class PartnerPayoutTests(TestCase):
             role='client',
         )
         self.client_user.partner = self.partner
-        self.client_user.save(update_fields=['partner'])
+        self.client_user.partner_linked_at = timezone.now()
+        self.client_user.save(update_fields=['partner', 'partner_linked_at'])
         self.admin = User.objects.create_user(
             username='admin1', email='admin1@test.com', password='pwd',
             role='admin',

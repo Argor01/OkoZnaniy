@@ -179,7 +179,7 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
         message = PartnerChatMessage.objects.create(
             room=room,
             sender=request.user,
-            message=msg_text,
+            message=msg_text or file.name,
             file=file,
             file_name=file.name,
         )

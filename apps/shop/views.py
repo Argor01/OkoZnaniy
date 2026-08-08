@@ -175,7 +175,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        first_file = work.files.first()
+        first_file = work.files.order_by('name', 'id').first()
         purchase = Purchase(
             work=work,
             buyer=request.user,

@@ -185,8 +185,8 @@ class OrderReviewLifecycleTests(TestCase):
 
     def test_client_can_approve_review_order(self):
         order = self._create_order(status="review")
-        WalletService.topup(self.client_user, Decimal("5000"))
-        WalletService.hold(self.client_user, Decimal("5000"), order=order)
+        WalletService.topup(self.client_user, Decimal("6250"))
+        WalletService.hold(self.client_user, Decimal("6250"), order=order)
         self.api_client.force_authenticate(user=self.client_user)
 
         response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
@@ -198,7 +198,7 @@ class OrderReviewLifecycleTests(TestCase):
         self.assertEqual(order.status, "completed")
         self.assertEqual(self.client_user.balance, Decimal("0.00"))
         self.assertEqual(self.client_user.frozen_balance, Decimal("0.00"))
-        self.assertEqual(self.expert_user.balance, Decimal("4250.00"))
+        self.assertEqual(self.expert_user.balance, Decimal("5000.00"))
 
     def test_client_cannot_approve_review_order_without_reserved_funds(self):
         order = self._create_order(status="review")
@@ -359,7 +359,7 @@ class OrderChatBootstrapTests(TestCase):
         self.assertEqual(order.status, "in_progress")
         self.assertEqual(order.budget, Decimal("3000"))
         self.assertEqual(self.client_user.balance, Decimal("3000.00"))
-        self.assertEqual(self.client_user.frozen_balance, Decimal("3000.00"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("1875.00"))
         self.assertTrue(Transaction.objects.filter(order=order, user=self.client_user, type=TransactionType.HOLD).exists())
         bid.refresh_from_db()
         self.assertEqual(bid.status, "accepted")
@@ -414,7 +414,7 @@ class OrderChatBootstrapTests(TestCase):
 
     def test_take_creates_main_chat_and_order_subdialog(self):
         order = self._create_order()
-        WalletService.topup(self.client_user, Decimal("2500"))
+        WalletService.topup(self.client_user, Decimal("3125"))
         self.api_client.force_authenticate(user=self.expert_user)
 
         response = self.api_client.post(f"/api/orders/orders/{order.id}/take/", {}, format="json")
@@ -424,7 +424,7 @@ class OrderChatBootstrapTests(TestCase):
         self.client_user.refresh_from_db()
         self.assertEqual(order.expert_id, self.expert_user.id)
         self.assertEqual(order.status, "in_progress")
-        self.assertEqual(self.client_user.frozen_balance, Decimal("2500.00"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("3125.00"))
         self.assertTrue(
             Chat.objects.filter(order__isnull=True, participants=self.client_user)
             .filter(participants=self.expert_user)

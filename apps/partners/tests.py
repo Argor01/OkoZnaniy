@@ -196,8 +196,8 @@ class PartnerChatRoomViewSetTests(TestCase):
             format='multipart',
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json()['filename'], 'brief.txt')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.json()['file_name'], 'brief.txt')
         self.assertTrue(
             PartnerChatMessage.objects.filter(
                 room=room,

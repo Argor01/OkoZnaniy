@@ -129,7 +129,7 @@ class OrderPriceTypeTests(TestCase):
         self.assertEqual(order.status, "new")
 
     def test_accept_bid_blocked_when_balance_below_bid_amount(self):
-        WalletService.topup(self.client_user, Decimal("2000"))
+        WalletService.topup(self.client_user, Decimal("1800"))
         order = self._create_order()
         bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"))
         response = self.api_client.post(
