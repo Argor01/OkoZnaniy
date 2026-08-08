@@ -309,8 +309,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   };
 
   const handleRefund = async () => {
-    if (!detailData?.order?.id) {
-      message.error('Заказ не найден');
+    if (!detailData?.order?.id && !detailData?.purchase?.id) {
+      message.error('Нет связанного заказа или покупки');
       return;
     }
     
