@@ -28,7 +28,7 @@ def release_ready_work_holds():
                 description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
             )
             purchase.status = Purchase.Status.COMPLETED
-            purchase.save(update_fields=['status', 'updated_at'])
+            purchase.save(update_fields=['status'])
             count += 1
         except Exception as e:
             logger.error(

@@ -30,7 +30,7 @@ import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
 
-const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 3 дней можно открыть спор, если работа не устраивает.';
+const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 7 дней можно открыть спор, если работа не устраивает.';
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
@@ -406,7 +406,6 @@ const ShopWorkDetail: React.FC = () => {
                       variant="outline"
                       danger
                       size="large"
-                      icon={<WarningOutlined />}
                       onClick={handleDispute}
                       loading={disputeMutation.isPending}
                       className={styles.actionButton}
@@ -417,7 +416,6 @@ const ShopWorkDetail: React.FC = () => {
                   <AppButton
                     variant="primary"
                     size="large"
-                    icon={<DownloadOutlined />}
                     disabled={!purchase.delivered_file_available || purchase.status === 'disputed'}
                     onClick={async () => {
                       if (!purchase.delivered_file_available) return;

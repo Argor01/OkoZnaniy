@@ -39,6 +39,7 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
     assigned_users = PublicUserProfileSerializer(many=True, read_only=True)
     decision_made_by = PublicUserProfileSerializer(read_only=True)
     order = OrderSerializer(read_only=True)
+    purchase = serializers.SerializerMethodField()
     
     messages = ArbitrationMessageSerializer(many=True, read_only=True)
     activities = ArbitrationActivitySerializer(many=True, read_only=True)
@@ -64,7 +65,7 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
         model = ArbitrationCase
         fields = [
             'id', 'case_number', 'plaintiff', 'plaintiff_id', 'defendant', 'defendant_id',
-            'order', 'order_id', 'reason', 'reason_display', 'subject',
+            'order', 'order_id', 'purchase', 'reason', 'reason_display', 'subject',
             'description', 'refund_type', 'refund_type_display',
             'requested_refund_percentage', 'requested_refund_amount',
             'approved_refund_percentage', 'approved_refund_amount',
@@ -79,6 +80,21 @@ class ArbitrationCaseSerializer(serializers.ModelSerializer):
             'case_number', 'created_at', 'updated_at', 'submitted_at',
             'closed_at', 'decision_date'
         ]
+    
+    def get_purchase(self, obj):
+        if not obj.purchase_id:
+            return None
+        purchase = obj.purchase
+        return {
+            'id': purchase.id,
+            'work_title': purchase.work.title if purchase.work else None,
+            'work_id': purchase.work_id,
+            'price_paid': str(purchase.price_paid),
+            'buyer_username': purchase.buyer.username if purchase.buyer else None,
+            'author_username': purchase.work.author.username if purchase.work and purchase.work.author else None,
+            'status': purchase.status,
+            'created_at': purchase.created_at.isoformat() if purchase.created_at else None,
+        }
     
     def create(self, validated_data):
         # Удаляем write-only поля
@@ -296,6 +312,89 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
             actor=user,
             activity_type='created',
             description=f'Дело создано пользователем {user.get_full_name() or user.username}'
+        )
+        
+        return case
+
+
+class PurchaseDisputeSerializer(serializers.Serializer):
+    """Сериализатор для подачи спора по покупке готовой работы"""
+    
+    purchase_id = serializers.IntegerField()
+    description = serializers.CharField(allow_blank=True)
+    requested_refund_percentage = serializers.FloatField(
+        default=100,
+        min_value=0,
+        max_value=100
+    )
+    
+    def validate(self, data):
+        from apps.shop.models import Purchase
+        
+        request = self.context['request']
+        user = request.user
+        purchase_id = data.get('purchase_id')
+        
+        if not data.get('description', '').strip():
+            raise serializers.ValidationError({
+                'description': 'Описание проблемы обязательно для заполнения'
+            })
+        
+        try:
+            purchase = Purchase.objects.select_related('work', 'work__author', 'buyer').get(id=purchase_id)
+        except Purchase.DoesNotExist:
+            raise serializers.ValidationError({
+                'purchase_id': 'Покупка не найдена'
+            })
+        
+        if purchase.buyer_id != user.id:
+            raise serializers.ValidationError({
+                'purchase_id': 'Вы не являетесь покупателем этой работы'
+            })
+        
+        if purchase.status != 'paid':
+            raise serializers.ValidationError({
+                'purchase_id': 'Спор можно открыть только для оплаченной покупки'
+            })
+        
+        if purchase.hold_until and timezone.now() > purchase.hold_until:
+            raise serializers.ValidationError({
+                'purchase_id': 'Срок подачи спора истёк (7 дней с момента покупки)'
+            })
+        
+        existing = ArbitrationCase.objects.filter(
+            purchase_id=purchase_id,
+        ).exclude(status__in=['closed', 'rejected']).first()
+        if existing is not None:
+            raise serializers.ValidationError({
+                'purchase_id': f'По этой покупке уже открыто дело {existing.case_number}'
+            })
+        
+        data['purchase'] = purchase
+        return data
+    
+    def create(self, validated_data):
+        user = self.context['request'].user
+        purchase = validated_data.pop('purchase')
+        
+        case = ArbitrationCase.objects.create(
+            plaintiff=user,
+            defendant=purchase.work.author,
+            purchase=purchase,
+            subject=f'Спор по покупке: {purchase.work.title}',
+            reason='ready_work_dispute',
+            description=validated_data.get('description', ''),
+            refund_type='full' if validated_data.get('requested_refund_percentage', 100) >= 100 else 'partial',
+            requested_refund_percentage=Decimal(str(validated_data.get('requested_refund_percentage', 100))),
+            status='submitted',
+            submitted_at=timezone.now(),
+        )
+        
+        ArbitrationActivity.objects.create(
+            case=case,
+            actor=user,
+            activity_type='created',
+            description=f'Спор по покупке открыт пользователем {user.get_full_name() or user.username}'
         )
         
         return case

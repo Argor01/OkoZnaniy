@@ -34,6 +34,7 @@ class ArbitrationCase(models.Model):
         ('deadline_violation', 'Нарушение сроков'),
         ('payment_dispute', 'Спор по оплате'),
         ('contract_violation', 'Нарушение условий договора'),
+        ('ready_work_dispute', 'Спор по готовой работе'),
         ('other', 'Другое'),
     ]
     
@@ -82,6 +83,16 @@ class ArbitrationCase(models.Model):
         blank=True,
         related_name='arbitration_cases',
         verbose_name='Связанный заказ'
+    )
+    
+    # Связанная покупка готовой работы
+    purchase = models.ForeignKey(
+        'shop.Purchase',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='arbitration_cases',
+        verbose_name='Связанная покупка'
     )
     
     # Детали претензии

@@ -93,15 +93,61 @@ def ensure_case_not_closed(case):
 def _process_arbitration_refund(case, refund_percentage):
     """Финализация финансового решения по арбитражу.
 
-    Распределяет замороженные средства заказа:
-    - refund_percentage% → клиенту (refund_hold)
-    - остальное → эксперту (release_to_expert с комиссией 15%)
-
-    Если эксперта нет — вся сумма возвращается клиенту.
-    Если замороженных средств нет — возвращает ошибку.
+    Распределяет замороженные средства:
+    - Для заказов: refund_percentage% → клиенту, остальное → эксперту
+    - Для покупок готовых работ: аналогичная логика
 
     Возвращает None при успехе или Response с ошибкой.
     """
+
+    # Ветка для покупки готовой работы
+    if case.purchase:
+        purchase = case.purchase
+        hold_amount = purchase.price_paid
+
+        if hold_amount <= 0:
+            return Response(
+                {'detail': 'Нет средств для возврата по покупке.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        refund_decimal = Decimal(str(refund_percentage))
+        client_amount = (hold_amount * refund_decimal / Decimal('100')).quantize(Decimal('0.01'))
+        expert_amount = hold_amount - client_amount
+
+        try:
+            if client_amount > 0:
+                WalletService.refund_hold(
+                    purchase.buyer,
+                    client_amount,
+                    description=f'Арбитраж {case.case_number}: возврат за покупку «{purchase.work.title}» {refund_percentage}%',
+                )
+
+            if expert_amount > 0:
+                WalletService.release_to_expert(
+                    client=purchase.buyer,
+                    expert=purchase.work.author,
+                    amount=expert_amount,
+                    description=f'Арбитраж {case.case_number}: выплата эксперту за «{purchase.work.title}»',
+                )
+
+            if refund_percentage >= 100:
+                purchase.status = 'refunded'
+            elif refund_percentage > 0:
+                purchase.status = 'completed'
+            else:
+                purchase.status = 'completed'
+            purchase.save(update_fields=['status'])
+
+        except Exception as e:
+            return Response(
+                {'detail': f'Ошибка при работе с кошельком: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return None
+
+    # Ветка для заказа (существующая логика)
     order = case.order
     if not order or not order.client:
         return Response(
@@ -400,6 +446,62 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             message_text='По заказу открыт арбитраж. Заказ и переписка временно заморожены до решения.',
             exclude_user_ids=[case.plaintiff_id, case.defendant_id] if case.defendant_id else [],
             notification_type=NotificationType.STATUS_CHANGED,
+        )
+        
+        return Response(
+            ArbitrationCaseSerializer(case).data,
+            status=status.HTTP_201_CREATED
+        )
+    
+    @action(detail=False, methods=['post'], url_path='submit-purchase-dispute')
+    def submit_purchase_dispute(self, request):
+        """
+        Подача спора по покупке готовой работы
+        POST /api/arbitration/cases/submit-purchase-dispute/
+        """
+        from .serializers import PurchaseDisputeSerializer
+        
+        serializer = PurchaseDisputeSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        case = serializer.save()
+        
+        purchase = case.purchase
+        
+        # Обновляем статус покупки
+        purchase.status = 'disputed'
+        purchase.delivered_file = None
+        purchase.delivered_file_name = ''
+        purchase.delivered_file_type = ''
+        purchase.delivered_file_size = 0
+        purchase.save(update_fields=[
+            'status', 'delivered_file', 'delivered_file_name',
+            'delivered_file_type', 'delivered_file_size',
+        ])
+        
+        # Уведомление продавцу
+        try:
+            NotificationService.create_notification(
+                recipient=purchase.work.author,
+                type=NotificationType.STATUS_CHANGED,
+                title='Открыт спор по покупке',
+                message=(
+                    f'Покупатель {request.user.username} открыл спор по покупке '
+                    f'«{purchase.work.title}». Доступ к файлу отозван, средства '
+                    f'заморожены до решения арбитража.'
+                ),
+                related_object_id=case.id,
+                related_object_type='arbitration_case',
+                data={'case_id': case.id, 'purchase_id': purchase.id},
+            )
+        except Exception:
+            pass
+        
+        log_activity(
+            case, request.user, 'submitted',
+            f'Спор по покупке открыт пользователем {request.user.get_full_name() or request.user.username}'
         )
         
         return Response(

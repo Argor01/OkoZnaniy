@@ -14,7 +14,7 @@ from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
-HOLD_DAYS = 3
+HOLD_DAYS = 7
 
 
 class IsExpertOrStaff(permissions.BasePermission):
@@ -83,11 +83,11 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         work = self.get_object()
         active_purchases = Purchase.objects.filter(
             work=work,
-            status=Purchase.Status.PAID,
+            status__in=[Purchase.Status.PAID, Purchase.Status.DISPUTED],
         ).exists()
         if active_purchases:
             return Response(
-                {'detail': 'Невозможно удалить работу: есть активные покупки. Дождитесь завершения удержания (3 дня) или разрешения споров.'},
+                {'detail': 'Невозможно удалить работу: есть активные покупки. Дождитесь завершения удержания (7 дней) или разрешения споров.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return super().destroy(request, *args, **kwargs)
@@ -222,10 +222,35 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         now = timezone.now()
         if purchase.hold_until and now > purchase.hold_until:
             return Response(
-                {'detail': 'Срок подачи спора истёк (3 дня с момента покупки).'},
+                {'detail': 'Срок подачи спора истёк (7 дней с момента покупки).'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Проверяем, нет ли уже открытого арбитража по этой покупке
+        from apps.arbitration.models import ArbitrationCase
+        existing = ArbitrationCase.objects.filter(
+            purchase=purchase,
+        ).exclude(status__in=['closed', 'rejected']).first()
+        if existing:
+            return Response(
+                {'detail': f'По этой покупке уже открыто дело {existing.case_number}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Создаём арбитражное дело
+        from apps.arbitration.serializers import PurchaseDisputeSerializer
+        dispute_serializer = PurchaseDisputeSerializer(
+            data={
+                'purchase_id': purchase.id,
+                'description': request.data.get('description', 'Спор по покупке готовой работы'),
+                'requested_refund_percentage': request.data.get('requested_refund_percentage', 100),
+            },
+            context={'request': request},
+        )
+        dispute_serializer.is_valid(raise_exception=True)
+        case = dispute_serializer.save()
+
+        # Обновляем статус покупки
         purchase.status = Purchase.Status.DISPUTED
         purchase.delivered_file = None
         purchase.delivered_file_name = ''
@@ -233,9 +258,10 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         purchase.delivered_file_size = 0
         purchase.save(update_fields=[
             'status', 'delivered_file', 'delivered_file_name',
-            'delivered_file_type', 'delivered_file_size', 'updated_at',
+            'delivered_file_type', 'delivered_file_size',
         ])
 
+        # Уведомление продавцу
         try:
             from apps.notifications.services import NotificationService
             from apps.notifications.models import NotificationType
@@ -247,18 +273,20 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
                 message=(
                     f'Покупатель {request.user.username} открыл спор по покупке '
                     f'«{purchase.work.title}». Доступ к файлу отозван, средства '
-                    f'заморожены до разрешения спора.'
+                    f'заморожены до решения арбитража ({case.case_number}).'
                 ),
-                related_object_id=purchase.id,
-                related_object_type='purchase',
-                data={'purchase_id': purchase.id, 'reason': 'dispute_opened'},
+                related_object_id=case.id,
+                related_object_type='arbitration_case',
+                data={'case_id': case.id, 'purchase_id': purchase.id},
             )
         except Exception:
             pass
 
         return Response({
             'status': 'disputed',
-            'detail': 'Спор открыт. Средства заморожены до разрешения.',
+            'case_number': case.case_number,
+            'case_id': case.id,
+            'detail': 'Спор открыт. Дело зарегистрировано в арбитраже.',
         })
 
     @action(detail=True, methods=['post'])

@@ -78,16 +78,16 @@
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
 }
 
 .infoCard {
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .infoCard :global(.ant-card-body) {
-  padding: 10px 12px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,10 +97,11 @@
 }
 
 .infoLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: block;
+  color: var(--text-tertiary, #8c8c8c);
 }
 
 .centeredStat {
@@ -109,10 +110,11 @@
 }
 
 .statLabel {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  color: var(--text-tertiary, #8c8c8c);
 }
 
 .centeredRow {
@@ -122,35 +124,35 @@
 
 .mutedIcon {
   color: var(--text-tertiary, #8c8c8c);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .mutedValue {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary, #595959);
 }
 
 .subjectValue {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary, #1f2937);
 }
 
 .priceIcon {
   color: #52c41a;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .priceValue {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #389e0d;
 }
 
 .ratingIcon {
   color: #faad14;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .ratingRow {
@@ -160,13 +162,13 @@
 }
 
 .ratingCount {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--text-tertiary, #8c8c8c);
   white-space: nowrap;
 }
 
 .rateSmall {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
 }
 
@@ -180,7 +182,7 @@
 }
 
 .createdValue {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary, #595959);
 }
@@ -242,17 +244,17 @@
   }
 
   .infoGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
   }
 
   .infoCard {
-    min-height: 80px;
+    min-height: 72px;
   }
 
   .infoCard :global(.ant-card-body) {
-    padding: 8px 10px;
-    min-height: 80px;
+    padding: 6px 8px;
+    min-height: 72px;
   }
 
   .actionButton {
@@ -266,37 +268,37 @@
   }
 
   .infoGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
   }
 
   .infoCard {
-    min-height: 76px;
+    min-height: 68px;
   }
 
   .infoCard :global(.ant-card-body) {
-    padding: 6px 8px;
-    min-height: 76px;
+    padding: 6px 6px;
+    min-height: 68px;
   }
 
   .infoLabel {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .centeredStat .statLabel {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .rateSmall {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .ratingIcon {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .ratingCount {
-    font-size: 12px;
+    font-size: 11px;
   }
 }
 

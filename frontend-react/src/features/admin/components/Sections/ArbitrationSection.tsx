@@ -71,6 +71,21 @@ interface ArbitrationCase {
     first_name: string;
     last_name: string;
   };
+  order?: {
+    id: number;
+    title: string;
+    budget: number;
+  };
+  purchase?: {
+    id: number;
+    work_title: string;
+    work_id: number;
+    price_paid: string;
+    buyer_username: string;
+    author_username: string;
+    status: string;
+    created_at: string;
+  };
   created_at: string;
   updated_at: string;
   messages_count: number;
@@ -303,8 +318,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       await refundForm.validateFields();
       setRefundProcessing(true);
       
-      const orderAmount = detailData.order.budget || 0;
-      const refundAmount = Math.round((orderAmount * refundPercentage) / 100);
+      const baseAmount = detailData.order?.budget || (detailData.purchase ? parseFloat(detailData.purchase.price_paid) : 0);
+      const refundAmount = Math.round((baseAmount * refundPercentage) / 100);
       const requireApproval = refundForm.getFieldValue('requireApproval') || false;
       
       await arbitrationApi.processRefund(detailData.id, refundPercentage, refundAmount, requireApproval);
@@ -553,6 +568,15 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                 <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{detailData.description || 'Описание не заполнено'}</Paragraph>
               </Descriptions.Item>
               {detailData.order ? <Descriptions.Item label="Заказ">#{detailData.order.id} · {detailData.order.title}</Descriptions.Item> : null}
+              {detailData.purchase ? (
+                <Descriptions.Item label="Покупка">
+                  #{detailData.purchase.id} · {detailData.purchase.work_title} · {detailData.purchase.price_paid} ₽
+                  <br />
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Покупатель: {detailData.purchase.buyer_username} · Продавец: {detailData.purchase.author_username}
+                  </Text>
+                </Descriptions.Item>
+              ) : null}
             </Descriptions>
 
             <Card size="small" title="Действия">
@@ -578,8 +602,9 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               </Space>
             </Card>
 
-            {detailData.order && ['under_review', 'in_arbitration', 'awaiting_response'].includes(detailData.status) && (() => {
+            {(detailData.order || detailData.purchase) && ['under_review', 'in_arbitration', 'awaiting_response'].includes(detailData.status) && (() => {
               const refundAlreadyDone = detailData.approved_refund_percentage != null && detailData.approved_refund_percentage !== '';
+              const baseAmount = detailData.order?.budget || (detailData.purchase ? parseFloat(detailData.purchase.price_paid) : 0);
               return (
                 <Card size="small" title={<Space><DollarOutlined />Возврат средств</Space>}>
                   <Form form={refundForm} layout="vertical">
@@ -593,9 +618,9 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                       )}
 
                       <div>
-                        <Text strong>Сумма заказа: </Text>
+                        <Text strong>Сумма: </Text>
                         <Text style={{ fontSize: 16, color: '#6435a5' }}>
-                          {(detailData.order.budget || 0).toLocaleString()} ₽
+                          {baseAmount.toLocaleString()} ₽
                         </Text>
                       </div>
 
@@ -605,7 +630,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                         </div>
                         <div style={{ marginBottom: 8 }}>
                           <Text style={{ fontSize: 18, color: '#52c41a', fontWeight: 600 }}>
-                             {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                             {Math.round((baseAmount * refundPercentage) / 100).toLocaleString()} ₽
                           </Text>
                         </div>
                         <Slider
@@ -623,7 +648,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                             100: '100%',
                           }}
                           tooltip={{
-                            formatter: (value) => `${value}% (${Math.round(((detailData.order.budget || 0) * (value || 0)) / 100).toLocaleString()} ₽)`,
+                            formatter: (value) => `${value}% (${Math.round((baseAmount * (value || 0)) / 100).toLocaleString()} ₽)`,
                           }}
                         />
                       </div>
@@ -658,7 +683,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                         size="large"
                         block
                       >
-                        Оформить возврат {Math.round(((detailData.order.budget || 0) * refundPercentage) / 100).toLocaleString()} ₽
+                        Оформить возврат {Math.round((baseAmount * refundPercentage) / 100).toLocaleString()} ₽
                       </Button>
                     </Space>
                   </Form>
@@ -666,15 +691,18 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               );
             })()}
 
-            {detailData.status === 'pending_approval' && detailData.order && (
-              <Card size="small" title={<Space><DollarOutlined />Ожидает согласования возврата</Space>} style={{ borderColor: '#faad14' }}>
-                <Space direction="vertical" size={8}>
-                  <Text>Предложенный возврат: <Text strong>{detailData.approved_refund_percentage}%</Text>
-                    ({Math.round(((detailData.order.budget || 0) * (detailData.approved_refund_percentage || 0)) / 100).toLocaleString()} ₽)
-                  </Text>
+            {detailData.status === 'pending_approval' && (detailData.order || detailData.purchase) && (() => {
+              const baseAmount = detailData.order?.budget || (detailData.purchase ? parseFloat(detailData.purchase.price_paid) : 0);
+              return (
+                <Card size="small" title={<Space><DollarOutlined />Ожидает согласования возврата</Space>} style={{ borderColor: '#faad14' }}>
+                  <Space direction="vertical" size={8}>
+                    <Text>Предложенный возврат: <Text strong>{detailData.approved_refund_percentage}%</Text>
+                      ({Math.round((baseAmount * (detailData.approved_refund_percentage || 0)) / 100).toLocaleString()} ₽)
+                    </Text>
                 </Space>
               </Card>
-            )}
+              );
+            })()}
 
             <Card size="small" title="Переписка и история">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
