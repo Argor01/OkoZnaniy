@@ -343,7 +343,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
     
     def get_queryset(self):
-        queryset = super().get_queryset().select_related('order', 'order__client', 'order__expert', 'assigned_admin')
+        queryset = super().get_queryset().select_related('order', 'order__client', 'order__expert', 'assigned_admin', 'purchase', 'purchase__work', 'purchase__work__author', 'purchase__buyer')
         user = self.request.user
         
         # Администраторы видят все дела
@@ -361,14 +361,16 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
                 queryset = queryset.filter(assigned_admin=user)
             
             return queryset.select_related(
-                'plaintiff', 'defendant', 'assigned_admin', 'order'
+                'plaintiff', 'defendant', 'assigned_admin', 'order',
+                'purchase', 'purchase__work', 'purchase__work__author', 'purchase__buyer',
             ).prefetch_related('assigned_users', 'messages', 'activities')
         
         # Обычные пользователи видят только свои дела (как истец или ответчик)
         queryset = queryset.filter(
             Q(plaintiff=user) | Q(defendant=user)
         ).select_related(
-            'plaintiff', 'defendant', 'assigned_admin', 'order'
+            'plaintiff', 'defendant', 'assigned_admin', 'order',
+            'purchase', 'purchase__work', 'purchase__work__author', 'purchase__buyer',
         ).prefetch_related('messages')
         
         return queryset
