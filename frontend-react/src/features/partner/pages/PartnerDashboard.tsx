@@ -167,7 +167,7 @@ const StatisticsPanel: React.FC<{
             />
           </Card>
         </Col>
-        {partnerInfo.pending_balance > 0 && (
+        {partnerInfo.expected_income > 0 && (
           <Col xs={24} sm={12} md={6}>
             <Card 
               style={{ 
@@ -176,8 +176,8 @@ const StatisticsPanel: React.FC<{
               }}
             >
               <Statistic
-                title="Ожидает выплаты"
-                value={partnerInfo.pending_balance}
+                title="Ожидаемый доход"
+                value={partnerInfo.expected_income}
                 suffix="₽"
                 prefix={<DollarOutlined style={{ color: '#fa8c16' }} />}
                 valueStyle={{ color: '#fa8c16' }}

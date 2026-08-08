@@ -31,6 +31,8 @@ export type TopupResponse = {
   payment_id: string;
   amount: string;
   method: string;
+  wallet_credit?: string;
+  acquiring_fee?: string;
   payment_url: string;
 };
 
@@ -38,6 +40,9 @@ export type WithdrawResponse = {
   withdrawal_id: number;
   status: string;
   amount: string;
+  gross_amount: string;
+  platform_fee: string;
+  acquiring_fee: string;
   card: string;
   balance: WalletBalance;
 };

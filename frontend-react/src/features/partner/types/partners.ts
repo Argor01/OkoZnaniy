@@ -29,12 +29,14 @@ export interface PartnerInfo {
   active_referrals: number;
   total_earnings: number;
   pending_balance: number;
+  expected_income: number;
 }
 
 export interface PartnerDashboardData {
   partner_info: PartnerInfo;
   referrals: Referral[];
   recent_earnings: PartnerEarning[];
+  monthly_history: Array<{ month: string; total: number }>;
 }
 
 export interface ReferralLinkResponse {

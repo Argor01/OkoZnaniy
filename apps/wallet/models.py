@@ -19,6 +19,9 @@ class WithdrawalRequest(models.Model):
         related_name="withdrawal_requests", verbose_name="Пользователь",
     )
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Сумма")
+    gross_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Списано с кошелька")
+    platform_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Комиссия платформы")
+    acquiring_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Комиссия эквайринга")
     card_number = models.CharField(max_length=32, verbose_name="Карта (маскированная)")
     status = models.CharField(
         max_length=16, choices=Status.choices, default=Status.PENDING, verbose_name="Статус",

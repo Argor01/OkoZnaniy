@@ -15,6 +15,7 @@ from .services import OrderActionService
 from apps.chat.services import ensure_order_chat_started
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
+from apps.wallet.policy import order_quote, money
 from apps.wallet.services import InsufficientFunds, WalletService
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.http import FileResponse, Http404
@@ -109,7 +110,8 @@ def _approve_review_order_atomically(order, user):
             user=locked_order.client,
             type=TransactionType.PURCHASE,
         ).exists()
-        if payment_amount > 0 and active_hold < payment_amount and not has_direct_payment:
+        required_hold = money(order_quote(payment_amount)['base_amount'] + order_quote(payment_amount)['service_fee'])
+        if payment_amount > 0 and active_hold < required_hold and not has_direct_payment:
             raise ValueError('Средства по заказу не зарезервированы.')
 
         _release_order_hold_if_any(locked_order)
@@ -156,38 +158,36 @@ def _reject_review_order_atomically(order, user):
         return locked_order, old_status
 
 
-def _reserve_order_hold_if_needed(order, amount=None):
-    amount = amount if amount is not None else _order_payment_amount(order)
-    if not isinstance(amount, Decimal):
-        amount = Decimal(str(amount or '0'))
-    amount = amount.quantize(Decimal('0.01'))
-    if amount <= 0:
+def _reserve_order_hold_if_needed(order, amount=None, prepayment_percent=100):
+    base = amount if amount is not None else _order_payment_amount(order)
+    quote = order_quote(base)
+    full_hold = money(quote['base_amount'] + quote['service_fee'])
+    percent_value = int(prepayment_percent or 100)
+    if percent_value not in (25, 50, 75, 100):
+        raise ValueError('Предоплата может быть только 25%, 50%, 75% или 100%.')
+    target_hold = money(full_hold * Decimal(percent_value) / Decimal('100'))
+    active_hold = money(_active_order_hold(order))
+    if active_hold >= target_hold:
         return None
-
-    active_hold = _active_order_hold(order)
-    if not isinstance(active_hold, Decimal):
-        active_hold = Decimal(str(active_hold or '0'))
-    active_hold = active_hold.quantize(Decimal('0.01'))
-    if active_hold >= amount:
-        return None
-
-    return WalletService.hold(
-        order.client,
-        amount - active_hold,
-        order=order,
-        description=f'Резерв средств по заказу #{order.id}',
-    )
+    return WalletService.hold(order.client, target_hold - active_hold, order=order, description=f'Резерв {percent_value}% по заказу #{order.id}')
 
 
 def _release_order_hold_if_any(order):
-    amount = _active_order_hold(order)
-    if amount > 0 and order.expert_id:
-        WalletService.release_to_expert(
-            client=order.client,
-            expert=order.expert,
-            amount=amount,
-            order=order,
-        )
+    active_hold = money(_active_order_hold(order))
+    if active_hold <= 0 or not order.expert_id:
+        return None
+    quote = order_quote(_order_payment_amount(order))
+    expected = money(quote['base_amount'] + quote['service_fee'])
+    if active_hold < expected:
+        raise InsufficientFunds('Заказ оплачен не полностью.')
+    return WalletService.release_order_payment(
+        client=order.client,
+        expert=order.expert,
+        base_amount=quote['base_amount'],
+        service_fee=quote['service_fee'],
+        order=order,
+        description=f'Распределение оплаты по заказу #{order.id}',
+    )
 
 
 def _refund_order_hold_if_any(order):
@@ -698,7 +698,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
                 Bid.objects.filter(order=order, expert=bid.expert).update(status=BidStatus.INVITED)
 
-                _reserve_order_hold_if_needed(order, bid.amount)
+                _reserve_order_hold_if_needed(order, bid.amount, bid.prepayment_percent)
         except InsufficientFunds:
             return Response(
                 {'detail': 'Недостаточно средств на балансе для назначения исполнителя. '
@@ -725,6 +725,19 @@ class OrderViewSet(viewsets.ModelViewSet):
         response_data['selected_bid_id'] = bid.id
         return Response(response_data)
 
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='pay-remaining')
+    def pay_remaining(self, request, pk=None):
+        order = self.get_object()
+        if order.client_id != request.user.id:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        if order.status not in ['awaiting_expert_acceptance', 'in_progress', 'review', 'revision']:
+            return Response({'detail': 'Доплата недоступна для текущего статуса.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            tx = _reserve_order_hold_if_needed(order, _order_payment_amount(order), 100)
+        except InsufficientFunds:
+            return Response({'detail': 'Недостаточно средств для доплаты.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Заказ оплачен полностью.', 'transaction_id': tx.id if tx else None})
+
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_assignment(self, request, pk=None):
         """Эксперт принимает приглашение и только после этого заказ стартует."""
@@ -747,7 +760,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         try:
             with transaction.atomic():
-                _reserve_order_hold_if_needed(order, bid.amount)
+                _reserve_order_hold_if_needed(order, bid.amount, bid.prepayment_percent)
                 bid.status = BidStatus.ACCEPTED
                 bid.save(update_fields=['status'])
                 order.budget = bid.amount
@@ -907,7 +920,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 user=order.client,
                 type=TransactionType.PURCHASE,
             ).exists()
-        if payment_amount > 0 and active_hold < payment_amount and not has_direct_payment:
+        required_hold = money(order_quote(payment_amount)['base_amount'] + order_quote(payment_amount)['service_fee'])
+        if payment_amount > 0 and active_hold < required_hold and not has_direct_payment:
             return Response(
                 {'detail': 'Средства по заказу не зарезервированы. Принятие работы и завершение заказа недоступны.'},
                 status=status.HTTP_400_BAD_REQUEST,

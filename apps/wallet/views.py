@@ -19,6 +19,7 @@ from .serializers import (
     WithdrawRequestSerializer,
 )
 from .models import WithdrawalRequest
+from .policy import money, percent, ACQUIRING_FEE_PERCENT
 from .services import WalletService, InsufficientFunds
 
 MIN_WITHDRAWAL = Decimal('100.00')
@@ -74,16 +75,18 @@ class WalletViewSet(viewsets.ViewSet):
             user=request.user,
             created_at__gte=idem_cutoff,
         ).order_by('-created_at').first()
-        if existing and existing.amount == amount and existing.payment_method == method:
+        if existing and money(existing.metadata.get('wallet_credit')) == amount and existing.payment_method == method:
             payment = existing
         else:
+            acquiring_fee = percent(amount, ACQUIRING_FEE_PERCENT)
             payment = Payment.objects.create(
-                amount=amount,
+                amount=money(amount + acquiring_fee),
                 payment_method=method,
                 status=PaymentStatus.PENDING,
                 purpose=Payment.Purpose.TOPUP,
                 user=request.user,
                 payment_id=f'topup-{request.user.pk}-{uuid.uuid4().hex}',
+                metadata={'wallet_credit': str(amount), 'acquiring_fee': str(acquiring_fee)},
             )
         if _sandbox_topup_allowed(request.user):
             if payment.status != PaymentStatus.COMPLETED:
@@ -93,7 +96,9 @@ class WalletViewSet(viewsets.ViewSet):
             bal = WalletService.get_balance(request.user)
             return Response({
                 'payment_id': payment.payment_id,
-                'amount': str(amount),
+                'amount': str(payment.amount),
+                'wallet_credit': str(amount),
+                'acquiring_fee': str(payment.metadata.get('acquiring_fee', '0.00')),
                 'method': method,
                 'sandbox': True,
                 'status': 'completed',
@@ -108,7 +113,9 @@ class WalletViewSet(viewsets.ViewSet):
             return Response({'detail': str(e)}, status=status.HTTP_502_BAD_GATEWAY)
         return Response({
             'payment_id': payment.payment_id,
-            'amount': str(amount),
+            'amount': str(payment.amount),
+            'wallet_credit': str(amount),
+            'acquiring_fee': str(payment.metadata.get('acquiring_fee', '0.00')),
             'method': method,
             'payment_url': link,
         })
@@ -136,7 +143,7 @@ class WalletViewSet(viewsets.ViewSet):
             user=request.user,
             created_at__gte=today_start,
             status__in=[WithdrawalRequest.Status.PENDING, WithdrawalRequest.Status.PAID],
-        ).aggregate(total=QSum('amount'))['total'] or Decimal('0')
+        ).aggregate(total=QSum('gross_amount'))['total'] or Decimal('0')
         if daily_withdrawn + amount > MAX_WITHDRAWAL:
             return Response(
                 {'detail': f'Дневной лимит вывода превышен. Осталось: {MAX_WITHDRAWAL - daily_withdrawn} ₽'},
@@ -146,13 +153,14 @@ class WalletViewSet(viewsets.ViewSet):
         masked = '**** **** **** ' + digits[-4:]
         try:
             with transaction.atomic():
-                tx = WalletService.withdraw(
+                withdrawal = WalletService.withdraw(
                     request.user, amount,
-                    description=f'Вывод на карту {masked}',
+                    description=f'Вывод на карту {masked}', return_details=True,
                 )
                 wr = WithdrawalRequest.objects.create(
-                    user=request.user, amount=amount, card_number=masked,
-                    status=WithdrawalRequest.Status.PENDING, transaction=tx,
+                    user=request.user, amount=withdrawal['net'], gross_amount=withdrawal['gross'],
+                    platform_fee=withdrawal['platform_fee'], acquiring_fee=withdrawal['acquiring_fee'], card_number=masked,
+                    status=WithdrawalRequest.Status.PENDING, transaction=withdrawal['transaction'],
                 )
         except InsufficientFunds as e:
             return Response({'detail': 'Недостаточно доступных средств'},
@@ -163,7 +171,10 @@ class WalletViewSet(viewsets.ViewSet):
         return Response({
             'withdrawal_id': wr.id,
             'status': wr.status,
-            'amount': str(amount),
+            'amount': str(withdrawal['net']),
+            'gross_amount': str(withdrawal['gross']),
+            'platform_fee': str(withdrawal['platform_fee']),
+            'acquiring_fee': str(withdrawal['acquiring_fee']),
             'card': masked,
             'balance': WalletBalanceSerializer(data).data,
         }, status=status.HTTP_201_CREATED)

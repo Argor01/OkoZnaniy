@@ -21,4 +21,14 @@ PAYMENT_SETTINGS = {
     'SUCCESS_URL': getattr(settings, 'PAYMENT_SUCCESS_URL', '/payment/success/'),
     'FAIL_URL': getattr(settings, 'PAYMENT_FAIL_URL', '/payment/fail/'),
     'NOTIFICATION_URL': getattr(settings, 'PAYMENT_NOTIFICATION_URL', '/api/payments/callback/'),
-} 
+}
+
+TBANK_SETTINGS = {
+    'API_URL': getattr(settings, 'TBANK_API_URL', 'https://securepay.tinkoff.ru/v2'),
+    'TERMINAL_KEY': getattr(settings, 'TBANK_TERMINAL_KEY', ''),
+    'PASSWORD': getattr(settings, 'TBANK_PASSWORD', ''),
+    'TEST_MODE': getattr(settings, 'TBANK_TEST_MODE', False),
+    'NOTIFICATION_URL': getattr(settings, 'TBANK_NOTIFICATION_URL', ''),
+    'SUCCESS_URL': getattr(settings, 'TBANK_SUCCESS_URL', ''),
+    'FAIL_URL': getattr(settings, 'TBANK_FAIL_URL', ''),
+}

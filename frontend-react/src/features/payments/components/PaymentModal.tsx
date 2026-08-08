@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Radio, Typography, message, Space } from 'antd';
-import { CreditCardOutlined, BankOutlined, WalletOutlined } from '@ant-design/icons';
+import { CreditCardOutlined, BankOutlined, WalletOutlined, QrcodeOutlined } from '@ant-design/icons';
 import { paymentsApi, type PaymentMethod } from '../api/payments';
 
 const { Text } = Typography;
@@ -14,6 +14,12 @@ interface PaymentModalProps {
 }
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
+  {
+    value: "tbank",
+    label: "Т-Банк",
+    icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />,
+    description: "Оплата картой через Т-Банк",
+  },
   {
     value: "sberpay_qr",
     label: "СберPay QR",

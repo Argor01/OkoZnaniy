@@ -23,6 +23,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q, Sum
+from django.utils import timezone
+from datetime import timedelta
+from .policy import (EXPERT_WITHDRAWAL_FEE_PERCENT, ACQUIRING_FEE_PERCENT, REFERRAL_LIFETIME_DAYS, money, percent, withdrawal_quote)
 
 from apps.orders.models import Transaction, TransactionType
 
@@ -33,7 +36,7 @@ ZERO = Decimal('0.00')
 
 # Default platform commission on expert payouts (orders + shop sales).
 DEFAULT_COMMISSION_PERCENT = Decimal(
-    str(getattr(settings, 'PLATFORM_COMMISSION_PERCENT', 15))
+    str(getattr(settings, 'PLATFORM_COMMISSION_PERCENT', 0))
 )
 
 # Username for the synthetic system account that collects platform fees.
@@ -282,22 +285,69 @@ class WalletService:
 
     @staticmethod
     @transaction.atomic
-    def withdraw(user, amount, *, description: str = 'Вывод средств') -> Transaction:
-        """Expert withdraws to their card (we just debit and record; the actual
-        bank transfer is handled out of band by finance ops)."""
-        amount = _q(amount)
-        if amount <= 0:
-            raise ValueError('Withdraw amount must be positive')
+    def withdraw(user, amount, *, description: str = 'Вывод средств', return_details: bool = False):
+        """Debit gross requested amount and return transparent fee breakdown."""
+        quote = withdrawal_quote(amount, getattr(user, 'role', 'client'))
         u = _lock_user(user.pk)
         available = (u.balance or ZERO) - (u.frozen_balance or ZERO)
-        if available < amount:
-            raise InsufficientFunds(f'Not enough funds: need {amount}, have {available}')
-        u.balance = (u.balance or ZERO) - amount
+        if available < quote['gross']:
+            raise InsufficientFunds(f"Not enough funds: need {quote['gross']}, have {available}")
+        u.balance = (u.balance or ZERO) - quote['gross']
         u.save(update_fields=['balance'])
-        return Transaction.objects.create(
-            user=u, amount=amount, type=TransactionType.WITHDRAWAL,
-            description=description, balance_after=u.balance,
+        tx = Transaction.objects.create(
+            user=u, amount=quote['gross'], type=TransactionType.WITHDRAWAL,
+            description=(f"{description}; к выплате {quote['net']} ₽, комиссия платформы "
+                         f"{quote['platform_fee']} ₽, эквайринг {quote['acquiring_fee']} ₽"),
+            balance_after=u.balance,
         )
+        if quote['platform_fee'] > 0:
+            system = _lock_user(get_system_account().pk)
+            system.balance = (system.balance or ZERO) + quote['platform_fee']
+            system.save(update_fields=['balance'])
+            Transaction.objects.create(
+                user=system, amount=quote['platform_fee'], type=TransactionType.COMMISSION,
+                description=f'Комиссия с вывода пользователя #{u.pk}', balance_after=system.balance,
+            )
+        details = {'transaction': tx, **quote}
+        return details if return_details else tx
+
+    @staticmethod
+    @transaction.atomic
+    def release_order_payment(*, client, expert, base_amount, service_fee, order=None, description='', source_key='') -> dict:
+        """Release escrow exactly per TZ: full base to author, 25% to partner or directors."""
+        base_amount, service_fee = money(base_amount), money(service_fee)
+        total = money(base_amount + service_fee)
+        linked_at = getattr(client, 'partner_linked_at', None) or getattr(client, 'date_joined', None)
+        partner = getattr(client, 'partner', None)
+        if partner and linked_at and linked_at < timezone.now() - timedelta(days=REFERRAL_LIFETIME_DAYS):
+            partner = None
+        system = get_system_account()
+        recipient = partner or system
+        ids = sorted({client.pk, expert.pk, recipient.pk})
+        locked = {u.pk: u for u in User.objects.select_for_update().filter(pk__in=ids)}
+        c, e, r = locked[client.pk], locked[expert.pk], locked[recipient.pk]
+        if (c.frozen_balance or ZERO) < total or (c.balance or ZERO) < total:
+            raise InsufficientFunds('Held amount is less than required order allocation')
+        c.frozen_balance -= total
+        c.balance -= total
+        e.balance = (e.balance or ZERO) + base_amount
+        r.balance = (r.balance or ZERO) + service_fee
+        c.save(update_fields=['frozen_balance', 'balance'])
+        e.save(update_fields=['balance'])
+        r.save(update_fields=['balance'])
+        release = Transaction.objects.create(user=c, amount=total, type=TransactionType.RELEASE, order=order, description=description or 'Списание резерва', balance_after=c.balance)
+        Transaction.objects.create(user=e, amount=base_amount, type=TransactionType.PAYOUT, order=order, description=description or 'Выплата автору', balance_after=e.balance)
+        Transaction.objects.create(user=r, amount=service_fee, type=TransactionType.PARTNER_PAYOUT if partner else TransactionType.COMMISSION, order=order, description='Реферальная комиссия 25%' if partner else 'Комиссия директорам 25%', balance_after=r.balance)
+        if partner:
+            from apps.users.models import PartnerEarning
+            earning, _ = PartnerEarning.objects.get_or_create(
+                partner=r, referral=c, order=order, earning_type='order', source_key=source_key or (f'order:{order.pk}' if order else ''),
+                defaults={'amount': service_fee, 'commission_rate': 25, 'source_amount': base_amount, 'is_paid': True},
+            )
+            if not earning.is_paid:
+                earning.is_paid = True
+                earning.save(update_fields=['is_paid'])
+        return {'release_tx': release, 'payout': base_amount, 'service_fee': service_fee, 'partner_id': partner.pk if partner else None}
 
     @staticmethod
     @transaction.atomic

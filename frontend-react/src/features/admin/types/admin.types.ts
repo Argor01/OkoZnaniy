@@ -13,6 +13,8 @@ export interface Partner {
   total_referrals: number;
   active_referrals: number;
   total_earnings: number;
+  paid_earnings: number;
+  unpaid_earnings: number;
   is_verified: boolean;
   date_joined: string;
 }

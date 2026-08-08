@@ -6,6 +6,8 @@ from django.utils import timezone
 from .models import Payment, PaymentMethod, PaymentStatus
 from .providers.alfabank import AlfaBankClient
 from .providers.sbp import SBPClient
+from .providers.tbank import TBankClient
+from apps.wallet.policy import order_quote, money
 
 
 class PaymentService:
@@ -14,20 +16,22 @@ class PaymentService:
         """
         Создает новый платеж для заказа
         """
+        quote = order_quote(order.final_price or order.budget)
         payment = Payment.objects.create(
             order=order,
             user=order.client,
-            amount=order.final_price or order.budget,
+            amount=quote['total'],
             payment_method=payment_method,
             status=PaymentStatus.PENDING,
-            payment_id=f"tmp-{order.id}-{timezone.now().timestamp()}"
+            payment_id=f"tmp-{order.id}-{timezone.now().timestamp()}",
+            metadata={k: str(v) for k, v in quote.items()},
         )
         return payment
 
     # Map user-facing method aliases to the underlying acquiring rail.
     _NORMALIZE_METHOD = {
         'card': 'card', 'sberbank': 'card',
-        'sbp': 'sbp', 'sberpay_qr': 'sbp',
+        'sbp': 'sbp', 'sberpay_qr': 'sbp', 'tbank': 'tbank',
     }
 
     @staticmethod
@@ -38,7 +42,11 @@ class PaymentService:
         rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
         if rail is None:
             raise ValueError(f'Неподдерживаемый метод оплаты: {payment.payment_method}')
-        from .config import ALFABANK_SETTINGS, SBP_SETTINGS
+        from .config import ALFABANK_SETTINGS, SBP_SETTINGS, TBANK_SETTINGS
+        if rail == 'tbank':
+            if not TBANK_SETTINGS.get('TERMINAL_KEY'):
+                raise ValueError('Т-Банк временно недоступен: эквайринг не настроен')
+            return PaymentService._get_tbank_payment_link(payment)
         if rail == 'card':
             if not ALFABANK_SETTINGS.get('USERNAME'):
                 raise ValueError('Оплата картой временно недоступна: эквайринг не настроен')
@@ -57,7 +65,9 @@ class PaymentService:
             
             # Определяем провайдера платежа
             rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
-            if rail == PaymentMethod.CARD:
+            if rail == 'tbank':
+                result = TBankClient().process_callback(data)
+            elif rail == PaymentMethod.CARD:
                 result = AlfaBankClient().process_callback(data)
             elif rail == PaymentMethod.SBP:
                 result = SBPClient().process_callback(data)
@@ -91,6 +101,9 @@ class PaymentService:
 
         order = payment.order
         client = order.client
+        base_amount = money(payment.metadata.get('base_amount') or order.final_price or order.budget)
+        service_fee = money(payment.metadata.get('service_fee') or order_quote(base_amount)['service_fee'])
+        escrow_amount = money(base_amount + service_fee)
 
         if not Transaction.objects.filter(
             user=client,
@@ -99,7 +112,7 @@ class PaymentService:
         ).exists():
             WalletService.topup(
                 client,
-                payment.amount,
+                escrow_amount,
                 payment=payment,
                 order=order,
                 description=f'Оплата заказа #{order.id}',
@@ -114,13 +127,17 @@ class PaymentService:
             - (totals.get(TransactionType.RELEASE) or Decimal('0.00'))
             - (totals.get(TransactionType.REFUND) or Decimal('0.00'))
         )
-        if active_hold < payment.amount:
+        if active_hold < escrow_amount:
             WalletService.hold(
                 client,
-                payment.amount - active_hold,
+                escrow_amount - active_hold,
                 order=order,
                 description=f'Резерв по заказу #{order.id}',
             )
+
+    @staticmethod
+    def _get_tbank_payment_link(payment: Payment) -> str:
+        return TBankClient().register_payment(payment)['formUrl']
 
     @staticmethod
     def _get_alfabank_payment_link(payment: Payment) -> str:

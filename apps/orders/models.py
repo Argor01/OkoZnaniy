@@ -428,7 +428,7 @@ class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ставка")
     prepayment_percent = models.PositiveSmallIntegerField(
         default=50,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        validators=[MinValueValidator(25), MaxValueValidator(100)],
         verbose_name="Процент предоплаты"
     )
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")

@@ -42,7 +42,7 @@ def _topup_on_payment_completed(sender, instance: Payment, created, **kwargs):
             return
         try:
             WalletService.topup(
-                _lock, instance.amount,
+                _lock, instance.metadata.get('wallet_credit') or instance.amount,
                 payment=instance,
                 description=f'Пополнение {instance.payment_method.upper()} #{instance.payment_id}',
             )

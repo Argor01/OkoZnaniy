@@ -34,6 +34,12 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
       PAYMENTS_SANDBOX: ${PAYMENTS_SANDBOX:-False}
+      TBANK_TERMINAL_KEY: ${TBANK_TERMINAL_KEY:-}
+      TBANK_PASSWORD: ${TBANK_PASSWORD:-}
+      TBANK_TEST_MODE: ${TBANK_TEST_MODE:-False}
+      TBANK_NOTIFICATION_URL: ${TBANK_NOTIFICATION_URL:-}
+      TBANK_SUCCESS_URL: ${TBANK_SUCCESS_URL:-}
+      TBANK_FAIL_URL: ${TBANK_FAIL_URL:-}
     healthcheck: &backend_health
       test: ["CMD-SHELL", "python -c \"import socket; s=socket.create_connection(('127.0.0.1',8000),5); s.close()\""]
       interval: 30s

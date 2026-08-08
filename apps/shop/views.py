@@ -15,7 +15,9 @@ from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
-HOLD_DAYS = 7
+from apps.wallet.policy import GUARANTEE_DAYS, order_quote
+
+HOLD_DAYS = GUARANTEE_DAYS
 
 
 class IsExpertOrStaff(permissions.BasePermission):
@@ -164,7 +166,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         try:
             WalletService.hold(
                 request.user,
-                work.price,
+                order_quote(work.price)['base_amount'] + order_quote(work.price)['service_fee'],
                 description=f'Покупка готовой работы «{work.title}»',
             )
         except InsufficientFunds:
@@ -209,6 +211,26 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         context['request'] = self.request
         return context
 
+    @action(detail=True, methods=['post'], url_path='confirm-completion')
+    @transaction.atomic
+    def confirm_completion(self, request, pk=None):
+        purchase = self.get_object()
+        if purchase.status != Purchase.Status.PAID:
+            return Response({'detail': 'Покупка уже завершена или находится в споре.'}, status=status.HTTP_400_BAD_REQUEST)
+        quote = order_quote(purchase.price_paid)
+        WalletService.release_order_payment(
+            client=purchase.buyer,
+            expert=purchase.work.author,
+            base_amount=quote['base_amount'],
+            service_fee=quote['service_fee'],
+            source_key=f'purchase:{purchase.pk}',
+            description=f'Досрочная разблокировка покупки «{purchase.work.title}»',
+        )
+        purchase.status = Purchase.Status.COMPLETED
+        purchase.hold_until = timezone.now()
+        purchase.save(update_fields=['status', 'hold_until'])
+        return Response(PurchaseSerializer(purchase, context={'request': request}).data)
+
     @action(detail=True, methods=['post'])
     @transaction.atomic
     def dispute(self, request, pk=None):
@@ -223,7 +245,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         now = timezone.now()
         if purchase.hold_until and now > purchase.hold_until:
             return Response(
-                {'detail': 'Срок подачи спора истёк (7 дней с момента покупки).'},
+                {'detail': 'Срок подачи спора истёк (10 дней с момента покупки).'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

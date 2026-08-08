@@ -12,6 +12,7 @@ def release_ready_work_holds():
 
     from apps.shop.models import Purchase
     from apps.wallet.services import WalletService
+    from apps.wallet.policy import order_quote
 
     expired = Purchase.objects.filter(
         status='paid',
@@ -21,10 +22,13 @@ def release_ready_work_holds():
     count = 0
     for purchase in expired:
         try:
-            WalletService.release_to_expert(
+            quote = order_quote(purchase.price_paid)
+            WalletService.release_order_payment(
                 client=purchase.buyer,
                 expert=purchase.work.author,
-                amount=purchase.price_paid,
+                base_amount=quote['base_amount'],
+                service_fee=quote['service_fee'],
+                source_key=f'purchase:{purchase.pk}',
                 description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
             )
             purchase.status = Purchase.Status.COMPLETED
