@@ -227,7 +227,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         # Проверяем, нет ли уже открытого арбитража по этой покупке
-        from apps.arbitration.models import ArbitrationCase
+        from apps.arbitration.models import ArbitrationCase, ArbitrationActivity
         existing = ArbitrationCase.objects.filter(
             purchase=purchase,
         ).exclude(status__in=['closed', 'rejected']).first()
@@ -237,18 +237,32 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Создаём арбитражное дело
-        from apps.arbitration.serializers import PurchaseDisputeSerializer
-        dispute_serializer = PurchaseDisputeSerializer(
-            data={
-                'purchase_id': purchase.id,
-                'description': request.data.get('description', 'Спор по покупке готовой работы'),
-                'requested_refund_percentage': request.data.get('requested_refund_percentage', 100),
-            },
-            context={'request': request},
+        description = request.data.get('description', '') or 'Спор по покупке готовой работы'
+        refund_pct = request.data.get('requested_refund_percentage', 100)
+        try:
+            refund_pct = float(refund_pct)
+        except (TypeError, ValueError):
+            refund_pct = 100
+
+        case = ArbitrationCase.objects.create(
+            plaintiff=request.user,
+            defendant=purchase.work.author,
+            purchase=purchase,
+            subject=f'Спор по покупке: {purchase.work.title}',
+            reason='ready_work_dispute',
+            description=description,
+            refund_type='full' if refund_pct >= 100 else 'partial',
+            requested_refund_percentage=Decimal(str(refund_pct)),
+            status='submitted',
+            submitted_at=timezone.now(),
         )
-        dispute_serializer.is_valid(raise_exception=True)
-        case = dispute_serializer.save()
+
+        ArbitrationActivity.objects.create(
+            case=case,
+            actor=request.user,
+            activity_type='created',
+            description=f'Спор по покупке открыт пользователем {request.user.get_full_name() or request.user.username}',
+        )
 
         # Обновляем статус покупки
         purchase.status = Purchase.Status.DISPUTED

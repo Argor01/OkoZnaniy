@@ -341,22 +341,26 @@ const ShopWorkDetail: React.FC = () => {
                   dataSource={work.files}
                   renderItem={(file: WorkFile) => (
                     <List.Item
-                      actions={[
-                        <AppButton
-                          key={`open-${file.id}`}
-                          variant="link"
-                          icon={<DownloadOutlined />}
-                          onClick={() => {
-                            const fileWithLinks = file as WorkFile & { view_url?: string; file_url?: string };
-                            const url = fileWithLinks.view_url || fileWithLinks.file_url || file.file;
-                            if (url) {
-                              window.open(url, '_blank');
-                            }
-                          }}
-                        >
-                          Открыть
-                        </AppButton>,
-                      ]}
+                      actions={
+                        purchase && purchase.delivered_file_available
+                          ? [
+                              <AppButton
+                                key={`open-${file.id}`}
+                                variant="link"
+                                icon={<DownloadOutlined />}
+                                onClick={() => {
+                                  const fileWithLinks = file as WorkFile & { view_url?: string; file_url?: string };
+                                  const url = fileWithLinks.view_url || fileWithLinks.file_url || file.file;
+                                  if (url) {
+                                    window.open(url, '_blank');
+                                  }
+                                }}
+                              >
+                                Открыть
+                              </AppButton>,
+                            ]
+                          : []
+                      }
                     >
                       <List.Item.Meta
                         avatar={<FileOutlined className={styles.fileIcon} />}
