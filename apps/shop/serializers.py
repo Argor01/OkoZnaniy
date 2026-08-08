@@ -57,7 +57,7 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
         model = ReadyWork
         fields = [
             'id', 'title', 'description', 'price', 'subject', 'work_type',
-            'execution_days', 'subject_name', 'work_type_name', 'author',
+            'subject_name', 'work_type_name', 'author',
             'author_name', 'author_avatar', 'preview', 'rating',
             'reviewsCount', 'viewsCount', 'purchasesCount', 'is_favorite',
             'moderation_status', 'is_active', 'created_at', 'updated_at', 'files',
@@ -114,7 +114,7 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
     preview = serializers.ImageField(required=False)
     work_files = serializers.ListField(
         child=serializers.FileField(),
-        required=False,
+        required=True,
         write_only=True,
     )
 
@@ -122,7 +122,7 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
         model = ReadyWork
         fields = [
             'title', 'description', 'price', 'subject', 'work_type',
-            'execution_days', 'preview', 'work_files',
+            'preview', 'work_files',
         ]
 
     def validate_description(self, value):

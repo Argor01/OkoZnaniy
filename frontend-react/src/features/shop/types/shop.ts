@@ -25,7 +25,6 @@ export interface Work {
   title: string;
   description: string;
   price: number;
-  execution_days: number;
   category?: string;
   subject: number;
   work_type: number;
@@ -55,7 +54,6 @@ export interface CreateWorkPayload {
   price: number;
   subject: string;
   work_type: string;
-  execution_days: number;
   preview?: File | null;
   files?: File[];
 }

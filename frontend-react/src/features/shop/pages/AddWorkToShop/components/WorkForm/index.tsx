@@ -28,7 +28,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
     price: 0,
     subject: '',
     workType: '',
-    executionDays: 7,
     preview: null,
     files: [],
   });
@@ -73,13 +72,13 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
       return;
     }
 
-    if (!formData.executionDays || formData.executionDays < 1) {
-      message.error('Укажите корректный срок выполнения');
+    if (!plainDescription) {
+      message.error('Добавьте описание работы');
       return;
     }
 
-    if (!plainDescription) {
-      message.error('Добавьте описание работы');
+    if (!formData.files || formData.files.length === 0) {
+      message.error('Прикрепите хотя бы один файл работы');
       return;
     }
 
@@ -150,17 +149,6 @@ const WorkForm: React.FC<WorkFormProps> = ({ onSave, onCancel }) => {
                 </Option>
               ))}
             </AppSelect>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Text className={`${styles.label} ${styles.labelRequired}`}>Срок выполнения (дни)</Text>
-            <AppInput.Number
-              placeholder="Например, 7"
-              value={formData.executionDays}
-              onChange={(value) => setFormData({ ...formData, executionDays: Number(value) || 1 })}
-              className={styles.input}
-              min={1}
-              size="middle"
-            />
           </Col>
         </Row>
 

@@ -282,13 +282,6 @@ const ShopWorkDetail: React.FC = () => {
 
                 <AppCard size="small" className={styles.infoCard}>
                   <Space direction="vertical" size={4} className={styles.fullWidth}>
-                    <Text type="secondary" className={styles.infoLabel}>Срок выполнения</Text>
-                    <Text className={styles.createdValue}>{work.execution_days || 0} дн.</Text>
-                  </Space>
-                </AppCard>
-
-                <AppCard size="small" className={styles.infoCard}>
-                  <Space direction="vertical" size={4} className={styles.fullWidth}>
                     <Text type="secondary" className={styles.infoLabel}>Создана</Text>
                     <Space align="center">
                       <CalendarOutlined className={styles.createdIcon} />

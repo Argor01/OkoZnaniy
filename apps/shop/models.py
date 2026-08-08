@@ -35,7 +35,6 @@ class ReadyWork(models.Model):
         blank=True,
         null=True,
     )
-    execution_days = models.PositiveIntegerField("Срок выполнения в днях", default=7)
     moderation_status = models.CharField(
         max_length=20,
         choices=ModerationStatus.choices,

@@ -68,7 +68,6 @@ const ShopReadyWorks: React.FC = () => {
         reviewsCount: work.reviewsCount || 0,
         viewsCount: work.viewsCount || 0,
         purchasesCount: work.purchasesCount || 0,
-        execution_days: work.execution_days || 0,
         author: work.author ? {
           ...work.author,
           avatar: work.author.avatar,

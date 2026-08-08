@@ -55,7 +55,6 @@ const AddWorkToShop: React.FC = () => {
       price: formData.price,
       subject: formData.subject,
       work_type: formData.workType,
-      execution_days: formData.executionDays,
       preview: formData.preview,
       files: formData.files
     };

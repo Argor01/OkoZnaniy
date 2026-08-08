@@ -28,7 +28,6 @@ export interface WorkFormData {
   price: number;
   subject: string;
   workType: string;
-  executionDays: number;
   preview?: File | null;
   files?: File[];
 }
