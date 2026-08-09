@@ -32,7 +32,7 @@ export const CookieConsent: React.FC = () => {
           <p className={styles.text}>
             На сайте используются метрические программы. Продолжая использование я соглашаюсь на обработку моих метрических данных
             <a 
-              href="/docs/metric_agreement.pdf" 
+              href="/docs/metric_agreenent.pdf" 
               target="_blank" 
               rel="noopener noreferrer"
               className={styles.link}
