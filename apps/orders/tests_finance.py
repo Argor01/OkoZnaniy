@@ -347,8 +347,10 @@ class OrderLifecycleTests(TestCase):
         self.client_u.refresh_from_db()
         self.assertEqual(order.status, 'in_progress')
         self.assertEqual(order.expert, self.expert)
-        self.assertEqual(self.client_u.frozen_balance, Decimal('625.00'))
-        self.assertEqual(self.client_u.balance, Decimal('1000.00'))
+        self.assertEqual(self.client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.client_u.balance, Decimal('375.00'))
+        self.expert.refresh_from_db()
+        self.assertEqual(self.expert.frozen_balance, Decimal('500.00'))
 
     def test_take_order_insufficient_funds(self):
         # no topup → should fail
@@ -576,9 +578,10 @@ class ShopEscrowTests(TestCase):
         self.buyer.refresh_from_db()
         self.seller.refresh_from_db()
         # Ready work is escrowed for the 10-day guarantee period.
-        self.assertEqual(self.buyer.balance, Decimal('937.50'))
-        self.assertEqual(self.buyer.frozen_balance, Decimal('937.50'))
-        self.assertEqual(self.seller.balance, Decimal('0.00'))
+        self.assertEqual(self.buyer.balance, Decimal('0.00'))
+        self.assertEqual(self.buyer.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.seller.balance, Decimal('750.00'))
+        self.assertEqual(self.seller.frozen_balance, Decimal('750.00'))
         self.assertFalse(Order.objects.filter(client=self.buyer, expert=self.seller).exists())
 
     def test_shop_purchase_insufficient_funds(self):
@@ -836,8 +839,10 @@ class FullE2EFlowTests(TestCase):
         # The order was created with expert=None, so this should work
         self.assertEqual(resp.status_code, http.HTTP_200_OK, resp.content)
         client_u.refresh_from_db()
-        self.assertEqual(client_u.frozen_balance, Decimal('2500.00'))
-        self.assertEqual(client_u.balance, Decimal('5000.00'))
+        self.assertEqual(client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(client_u.balance, Decimal('2500.00'))
+        expert.refresh_from_db()
+        self.assertEqual(expert.frozen_balance, Decimal('2000.00'))
 
         # 4. Expert completes → review
         resp = api.post(f'/api/orders/orders/{order.id}/complete/')

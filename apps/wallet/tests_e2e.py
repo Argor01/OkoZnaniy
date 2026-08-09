@@ -43,8 +43,8 @@ class WalletInteractionE2E(TestCase):
  def test_order_prepayment_remaining_and_approval(self):
   WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,subject=self.s,work_type=self.wt,title='E2E',description='flow',budget=1000,deadline=timezone.now()+timedelta(days=5),status='new'); b=Bid.objects.create(order=o,expert=self.e,amount=1000,prepayment_percent=50)
   self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/accept_bid/',{'bid_id':b.id},format='json'); self.assertEqual(r.status_code,200,r.content)
-  self.auth(self.e); r=self.api.post(f'/api/orders/orders/{o.id}/accept_assignment/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.assertEqual(self.c.frozen_balance,625)
-  self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/pay-remaining/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.assertEqual(self.c.frozen_balance,1250)
+  self.auth(self.e); r=self.api.post(f'/api/orders/orders/{o.id}/accept_assignment/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual(self.c.frozen_balance,0); self.assertEqual(self.e.frozen_balance,500); self.assertEqual(self.p.frozen_balance,125)
+  self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/pay-remaining/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual(self.c.frozen_balance,0); self.assertEqual(self.e.frozen_balance,1000); self.assertEqual(self.p.frozen_balance,250)
   o.status='review'; o.save(update_fields=['status']); r=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(r.status_code,200,r.content)
   self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual((self.c.balance,self.c.frozen_balance,self.e.balance,self.p.balance),(0,0,1000,250)); pe=PartnerEarning.objects.get(order=o); self.assertTrue(pe.is_paid)
  def test_partial_order_cannot_release(self):
@@ -52,7 +52,7 @@ class WalletInteractionE2E(TestCase):
   self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(r.status_code,400); self.e.refresh_from_db(); o.refresh_from_db(); self.assertEqual(self.e.balance,0); self.assertEqual(o.status,'review')
  def test_ready_work_10_day_hold_and_early_confirmation(self):
   w=ReadyWork.objects.create(title='ready',description='ready',price=400,subject=self.s,work_type=self.wt,author=self.e,is_active=True,moderation_status=ReadyWork.ModerationStatus.APPROVED); WalletService.topup(self.c,500); self.auth(self.c)
-  r=self.api.post(f'/api/shop/works/{w.id}/purchase/',{},format='json'); self.assertEqual(r.status_code,201,r.content); p=Purchase.objects.get(pk=r.json()['id']); self.assertGreater(p.hold_until,timezone.now()+timedelta(days=9, hours=23)); self.c.refresh_from_db(); self.assertEqual(self.c.frozen_balance,500)
+  r=self.api.post(f'/api/shop/works/{w.id}/purchase/',{},format='json'); self.assertEqual(r.status_code,201,r.content); p=Purchase.objects.get(pk=r.json()['id']); self.assertGreater(p.hold_until,timezone.now()+timedelta(days=9, hours=23)); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual(self.c.frozen_balance,0); self.assertEqual(self.e.frozen_balance,400); self.assertEqual(self.p.frozen_balance,100)
   r=self.api.post(f'/api/shop/purchases/{p.id}/confirm-completion/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); p.refresh_from_db(); self.assertEqual((p.status,self.c.balance,self.c.frozen_balance,self.e.balance,self.p.balance),(Purchase.Status.COMPLETED,0,0,400,100))
  def test_validation_is_atomic(self):
   self.auth(self.c)
@@ -61,7 +61,7 @@ class WalletInteractionE2E(TestCase):
   self.assertEqual(self.api.post('/api/wallet/topup/',{'amount':99,'payment_method':'sberpay_qr'},format='json').status_code,400)
   self.c.refresh_from_db(); self.assertEqual(self.c.balance,0); self.assertFalse(WithdrawalRequest.objects.filter(user=self.c).exists())
  def test_completed_order_refund_claws_back_partner_and_creates_expert_debt(self):
-  WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,expert=self.e,subject=self.s,work_type=self.wt,title='refund later',description='refund',budget=1000,deadline=timezone.now()+timedelta(days=2),status='review'); WalletService.hold(self.c,1250,order=o)
+  WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,expert=self.e,subject=self.s,work_type=self.wt,title='refund later',description='refund',budget=1000,deadline=timezone.now()+timedelta(days=2),status='review'); WalletService.fund_distributed_escrow(client=self.c,expert=self.e,base_amount=1000,service_fee=250,fund_amount=1250,order=o)
   self.auth(self.c); done=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(done.status_code,200,done.content)
   st=o.wallet_settlement; self.e.refresh_from_db(); self.e.balance=0; self.e.save(update_fields=['balance'])
   result=WalletService.clawback_settlement(st,50,description='E2E поздний возврат')

@@ -239,8 +239,11 @@ class WalletOrderLedgerTests(TestCase):
 
         self.assertEqual(payment.status, PaymentStatus.COMPLETED)
         self.assertEqual(order.status, 'in_progress')
-        self.assertEqual(self.client_user.balance, Decimal('1250.00'))
-        self.assertEqual(self.client_user.frozen_balance, Decimal('1250.00'))
+        self.assertEqual(self.client_user.balance, Decimal('0.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.expert.refresh_from_db()
+        self.assertEqual(self.expert.balance, Decimal('1000.00'))
+        self.assertEqual(self.expert.frozen_balance, Decimal('1000.00'))
         self.assertEqual(
             Transaction.objects.filter(order=order, payment=payment, type=TransactionType.TOPUP).count(),
             1,
@@ -360,8 +363,11 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(accepted.status_code, status.HTTP_200_OK, accepted.content)
 
         self.client_user.refresh_from_db()
-        self.assertEqual(self.client_user.balance, Decimal('1500.00'))
-        self.assertEqual(self.client_user.frozen_balance, Decimal('750.00'))
+        self.assertEqual(self.client_user.balance, Decimal('750.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.expert.refresh_from_db(); partner.refresh_from_db()
+        self.assertEqual(self.expert.frozen_balance, Decimal('600.00'))
+        self.assertEqual(partner.frozen_balance, Decimal('150.00'))
         self.assertEqual(Transaction.objects.filter(order=order, type=TransactionType.HOLD).count(), 1)
 
         self.api.force_authenticate(self.client_user)

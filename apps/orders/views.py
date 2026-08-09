@@ -169,7 +169,7 @@ def _reserve_order_hold_if_needed(order, amount=None, prepayment_percent=100):
     active_hold = money(_active_order_hold(order))
     if active_hold >= target_hold:
         return None
-    return WalletService.hold(order.client, target_hold - active_hold, order=order, description=f'Резерв {percent_value}% по заказу #{order.id}')
+    return WalletService.fund_distributed_escrow(client=order.client, expert=order.expert, base_amount=quote['base_amount'], service_fee=quote['service_fee'], fund_amount=target_hold - active_hold, order=order, description=f'Резерв {percent_value}% по заказу #{order.id}')
 
 
 def _release_order_hold_if_any(order):
@@ -180,25 +180,20 @@ def _release_order_hold_if_any(order):
     expected = money(quote['base_amount'] + quote['service_fee'])
     if active_hold < expected:
         raise InsufficientFunds('Заказ оплачен не полностью.')
-    return WalletService.release_order_payment(
-        client=order.client,
-        expert=order.expert,
-        base_amount=quote['base_amount'],
-        service_fee=quote['service_fee'],
-        order=order,
-        description=f'Распределение оплаты по заказу #{order.id}',
-    )
+    settlement = getattr(order, 'wallet_settlement', None)
+    if settlement is not None:
+        return WalletService.release_distributed_escrow(settlement, description=f'Распределение оплаты по заказу #{order.id}')
+    return WalletService.release_order_payment(client=order.client, expert=order.expert, base_amount=quote['base_amount'], service_fee=quote['service_fee'], order=order, description=f'Распределение оплаты по заказу #{order.id}')
 
 
 def _refund_order_hold_if_any(order):
-    amount = _active_order_hold(order)
+    amount = money(_active_order_hold(order))
     if amount > 0:
-        WalletService.refund_hold(
-            order.client,
-            amount,
-            order=order,
-            description=f'Возврат резерва по заказу #{order.id}',
-        )
+        settlement = getattr(order, 'wallet_settlement', None)
+        if settlement is not None:
+            return WalletService.refund_distributed_escrow(settlement, amount, description=f'Возврат резерва по заказу #{order.id}')
+        return WalletService.refund_hold(order.client, amount, order=order, description=f'Возврат резерва по заказу #{order.id}')
+
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -474,8 +469,8 @@ class OrderViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Взять можно только заказ в статусе new.'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():
-                _reserve_order_hold_if_needed(order)
                 order.expert = user
+                _reserve_order_hold_if_needed(order)
                 order.status = 'in_progress'
                 order.save(update_fields=['expert', 'status', 'updated_at'])
         except InsufficientFunds:
@@ -736,7 +731,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             tx = _reserve_order_hold_if_needed(order, _order_payment_amount(order), 100)
         except InsufficientFunds:
             return Response({'detail': 'Недостаточно средств для доплаты.'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'detail': 'Заказ оплачен полностью.', 'transaction_id': tx.id if tx else None})
+        return Response({'detail': 'Заказ оплачен полностью.', 'transaction_id': (tx.get('transaction').id if isinstance(tx, dict) and tx.get('transaction') else (tx.id if tx else None))})
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_assignment(self, request, pk=None):

@@ -10,6 +10,7 @@ from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
@@ -163,18 +164,6 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         hold_until = now + timedelta(days=HOLD_DAYS)
 
-        try:
-            WalletService.hold(
-                request.user,
-                order_quote(work.price)['base_amount'] + order_quote(work.price)['service_fee'],
-                description=f'Покупка готовой работы «{work.title}»',
-            )
-        except InsufficientFunds:
-            return Response(
-                {'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
         first_file = work.files.order_by('name', 'id').first()
         purchase = Purchase(
             work=work,
@@ -189,6 +178,16 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             purchase.delivered_file_size = first_file.file_size or 0
 
         purchase.save()
+        quote = order_quote(work.price)
+        try:
+            WalletService.fund_distributed_escrow(
+                client=request.user, expert=work.author, purchase=purchase,
+                base_amount=quote['base_amount'], service_fee=quote['service_fee'],
+                fund_amount=quote['base_amount'] + quote['service_fee'],
+                description=f'Покупка готовой работы «{work.title}»',
+            )
+        except InsufficientFunds:
+            raise ValidationError({'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'})
 
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -218,15 +217,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         if purchase.status != Purchase.Status.PAID:
             return Response({'detail': 'Покупка уже завершена или находится в споре.'}, status=status.HTTP_400_BAD_REQUEST)
         quote = order_quote(purchase.price_paid)
-        WalletService.release_order_payment(
-            client=purchase.buyer,
-            expert=purchase.work.author,
-            purchase=purchase,
-            base_amount=quote['base_amount'],
-            service_fee=quote['service_fee'],
-            source_key=f'purchase:{purchase.pk}',
-            description=f'Досрочная разблокировка покупки «{purchase.work.title}»',
-        )
+        WalletService.release_distributed_escrow(purchase.wallet_settlement, description=f'Досрочная разблокировка покупки «{purchase.work.title}»')
         purchase.status = Purchase.Status.COMPLETED
         purchase.hold_until = timezone.now()
         purchase.save(update_fields=['status', 'hold_until'])

@@ -55,6 +55,9 @@ class Settlement(models.Model):
     service_fee = models.DecimalField(max_digits=12, decimal_places=2)
     refunded_base = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     refunded_service_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    funded_base = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    funded_service_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    is_released = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

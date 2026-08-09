@@ -317,6 +317,92 @@ class WalletService:
 
     @staticmethod
     @transaction.atomic
+    def fund_distributed_escrow(*, client, expert, base_amount, service_fee, fund_amount, order=None, purchase=None, description=''):
+        """Debit client now and credit+freeze recipients proportionally."""
+        from apps.wallet.models import Settlement
+        base_amount, service_fee, fund_amount = money(base_amount), money(service_fee), money(fund_amount)
+        total = money(base_amount + service_fee)
+        if fund_amount <= 0 or fund_amount > total:
+            raise ValueError('Invalid escrow funding amount')
+        linked_at = getattr(client, 'partner_linked_at', None) or getattr(client, 'date_joined', None)
+        partner = getattr(client, 'partner', None)
+        if partner and linked_at and linked_at < timezone.now() - timedelta(days=REFERRAL_LIFETIME_DAYS):
+            partner = None
+        fee_recipient = partner or get_system_account()
+        lookup = {'order': order} if order is not None else {'purchase': purchase}
+        st, _ = Settlement.objects.select_for_update().get_or_create(
+            **lookup,
+            defaults={'client': client, 'expert': expert, 'fee_recipient': fee_recipient, 'base_amount': base_amount, 'service_fee': service_fee},
+        )
+        already = money(st.funded_base + st.funded_service_fee)
+        target = min(total, money(already + fund_amount))
+        target_base = money(target * base_amount / total) if total else ZERO
+        target_fee = money(target - target_base)
+        delta_base = max(ZERO, target_base - st.funded_base)
+        delta_fee = max(ZERO, target_fee - st.funded_service_fee)
+        delta = money(delta_base + delta_fee)
+        ids = sorted({client.pk, expert.pk, fee_recipient.pk})
+        locked = {u.pk: u for u in User.objects.select_for_update().filter(pk__in=ids)}
+        c, e, r = locked[client.pk], locked[expert.pk], locked[fee_recipient.pk]
+        available = (c.balance or ZERO) - (c.frozen_balance or ZERO)
+        if available < delta:
+            raise InsufficientFunds(f'Not enough funds: need {delta}, have {available}')
+        c.balance -= delta
+        e.balance = (e.balance or ZERO) + delta_base
+        e.frozen_balance = (e.frozen_balance or ZERO) + delta_base
+        r.balance = (r.balance or ZERO) + delta_fee
+        r.frozen_balance = (r.frozen_balance or ZERO) + delta_fee
+        c.save(update_fields=['balance']); e.save(update_fields=['balance','frozen_balance']); r.save(update_fields=['balance','frozen_balance'])
+        st.funded_base += delta_base; st.funded_service_fee += delta_fee
+        st.save(update_fields=['funded_base','funded_service_fee'])
+        tx = Transaction.objects.create(user=c, amount=delta, type=TransactionType.HOLD, order=order, description=description or 'Распределённый резерв', balance_after=c.balance)
+        return {'transaction': tx, 'settlement': st, 'base': delta_base, 'fee': delta_fee}
+
+    @staticmethod
+    @transaction.atomic
+    def release_distributed_escrow(settlement, *, description=''):
+        from apps.wallet.models import Settlement
+        st = Settlement.objects.select_for_update().select_related('client','expert','fee_recipient').get(pk=settlement.pk)
+        if st.is_released:
+            return {'settlement': st, 'already_released': True}
+        total = money(st.funded_base + st.funded_service_fee)
+        users = {u.pk:u for u in User.objects.select_for_update().filter(pk__in=sorted({st.expert_id,st.fee_recipient_id}))}
+        e, r = users[st.expert_id], users[st.fee_recipient_id]
+        if (e.frozen_balance or ZERO) < st.funded_base or (r.frozen_balance or ZERO) < st.funded_service_fee:
+            raise InsufficientFunds('Recipient escrow balance is insufficient')
+        e.frozen_balance -= st.funded_base; r.frozen_balance -= st.funded_service_fee
+        e.save(update_fields=['frozen_balance']); r.save(update_fields=['frozen_balance'])
+        Transaction.objects.create(user=st.client, amount=total, type=TransactionType.RELEASE, order=st.order, description=description or 'Разблокировка распределённого резерва', balance_after=st.client.balance)
+        Transaction.objects.create(user=e, amount=st.funded_base, type=TransactionType.PAYOUT, order=st.order, description=description or 'Выплата автору', balance_after=e.balance)
+        Transaction.objects.create(user=r, amount=st.funded_service_fee, type=TransactionType.PARTNER_PAYOUT if r.role=='partner' else TransactionType.COMMISSION, order=st.order, description='Реферальная комиссия 25%' if r.role=='partner' else 'Комиссия директорам 25%', balance_after=r.balance)
+        st.is_released=True; st.save(update_fields=['is_released'])
+        if r.role=='partner':
+            from apps.users.models import PartnerEarning
+            earning,_=PartnerEarning.objects.get_or_create(partner=r,referral=st.client,order=st.order,earning_type='order',source_key=f'order:{st.order_id}' if st.order_id else f'purchase:{st.purchase_id}',defaults={'amount':st.funded_service_fee,'commission_rate':25,'source_amount':st.funded_base,'is_paid':True})
+            if not earning.is_paid: earning.is_paid=True; earning.save(update_fields=['is_paid'])
+            from apps.users.signals import update_partner_statistics; update_partner_statistics(r)
+        return {'settlement':st,'payout':st.funded_base,'service_fee':st.funded_service_fee}
+
+    @staticmethod
+    @transaction.atomic
+    def refund_distributed_escrow(settlement, amount=None, *, description=''):
+        from apps.wallet.models import Settlement
+        st=Settlement.objects.select_for_update().select_related('client','expert','fee_recipient').get(pk=settlement.pk)
+        if st.is_released: raise ValueError('Released escrow must use clawback')
+        funded=money(st.funded_base+st.funded_service_fee); amount=money(funded if amount is None else amount)
+        if amount<=0 or amount>funded: raise ValueError('Invalid escrow refund amount')
+        base=money(amount*st.funded_base/funded) if funded else ZERO; fee=money(amount-base)
+        users={u.pk:u for u in User.objects.select_for_update().filter(pk__in=sorted({st.client_id,st.expert_id,st.fee_recipient_id}))}
+        c,e,r=users[st.client_id],users[st.expert_id],users[st.fee_recipient_id]
+        if e.frozen_balance<base or r.frozen_balance<fee: raise InsufficientFunds('Recipient escrow is insufficient')
+        e.frozen_balance-=base; e.balance-=base; r.frozen_balance-=fee; r.balance-=fee; c.balance+=amount
+        e.save(update_fields=['balance','frozen_balance']); r.save(update_fields=['balance','frozen_balance']); c.save(update_fields=['balance'])
+        st.funded_base-=base; st.funded_service_fee-=fee; st.save(update_fields=['funded_base','funded_service_fee'])
+        tx=Transaction.objects.create(user=c,amount=amount,type=TransactionType.REFUND,order=st.order,description=description or 'Возврат распределённого резерва',balance_after=c.balance)
+        return {'transaction':tx,'refund':amount}
+
+    @staticmethod
+    @transaction.atomic
     def release_order_payment(*, client, expert, base_amount, service_fee, order=None, purchase=None, description='', source_key='') -> dict:
         """Release escrow exactly per TZ: full base to author, 25% to partner or directors."""
         base_amount, service_fee = money(base_amount), money(service_fee)

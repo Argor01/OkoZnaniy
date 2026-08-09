@@ -16,6 +16,8 @@ class PaymentService:
         """
         Создает новый платеж для заказа
         """
+        if not order.expert_id:
+            raise ValueError('Сначала выберите исполнителя: средства должны блокироваться у автора.')
         quote = order_quote(order.final_price or order.budget)
         payment = Payment.objects.create(
             order=order,
@@ -128,11 +130,13 @@ class PaymentService:
             - (totals.get(TransactionType.REFUND) or Decimal('0.00'))
         )
         if active_hold < escrow_amount:
-            WalletService.hold(
-                client,
-                escrow_amount - active_hold,
-                order=order,
-                description=f'Резерв по заказу #{order.id}',
+            if not order.expert_id:
+                raise ValueError('У заказа не выбран исполнитель для распределённого escrow')
+            WalletService.fund_distributed_escrow(
+                client=client, expert=order.expert,
+                base_amount=base_amount, service_fee=service_fee,
+                fund_amount=escrow_amount - active_hold,
+                order=order, description=f'Резерв по заказу #{order.id}',
             )
 
     @staticmethod

@@ -192,9 +192,10 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertIsNotNone(purchase.hold_until)
         self.assertTrue(purchase.hold_until > timezone.now())
 
-        self.assertEqual(self.buyer.balance, Decimal("1500.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("1500.00"))
-        self.assertEqual(self.author.balance, Decimal("0.00"))
+        self.assertEqual(self.buyer.balance, Decimal("0.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.assertEqual(self.author.balance, Decimal("1200.00"))
+        self.assertEqual(self.author.frozen_balance, Decimal("1200.00"))
 
         self.assertTrue(bool(purchase.delivered_file))
         self.assertEqual(purchase.delivered_file_name, "work.docx")
@@ -289,8 +290,10 @@ class ReadyWorkDisputeTests(TestCase):
         self.buyer.refresh_from_db()
         self.assertEqual(purchase.status, Purchase.Status.DISPUTED)
         self.assertFalse(bool(purchase.delivered_file))
-        self.assertEqual(self.buyer.balance, Decimal("625.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("625.00"))
+        self.assertEqual(self.buyer.balance, Decimal("0.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.author.refresh_from_db()
+        self.assertEqual(self.author.frozen_balance, Decimal("500.00"))
 
         self.assertEqual(
             set(Transaction.objects.filter(user=self.buyer).values_list("type", flat=True)),

@@ -23,15 +23,7 @@ def release_ready_work_holds():
     for purchase in expired:
         try:
             quote = order_quote(purchase.price_paid)
-            WalletService.release_order_payment(
-                client=purchase.buyer,
-                expert=purchase.work.author,
-                purchase=purchase,
-                base_amount=quote['base_amount'],
-                service_fee=quote['service_fee'],
-                source_key=f'purchase:{purchase.pk}',
-                description=f'Выплата по покупке готовой работы «{purchase.work.title}»',
-            )
+            WalletService.release_distributed_escrow(purchase.wallet_settlement, description=f'Выплата по покупке готовой работы «{purchase.work.title}»')
             purchase.status = Purchase.Status.COMPLETED
             purchase.save(update_fields=['status'])
             count += 1
