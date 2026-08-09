@@ -65,7 +65,7 @@ const BecomeExpert: React.FC = () => {
               и ставишь цену. Начни зарабатывать на своих знаниях уже сегодня.
             </p>
             <div className={styles.bpHeroCtas}>
-              <button className={styles.btnPrimaryBig} onClick={() => navigate('/expert-application')}>Стать экспертом →</button>
+              <button className={styles.btnPrimaryBig} onClick={() => navigate('/expert-application')}>Стать экспертом</button>
               <a href="#adv" className={styles.btnGhost}>Узнать подробнее</a>
             </div>
             <div className={styles.bpHeroNote}><CheckCircleOutlined /> Регистрация бесплатна, первые заказы уже сегодня</div>
