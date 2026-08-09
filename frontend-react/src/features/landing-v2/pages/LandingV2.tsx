@@ -98,7 +98,7 @@ const Hero: React.FC = () => {
   const [deadline, setDeadline] = useState('Через неделю');
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/register?type=${encodeURIComponent(taskType)}&deadline=${encodeURIComponent(deadline)}`);
+    navigate('/register');
   };
   return (
     <section className={styles.hero}>
@@ -156,7 +156,7 @@ const Hero: React.FC = () => {
               </select>
             </div>
             <button type="submit" className={styles.heroFormBtn}>
-              Найти эксперта →
+              Найти эксперта
             </button>
           </form>
 
@@ -353,7 +353,7 @@ const HowItWorks: React.FC = () => {
             ))}
           </div>
           <button className={styles.btnPrimaryBig} onClick={() => navigate('/login')}>
-            Оформить заявку бесплатно →
+            Оформить заявку бесплатно
           </button>
           <div className={styles.howNote}>
             <span><LockOutlined /></span> Деньги под защитой эскроу. Возврат 100% за 24 часа.
