@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils.html import strip_tags
+from django.conf import settings
 
 from apps.catalog.serializers import SubjectSerializer, WorkTypeSerializer
 from .models import Purchase, ReadyWork, ReadyWorkFile
@@ -131,8 +132,13 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         work_files = validated_data.pop('work_files', [])
         validated_data['author'] = self.context['request'].user
-        validated_data['moderation_status'] = ReadyWork.ModerationStatus.PENDING
-        validated_data['is_active'] = False
+        moderation_enabled = getattr(settings, 'READY_WORK_MODERATION_ENABLED', False)
+        validated_data['moderation_status'] = (
+            ReadyWork.ModerationStatus.PENDING
+            if moderation_enabled
+            else ReadyWork.ModerationStatus.APPROVED
+        )
+        validated_data['is_active'] = not moderation_enabled
 
         work = ReadyWork.objects.create(**validated_data)
 

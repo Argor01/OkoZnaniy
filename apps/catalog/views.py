@@ -379,7 +379,10 @@ class WorkTypeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_queryset(self):
-        return WorkType.objects.all()
+        queryset = WorkType.objects.all()
+        if 'is_active' not in self.request.query_params:
+            queryset = queryset.filter(is_active=True)
+        return queryset
 
     @action(detail=True, methods=['post'])
     def calculate_price(self, request, pk=None):

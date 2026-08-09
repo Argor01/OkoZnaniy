@@ -291,7 +291,7 @@ const IncomeExpenseDetail: React.FC = () => {
             ].filter(Boolean).join(' ')}
           >
             <Statistic
-              title="Общий доход"
+              title="Ручные доходы"
               value={totalIncome}
               prefix="₽"
               precision={0}
@@ -310,7 +310,7 @@ const IncomeExpenseDetail: React.FC = () => {
             ].filter(Boolean).join(' ')}
           >
             <Statistic
-              title="Общие расходы"
+              title="Ручные расходы"
               value={totalExpense}
               prefix="₽"
               precision={0}
@@ -331,7 +331,7 @@ const IncomeExpenseDetail: React.FC = () => {
             ].filter(Boolean).join(' ')}
           >
             <Statistic
-              title="Чистая прибыль"
+              title="Результат ручных операций"
               value={netProfit}
               prefix="₽"
               precision={0}
@@ -345,7 +345,7 @@ const IncomeExpenseDetail: React.FC = () => {
       </Row>
 
       <Card 
-        title="Доходы и расходы"
+        title="Ручные доходы и расходы"
         className={[
           'incomeExpenseChartCard',
           isMobile ? 'incomeExpenseChartCardMobile' : '',

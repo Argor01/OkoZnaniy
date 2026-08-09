@@ -108,7 +108,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>О проекте</h3>
             <div className={styles.linksInline}>
-              <a href={ROUTES.partners} className={styles.link}>Партнерская компания</a>
+              <a href={ROUTES.becomePartner} className={styles.link}>Партнерская программа</a>
               <a href="/#about" className={styles.link}>О компании</a>
               <a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a>
               <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a>

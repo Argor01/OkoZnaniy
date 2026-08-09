@@ -73,6 +73,16 @@ class ReadyWorkCreationRegressionTests(TestCase):
         self.assertEqual(work.price, Decimal("199.99"))
         self.assertEqual(work.subject_id, self.subject.id)
         self.assertEqual(work.work_type_id, self.work_type.id)
+        self.assertEqual(work.moderation_status, ReadyWork.ModerationStatus.APPROVED)
+        self.assertTrue(work.is_active)
+
+    @override_settings(READY_WORK_MODERATION_ENABLED=True)
+    def test_moderation_can_be_reenabled(self):
+        response = self.api_client.post(
+            "/api/shop/works/", self._payload(title="Moderated work"), format="multipart"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        work = ReadyWork.objects.get(pk=response.json()["id"])
         self.assertEqual(work.moderation_status, ReadyWork.ModerationStatus.PENDING)
         self.assertFalse(work.is_active)
 

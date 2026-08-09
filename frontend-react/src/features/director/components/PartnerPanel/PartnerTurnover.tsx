@@ -300,24 +300,6 @@ const PartnerTurnover: React.FC = () => {
                   />
                 </Card>
               </Col>
-              <Col xs={24} sm={24} md={8}>
-                <Card
-                  className={[
-                    styles.statCard,
-                    isMobile ? styles.statCardMobile : '',
-                    isMobile ? styles.statCardHighlightMobile : '',
-                  ].filter(Boolean).join(' ')}
-                >
-                  <Statistic
-                    title="Активных партнёров"
-                    value={turnoverData.partners?.length || 0}
-                    className={[
-                      styles.statisticActive,
-                      isMobile ? styles.statisticActiveMobile : '',
-                    ].filter(Boolean).join(' ')}
-                  />
-                </Card>
-              </Col>
             </Row>
 
             

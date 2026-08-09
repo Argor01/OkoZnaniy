@@ -157,8 +157,6 @@ const PartnerList: React.FC = () => {
     });
   }, [partners, searchText, statusFilter, dateRange]);
 
-  const activePartnersCount = partners?.filter((p) => p.isActive || p.is_active).length || 0;
-  const totalPartnersCount = partners?.length || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('ru-RU', {
@@ -346,24 +344,6 @@ const PartnerList: React.FC = () => {
     <div>
 
       <Row gutter={[16, isMobile ? 12 : 16]} className={styles.statsRow}>
-        <Col xs={24} sm={12} md={8}>
-          <Card
-            className={[
-              styles.statCard,
-              isMobile ? styles.statCardMobile : '',
-            ].filter(Boolean).join(' ')}
-          >
-            <Statistic
-              title="Активных партнёров"
-              value={activePartnersCount}
-              suffix={`/ ${totalPartnersCount}`}
-              className={[
-                styles.statisticActive,
-                isMobile ? styles.statisticActiveMobile : '',
-              ].filter(Boolean).join(' ')}
-            />
-          </Card>
-        </Col>
         <Col xs={24} sm={12} md={8}>
           <Card
             className={[

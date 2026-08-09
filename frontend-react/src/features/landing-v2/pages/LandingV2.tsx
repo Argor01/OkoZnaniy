@@ -98,7 +98,7 @@ const Hero: React.FC = () => {
   const [deadline, setDeadline] = useState('Через неделю');
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/register');
+    navigate('/login');
   };
   return (
     <section className={styles.hero}>

@@ -162,6 +162,75 @@ class AcceptOfferRegressionTests(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
+class LinkedIndividualOfferTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.client_user = User.objects.create_user(
+            username="linked_offer_client", password="pwd", role="client"
+        )
+        cls.expert_user = User.objects.create_user(
+            username="linked_offer_expert", password="pwd", role="expert"
+        )
+        cls.other_expert = User.objects.create_user(
+            username="linked_offer_other_expert", password="pwd", role="expert"
+        )
+        cls.chat = Chat.objects.create(client=cls.client_user, expert=cls.expert_user)
+        cls.chat.participants.set([cls.client_user, cls.expert_user])
+
+    def setUp(self):
+        self.api_client = APIClient()
+        self.api_client.force_authenticate(user=self.expert_user)
+
+    def _order(self, **overrides):
+        values = {
+            "client": self.client_user,
+            "title": "Fixed-price order",
+            "description": "Order available for an individual offer",
+            "budget": 1200,
+            "price_type": "fixed",
+            "deadline": timezone.now() + timedelta(days=5),
+            "status": "new",
+        }
+        values.update(overrides)
+        return Order.objects.create(**values)
+
+    def test_fixed_price_unassigned_order_can_be_linked(self):
+        order = self._order()
+        response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/send_message/",
+            {
+                "message_type": "offer",
+                "offer_data": {
+                    "description": "Offer for fixed-price order",
+                    "cost": 1400,
+                    "deadline": (timezone.now() + timedelta(days=4)).isoformat(),
+                    "linked_order_id": order.id,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertEqual(response.json()["offer_data"]["linked_order_id"], order.id)
+
+    def test_order_with_expert_cannot_be_linked(self):
+        order = self._order(expert=self.other_expert)
+        response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/send_message/",
+            {
+                "message_type": "offer",
+                "offer_data": {
+                    "description": "Invalid linked offer",
+                    "cost": 1400,
+                    "linked_order_id": order.id,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("уже есть", response.json()["detail"])
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
 class ChatConversationRoutingTests(TestCase):
     @classmethod
     def setUpTestData(cls):

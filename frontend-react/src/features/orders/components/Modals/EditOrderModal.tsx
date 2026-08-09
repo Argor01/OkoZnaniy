@@ -170,7 +170,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         subject_id: values.subject,
         work_type_id: values.work_type,
         price_type: values.price_type,
-        budget: values.price_type === 'fixed' && values.budget ? String(values.budget) : undefined,
+        budget: values.price_type === 'fixed' && values.budget ? String(values.budget) : null,
         client_note: values.client_note || undefined,
       };
 

@@ -37,7 +37,7 @@ const AddWorkToShop: React.FC = () => {
   const createWorkMutation = useMutation({
     mutationFn: (data: CreateWorkPayload) => shopApi.createWork(data),
     onSuccess: () => {
-      message.success('Работа отправлена на модерацию. Подтверждение может занять от 5 минут до 3 часов.');
+      message.success('Работа опубликована в магазине готовых работ.');
       queryClient.invalidateQueries({ queryKey: ['shop-works'] });
       queryClient.invalidateQueries({ queryKey: ['shop-my-works'] });
       navigate('/shop/ready-works');

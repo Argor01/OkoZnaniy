@@ -304,23 +304,9 @@ class ChatViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                if linked_order.expert_id is not None and linked_order.expert_id != request.user.id:
+                if linked_order.expert_id is not None:
                     return Response(
                         {'detail': 'У этого заказа уже есть назначенный эксперт.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                if getattr(linked_order, 'price_type', None) != 'negotiable':
-                    return Response(
-                        {'detail': 'Привязка доступна только для заказов с договорной ценой.'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                from apps.orders.models import Bid
-                existing_bid = Bid.objects.filter(order=linked_order, expert=request.user).exists()
-                if existing_bid and getattr(linked_order, 'price_type', None) != 'negotiable':
-                    return Response(
-                        {'detail': 'Вы уже оставляли отклик на этот заказ.'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
 

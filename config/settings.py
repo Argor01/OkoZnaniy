@@ -561,3 +561,5 @@ LOGGING = {
         },
     },
 }
+# Ready-work moderation can be re-enabled later without code changes.
+READY_WORK_MODERATION_ENABLED = os.getenv('READY_WORK_MODERATION_ENABLED', 'False') == 'True'

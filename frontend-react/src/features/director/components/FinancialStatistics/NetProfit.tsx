@@ -68,6 +68,7 @@ const NetProfit: React.FC = () => {
       profit: d.profit,
       income: d.income,
       expense: d.expense,
+      expertPayouts: d.expert_payouts || 0,
     }));
   }, [netProfitData]);
 
@@ -236,7 +237,7 @@ const NetProfit: React.FC = () => {
       </Row>
 
       <Card 
-        title="Динамика комиссии и выплат"
+        title="Динамика доходов, расходов и прибыли"
         className={[
           'netProfitChartCard',
           isMobile ? 'netProfitChartCardMobile' : '',
@@ -274,8 +275,9 @@ const NetProfit: React.FC = () => {
                   formatter={(value: number) => `${value.toLocaleString('ru-RU')} ₽`}
                 />
                 <Legend />
-                <Area type="monotone" dataKey="income" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Комиссия" />
-                <Area type="monotone" dataKey="expense" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Выплаты" />
+                <Area type="monotone" dataKey="income" stroke="#52c41a" fill="#52c41a" fillOpacity={0.6} name="Доходы платформы" />
+                <Area type="monotone" dataKey="expense" stroke="#ff4d4f" fill="#ff4d4f" fillOpacity={0.6} name="Ручные расходы" />
+                <Area type="monotone" dataKey="expertPayouts" stroke="#fa8c16" fill="#fa8c16" fillOpacity={0.25} name="Выплаты экспертам" />
                 <Area type="monotone" dataKey="profit" stroke="#1890ff" fill="#1890ff" fillOpacity={0.3} name="Прибыль" />
               </AreaChart>
             </ResponsiveContainer>

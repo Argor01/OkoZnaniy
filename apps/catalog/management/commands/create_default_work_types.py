@@ -149,8 +149,8 @@ class Command(BaseCommand):
                 'name': 'Бизнес-план',
                 'slug': 'biznes-plan',
                 'description': 'Разработка плана развития бизнеса',
-                'base_price': 5000,
-                'estimated_time': 14,
+                'base_price': 3500,
+                'estimated_time': 60,
                 'icon': 'fa-briefcase'
             },
             {

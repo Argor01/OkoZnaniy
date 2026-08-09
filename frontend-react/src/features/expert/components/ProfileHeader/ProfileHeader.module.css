@@ -8,6 +8,10 @@
   margin-bottom: 20px;
   box-shadow: none;
   border: none;
+  container-type: inline-size;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .profileBlockContent {
@@ -15,13 +19,15 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 32px;
+  min-width: 0;
 }
 
 .profileLeft {
   display: flex;
   gap: 24px;
   align-items: flex-start;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .profileAvatar {
@@ -168,6 +174,9 @@
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
+  flex: 0 1 240px;
+  min-width: 190px;
+  max-width: 280px;
 }
 
 .profileStats {
@@ -175,6 +184,8 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
 }
 
 .profileStatsBlock {
@@ -188,11 +199,17 @@
   margin-bottom: 12px;
   font-size: 16px;
   color: #6b7280;
+  line-height: 1.45;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .profileStatsLine {
   font-size: 16px;
   color: #1f2937;
+  line-height: 1.45;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .statsNumber {
@@ -571,4 +588,125 @@
 
 .editProfileButton:active {
   transform: scale(0.95);
+}
+
+
+/* Component-level responsiveness: the profile can be narrow even on a wide
+   viewport when sidebars and the questions panel are visible. */
+@container (max-width: 760px) {
+  .profileBlockContent {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .profileLeft,
+  .profileRight {
+    width: 100%;
+    max-width: none;
+  }
+
+  .profileRight {
+    flex: none;
+    min-width: 0;
+    align-items: flex-start;
+    text-align: left;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border-base, #e5e7eb);
+  }
+
+  .profileStats {
+    display: grid;
+    grid-template-columns: minmax(150px, auto) minmax(0, 1fr);
+    align-items: start;
+    gap: 12px 24px;
+  }
+
+  .profileStatsMeta {
+    margin: 0;
+    white-space: normal;
+  }
+
+  .profileStatsBlock {
+    min-width: 0;
+  }
+
+  .profileStatsMeta,
+  .profileStatsLine {
+    text-align: left;
+  }
+}
+
+@container (max-width: 560px) {
+  .profileBlock {
+    padding: 20px 16px;
+  }
+
+  .profileLeft {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profileInfo {
+    width: 100%;
+    align-items: center;
+  }
+
+  .profileNameRow {
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .profileNameTitle {
+    flex: 1 1 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .profileStatsRow,
+  .profileStatsRowMobile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    overflow: visible;
+  }
+
+  .profileStatColumn,
+  .profileStatColumnMobile {
+    min-width: 0;
+    max-width: none;
+    text-align: center;
+  }
+
+  .profileStatLabel {
+    white-space: normal;
+  }
+
+  .profileStats {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .profileRight,
+  .profileStatsMeta,
+  .profileStatsLine {
+    text-align: center;
+  }
+
+  .profileRight,
+  .profileStats {
+    align-items: center;
+  }
+}
+
+@container (max-width: 360px) {
+  .profileStatsRow,
+  .profileStatsRowMobile {
+    grid-template-columns: 1fr;
+  }
+
+  .profileStatRate {
+    font-size: 16px;
+  }
 }

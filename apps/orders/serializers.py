@@ -7,6 +7,7 @@ from apps.catalog.services import PricingService
 from apps.users.serializers import PublicUserProfileSerializer
 from django.utils import timezone
 from rest_framework.reverse import reverse
+from decimal import Decimal
 
 MAX_ORDER_BUDGET = 99_999_999.99
 
@@ -79,6 +80,14 @@ class OrderCommentSerializer(serializers.ModelSerializer):
 class BidSerializer(serializers.ModelSerializer):
     expert = PublicUserProfileSerializer(read_only=True)
     expert_rating = serializers.SerializerMethodField()
+    # Ставка эксперта является его собственным предложением и не ограничивается
+    # бюджетом клиента. Ограничиваем только форматом поля и общим максимумом.
+    amount = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        min_value=Decimal('0'),
+        max_value=Decimal(str(MAX_ORDER_BUDGET)),
+    )
 
     class Meta:
         model = Bid

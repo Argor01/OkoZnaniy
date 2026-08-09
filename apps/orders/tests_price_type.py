@@ -1,7 +1,7 @@
 """Price-type feature tests.
 
 Coverage:
- * fixed-price orders require the client to have enough balance at creation;
+ * fixed-price orders can be published regardless of the client balance;
  * negotiable orders can be published regardless of balance;
  * fixed-price orders require a non-empty budget;
  * accept_bid (assigning an expert) checks the client balance when the bid
@@ -80,13 +80,16 @@ class OrderPriceTypeTests(TestCase):
 
     # ── creation ──────────────────────────────────────────────────
 
-    def test_fixed_price_order_blocked_without_funds(self):
+    def test_fixed_price_order_created_without_funds(self):
         response = self.api_client.post(
             "/api/orders/orders/", self._payload(), format="json"
         )
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("Недостаточно средств", response.json()["detail"])
-        self.assertFalse(Order.objects.filter(title="Заказ с ценой").exists())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        order = Order.objects.get(pk=response.json()["id"])
+        self.assertEqual(order.price_type, "fixed")
+        self.assertEqual(order.budget, Decimal("5000"))
+        self.client_user.refresh_from_db()
+        self.assertEqual(self.client_user.balance, Decimal("0"))
 
     def test_fixed_price_order_created_with_enough_funds(self):
         WalletService.topup(self.client_user, Decimal("5000"))
@@ -111,6 +114,41 @@ class OrderPriceTypeTests(TestCase):
         order = Order.objects.get(pk=response.json()["id"])
         self.assertEqual(order.price_type, "negotiable")
         self.assertIsNone(order.budget)
+
+    # ── editing ───────────────────────────────────────────────────
+
+    def test_fixed_order_can_be_changed_to_negotiable(self):
+        order = self._create_order(price_type="fixed", budget=Decimal("5000"))
+        response = self.api_client.patch(
+            f"/api/orders/orders/{order.id}/",
+            {
+                "subject_id": self.subject.id,
+                "work_type_id": self.work_type.id,
+                "price_type": "negotiable",
+                "budget": None,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        order.refresh_from_db()
+        self.assertEqual(order.price_type, "negotiable")
+        self.assertIsNone(order.budget)
+
+    def test_expert_can_bid_above_client_budget(self):
+        order = self._create_order(budget=Decimal("1000"))
+        self.api_client.force_authenticate(user=self.expert_user)
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/bids/",
+            {
+                "amount": "2500",
+                "prepayment_percent": 50,
+                "comment": "My price is above the client budget",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        bid = Bid.objects.get(order=order, expert=self.expert_user)
+        self.assertEqual(bid.amount, Decimal("2500"))
 
     # ── accept_bid ────────────────────────────────────────────────
 

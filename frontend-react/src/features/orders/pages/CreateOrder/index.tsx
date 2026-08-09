@@ -3,13 +3,12 @@ import { Form, Typography, message, Modal, Radio } from 'antd';
 import type { UploadFile } from 'antd/es/upload/interface';
 import { InboxOutlined, PlusOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { catalogApi } from '@/features/common/api/catalog';
 import { ordersApi } from '@/features/orders/api/orders';
 import { CreateOrderRequest } from '@/features/orders/types/orders';
-import { walletApi } from '@/features/wallet/api/wallet';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
@@ -51,13 +50,6 @@ const CreateOrder: React.FC = () => {
   const [deadlineTime, setDeadlineTime] = useState<DeadlineTimeValues>({ hours: 12, minutes: 0 });
   const [priceType, setPriceType] = useState<'fixed' | 'negotiable'>('fixed');
   const submitGuardRef = useRef(false);
-
-  const { data: walletBalance } = useQuery({
-    queryKey: ['wallet-balance'],
-    queryFn: walletApi.me,
-    staleTime: 30_000,
-  });
-  const availableBalance = walletBalance ? Number(walletBalance.available_balance) : 0;
 
   const lockSubmit = () => {
     submitGuardRef.current = true;
@@ -394,7 +386,7 @@ const CreateOrder: React.FC = () => {
             {priceType === 'fixed' ? (
               <div className={styles.priceSection}>
                 <Typography.Text type="secondary">
-                  Доступно на балансе: {availableBalance.toLocaleString('ru-RU')} ₽
+                  Можно указать стоимость выше текущего баланса. Оплата потребуется только при выборе эксперта.
                 </Typography.Text>
               </div>
             ) : (
