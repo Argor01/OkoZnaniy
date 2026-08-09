@@ -23,6 +23,7 @@ interface EditOrderFormValues {
   deadline: dayjs.Dayjs;
   subject: number;
   work_type: number;
+  price_type: 'fixed' | 'negotiable';
   budget?: number | null;
   client_note?: string;
 }
@@ -88,6 +89,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         deadline: deadlineDate.startOf('day'),
         subject: typeof order.subject === 'object' ? order.subject?.id : order.subject,
         work_type: typeof order.work_type === 'object' ? order.work_type?.id : order.work_type,
+        price_type: order.price_type || 'fixed',
         budget: order.budget ? Number(order.budget) : undefined,
         client_note: order.client_note || '',
       });
@@ -145,6 +147,13 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
   const onFinish = async (values: EditOrderFormValues) => {
     if (!order || !canEdit || submitGuardRef.current) return;
+
+    // Validate budget for fixed price
+    if (values.price_type === 'fixed' && (!values.budget || Number(values.budget) <= 0)) {
+      message.error('Для фиксированной цены укажите стоимость');
+      return;
+    }
+
     lockSubmit();
 
     try {
@@ -160,7 +169,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         deadline: deadlineWithTime.toISOString(),
         subject_id: values.subject,
         work_type_id: values.work_type,
-        budget: values.budget ? String(values.budget) : undefined,
+        price_type: values.price_type,
+        budget: values.price_type === 'fixed' && values.budget ? String(values.budget) : undefined,
         client_note: values.client_note || undefined,
       };
 
@@ -356,24 +366,50 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
             </Form.Item>
 
             <Form.Item
-              name="budget"
-              label="Стоимость (₽)"
-              rules={[
-                {
-                  validator: (_, value) => {
-                    if (value !== undefined && value !== null && Number(value) <= 0) {
-                      return Promise.reject(new Error('Стоимость должна быть больше 0'));
-                    }
-                    return Promise.resolve();
-                  }
-                }
-              ]}
+              name="price_type"
+              label="Тип цены"
+              rules={[{ required: true, message: 'Выберите тип цены' }]}
             >
-              <AppInput.Number
-                placeholder="Стоимость (необязательно)"
-                min={1}
-                className={`${styles.priceInput} ${styles.fullWidth}`}
-              />
+              <AppSelect
+                placeholder="Тип цены"
+                className={styles.selectField}
+                getPopupContainer={() => document.body}
+              >
+                <AppSelect.Option value="fixed">Фиксированная цена</AppSelect.Option>
+                <AppSelect.Option value="negotiable">Договорная цена</AppSelect.Option>
+              </AppSelect>
+            </Form.Item>
+
+            <Form.Item
+              noStyle
+              shouldUpdate={(prev, next) => prev.price_type !== next.price_type}
+            >
+              {({ getFieldValue }) => {
+                const priceType = getFieldValue('price_type');
+                if (priceType !== 'fixed') return null;
+                return (
+                  <Form.Item
+                    name="budget"
+                    label="Стоимость (₽)"
+                    rules={[
+                      {
+                        validator: (_, value) => {
+                          if (priceType === 'fixed' && (value === undefined || value === null || Number(value) <= 0)) {
+                            return Promise.reject(new Error('Для фиксированной цены укажите стоимость'));
+                          }
+                          return Promise.resolve();
+                        }
+                      }
+                    ]}
+                  >
+                    <AppInput.Number
+                      placeholder="Стоимость"
+                      min={1}
+                      className={`${styles.priceInput} ${styles.fullWidth}`}
+                    />
+                  </Form.Item>
+                );
+              }}
             </Form.Item>
 
             <Form.Item

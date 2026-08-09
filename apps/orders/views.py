@@ -314,25 +314,6 @@ class OrderViewSet(viewsets.ModelViewSet):
         blocked = _ensure_not_banned_for_contacts(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
-        # Проверка баланса для заказа с фиксированной ценой
-        price_type = request.data.get('price_type') or 'fixed'
-        budget = request.data.get('budget')
-        if price_type == 'fixed' and budget not in (None, ''):
-            try:
-                amount = Decimal(str(budget))
-            except Exception:
-                amount = Decimal('0')
-            if amount > 0:
-                try:
-                    available = WalletService.get_balance(request.user)['available_balance']
-                    if available < amount:
-                        return Response(
-                            {'detail': 'Недостаточно средств на балансе для создания заказа с фиксированной ценой. '
-                                       f'Доступно: {available} ₽. Пополните баланс в разделе «Кошелёк».'},
-                            status=status.HTTP_400_BAD_REQUEST,
-                        )
-                except Exception as e:
-                    logger.error(f"[OrderViewSet.create] Balance check failed for user {request.user.id}: {e}", exc_info=True)
         try:
             return super().create(request, *args, **kwargs)
         except Exception as e:

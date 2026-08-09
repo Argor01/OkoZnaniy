@@ -127,17 +127,6 @@ const CreateOrder: React.FC = () => {
       lockSubmit();
       try {
         setIsUploading(true);
-
-        // Проверка баланса для заказа с фиксированной ценой
-        if (priceType === 'fixed' && values.budget) {
-          const need = Number(values.budget);
-          if (need > availableBalance) {
-            message.error(
-              `Недостаточно средств на балансе для создания заказа. Доступно: ${availableBalance.toLocaleString('ru-RU')} ₽. Пополните баланс в разделе «Кошелёк».`
-            );
-            return;
-          }
-        }
       
         // Логируем данные для отладки
         logger.log('📦 Отправляемые данные заказа:', values);

@@ -240,7 +240,7 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                     size={isMobile ? 'large' : 'middle'}
                     options={availableOrders.map((o) => ({
                       value: o.id,
-                      label: `#${o.id} — ${o.title || o.subject?.name || 'Заказ'}`,
+                      label: `#${o.id} — ${o.title || o.subject?.name || 'Заказ'}${o.price_type === 'fixed' && o.budget ? ` (${o.budget}₽)` : ''}`,
                     }))}
                     onChange={(value: number) => setSelectedOrderId(value)}
                   />
