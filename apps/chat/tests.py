@@ -258,10 +258,10 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(count_response.status_code, status.HTTP_200_OK)
         self.assertEqual(count_response.json()["unread_count"], 0)
 
-        Message.objects.filter(chat=chat, message_type="system").update(is_read=True)
-        mark_response = self.api_client.post(f"/api/chat/chats/{chat.id}/mark_as_unread/")
+        Message.objects.filter(chat=self.direct_chat, message_type="system").update(is_read=True)
+        mark_response = self.api_client.post(f"/api/chat/chats/{self.direct_chat.id}/mark_as_unread/")
         self.assertEqual(mark_response.status_code, status.HTTP_200_OK)
-        self.assertFalse(Message.objects.filter(chat=chat, message_type="system", is_read=False).exists())
+        self.assertFalse(Message.objects.filter(chat=self.direct_chat, message_type="system", is_read=False).exists())
 
         Message.objects.filter(pk=hidden_message.pk).update(is_read=True)
         mark_response = self.api_client.post(f"/api/chat/chats/{self.direct_chat.id}/mark_as_unread/")

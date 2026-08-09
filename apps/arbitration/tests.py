@@ -10,6 +10,7 @@ from apps.arbitration.models import ArbitrationActivity, ArbitrationCase, Arbitr
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Message as ChatMessage
 from apps.orders.models import Order
+from apps.wallet.services import WalletService
 
 User = get_user_model()
 
@@ -271,6 +272,8 @@ class ArbitrationCaseAPITests(TestCase):
 
     def test_make_decision_sets_status_and_refund_fields(self):
         case = self._create_case(status='under_review')
+        WalletService.topup(self.client_user, 18750)
+        WalletService.hold(self.client_user, 18750, order=self.order)
         self.api_client.force_authenticate(user=self.admin_user)
 
         response = self.api_client.post(

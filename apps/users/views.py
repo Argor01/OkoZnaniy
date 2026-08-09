@@ -705,6 +705,14 @@ class UserViewSet(viewsets.ModelViewSet):
         # Доходы партнера
         earnings = PartnerEarning.objects.filter(partner=user)
         total_earnings = sum(earning.amount for earning in earnings)
+        from apps.wallet.policy import percent, PARTNER_COMMISSION_PERCENT
+        expected_income = 0
+        for ref in referrals:
+            for active_order in ref.client_orders.filter(status__in=['in_progress', 'review', 'revision']):
+                expected_income += percent(active_order.final_price or active_order.budget, PARTNER_COMMISSION_PERCENT)
+        from django.db.models.functions import TruncMonth
+        monthly_rows = earnings.annotate(month=TruncMonth('created_at')).values('month').annotate(total=models.Sum('amount')).order_by('-month')
+        monthly_history = [{'month': row['month'], 'total': row['total']} for row in monthly_rows]
         
         # Обновляем статистику
         user.active_referrals = active_referrals.count()
@@ -719,6 +727,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'active_referrals': user.active_referrals,
                 'total_earnings': user.total_earnings,
                 'pending_balance': user.pending_balance,
+                'expected_income': expected_income,
             },
             'referrals': [
                 {
@@ -732,6 +741,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 }
                 for ref in referrals
             ],
+            'monthly_history': monthly_history,
             'recent_earnings': [
                 {
                     'id': earning.id,
@@ -832,8 +842,11 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         partners = User.objects.filter(role='partner').order_by('-date_joined')
-        serializer = self.get_serializer(partners, many=True)
-        return Response(serializer.data)
+        data = list(self.get_serializer(partners, many=True).data)
+        for row, partner in zip(data, partners):
+            row['paid_earnings'] = PartnerEarning.objects.filter(partner=partner, is_paid=True).aggregate(total=models.Sum('amount'))['total'] or 0
+            row['unpaid_earnings'] = PartnerEarning.objects.filter(partner=partner, is_paid=False).aggregate(total=models.Sum('amount'))['total'] or 0
+        return Response(data)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def admin_earnings(self, request):

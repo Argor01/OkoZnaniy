@@ -6,6 +6,7 @@ class WalletBalanceSerializer(serializers.Serializer):
     balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     frozen_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     pending_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
+    debt_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     available_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
 
 
@@ -28,14 +29,14 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
         ]
 
     def get_direction(self, obj) -> str:
-        income = {'topup', 'release', 'payout', 'refund'}
+        income = {'topup', 'payout', 'refund', 'partner_payout'}
         return 'in' if obj.type in income else 'out'
 
 
 class TopupRequestSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=100)
     payment_method = serializers.ChoiceField(
-        choices=['sberpay_qr', 'sberbank', 'card', 'sbp'],
+        choices=['tbank', 'sberpay_qr', 'sberbank', 'card', 'sbp'],
         default='sberpay_qr',
     )
 

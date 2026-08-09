@@ -149,8 +149,8 @@ class WalletServiceTests(TestCase):
         system = get_system_account()
         system.refresh_from_db()
 
-        fee = _q(Decimal('1000') * COMMISSION / Decimal('100'))
-        payout = _q(Decimal('1000') - fee)
+        fee = Decimal('0.00')
+        payout = Decimal('1000.00')
 
         self.assertEqual(self.user.balance, Decimal('0.00'))
         self.assertEqual(self.user.frozen_balance, Decimal('0.00'))
@@ -181,7 +181,7 @@ class WalletServiceTests(TestCase):
         )
         self.assertEqual(Transaction.objects.filter(user=self.user, type=TransactionType.RELEASE).count(), 1)
         self.assertEqual(Transaction.objects.filter(user=self.expert, type=TransactionType.PAYOUT).count(), 1)
-        self.assertEqual(Transaction.objects.filter(type=TransactionType.COMMISSION).count(), 1)
+        self.assertEqual(Transaction.objects.filter(type=TransactionType.COMMISSION).count(), 0)
 
     # --- direct_transfer ---
 
@@ -347,8 +347,10 @@ class OrderLifecycleTests(TestCase):
         self.client_u.refresh_from_db()
         self.assertEqual(order.status, 'in_progress')
         self.assertEqual(order.expert, self.expert)
-        self.assertEqual(self.client_u.frozen_balance, Decimal('500.00'))
-        self.assertEqual(self.client_u.balance, Decimal('1000.00'))
+        self.assertEqual(self.client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.client_u.balance, Decimal('375.00'))
+        self.expert.refresh_from_db()
+        self.assertEqual(self.expert.frozen_balance, Decimal('500.00'))
 
     def test_take_order_insufficient_funds(self):
         # no topup → should fail
@@ -369,7 +371,7 @@ class OrderLifecycleTests(TestCase):
     def test_approve_releases_hold_to_expert(self):
         WalletService.topup(self.client_u, Decimal('1000'))
         order = self._order(status='review', expert=self.expert)
-        WalletService.hold(self.client_u, Decimal('500'), order=order)
+        WalletService.hold(self.client_u, Decimal('625'), order=order)
         self.api.force_authenticate(self.client_u)
         resp = self.api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(resp.status_code, http.HTTP_200_OK, resp.content)
@@ -378,8 +380,8 @@ class OrderLifecycleTests(TestCase):
         self.expert.refresh_from_db()
         self.assertEqual(order.status, 'completed')
         self.assertEqual(self.client_u.frozen_balance, Decimal('0.00'))
-        # Expert gets 85% of 500 = 425
-        self.assertEqual(self.expert.balance, Decimal('425.00'))
+        # Author receives the full base price; client service fee goes to directors.
+        self.assertEqual(self.expert.balance, Decimal('500.00'))
 
     def test_reject_refunds_hold(self):
         WalletService.topup(self.client_u, Decimal('1000'))
@@ -568,22 +570,19 @@ class ShopEscrowTests(TestCase):
         )
 
     def test_shop_purchase_uses_escrow(self):
-        WalletService.topup(self.buyer, Decimal('1000'))
+        WalletService.topup(self.buyer, Decimal('937.50'))
         work = self._ready_work()
         self.api.force_authenticate(self.buyer)
         resp = self.api.post(f'/api/shop/works/{work.id}/purchase/')
         self.assertEqual(resp.status_code, http.HTTP_201_CREATED, resp.content)
         self.buyer.refresh_from_db()
         self.seller.refresh_from_db()
-        # Buyer topped up 1000, spent 750 → 250 remaining; frozen back to 0
-        self.assertEqual(self.buyer.balance, Decimal('250.00'))
+        # Ready work is escrowed for the 10-day guarantee period.
+        self.assertEqual(self.buyer.balance, Decimal('0.00'))
         self.assertEqual(self.buyer.frozen_balance, Decimal('0.00'))
-        # Seller gets 85% of 750 = 637.50
-        self.assertEqual(self.seller.balance, Decimal('637.50'))
-        # Order created as completed
-        order = Order.objects.filter(client=self.buyer, expert=self.seller).first()
-        self.assertIsNotNone(order)
-        self.assertEqual(order.status, 'completed')
+        self.assertEqual(self.seller.balance, Decimal('750.00'))
+        self.assertEqual(self.seller.frozen_balance, Decimal('750.00'))
+        self.assertFalse(Order.objects.filter(client=self.buyer, expert=self.seller).exists())
 
     def test_shop_purchase_insufficient_funds(self):
         work = self._ready_work()
@@ -840,8 +839,10 @@ class FullE2EFlowTests(TestCase):
         # The order was created with expert=None, so this should work
         self.assertEqual(resp.status_code, http.HTTP_200_OK, resp.content)
         client_u.refresh_from_db()
-        self.assertEqual(client_u.frozen_balance, Decimal('2000.00'))
-        self.assertEqual(client_u.balance, Decimal('5000.00'))
+        self.assertEqual(client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(client_u.balance, Decimal('2500.00'))
+        expert.refresh_from_db()
+        self.assertEqual(expert.frozen_balance, Decimal('2000.00'))
 
         # 4. Expert completes → review
         resp = api.post(f'/api/orders/orders/{order.id}/complete/')
@@ -861,11 +862,11 @@ class FullE2EFlowTests(TestCase):
         system.refresh_from_db()
 
         self.assertEqual(order.status, 'completed')
-        self.assertEqual(client_u.balance, Decimal('3000.00'))
+        self.assertEqual(client_u.balance, Decimal('2500.00'))
         self.assertEqual(client_u.frozen_balance, Decimal('0.00'))
-        # Expert gets 85%
-        self.assertEqual(expert.balance, Decimal('1700.00'))
-        self.assertEqual(system.balance, Decimal('300.00'))
+        # Author gets base, directors get the 25% client service fee.
+        self.assertEqual(expert.balance, Decimal('2000.00'))
+        self.assertEqual(system.balance, Decimal('500.00'))
 
         # Verify transactions
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.HOLD).exists())
@@ -876,7 +877,7 @@ class FullE2EFlowTests(TestCase):
         # Verify stats
         stats_c = WalletService.get_stats(client_u)
         self.assertEqual(stats_c['total_topup'], Decimal('5000.00'))
-        self.assertEqual(stats_c['total_spent'], Decimal('2000.00'))
+        self.assertEqual(stats_c['total_spent'], Decimal('2500.00'))
 
         stats_e = WalletService.get_stats(expert)
-        self.assertEqual(stats_e['total_earned'], Decimal('1700.00'))
+        self.assertEqual(stats_e['total_earned'], Decimal('2000.00'))

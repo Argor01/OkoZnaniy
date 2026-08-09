@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Radio, Typography, message, Space } from 'antd';
-import { CreditCardOutlined, BankOutlined, WalletOutlined } from '@ant-design/icons';
+import { CreditCardOutlined, BankOutlined, WalletOutlined, QrcodeOutlined } from '@ant-design/icons';
 import { paymentsApi, type PaymentMethod } from '../api/payments';
 
 const { Text } = Typography;
@@ -14,6 +14,12 @@ interface PaymentModalProps {
 }
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
+  {
+    value: "tbank",
+    label: "Т-Банк",
+    icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />,
+    description: "Оплата картой через Т-Банк",
+  },
   {
     value: "sberpay_qr",
     label: "СберPay QR",
@@ -71,7 +77,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     >
       <div style={{ padding: '16px 0' }}>
         <Text style={{ marginBottom: 16, display: 'block' }}>
-          Сумма к оплате: <Text strong>{amount.toLocaleString('ru-RU')} ₽</Text>
+          Стоимость работы: <Text strong>{amount.toLocaleString('ru-RU')} ₽</Text><br />
+          Сервисный сбор 25%: <Text strong>{(amount * 0.25).toLocaleString('ru-RU')} ₽</Text><br />
+          Эквайринг 1,5%: <Text strong>{(amount * 1.25 * 0.015).toLocaleString('ru-RU')} ₽</Text><br />
+          Итого: <Text strong>{(amount * 1.25 * 1.015).toLocaleString('ru-RU')} ₽</Text>
         </Text>
         <Radio.Group
           value={selectedMethod}

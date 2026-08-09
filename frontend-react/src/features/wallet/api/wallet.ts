@@ -4,6 +4,7 @@ export type WalletBalance = {
   balance: string;
   frozen_balance: string;
   pending_balance: string;
+  debt_balance: string;
   available_balance: string;
 };
 
@@ -18,7 +19,7 @@ export type WalletTransaction = {
   amount: string;
   type:
     | 'hold' | 'release' | 'payout' | 'commission' | 'refund'
-    | 'topup' | 'withdrawal' | 'purchase';
+    | 'topup' | 'withdrawal' | 'purchase' | 'partner_payout' | 'clawback';
   type_display: string;
   direction: 'in' | 'out';
   description: string;
@@ -31,6 +32,8 @@ export type TopupResponse = {
   payment_id: string;
   amount: string;
   method: string;
+  wallet_credit?: string;
+  acquiring_fee?: string;
   payment_url: string;
 };
 
@@ -38,6 +41,9 @@ export type WithdrawResponse = {
   withdrawal_id: number;
   status: string;
   amount: string;
+  gross_amount: string;
+  platform_fee: string;
+  acquiring_fee: string;
   card: string;
   balance: WalletBalance;
 };

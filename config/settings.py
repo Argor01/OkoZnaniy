@@ -472,6 +472,15 @@ SBP_MERCHANT_ID = os.getenv('SBP_MERCHANT_ID')
 SBP_API_KEY = os.getenv('SBP_API_KEY')
 SBP_TEST_MODE = os.getenv('SBP_TEST_MODE', 'True') == 'True'
 
+# T-Bank acquiring
+TBANK_API_URL = os.getenv('TBANK_API_URL', 'https://securepay.tinkoff.ru/v2')
+TBANK_TERMINAL_KEY = os.getenv('TBANK_TERMINAL_KEY', '')
+TBANK_PASSWORD = os.getenv('TBANK_PASSWORD', '')
+TBANK_TEST_MODE = os.getenv('TBANK_TEST_MODE', 'False') == 'True'
+TBANK_NOTIFICATION_URL = os.getenv('TBANK_NOTIFICATION_URL', '')
+TBANK_SUCCESS_URL = os.getenv('TBANK_SUCCESS_URL', '')
+TBANK_FAIL_URL = os.getenv('TBANK_FAIL_URL', '')
+
 # Sandbox top-ups: instant wallet credit without a real acquirer.
 # Safe only on test/staging; gated to staff/@okoznaniy.test in the wallet view.
 PAYMENTS_SANDBOX = os.getenv('PAYMENTS_SANDBOX', 'False') == 'True'

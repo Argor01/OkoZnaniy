@@ -395,6 +395,7 @@ class TransactionType(models.TextChoices):
     WITHDRAWAL = "withdrawal", "Вывод средств"
     PURCHASE = "purchase", "Покупка"
     PARTNER_PAYOUT = "partner_payout", "Выплата партнеру"
+    CLAWBACK = "clawback", "Списание по возврату"
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -428,7 +429,7 @@ class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ставка")
     prepayment_percent = models.PositiveSmallIntegerField(
         default=50,
-        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        validators=[MinValueValidator(25), MaxValueValidator(100)],
         verbose_name="Процент предоплаты"
     )
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")

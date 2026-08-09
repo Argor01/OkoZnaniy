@@ -74,6 +74,13 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({
       sorter: (a: Partner, b: Partner) => a.total_earnings - b.total_earnings,
     },
     {
+      title: 'Оплачено',
+      dataIndex: 'paid_earnings',
+      key: 'paid_earnings',
+      render: (amount: number) => <span className={styles.earnings}>{(amount || 0).toLocaleString()} ₽</span>,
+      sorter: (a: Partner, b: Partner) => (a.paid_earnings || 0) - (b.paid_earnings || 0),
+    },
+    {
       title: 'Статус',
       dataIndex: 'is_verified',
       key: 'is_verified',

@@ -114,7 +114,7 @@ class CreateReadyWorkSerializer(serializers.ModelSerializer):
     preview = serializers.ImageField(required=False)
     work_files = serializers.ListField(
         child=serializers.FileField(),
-        required=True,
+        required=False,
         write_only=True,
     )
 

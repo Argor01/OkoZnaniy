@@ -10,12 +10,15 @@ from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from apps.wallet.services import InsufficientFunds, WalletService
 from .models import FavoriteWork, Purchase, ReadyWork, ReadyWorkFile
 from .serializers import CreateReadyWorkSerializer, PurchaseSerializer, ReadyWorkSerializer
 
-HOLD_DAYS = 7
+from apps.wallet.policy import GUARANTEE_DAYS, order_quote
+
+HOLD_DAYS = GUARANTEE_DAYS
 
 
 class IsExpertOrStaff(permissions.BasePermission):
@@ -161,19 +164,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
         now = timezone.now()
         hold_until = now + timedelta(days=HOLD_DAYS)
 
-        try:
-            WalletService.hold(
-                request.user,
-                work.price,
-                description=f'Покупка готовой работы «{work.title}»',
-            )
-        except InsufficientFunds:
-            return Response(
-                {'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        first_file = work.files.first()
+        first_file = work.files.order_by('name', 'id').first()
         purchase = Purchase(
             work=work,
             buyer=request.user,
@@ -187,6 +178,16 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             purchase.delivered_file_size = first_file.file_size or 0
 
         purchase.save()
+        quote = order_quote(work.price)
+        try:
+            WalletService.fund_distributed_escrow(
+                client=request.user, expert=work.author, purchase=purchase,
+                base_amount=quote['base_amount'], service_fee=quote['service_fee'],
+                fund_amount=quote['base_amount'] + quote['service_fee'],
+                description=f'Покупка готовой работы «{work.title}»',
+            )
+        except InsufficientFunds:
+            raise ValidationError({'detail': 'Недостаточно средств на кошельке для покупки готовой работы.'})
 
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -209,6 +210,19 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         context['request'] = self.request
         return context
 
+    @action(detail=True, methods=['post'], url_path='confirm-completion')
+    @transaction.atomic
+    def confirm_completion(self, request, pk=None):
+        purchase = self.get_object()
+        if purchase.status != Purchase.Status.PAID:
+            return Response({'detail': 'Покупка уже завершена или находится в споре.'}, status=status.HTTP_400_BAD_REQUEST)
+        quote = order_quote(purchase.price_paid)
+        WalletService.release_distributed_escrow(purchase.wallet_settlement, description=f'Досрочная разблокировка покупки «{purchase.work.title}»')
+        purchase.status = Purchase.Status.COMPLETED
+        purchase.hold_until = timezone.now()
+        purchase.save(update_fields=['status', 'hold_until'])
+        return Response(PurchaseSerializer(purchase, context={'request': request}).data)
+
     @action(detail=True, methods=['post'])
     @transaction.atomic
     def dispute(self, request, pk=None):
@@ -223,7 +237,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         now = timezone.now()
         if purchase.hold_until and now > purchase.hold_until:
             return Response(
-                {'detail': 'Срок подачи спора истёк (7 дней с момента покупки).'},
+                {'detail': 'Срок подачи спора истёк (10 дней с момента покупки).'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

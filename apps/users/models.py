@@ -40,8 +40,10 @@ class User(AbstractUser):
         verbose_name="VK уведомления включены"
     )
     partner = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='referrals', verbose_name="Партнер")
+    partner_linked_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата привязки к партнеру")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     frozen_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    debt_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Задолженность по возвратам")
     email_verified = models.BooleanField(default=False, verbose_name="Email подтвержден")
 
     class Meta:
@@ -54,6 +56,7 @@ class User(AbstractUser):
                 check=models.Q(frozen_balance__gte=0),
                 name='user_frozen_balance_non_negative',
             ),
+            models.CheckConstraint(check=models.Q(debt_balance__gte=0), name='user_debt_balance_non_negative'),
             models.CheckConstraint(
                 check=models.Q(pending_balance__gte=0),
                 name='user_pending_balance_non_negative',
@@ -80,7 +83,7 @@ class User(AbstractUser):
     
     # Поля партнерской системы
     referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Реферальный код")
-    partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5.00, verbose_name="Процент партнера (%)")
+    partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Процент партнера (%)")
     total_referrals = models.PositiveIntegerField(default=0, verbose_name="Всего рефералов")
     active_referrals = models.PositiveIntegerField(default=0, verbose_name="Активных рефералов")
     total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Общий доход")
@@ -231,6 +234,7 @@ class PartnerEarning(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма начисления")
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Процент комиссии")
     source_amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Исходная сумма")
+    source_key = models.CharField(max_length=64, blank=True, default='', db_index=True, verbose_name="Источник начисления")
     earning_type = models.CharField(
         max_length=20,
         choices=[

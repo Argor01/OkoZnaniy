@@ -29,6 +29,7 @@ from apps.chat.websocket_utils import (
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
+from apps.wallet.policy import order_quote, money
 from apps.wallet.services import WalletService
 from apps.orders.views import _active_order_hold
 from decimal import Decimal
@@ -103,7 +104,17 @@ def _process_arbitration_refund(case, refund_percentage):
     # Ветка для покупки готовой работы
     if case.purchase:
         purchase = case.purchase
-        hold_amount = purchase.price_paid
+        quote = order_quote(purchase.price_paid)
+        settlement = getattr(purchase, 'wallet_settlement', None)
+        if settlement is not None:
+            try:
+                WalletService.clawback_settlement(settlement, refund_percentage, description=f'Арбитраж {case.case_number}: возврат после завершения покупки')
+                purchase.status = 'refunded' if refund_percentage >= 100 else 'completed'
+                purchase.save(update_fields=['status'])
+                return None
+            except Exception as e:
+                return Response({'detail': f'Ошибка при возврате завершённой сделки: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        hold_amount = money(quote['base_amount'] + quote['service_fee'])
 
         if hold_amount <= 0:
             return Response(
@@ -113,7 +124,9 @@ def _process_arbitration_refund(case, refund_percentage):
 
         refund_decimal = Decimal(str(refund_percentage))
         client_amount = (hold_amount * refund_decimal / Decimal('100')).quantize(Decimal('0.01'))
-        expert_amount = hold_amount - client_amount
+        remaining_ratio = (Decimal('100') - refund_decimal) / Decimal('100')
+        expert_amount = money(quote['base_amount'] * remaining_ratio)
+        partner_amount = money(quote['service_fee'] * remaining_ratio)
 
         try:
             if client_amount > 0:
@@ -123,12 +136,14 @@ def _process_arbitration_refund(case, refund_percentage):
                     description=f'Арбитраж {case.case_number}: возврат за покупку «{purchase.work.title}» {refund_percentage}%',
                 )
 
-            if expert_amount > 0:
-                WalletService.release_to_expert(
+            if expert_amount > 0 or partner_amount > 0:
+                WalletService.release_order_payment(
                     client=purchase.buyer,
                     expert=purchase.work.author,
-                    amount=expert_amount,
-                    description=f'Арбитраж {case.case_number}: выплата эксперту за «{purchase.work.title}»',
+                    base_amount=expert_amount,
+                    service_fee=partner_amount,
+                    source_key=f'purchase:{purchase.pk}',
+                    description=f'Арбитраж {case.case_number}: распределение остатка за «{purchase.work.title}»',
                 )
 
             if refund_percentage >= 100:
@@ -157,14 +172,25 @@ def _process_arbitration_refund(case, refund_percentage):
 
     active_hold = _active_order_hold(order)
     if active_hold <= 0:
-        return Response(
-            {'detail': 'Нет замороженных средств по заказу для возврата.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        settlement = getattr(order, 'wallet_settlement', None)
+        if settlement is not None:
+            try:
+                WalletService.clawback_settlement(settlement, refund_percentage, description=f'Арбитраж {case.case_number}: возврат после завершения заказа')
+                order.status = 'cancelled'
+                order.save(update_fields=['status', 'updated_at'])
+                return None
+            except Exception as e:
+                return Response({'detail': f'Ошибка при возврате завершённой сделки: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Нет средств по заказу для возврата.'}, status=status.HTTP_400_BAD_REQUEST)
 
     refund_decimal = Decimal(str(refund_percentage))
-    client_amount = (active_hold * refund_decimal / Decimal('100')).quantize(Decimal('0.01'))
-    expert_amount = active_hold - client_amount
+    client_amount = money(active_hold * refund_decimal / Decimal('100'))
+    quote = order_quote(order.final_price if order.final_price is not None else order.budget)
+    full_escrow = money(quote['base_amount'] + quote['service_fee'])
+    funded_ratio = min(Decimal('1'), money(active_hold) / full_escrow) if full_escrow else Decimal('0')
+    remaining_ratio = funded_ratio * (Decimal('100') - refund_decimal) / Decimal('100')
+    expert_amount = money(quote['base_amount'] * remaining_ratio)
+    partner_amount = money(quote['service_fee'] * remaining_ratio)
 
     try:
         if client_amount > 0:
@@ -175,13 +201,14 @@ def _process_arbitration_refund(case, refund_percentage):
                 description=f'Арбитраж {case.case_number}: возврат клиенту {refund_percentage}%',
             )
 
-        if expert_amount > 0 and order.expert:
-            WalletService.release_to_expert(
+        if (expert_amount > 0 or partner_amount > 0) and order.expert:
+            WalletService.release_order_payment(
                 client=order.client,
                 expert=order.expert,
-                amount=expert_amount,
+                base_amount=expert_amount,
+                service_fee=partner_amount,
                 order=order,
-                description=f'Арбитраж {case.case_number}: выплата эксперту',
+                description=f'Арбитраж {case.case_number}: распределение остатка',
             )
 
         order.status = 'cancelled'
@@ -1056,12 +1083,10 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         """Закрыть дело (только для админов)"""
         case = self.get_object()
 
-        taken_resp = ensure_case_taken_into_work(case)
-        if taken_resp is not None:
-            return taken_resp
-        closed_resp = ensure_case_not_closed(case)
-        if closed_resp is not None:
-            return closed_resp
+        if case.status in ('closed', 'rejected'):
+            return Response({'detail': 'Дело уже завершено.'}, status=status.HTTP_400_BAD_REQUEST)
+        if case.status not in ARBITRATION_IN_PROGRESS_STATUSES + ('decision_made',):
+            return Response({'detail': 'Сначала возьмите дело в работу.'}, status=status.HTTP_400_BAD_REQUEST)
 
         final_message = request.data.get('message', '').strip()
 

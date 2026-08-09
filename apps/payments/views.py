@@ -2,7 +2,7 @@ import logging
 from django.db import transaction
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
@@ -119,3 +119,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
             {'status': 'failed'},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def tbank_callback(request):
+    """Signed T-Bank notification endpoint; returns the acknowledgement T-Bank expects."""
+    order_id = request.data.get('OrderId')
+    if not order_id:
+        return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
+    try:
+        success = PaymentService.process_payment_callback(order_id, request.data)
+    except Exception:
+        logger.exception('T-Bank callback failed for OrderId=%s', order_id)
+        return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
+    return Response('OK' if success else 'ERROR', status=status.HTTP_200_OK if success else status.HTTP_400_BAD_REQUEST)

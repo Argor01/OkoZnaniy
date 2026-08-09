@@ -167,7 +167,7 @@ const StatisticsPanel: React.FC<{
             />
           </Card>
         </Col>
-        {partnerInfo.pending_balance > 0 && (
+        {partnerInfo.expected_income > 0 && (
           <Col xs={24} sm={12} md={6}>
             <Card 
               style={{ 
@@ -176,8 +176,8 @@ const StatisticsPanel: React.FC<{
               }}
             >
               <Statistic
-                title="Ожидает выплаты"
-                value={partnerInfo.pending_balance}
+                title="Ожидаемый доход"
+                value={partnerInfo.expected_income}
                 suffix="₽"
                 prefix={<DollarOutlined style={{ color: '#fa8c16' }} />}
                 valueStyle={{ color: '#fa8c16' }}
@@ -385,7 +385,20 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
   ];
 
   return (
-    <Card>
+    <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Card title="Помесячная история">
+        <Table
+          dataSource={data.monthly_history}
+          rowKey={(row) => row.month}
+          pagination={false}
+          columns={[
+            { title: 'Месяц', dataIndex: 'month', render: (month: string) => dayjs(month).format('MMMM YYYY') },
+            { title: 'Доход за месяц', dataIndex: 'total', render: (total: number) => `${Number(total).toLocaleString('ru-RU')} ₽` },
+          ]}
+          locale={{ emptyText: 'Пока нет операций' }}
+        />
+      </Card>
+      <Card title="История начислений">
       <Table
         columns={earningsColumns}
         dataSource={earnings}
@@ -395,7 +408,8 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
         className="partnerDashboardEarningsTable"
         scroll={{ x: 800 }}
       />
-    </Card>
+      </Card>
+    </Space>
   );
 };
 

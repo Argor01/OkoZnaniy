@@ -46,6 +46,11 @@ export const shopApi = {
     return response.data;
   },
 
+  confirmPurchaseCompletion: async (purchaseId: number): Promise<Purchase> => {
+    const response = await apiClient.post(`/shop/purchases/${purchaseId}/confirm-completion/`);
+    return response.data;
+  },
+
   disputePurchase: async (purchaseId: number): Promise<{ status: string; detail: string }> => {
     const response = await apiClient.post(`/shop/purchases/${purchaseId}/dispute/`);
     return response.data;

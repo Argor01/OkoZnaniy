@@ -25,7 +25,8 @@ const FILTERS = [
 const QUICK_SUMS = [500, 1000, 5000, 10000];
 
 const METHODS = [
-  { value: 'sberpay_qr', label: 'СберPay QR', icon: <QrcodeOutlined />, hint: 'Сканируй QR в Сбер Онлайн' },
+  { value: 'tbank', label: 'Т-Банк', icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />, hint: 'Оплата картой через Т-Банк' },
+  { value: 'sberpay_qr', label: 'СберPay QR', icon: <img src="/assets/banks/sberpay.svg" alt="СберPay" width={112} height={32} />, hint: 'Сканируй QR в Сбер Онлайн' },
 ];
 
 function formatMoney(v: string | number | undefined): string {
@@ -186,7 +187,7 @@ export default function Wallet() {
                   <div className={styles.txMeta}>
                     <Tag className={styles.txTag}>{t.type_display}</Tag>
                     <span className={styles.txDate}>{formatDate(t.timestamp)}</span>
-                    {t.order_id && <span className={styles.txOrder}>Заказ #{t.order_id}</span>}
+                    {t.order_id && <a className={styles.txOrder} href={`/orders/${t.order_id}`}>Заказ #{t.order_id}</a>}
                   </div>
                 </div>
                 <div className={`${styles.txAmount} ${t.direction === 'in' ? styles.amtIn : styles.amtOut}`}>
@@ -303,7 +304,7 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
         onClick={submit}
         className={styles.topupSubmit}
       >
-        Пополнить на {formatMoney(amount)} ₽
+        Оплатить {formatMoney(amount * 1.015)} ₽, на баланс {formatMoney(amount)} ₽
       </Button>
     </Modal>
   );
@@ -342,7 +343,7 @@ function WithdrawModal({ open, available, onClose, onDone }: { open: boolean; av
       className={styles.topupModal}
     >
       <Paragraph type="secondary" className={styles.topupHint}>
-        Доступно к выводу: <b>{formatMoney(available)} ₽</b>. Средства спишутся сразу, выплата на карту обычно занимает до 3 рабочих дней.
+        Доступно: <b>{formatMoney(available)} ₽</b>. Эквайринг 1,5%. Для автора дополнительно удерживается 15% комиссии платформы. Точная сумма выплаты показывается в заявке.
       </Paragraph>
 
       <Input

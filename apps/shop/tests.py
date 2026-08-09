@@ -24,7 +24,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
-from apps.orders.models import Transaction, TransactionType
+from apps.orders.models import Order, Transaction, TransactionType
 from apps.shop.models import Purchase, ReadyWork, ReadyWorkFile
 
 User = get_user_model()
@@ -167,7 +167,7 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertFalse(Transaction.objects.exists())
 
     def test_purchase_holds_funds_and_copies_file(self):
-        self.buyer.balance = Decimal("1200.00")
+        self.buyer.balance = Decimal("1500.00")
         self.buyer.save(update_fields=["balance"])
 
         rfile = SimpleUploadedFile("work.docx", b"file-content", content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
@@ -193,20 +193,21 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertTrue(purchase.hold_until > timezone.now())
 
         self.assertEqual(self.buyer.balance, Decimal("0.00"))
-        self.assertEqual(self.buyer.frozen_balance, Decimal("1200.00"))
-        self.assertEqual(self.author.balance, Decimal("0.00"))
+        self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.assertEqual(self.author.balance, Decimal("1200.00"))
+        self.assertEqual(self.author.frozen_balance, Decimal("1200.00"))
 
         self.assertTrue(bool(purchase.delivered_file))
         self.assertEqual(purchase.delivered_file_name, "work.docx")
         self.assertEqual(purchase.delivered_file_size, 12)
 
-        self.assertIsNone(purchase.order_id)
+        self.assertFalse(Order.objects.filter(client=self.buyer, expert=self.author).exists())
 
         self.assertEqual(body["status"], "paid")
         self.assertTrue(body["delivered_file_available"])
 
     def test_purchase_copies_first_file(self):
-        self.buyer.balance = Decimal("1200.00")
+        self.buyer.balance = Decimal("1500.00")
         self.buyer.save(update_fields=["balance"])
 
         rfile1 = SimpleUploadedFile("first.docx", b"first", content_type="application/octet-stream")
@@ -221,18 +222,18 @@ class ReadyWorkPurchaseWalletTests(TestCase):
         self.assertEqual(purchase.delivered_file_name, "first.docx")
 
     def test_purchase_no_order_created(self):
-        self.buyer.balance = Decimal("1200.00")
+        self.buyer.balance = Decimal("1500.00")
         self.buyer.save(update_fields=["balance"])
 
         response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         purchase = Purchase.objects.get(pk=response.json()["id"])
-        self.assertIsNone(purchase.order_id)
+        self.assertFalse(Order.objects.filter(client=self.buyer, expert=self.author).exists())
 
     def test_cannot_purchase_own_work(self):
         self.api_client.force_authenticate(user=self.author)
-        self.author.balance = Decimal("1200.00")
+        self.author.balance = Decimal("1500.00")
         self.author.save(update_fields=["balance"])
 
         response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
@@ -273,7 +274,7 @@ class ReadyWorkDisputeTests(TestCase):
         )
 
     def _purchase(self):
-        self.buyer.balance = Decimal("500.00")
+        self.buyer.balance = Decimal("625.00")
         self.buyer.save(update_fields=["balance"])
         response = self.api_client.post(f"/api/shop/works/{self.work.id}/purchase/")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
@@ -289,12 +290,14 @@ class ReadyWorkDisputeTests(TestCase):
         self.buyer.refresh_from_db()
         self.assertEqual(purchase.status, Purchase.Status.DISPUTED)
         self.assertFalse(bool(purchase.delivered_file))
-        self.assertEqual(self.buyer.balance, Decimal("500.00"))
+        self.assertEqual(self.buyer.balance, Decimal("0.00"))
         self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
+        self.author.refresh_from_db()
+        self.assertEqual(self.author.frozen_balance, Decimal("500.00"))
 
         self.assertEqual(
             set(Transaction.objects.filter(user=self.buyer).values_list("type", flat=True)),
-            {TransactionType.HOLD, TransactionType.REFUND},
+            {TransactionType.HOLD},
         )
 
     def test_dispute_after_3_days_is_rejected(self):
@@ -348,7 +351,7 @@ class ReadyWorkAutoReleaseTests(TestCase):
         )
 
     def _purchase(self):
-        self.buyer.balance = Decimal("500.00")
+        self.buyer.balance = Decimal("625.00")
         self.buyer.save(update_fields=["balance"])
         client = APIClient()
         client.force_authenticate(user=self.buyer)
@@ -372,7 +375,7 @@ class ReadyWorkAutoReleaseTests(TestCase):
 
         self.assertEqual(purchase.status, Purchase.Status.COMPLETED)
         self.assertEqual(self.buyer.frozen_balance, Decimal("0.00"))
-        self.assertEqual(self.author.balance, Decimal("475.00"))
+        self.assertEqual(self.author.balance, Decimal("500.00"))
 
     def test_no_release_for_active_hold(self):
         from apps.shop.tasks import release_ready_work_holds
