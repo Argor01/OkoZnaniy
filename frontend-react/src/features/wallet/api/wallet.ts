@@ -4,6 +4,7 @@ export type WalletBalance = {
   balance: string;
   frozen_balance: string;
   pending_balance: string;
+  debt_balance: string;
   available_balance: string;
 };
 
@@ -18,7 +19,7 @@ export type WalletTransaction = {
   amount: string;
   type:
     | 'hold' | 'release' | 'payout' | 'commission' | 'refund'
-    | 'topup' | 'withdrawal' | 'purchase';
+    | 'topup' | 'withdrawal' | 'purchase' | 'partner_payout' | 'clawback';
   type_display: string;
   direction: 'in' | 'out';
   description: string;

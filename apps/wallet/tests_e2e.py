@@ -60,3 +60,16 @@ class WalletInteractionE2E(TestCase):
   self.assertEqual(self.api.post('/api/wallet/withdraw/',{'amount':100,'card_number':'4111111111111111'},format='json').status_code,400)
   self.assertEqual(self.api.post('/api/wallet/topup/',{'amount':99,'payment_method':'sberpay_qr'},format='json').status_code,400)
   self.c.refresh_from_db(); self.assertEqual(self.c.balance,0); self.assertFalse(WithdrawalRequest.objects.filter(user=self.c).exists())
+ def test_completed_order_refund_claws_back_partner_and_creates_expert_debt(self):
+  WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,expert=self.e,subject=self.s,work_type=self.wt,title='refund later',description='refund',budget=1000,deadline=timezone.now()+timedelta(days=2),status='review'); WalletService.hold(self.c,1250,order=o)
+  self.auth(self.c); done=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(done.status_code,200,done.content)
+  st=o.wallet_settlement; self.e.refresh_from_db(); self.e.balance=0; self.e.save(update_fields=['balance'])
+  result=WalletService.clawback_settlement(st,50,description='E2E поздний возврат')
+  self.assertEqual(result['refund'],Decimal('625')); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db()
+  self.assertEqual(self.c.balance,625); self.assertEqual(self.e.debt_balance,500); self.assertEqual(self.p.balance,125)
+  self.assertTrue(Transaction.objects.filter(user=self.e,type=TransactionType.CLAWBACK).exists())
+  WalletService.topup(self.e,500); self.e.refresh_from_db(); self.assertEqual(self.e.debt_balance,0); self.assertEqual(self.e.balance,0)
+ def test_completed_purchase_has_settlement_for_late_refund(self):
+  w=ReadyWork.objects.create(title='late ready',description='ready',price=400,subject=self.s,work_type=self.wt,author=self.e,is_active=True,moderation_status=ReadyWork.ModerationStatus.APPROVED); WalletService.topup(self.c,500); self.auth(self.c)
+  bought=self.api.post(f'/api/shop/works/{w.id}/purchase/',{},format='json'); p=Purchase.objects.get(pk=bought.json()['id']); confirmed=self.api.post(f'/api/shop/purchases/{p.id}/confirm-completion/',{},format='json'); self.assertEqual(confirmed.status_code,200,confirmed.content)
+  self.assertEqual(p.wallet_settlement.base_amount,Decimal('400')); result=WalletService.clawback_settlement(p.wallet_settlement,50); self.assertEqual(result['refund'],Decimal('250'))

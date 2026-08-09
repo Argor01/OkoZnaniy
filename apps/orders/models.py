@@ -395,6 +395,7 @@ class TransactionType(models.TextChoices):
     WITHDRAWAL = "withdrawal", "Вывод средств"
     PURCHASE = "purchase", "Покупка"
     PARTNER_PAYOUT = "partner_payout", "Выплата партнеру"
+    CLAWBACK = "clawback", "Списание по возврату"
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

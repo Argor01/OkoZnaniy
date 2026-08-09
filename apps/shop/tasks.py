@@ -26,6 +26,7 @@ def release_ready_work_holds():
             WalletService.release_order_payment(
                 client=purchase.buyer,
                 expert=purchase.work.author,
+                purchase=purchase,
                 base_amount=quote['base_amount'],
                 service_fee=quote['service_fee'],
                 source_key=f'purchase:{purchase.pk}',

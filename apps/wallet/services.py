@@ -80,14 +80,16 @@ class WalletService:
     # --------------- queries ---------------
     @staticmethod
     def get_balance(user) -> dict:
-        u = User.objects.only('balance', 'frozen_balance', 'pending_balance').get(pk=user.pk)
+        u = User.objects.only('balance', 'frozen_balance', 'pending_balance', 'debt_balance').get(pk=user.pk)
         balance = u.balance or ZERO
         frozen = u.frozen_balance or ZERO
         pending = u.pending_balance or ZERO
+        debt = u.debt_balance or ZERO
         return {
             'balance': balance,
             'frozen_balance': frozen,
             'pending_balance': pending,
+            'debt_balance': debt,
             'available_balance': balance - frozen,
         }
 
@@ -123,8 +125,10 @@ class WalletService:
         if amount <= 0:
             raise ValueError('Top-up amount must be positive')
         u = _lock_user(user.pk)
-        u.balance = (u.balance or ZERO) + amount
-        u.save(update_fields=['balance'])
+        debt_payment = min(amount, u.debt_balance or ZERO)
+        u.debt_balance = (u.debt_balance or ZERO) - debt_payment
+        u.balance = (u.balance or ZERO) + (amount - debt_payment)
+        u.save(update_fields=['balance', 'debt_balance'])
         return Transaction.objects.create(
             user=u, amount=amount, type=TransactionType.TOPUP, order=order,
             description=description or 'Пополнение баланса',
@@ -313,7 +317,7 @@ class WalletService:
 
     @staticmethod
     @transaction.atomic
-    def release_order_payment(*, client, expert, base_amount, service_fee, order=None, description='', source_key='') -> dict:
+    def release_order_payment(*, client, expert, base_amount, service_fee, order=None, purchase=None, description='', source_key='') -> dict:
         """Release escrow exactly per TZ: full base to author, 25% to partner or directors."""
         base_amount, service_fee = money(base_amount), money(service_fee)
         total = money(base_amount + service_fee)
@@ -349,7 +353,51 @@ class WalletService:
                 earning.save(update_fields=['is_paid'])
             from apps.users.signals import update_partner_statistics
             update_partner_statistics(r)
+        if order is not None or purchase is not None:
+            from apps.wallet.models import Settlement
+            lookup = {'order': order} if order is not None else {'purchase': purchase}
+            Settlement.objects.update_or_create(
+                **lookup,
+                defaults={'client': c, 'expert': e, 'fee_recipient': r, 'base_amount': base_amount, 'service_fee': service_fee},
+            )
         return {'release_tx': release, 'payout': base_amount, 'service_fee': service_fee, 'partner_id': partner.pk if partner else None}
+
+    @staticmethod
+    @transaction.atomic
+    def clawback_settlement(settlement, refund_percentage, *, description='') -> dict:
+        """Refund a released deal. Missing recipient cash becomes explicit debt."""
+        from apps.wallet.models import Settlement
+        st = Settlement.objects.select_for_update().select_related('client', 'expert', 'fee_recipient').get(pk=settlement.pk)
+        pct = Decimal(str(refund_percentage))
+        if pct < 0 or pct > 100:
+            raise ValueError('Refund percentage must be between 0 and 100')
+        target_base = money(st.base_amount * pct / Decimal('100'))
+        target_fee = money(st.service_fee * pct / Decimal('100'))
+        base_due = max(ZERO, target_base - st.refunded_base)
+        fee_due = max(ZERO, target_fee - st.refunded_service_fee)
+        ids = sorted({st.client_id, st.expert_id, st.fee_recipient_id})
+        locked = {u.pk: u for u in User.objects.select_for_update().filter(pk__in=ids)}
+        client, expert, fee_user = locked[st.client_id], locked[st.expert_id], locked[st.fee_recipient_id]
+
+        def debit(user, amount):
+            cash = min(user.balance or ZERO, amount)
+            user.balance = (user.balance or ZERO) - cash
+            user.debt_balance = (user.debt_balance or ZERO) + (amount - cash)
+            user.save(update_fields=['balance', 'debt_balance'])
+            if amount:
+                Transaction.objects.create(user=user, amount=amount, type=TransactionType.CLAWBACK, order=st.order, description=description or 'Списание по возврату', balance_after=user.balance)
+
+        debit(expert, base_due)
+        debit(fee_user, fee_due)
+        total = money(base_due + fee_due)
+        client.balance = (client.balance or ZERO) + total
+        client.save(update_fields=['balance'])
+        if total:
+            Transaction.objects.create(user=client, amount=total, type=TransactionType.REFUND, order=st.order, description=description or 'Возврат после завершения сделки', balance_after=client.balance)
+        st.refunded_base += base_due
+        st.refunded_service_fee += fee_due
+        st.save(update_fields=['refunded_base', 'refunded_service_fee'])
+        return {'refund': total, 'expert_clawback': base_due, 'fee_clawback': fee_due}
 
     @staticmethod
     @transaction.atomic

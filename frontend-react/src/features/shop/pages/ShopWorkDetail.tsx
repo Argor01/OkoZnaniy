@@ -30,7 +30,7 @@ import styles from './ShopWorkDetail.module.css';
 
 const { Title, Text } = Typography;
 
-const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 7 дней можно открыть спор, если работа не устраивает.';
+const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 10 дней можно открыть спор, если работа не устраивает.';
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
@@ -89,6 +89,15 @@ const ShopWorkDetail: React.FC = () => {
     onError: () => {
       message.error('Не удалось сохранить оценку');
     },
+  });
+
+  const confirmMutation = useMutation({
+    mutationFn: (purchaseId: number) => shopApi.confirmPurchaseCompletion(purchaseId),
+    onSuccess: () => {
+      message.success('Выполнение подтверждено, средства разблокированы');
+      queryClient.invalidateQueries({ queryKey: ['shop-purchases'] });
+    },
+    onError: (error: any) => message.error(error?.response?.data?.detail || 'Не удалось подтвердить выполнение'),
   });
 
   const disputeMutation = useMutation({
@@ -398,6 +407,20 @@ const ShopWorkDetail: React.FC = () => {
                 </Popconfirm>
               ) : purchase ? (
                 <Space>
+                  {purchase.status === 'paid' && (
+                    <AppButton
+                      variant="primary"
+                      size="large"
+                      loading={confirmMutation.isPending}
+                      onClick={() => Modal.confirm({
+                        title: 'Подтвердить выполнение?',
+                        content: 'Средства автора и партнёра будут разблокированы сразу. Отменить действие нельзя.',
+                        okText: 'Подтвердить', cancelText: 'Отмена',
+                        onOk: () => confirmMutation.mutate(purchase.id),
+                      })}
+                      className={styles.actionButton}
+                    >Подтвердить выполнение</AppButton>
+                  )}
                   {purchase.status === 'paid' && purchase.seconds_until_hold_end && purchase.seconds_until_hold_end > 0 && (
                     <AppButton
                       variant="outline"

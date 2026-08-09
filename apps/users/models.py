@@ -43,6 +43,7 @@ class User(AbstractUser):
     partner_linked_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата привязки к партнеру")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     frozen_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    debt_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0, verbose_name="Задолженность по возвратам")
     email_verified = models.BooleanField(default=False, verbose_name="Email подтвержден")
 
     class Meta:
@@ -55,6 +56,7 @@ class User(AbstractUser):
                 check=models.Q(frozen_balance__gte=0),
                 name='user_frozen_balance_non_negative',
             ),
+            models.CheckConstraint(check=models.Q(debt_balance__gte=0), name='user_debt_balance_non_negative'),
             models.CheckConstraint(
                 check=models.Q(pending_balance__gte=0),
                 name='user_pending_balance_non_negative',

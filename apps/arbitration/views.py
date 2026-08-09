@@ -105,6 +105,15 @@ def _process_arbitration_refund(case, refund_percentage):
     if case.purchase:
         purchase = case.purchase
         quote = order_quote(purchase.price_paid)
+        settlement = getattr(purchase, 'wallet_settlement', None)
+        if settlement is not None:
+            try:
+                WalletService.clawback_settlement(settlement, refund_percentage, description=f'Арбитраж {case.case_number}: возврат после завершения покупки')
+                purchase.status = 'refunded' if refund_percentage >= 100 else 'completed'
+                purchase.save(update_fields=['status'])
+                return None
+            except Exception as e:
+                return Response({'detail': f'Ошибка при возврате завершённой сделки: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
         hold_amount = money(quote['base_amount'] + quote['service_fee'])
 
         if hold_amount <= 0:
@@ -163,10 +172,16 @@ def _process_arbitration_refund(case, refund_percentage):
 
     active_hold = _active_order_hold(order)
     if active_hold <= 0:
-        return Response(
-            {'detail': 'Нет замороженных средств по заказу для возврата.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        settlement = getattr(order, 'wallet_settlement', None)
+        if settlement is not None:
+            try:
+                WalletService.clawback_settlement(settlement, refund_percentage, description=f'Арбитраж {case.case_number}: возврат после завершения заказа')
+                order.status = 'cancelled'
+                order.save(update_fields=['status', 'updated_at'])
+                return None
+            except Exception as e:
+                return Response({'detail': f'Ошибка при возврате завершённой сделки: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Нет средств по заказу для возврата.'}, status=status.HTTP_400_BAD_REQUEST)
 
     refund_decimal = Decimal(str(refund_percentage))
     client_amount = money(active_hold * refund_decimal / Decimal('100'))

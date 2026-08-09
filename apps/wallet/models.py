@@ -42,3 +42,23 @@ class WithdrawalRequest(models.Model):
 
     def __str__(self):
         return f"Вывод {self.amount} ({self.get_status_display()}) — {self.user_id}"
+
+
+class Settlement(models.Model):
+    """Immutable allocation snapshot used for refunds after escrow release."""
+    order = models.OneToOneField('orders.Order', null=True, blank=True, on_delete=models.PROTECT, related_name='wallet_settlement')
+    purchase = models.OneToOneField('shop.Purchase', null=True, blank=True, on_delete=models.PROTECT, related_name='wallet_settlement')
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='client_settlements')
+    expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='expert_settlements')
+    fee_recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='fee_settlements')
+    base_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    service_fee = models.DecimalField(max_digits=12, decimal_places=2)
+    refunded_base = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    refunded_service_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.CheckConstraint(
+            check=(models.Q(order__isnull=False, purchase__isnull=True) | models.Q(order__isnull=True, purchase__isnull=False)),
+            name='settlement_exactly_one_source',
+        )]
