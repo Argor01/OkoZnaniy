@@ -199,6 +199,11 @@ export const ordersApi = {
     return response.data;
   },
 
+  createClientReview: async (orderId: number, rating: number, comment?: string) => {
+    const response = await apiClient.post(`/orders/orders/${orderId}/create-client-review/`, { rating, comment });
+    return response.data;
+  },
+
   acceptAssignment: async (orderId: number) => {
     const response = await apiClient.post(API_ENDPOINTS.orders.acceptAssignment(orderId));
     return response.data;

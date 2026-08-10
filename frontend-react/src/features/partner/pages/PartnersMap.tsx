@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Spin, Alert, Select, Typography, Space, Tag, Button, Modal } from 'antd';
-import { PhoneOutlined, UserOutlined } from '@ant-design/icons';
+import { Card, Spin, Alert, Select, Typography, Tag, Button } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { partnersApi, MapPartner } from '../api/partners';
 import styles from './PartnersMap.module.css';
@@ -103,6 +103,17 @@ const CITY_COORDINATES: Record<string, { x: number; y: number }> = {
   'Севастополь': { x: 44.6167, y: 33.5254 },
 };
 
+const normalizeCityName = (value?: string): string =>
+  String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/ё/g, 'е')
+    .toLocaleLowerCase('ru-RU');
+
+const CITY_COORDINATES_INDEX = new Map(
+  Object.entries(CITY_COORDINATES).map(([city, coords]) => [normalizeCityName(city), { city, coords }])
+);
+
 // Функция для конвертации географических координат в SVG координаты
 const convertGeoToSvg = (lat: number, lon: number): { x: number; y: number } => {
   // Границы России в географических координатах
@@ -124,8 +135,6 @@ const convertGeoToSvg = (lat: number, lon: number): { x: number; y: number } => 
 
 const PartnersMap: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<string>('');
-  const [selectedPartner, setSelectedPartner] = useState<PartnerWithCoords | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const [partnersWithCoords, setPartnersWithCoords] = useState<PartnerWithCoords[]>([]);
   const [mapData, setMapData] = useState<MapData | null>(null);
   const [mapLoading, setMapLoading] = useState(true);
@@ -173,20 +182,19 @@ const PartnersMap: React.FC = () => {
           return;
         }
 
-        // Используем встроенные координаты
-        const coords = CITY_COORDINATES[partner.city];
-        if (coords) {
-          const svgCoords = convertGeoToSvg(coords.x, coords.y);
+        // Нормализуем регистр, пробелы и «ё», чтобы данные из профиля
+        // совпадали со справочником городов.
+        const match = CITY_COORDINATES_INDEX.get(normalizeCityName(partner.city));
+        if (match) {
+          const svgCoords = convertGeoToSvg(match.coords.x, match.coords.y);
           results.push({
             ...partner,
-            coordinates: { lat: coords.x, lon: coords.y },
-            svgCoords: svgCoords
+            city: match.city,
+            coordinates: { lat: match.coords.x, lon: match.coords.y },
+            svgCoords,
           });
         } else {
-          results.push({
-            ...partner,
-            error: 'Координаты не найдены'
-          });
+          results.push({ ...partner, city: partner.city.trim() });
         }
       });
 
@@ -202,11 +210,6 @@ const PartnersMap: React.FC = () => {
     : partnersWithCoords;
 
   const uniqueCities = Array.from(new Set(partnersWithCoords.map(p => p.city))).sort();
-
-  const handleMarkerClick = (partner: PartnerWithCoords) => {
-    setSelectedPartner(partner);
-    setModalVisible(true);
-  };
 
   if (isLoading || mapLoading) {
     return (
@@ -349,7 +352,6 @@ const PartnersMap: React.FC = () => {
                             left: `${(partner.svgCoords.x / 1000) * 100}%`,
                             top: `${(partner.svgCoords.y / 600) * 100}%`,
                           }}
-                          onClick={() => handleMarkerClick(partner)}
                           title={`${getDisplayUsername(partner)} - ${partner.city}`}
                         >
                           <div className={styles.markerDot} />
@@ -390,8 +392,6 @@ const PartnersMap: React.FC = () => {
                       key={partner.id}
                       size="small"
                       className={styles.partnerCard}
-                      onClick={() => handleMarkerClick(partner)}
-                      hoverable
                     >
                       <div className={styles.partnerInfo}>
                         <div className={styles.partnerNameRow}>
@@ -409,18 +409,7 @@ const PartnersMap: React.FC = () => {
                             <Text className={styles.partnerStatLabel}>Рефералов</Text>
                             <Text className={styles.partnerStatValue}>{partner.total_referrals}</Text>
                           </div>
-                          <div className={styles.partnerStat}>
-                            <UserOutlined className={styles.partnerStatIcon} />
-                            <Text className={styles.partnerStatLabel}>Активных</Text>
-                            <Text className={styles.partnerStatValue}>{partner.active_referrals}</Text>
-                          </div>
                         </div>
-                        <div className={styles.partnerEarnings}>
-                          {partner.total_earnings.toLocaleString('ru-RU')} ₽
-                        </div>
-                        {partner.error && (
-                          <Text type="danger" className={styles.partnerError}>{partner.error}</Text>
-                        )}
                       </div>
                     </Card>
                   ))
@@ -430,49 +419,6 @@ const PartnersMap: React.FC = () => {
           </div>
         </div>
 
-      {/* Модальное окно с информацией о партнере */}
-      <Modal
-        title={selectedPartner ? getDisplayUsername(selectedPartner) : undefined}
-        open={modalVisible}
-        onCancel={() => setModalVisible(false)}
-        footer={[
-          <Button key="close" onClick={() => setModalVisible(false)}>
-            Закрыть
-          </Button>
-        ]}
-        width={600}
-      >
-        {selectedPartner && (
-          <div className={styles.partnerDetails}>
-            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-              <div>
-                <Text strong>Город:</Text>
-                <br />
-                <Text>{selectedPartner.city}</Text>
-              </div>
-              <div>
-                <Text strong>Email:</Text>
-                <br />
-                <Text>{selectedPartner.email}</Text>
-              </div>
-              {selectedPartner.phone && (
-                <div>
-                  <Text strong>Телефон:</Text>
-                  <br />
-                  <Text>
-                    <PhoneOutlined /> {selectedPartner.phone}
-                  </Text>
-                </div>
-              )}
-              <div>
-                <Text strong>Дата регистрации:</Text>
-                <br />
-                <Text>{new Date(selectedPartner.date_joined).toLocaleDateString('ru-RU')}</Text>
-              </div>
-            </Space>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

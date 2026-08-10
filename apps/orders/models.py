@@ -416,6 +416,19 @@ class Transaction(models.Model):
     def __str__(self):
         return f"{self.user.username} — {self.get_type_display()} — {self.amount}"
 
+class ClientReview(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='client_review')
+    expert = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='client_reviews_given')
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='client_reviews_received')
+    rating = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
 class BidStatus(models.TextChoices):
     ACTIVE = "active", "Активная"
     INVITED = "invited", "Ожидает ответа эксперта"
@@ -429,7 +442,7 @@ class Bid(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Ставка")
     prepayment_percent = models.PositiveSmallIntegerField(
         default=50,
-        validators=[MinValueValidator(25), MaxValueValidator(100)],
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
         verbose_name="Процент предоплаты"
     )
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")

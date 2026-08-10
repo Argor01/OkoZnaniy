@@ -6,7 +6,6 @@ import { ArrowLeftOutlined, UploadOutlined, FileOutlined, LinkOutlined, CheckCir
 import { complaintsApi, CreateComplaintRequest, Complaint } from '@/features/arbitration/api/complaints';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { authApi } from '@/features/auth/api/auth';
-import { supportRequestsApi } from '@/features/support/api/requests';
 import { AppButton, AppCard } from '@/components/ui';
 import { truncateDisplayName } from '@/utils/formatters';
 import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutlined, ClockCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
@@ -106,19 +105,6 @@ const ComplaintForm: React.FC = () => {
             ? 'partial'
             : 'full';
 
-      await supportRequestsApi.createClaim({
-        order_id: Number(orderId),
-        claim_type: values.complaint_type,
-        subject: COMPLAINT_TYPES.find((item) => item.value === values.complaint_type)?.label || values.complaint_type,
-        description: values.description,
-        reason: reasonMap[values.complaint_type] || 'other',
-        refund_type: refundType,
-        refund_percentage: refundType === 'partial' ? values.refund_percent : undefined,
-      });
-
-      message.success('Претензия подана. Открываю центр обращений.');
-      navigate('/support');
-      return;
       // Подготовка данных для отправки
       const createData: CreateComplaintRequest = {
         order_id: Number(orderId),

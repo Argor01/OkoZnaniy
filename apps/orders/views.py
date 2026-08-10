@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from datetime import timedelta
 from decimal import Decimal
-from .models import Order, Transaction, TransactionType, Dispute, OrderFile, OrderComment, Bid, BidStatus
+from .models import Order, Transaction, TransactionType, Dispute, OrderFile, OrderComment, Bid, BidStatus, ClientReview
 from .serializers import OrderSerializer, AvailableOrderSerializer, TransactionSerializer, DisputeSerializer, OrderFileSerializer, OrderCommentSerializer, BidSerializer
 from .services import OrderActionService
 from apps.chat.services import ensure_order_chat_started
@@ -135,7 +135,7 @@ def _cancel_overdue_order_atomically(order, user):
             raise ValueError('Действие недоступно для текущего состояния заказа.')
 
         old_status = locked_order.status
-        _refund_order_hold_if_any(locked_order)
+        # Предоплата остаётся в эскроу после отмены. Её судьбу решает арбитраж.
         locked_order.status = 'cancelled'
         locked_order.save(update_fields=['status', 'updated_at'])
         return locked_order, old_status
@@ -152,7 +152,7 @@ def _reject_review_order_atomically(order, user):
             raise ValueError('Действие недоступно для текущего состояния заказа.')
 
         old_status = locked_order.status
-        _refund_order_hold_if_any(locked_order)
+        # Предоплата остаётся в эскроу после отклонения работы. Её судьбу решает арбитраж.
         locked_order.status = 'cancelled'
         locked_order.save(update_fields=['status', 'updated_at'])
         return locked_order, old_status
@@ -162,12 +162,12 @@ def _reserve_order_hold_if_needed(order, amount=None, prepayment_percent=100):
     base = amount if amount is not None else _order_payment_amount(order)
     quote = order_quote(base)
     full_hold = money(quote['base_amount'] + quote['service_fee'])
-    percent_value = int(prepayment_percent or 100)
-    if percent_value not in (25, 50, 75, 100):
-        raise ValueError('Предоплата может быть только 25%, 50%, 75% или 100%.')
+    percent_value = 100 if prepayment_percent is None else int(prepayment_percent)
+    if percent_value not in (0, 25, 50, 75, 100):
+        raise ValueError('Предоплата может быть только 0%, 25%, 50%, 75% или 100%.')
     target_hold = money(full_hold * Decimal(percent_value) / Decimal('100'))
     active_hold = money(_active_order_hold(order))
-    if active_hold >= target_hold:
+    if target_hold <= 0 or active_hold >= target_hold:
         return None
     return WalletService.fund_distributed_escrow(client=order.client, expert=order.expert, base_amount=quote['base_amount'], service_fee=quote['service_fee'], fund_amount=target_hold - active_hold, order=order, description=f'Резерв {percent_value}% по заказу #{order.id}')
 
@@ -594,31 +594,6 @@ class OrderViewSet(viewsets.ModelViewSet):
                 pass
         return Response(self.get_serializer(order).data)
 
-        try:
-            _refund_order_hold_if_any(order)
-        except InsufficientFunds:
-            return Response(
-                {'detail': 'Не удалось вернуть резерв по заказу. Проверьте баланс клиента.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        old_status = order.status
-        order.status = 'cancelled'
-        order.save(update_fields=['status', 'updated_at'])
-
-        if order.expert_id:
-            safe_call(NotificationService.create_notification,
-                recipient=order.expert,
-                type='status_changed',
-                title='Заказ отменён',
-                message=f"Клиент отменил заказ №{order.id} из‑за просрочки.",
-                related_object_id=order.id,
-                related_object_type='order',
-                data={'order_id': order.id, 'old_status': old_status, 'new_status': order.status})
-            from apps.experts.services import ExpertStatisticsService
-            ExpertStatisticsService.update_expert_statistics(order.expert)
-
-        return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def accept_bid(self, request, pk=None):
@@ -1084,6 +1059,26 @@ class OrderViewSet(viewsets.ModelViewSet):
         
         serializer = DisputeSerializer(dispute)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='create-client-review')
+    def create_client_review(self, request, pk=None):
+        order = self.get_object()
+        if order.expert_id != request.user.id:
+            return Response({'error': 'Только исполнитель заказа может оставить отзыв клиенту'}, status=status.HTTP_403_FORBIDDEN)
+        if order.status != 'completed':
+            return Response({'error': 'Отзыв можно оставить только после завершения заказа'}, status=status.HTTP_400_BAD_REQUEST)
+        rating = request.data.get('rating')
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError
+        except (TypeError, ValueError):
+            return Response({'error': 'Оценка должна быть числом от 1 до 5'}, status=status.HTTP_400_BAD_REQUEST)
+        review, created = ClientReview.objects.update_or_create(
+            order=order,
+            defaults={'expert': request.user, 'client': order.client, 'rating': rating, 'comment': (request.data.get('comment') or '').strip()},
+        )
+        return Response({'id': review.id, 'rating': review.rating, 'comment': review.comment, 'created_at': review.created_at}, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def create_review(self, request, pk=None):

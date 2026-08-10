@@ -10,6 +10,7 @@ import BidModal from '../../components/BidModal';
 import EditOrderModal from '../../components/Modals/EditOrderModal';
 import { AppButton, AppCard } from '@/components/ui';
 import { useOrderDetail } from './hooks/useOrderDetail';
+import { ordersApi } from '@/features/orders/api/orders';
 import OrderHeader from './OrderHeader';
 import OrderContent from './OrderContent';
 import { formatUserName } from '@/utils/formatters';
@@ -21,6 +22,10 @@ const { Title, Text } = Typography;
 
 const OrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
+  const [clientReviewOpen, setClientReviewOpen] = React.useState(false);
+  const [clientReviewRating, setClientReviewRating] = React.useState(5);
+  const [clientReviewComment, setClientReviewComment] = React.useState('');
+  const [clientReviewSubmitting, setClientReviewSubmitting] = React.useState(false);
   const {
     isMobile,
     bidModalVisible, setBidModalVisible,
@@ -195,6 +200,7 @@ const OrderDetail: React.FC = () => {
               orderId={orderId!}
               isMobile={isMobile}
               isOrderOwner={isOrderOwner}
+              isOrderExpert={isOrderExpert}
               clientDisplayName={clientDisplayName}
               clientRoleLabel="Заказчик"
               clientRating={clientRating}
@@ -280,6 +286,14 @@ const OrderDetail: React.FC = () => {
                   Отклонить заказ
                 </AppButton>
               </Space>
+            ) : null}
+
+            {isOrderExpert && order.status === 'completed' && !order.client_review ? (
+              <div className={styles.sectionBlock}>
+                <AppButton variant="primary" onClick={() => setClientReviewOpen(true)}>
+                  Оставить отзыв о клиенте
+                </AppButton>
+              </div>
             ) : null}
 
             {canBid && (
@@ -411,6 +425,47 @@ const OrderDetail: React.FC = () => {
               Принять без отзыва
             </AppButton>
           </Space>
+        </Space>
+      </Modal>
+
+      <Modal
+        open={clientReviewOpen}
+        centered
+        title="Отзыв о клиенте"
+        footer={null}
+        onCancel={() => !clientReviewSubmitting && setClientReviewOpen(false)}
+      >
+        <Space direction="vertical" size={16} className={styles.fullWidth}>
+          <div>
+            <Text strong>Оценка клиента</Text>
+            <div className={styles.reviewStarsRow}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Button key={star} type="text" icon={<StarFilled style={{ color: star <= clientReviewRating ? '#faad14' : '#d9d9d9' }} />} onClick={() => setClientReviewRating(star)} />
+              ))}
+            </div>
+          </div>
+          <Input.TextArea rows={4} placeholder="Как проходило взаимодействие с клиентом" value={clientReviewComment} onChange={(e) => setClientReviewComment(e.target.value)} maxLength={2000} />
+          <AppButton
+            variant="primary"
+            loading={clientReviewSubmitting}
+            onClick={async () => {
+              if (!orderId) return;
+              try {
+                setClientReviewSubmitting(true);
+                await ordersApi.createClientReview(Number(orderId), clientReviewRating, clientReviewComment.trim());
+                await refreshOrderWithLists();
+                setClientReviewOpen(false);
+                setClientReviewComment('');
+                message.success('Отзыв о клиенте сохранён');
+              } catch (e: any) {
+                message.error(e?.response?.data?.error || e?.response?.data?.detail || 'Не удалось сохранить отзыв');
+              } finally {
+                setClientReviewSubmitting(false);
+              }
+            }}
+          >
+            Сохранить отзыв
+          </AppButton>
         </Space>
       </Modal>
 

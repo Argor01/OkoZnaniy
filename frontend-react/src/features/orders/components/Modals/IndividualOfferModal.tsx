@@ -116,19 +116,29 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
   });
 
   const handleFinish = (values: OfferFormValues) => {
+    const effectiveWorkTypeId = linkToOrder
+      ? selectedOrder?.work_type?.id
+      : values.work_type_id;
+    const effectiveSubjectId = linkToOrder
+      ? selectedOrder?.subject?.id
+      : values.subject_id;
     const selectedWorkType = isIndividual
-      ? workTypes.find((w) => w.id === values.work_type_id)
+      ? workTypes.find((w) => w.id === effectiveWorkTypeId)
       : undefined;
     const selectedSubject = isIndividual
-      ? subjects.find((s) => s.id === values.subject_id)
+      ? subjects.find((s) => s.id === effectiveSubjectId)
       : undefined;
 
     const data: OfferSubmitData = {
       ...values,
-      work_type_id: isIndividual ? values.work_type_id : undefined,
-      work_type: isIndividual ? selectedWorkType?.name : undefined,
-      subject_id: isIndividual ? values.subject_id : undefined,
-      subject: isIndividual ? selectedSubject?.name : undefined,
+      work_type_id: isIndividual ? effectiveWorkTypeId : undefined,
+      work_type: isIndividual
+        ? (selectedOrder?.work_type?.name || selectedWorkType?.name)
+        : undefined,
+      subject_id: isIndividual ? effectiveSubjectId : undefined,
+      subject: isIndividual
+        ? (selectedOrder?.subject?.name || selectedSubject?.name)
+        : undefined,
       deadline: isIndividual && values.deadline ? values.deadline.toISOString() : null,
       linked_order_id: linkToOrder && selectedOrderId ? selectedOrderId : undefined,
     };
@@ -246,6 +256,16 @@ const IndividualOfferModal: React.FC<IndividualOfferModalProps> = ({
                   />
                 </Form.Item>
               )}
+              {linkToOrder && selectedOrder ? (
+                <div className={styles.linkedOrderMeta}>
+                  <Text type="secondary">
+                    Тип работы: <strong>{selectedOrder.work_type?.name || 'Не указан'}</strong>
+                  </Text>
+                  <Text type="secondary">
+                    Предмет: <strong>{selectedOrder.subject?.name || 'Не указан'}</strong>
+                  </Text>
+                </div>
+              ) : null}
             </div>
           ) : null}
 

@@ -56,5 +56,4 @@ export interface MapPartner {
   date_joined: string;
   total_referrals: number;
   active_referrals: number;
-  total_earnings: number;
 }

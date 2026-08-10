@@ -152,6 +152,34 @@ class OrderPriceTypeTests(TestCase):
 
     # ── accept_bid ────────────────────────────────────────────────
 
+    def test_zero_prepayment_bid_can_start_without_wallet_funds(self):
+        order = self._create_order(budget=Decimal("1000"))
+        self.api_client.force_authenticate(user=self.expert_user)
+        bid_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/bids/",
+            {"amount": "1500", "prepayment_percent": 0, "comment": "Оплата после выполнения"},
+            format="json",
+        )
+        self.assertEqual(bid_response.status_code, status.HTTP_201_CREATED, bid_response.content)
+        bid_id = Bid.objects.get(order=order, expert=self.expert_user).id
+
+        self.api_client.force_authenticate(user=self.client_user)
+        invite_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/accept_bid/", {"bid_id": bid_id}, format="json"
+        )
+        self.assertEqual(invite_response.status_code, status.HTTP_200_OK, invite_response.content)
+
+        self.api_client.force_authenticate(user=self.expert_user)
+        accept_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/accept_assignment/", {}, format="json"
+        )
+        self.assertEqual(accept_response.status_code, status.HTTP_200_OK, accept_response.content)
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.assertEqual(order.status, "in_progress")
+        self.assertEqual(order.budget, Decimal("1500"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("0"))
+
     def test_accept_bid_blocked_when_client_has_no_funds(self):
         order = self._create_order()
         bid = Bid.objects.create(order=order, expert=self.expert_user, amount=Decimal("3000"))

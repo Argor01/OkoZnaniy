@@ -352,13 +352,24 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 class PublicUserProfileSerializer(serializers.ModelSerializer):
     """Serializer для публичного профиля пользователя"""
     display_username = serializers.CharField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        if getattr(obj, 'role', None) == 'client':
+            from django.db.models import Avg
+            return float(obj.client_reviews_received.aggregate(avg=Avg('rating'))['avg'] or 0)
+        try:
+            return float(obj.statistics.average_rating)
+        except Exception:
+            return 0.0
     
     class Meta:
         model = User
         fields = [
             'id', 'username', 'display_username', 'first_name', 'last_name', 'role',
             'avatar', 'bio', 'experience_years', 'hourly_rate',
-            'education', 'skills', 'portfolio_url', 'is_verified', 'city'
+            'education', 'skills', 'portfolio_url', 'is_verified', 'city',
+            'average_rating'
         ]
 
 

@@ -160,6 +160,7 @@ class OrderSerializer(serializers.ModelSerializer):
     is_overdue = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     available_actions = serializers.SerializerMethodField()
+    client_review = serializers.SerializerMethodField(read_only=True)
     
     # Явно указываем budget как FloatField для корректной сериализации
     budget = serializers.FloatField(required=False, allow_null=True)
@@ -193,11 +194,11 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at',
-            'client_note', 'payment_status', 'available_actions',
+            'client_note', 'payment_status', 'available_actions', 'client_review',
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
-            'updated_at'
+            'updated_at', 'client_review'
         ]
 
     def validate(self, data):
@@ -297,6 +298,13 @@ class OrderSerializer(serializers.ModelSerializer):
         ).exists():
             return 'paid'
         return 'pending'
+
+    def get_client_review(self, obj):
+        try:
+            review = obj.client_review
+            return {'id': review.id, 'rating': review.rating, 'comment': review.comment, 'created_at': review.created_at}
+        except Exception:
+            return None
 
     def get_available_actions(self, obj):
         request = self.context.get('request')

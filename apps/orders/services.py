@@ -70,7 +70,7 @@ class OrderActionService:
             'can_reject_work': is_client and order.status in cls.CLIENT_REVIEW_STATUSES and not is_contact_banned,
             'can_extend_deadline': is_client and bool(order.expert_id) and order.status in cls.EXPERT_WORK_STATUSES and deadline_is_overdue and not is_contact_banned,
             'can_cancel_overdue': is_client and bool(order.expert_id) and order.status in cls.EXPERT_WORK_STATUSES and deadline_is_overdue and not is_contact_banned,
-            'can_open_dispute': is_client and order.status in ('completed', 'review') and not hasattr(order, 'dispute') and not is_contact_banned,
+            'can_open_dispute': (is_client or is_expert) and order.status in ('completed', 'review', 'cancelled', 'canceled') and not hasattr(order, 'dispute') and not is_contact_banned,
             'can_create_review': is_client and order.status == 'completed' and bool(order.expert_id) and not is_contact_banned,
             'can_open_order_chat': bool(order.expert_id) and (is_client or is_expert or is_staff) and not is_contact_banned,
         }

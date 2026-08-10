@@ -5,17 +5,18 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Max, Count, Prefetch
+from django.db.models import Q, Max, Count, Sum, Prefetch
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
 from .services import ensure_order_chat_started, get_or_create_direct_chat, get_or_create_order_chat, readable_messages_for_chat, unread_messages_for_user
 from .websocket_utils import notify_chat_message, notify_typing
-from apps.orders.models import Order, OrderFile
+from apps.orders.models import Order, OrderFile, Transaction, TransactionType
 from apps.notifications.models import NotificationType
 from apps.notifications.services import NotificationService
 from apps.core.safe_notify import safe_call
 from apps.wallet.services import InsufficientFunds, WalletService
+from apps.wallet.policy import order_quote, money
 from decimal import Decimal, InvalidOperation
 
 
@@ -39,6 +40,42 @@ def _contact_ban_response(user, action_detail='\u0414\u0435\u0439\u0441\u0442\u0
             'frozen_reason': getattr(user, 'contact_ban_reason', None) or '\u041f\u0440\u043e\u0444\u0438\u043b\u044c\u0020\u0437\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u0020\u0437\u0430\u0020\u043e\u0431\u043c\u0435\u043d\u0020\u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043d\u044b\u043c\u0438\u0020\u0434\u0430\u043d\u043d\u044b\u043c\u0438',
         },
         status=status.HTTP_400_BAD_REQUEST,
+    )
+
+
+def _active_order_hold(order):
+    rows = Transaction.objects.filter(
+        order=order,
+        user=order.client,
+        type__in=[TransactionType.HOLD, TransactionType.RELEASE, TransactionType.REFUND],
+    ).values('type').annotate(total=Sum('amount'))
+    totals = {row['type']: row['total'] for row in rows}
+    return money(
+        (totals.get(TransactionType.HOLD) or 0)
+        - (totals.get(TransactionType.RELEASE) or 0)
+        - (totals.get(TransactionType.REFUND) or 0)
+    )
+
+
+def _fund_individual_offer(order, client, expert, base_amount, prepayment_percent):
+    percent_value = 50 if prepayment_percent is None else int(prepayment_percent)
+    if percent_value < 0 or percent_value > 100:
+        raise ValueError('Процент предоплаты должен быть от 0 до 100.')
+
+    quote = order_quote(base_amount)
+    full_amount = money(quote['base_amount'] + quote['service_fee'])
+    target = money(full_amount * Decimal(percent_value) / Decimal('100'))
+    if target <= 0:
+        return None
+
+    return WalletService.fund_distributed_escrow(
+        client=client,
+        expert=expert,
+        base_amount=quote['base_amount'],
+        service_fee=quote['service_fee'],
+        fund_amount=target,
+        order=order,
+        description=f'Предоплата {percent_value}% по заказу #{order.id}',
     )
 
 
@@ -952,6 +989,13 @@ class ChatViewSet(viewsets.ModelViewSet):
 
             client_user = chat.client or request.user
             expert_user = chat.expert or message.sender
+            prepayment_raw = offer_data.get('prepayment_percent', 50)
+            try:
+                prepayment_percent = int(prepayment_raw)
+            except (TypeError, ValueError):
+                return Response({'detail': 'Процент предоплаты должен быть числом.'}, status=status.HTTP_400_BAD_REQUEST)
+            if prepayment_percent < 0 or prepayment_percent > 100:
+                return Response({'detail': 'Процент предоплаты должен быть от 0 до 100.'}, status=status.HTTP_400_BAD_REQUEST)
 
             with transaction.atomic():
                 message = Message.objects.select_for_update().get(pk=message.pk)
@@ -990,12 +1034,14 @@ class ChatViewSet(viewsets.ModelViewSet):
                     )
 
                 if cost > 0:
-                    WalletService.hold(
+                    _fund_individual_offer(
+                        order,
                         client_user,
+                        expert_user,
                         cost,
-                        order=order,
-                        description=f'Резерв средств по заказу #{order.id}',
+                        prepayment_percent,
                     )
+                offer_data['prepayment_percent'] = prepayment_percent
             
                 # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РїСЂРµРґР»РѕР¶РµРЅРёСЏ
                 offer_data['status'] = 'accepted'

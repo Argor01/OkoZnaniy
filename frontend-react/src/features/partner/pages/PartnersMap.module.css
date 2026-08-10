@@ -97,7 +97,6 @@
 .marker {
   position: absolute;
   pointer-events: all;
-  cursor: pointer;
   transform: translate(-50%, -50%);
   z-index: 10;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -316,19 +315,6 @@
   font-size: 13px !important;
 }
 
-.partnerEarnings {
-  background: var(--color-brand-purple-500, #7c3aed);
-  color: #ffffff;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: 13px;
-  text-align: center;
-}
-
-.partnerError {
-  font-size: 12px;
-}
 
 /* ===== СОСТОЯНИЯ И УТИЛИТЫ ===== */
 .emptyState {

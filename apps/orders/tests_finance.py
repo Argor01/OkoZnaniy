@@ -383,7 +383,7 @@ class OrderLifecycleTests(TestCase):
         # Author receives the full base price; client service fee goes to directors.
         self.assertEqual(self.expert.balance, Decimal('500.00'))
 
-    def test_reject_refunds_hold(self):
+    def test_reject_keeps_prepayment_in_escrow(self):
         WalletService.topup(self.client_u, Decimal('1000'))
         order = self._order(status='review', expert=self.expert)
         WalletService.hold(self.client_u, Decimal('500'), order=order)
@@ -393,8 +393,9 @@ class OrderLifecycleTests(TestCase):
         order.refresh_from_db()
         self.client_u.refresh_from_db()
         self.assertEqual(order.status, 'cancelled')
-        self.assertEqual(self.client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.client_u.frozen_balance, Decimal('500.00'))
         self.assertEqual(self.client_u.balance, Decimal('1000.00'))
+        self.assertFalse(Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists())
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -425,7 +426,7 @@ class CancelOverdueTests(TestCase):
         order.refresh_from_db()
         return order
 
-    def test_cancel_overdue_refunds_hold(self):
+    def test_cancel_overdue_keeps_prepayment_in_escrow(self):
         WalletService.topup(self.client_u, Decimal('1000'))
         order = self._overdue_order()
         WalletService.hold(self.client_u, Decimal('800'), order=order)
@@ -435,9 +436,9 @@ class CancelOverdueTests(TestCase):
         order.refresh_from_db()
         self.client_u.refresh_from_db()
         self.assertEqual(order.status, 'cancelled')
-        self.assertEqual(self.client_u.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.client_u.frozen_balance, Decimal('800.00'))
         self.assertEqual(self.client_u.balance, Decimal('1000.00'))
-        self.assertTrue(
+        self.assertFalse(
             Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists()
         )
 

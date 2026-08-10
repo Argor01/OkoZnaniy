@@ -8,6 +8,7 @@ create the order and return 200.
 """
 
 from datetime import timedelta
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -64,7 +65,7 @@ class AcceptOfferRegressionTests(TestCase):
         )
 
     def test_client_can_accept_individual_offer(self):
-        WalletService.topup(self.client_user, 1500)
+        WalletService.topup(self.client_user, 1875)
         self.api_client.force_authenticate(user=self.client_user)
         response = self.api_client.post(
             f"/api/chat/chats/{self.chat.id}/accept_offer/",
@@ -85,14 +86,16 @@ class AcceptOfferRegressionTests(TestCase):
         self.assertEqual(order.expert_id, self.expert_user.id)
         self.assertEqual(order.subject_id, self.subject.id)
         self.assertEqual(order.status, "in_progress")
-        self.assertEqual(self.client_user.balance, 1500)
-        self.assertEqual(self.client_user.frozen_balance, 1500)
+        self.assertEqual(self.client_user.balance, Decimal("937.50"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("0"))
+        self.expert_user.refresh_from_db()
+        self.assertEqual(self.expert_user.frozen_balance, Decimal("750.00"))
         self.assertTrue(
             Transaction.objects.filter(
                 order=order,
                 user=self.client_user,
                 type=TransactionType.HOLD,
-                amount=1500,
+                amount=Decimal("937.50"),
             ).exists()
         )
         self.assertIn("chat_id", payload)
@@ -124,7 +127,7 @@ class AcceptOfferRegressionTests(TestCase):
         self.assertEqual(Order.objects.filter(description="Test offer for regression").count(), 1)
 
     def test_accepted_offer_cannot_be_rejected_afterwards(self):
-        WalletService.topup(self.client_user, 1500)
+        WalletService.topup(self.client_user, 1875)
         self.api_client.force_authenticate(user=self.client_user)
 
         accept_response = self.api_client.post(
@@ -211,6 +214,56 @@ class LinkedIndividualOfferTests(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.assertEqual(response.json()["offer_data"]["linked_order_id"], order.id)
+
+    def test_accepting_linked_offer_reserves_service_fee_and_can_complete(self):
+        order = self._order(budget=1200)
+        WalletService.topup(self.client_user, 1750)
+        create_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/send_message/",
+            {
+                "message_type": "offer",
+                "offer_data": {
+                    "description": "Linked offer with service fee",
+                    "cost": 1400,
+                    "deadline": (timezone.now() + timedelta(days=4)).isoformat(),
+                    "linked_order_id": order.id,
+                    "prepayment_percent": 50,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_200_OK, create_response.content)
+
+        self.api_client.force_authenticate(user=self.client_user)
+        accept_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": create_response.json()["id"]},
+            format="json",
+        )
+        self.assertEqual(accept_response.status_code, status.HTTP_200_OK, accept_response.content)
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.assertEqual(order.budget, Decimal("1400"))
+        self.assertEqual(self.client_user.balance, Decimal("875"))
+        self.assertEqual(self.client_user.frozen_balance, Decimal("0"))
+        self.expert_user.refresh_from_db()
+        self.assertEqual(self.expert_user.frozen_balance, Decimal("700"))
+
+        pay_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/pay-remaining/", {}, format="json"
+        )
+        self.assertEqual(pay_response.status_code, status.HTTP_200_OK, pay_response.content)
+        self.expert_user.refresh_from_db()
+        self.assertEqual(self.expert_user.frozen_balance, Decimal("1400"))
+
+        order.status = "review"
+        order.save(update_fields=["status", "updated_at"])
+        approve_response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/approve/", {}, format="json"
+        )
+        self.assertEqual(approve_response.status_code, status.HTTP_200_OK, approve_response.content)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "completed")
 
     def test_order_with_expert_cannot_be_linked(self):
         order = self._order(expert=self.other_expert)

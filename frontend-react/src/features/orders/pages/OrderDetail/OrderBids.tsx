@@ -247,19 +247,17 @@ const OrderBids: React.FC<OrderBidsProps> = ({
               >
                 <Text strong className={styles.expertName}>{getDisplayUsername(order.expert)}</Text>
               </AppButton>
-              {expertReview ? (
-                <div className={styles.expertReviewBlock}>
-                  <span className={styles.expertReviewRating}>
-                    <StarFilled className={styles.clientRatingIcon} />
-                    {expertReview.rating.toFixed(1)}
-                  </span>
+              <div className={styles.expertReviewBlock}>
+                <span className={styles.expertReviewRating}>
+                  <StarFilled className={styles.clientRatingIcon} />
+                  {Number(order.expert.average_rating || 0).toFixed(1)}
+                </span>
+                {expertReview?.comment?.trim() ? (
                   <Text type="secondary" className={styles.expertReviewText}>
-                    {expertReview.comment?.trim()
-                      ? `Отзыв по работе: ${expertReview.comment.trim()}`
-                      : 'Отзыв по работе оставлен без комментария'}
+                    Отзыв по этой работе: {expertReview.comment.trim()}
                   </Text>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
             </div>
             {isOrderOwner && (
               <AppButton

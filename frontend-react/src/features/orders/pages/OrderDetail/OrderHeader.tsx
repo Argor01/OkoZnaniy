@@ -32,6 +32,7 @@ interface OrderHeaderProps {
   orderId: string;
   isMobile: boolean;
   isOrderOwner: boolean;
+  isOrderExpert: boolean;
   clientDisplayName: string;
   clientRoleLabel: string;
   clientRating: number | null;
@@ -45,6 +46,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   orderId,
   isMobile,
   isOrderOwner,
+  isOrderExpert,
   clientDisplayName,
   clientRoleLabel,
   clientRating,
@@ -162,6 +164,19 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
           </div>
         </div>
       </div>
+
+      {isOrderExpert && ['cancelled', 'canceled'].includes(order.status) ? (
+        <div className={`${styles.orderActionsSection} ${styles.sectionBlock}`}>
+          <AppButton
+            variant="secondary"
+            icon={<MessageOutlined />}
+            size={isMobile ? 'middle' : 'large'}
+            onClick={() => navigate(`/orders/${orderId}/complaint`)}
+          >
+            Подать жалобу в арбитраж
+          </AppButton>
+        </div>
+      ) : null}
 
       {isOrderOwner && (
         <div className={`${styles.orderActionsSection} ${styles.sectionBlock}`}>

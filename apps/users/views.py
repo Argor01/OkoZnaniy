@@ -808,25 +808,17 @@ class UserViewSet(viewsets.ModelViewSet):
                 models.Q(client_orders__isnull=False) | models.Q(expert_orders__isnull=False)
             ).distinct().count()
             
-            # Подсчитываем общий доход
-            total_earnings = PartnerEarning.objects.filter(
-                partner=partner
-            ).aggregate(
-                total=models.Sum('amount')
-            )['total'] or 0
-            
             partners_data.append({
                 'id': partner.id,
                 'username': partner.username,
                 'display_username': partner.display_username,
                 'email': partner.email,
-                'city': partner.city,
+                'city': (partner.city or '').strip(),
                 'phone': partner.phone,
                 'role': partner.role,
                 'date_joined': partner.date_joined,
                 'total_referrals': total_referrals,
                 'active_referrals': active_referrals,
-                'total_earnings': float(total_earnings),
             })
         
         return Response(partners_data)

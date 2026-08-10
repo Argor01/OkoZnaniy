@@ -121,6 +121,26 @@ class ArbitrationCaseAPITests(TestCase):
         self.assertFalse(self.client_user.is_banned_for_contacts)
         self.assertIsNone(self.client_user.contact_ban_reason)
 
+    def test_expert_can_submit_complaint_after_client_cancels(self):
+        self.order.status = 'cancelled'
+        self.order.save(update_fields=['status', 'updated_at'])
+        self.api_client.force_authenticate(user=self.expert_user)
+        response = self.api_client.post(
+            '/api/arbitration/complaints/',
+            {
+                'order_id': self.order.id,
+                'complaint_type': 'not_paid',
+                'is_order_relevant': True,
+                'financial_requirement': 'no_refund',
+                'description': 'Клиент отменил заказ после получения результата и не оплатил работу.',
+            },
+            format='multipart',
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        complaint = Complaint.objects.get(order=self.order)
+        self.assertEqual(complaint.plaintiff_id, self.expert_user.id)
+        self.assertEqual(complaint.defendant_id, self.client_user.id)
+
     def test_submit_claim_rejects_duplicate_active_case(self):
         self._create_case()
         self.api_client.force_authenticate(user=self.client_user)

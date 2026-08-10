@@ -36,6 +36,7 @@ export interface OrderExpert {
   last_name?: string;
   avatar?: string;
   bio?: string;
+  average_rating?: number;
   phone?: string;
   email?: string;
 }
@@ -100,6 +101,12 @@ export interface Order {
   updated_at: string;
   files?: OrderFile[];
   bids?: Bid[];
+  client_review?: {
+    id: number;
+    rating: number;
+    comment?: string;
+    created_at: string;
+  };
   expert_rating?: {
     id: number;
     rating: number;
