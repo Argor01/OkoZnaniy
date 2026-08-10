@@ -4,8 +4,10 @@ export interface ExpertStatistics {
   id: number;
   expert: number;
   total_orders: number;
+  active_orders?: number;
   completed_orders: number;
   average_rating: number;
+  client_average_rating?: number;
   success_rate: number;
   total_earnings: number | null;
   response_time_avg: number;

@@ -21,6 +21,7 @@ from apps.chat.models import Chat, Message
 from apps.chat.services import ContactDetectionService
 from apps.orders.models import Order, Transaction, TransactionType
 from apps.wallet.services import WalletService
+from apps.wallet.policy import order_quote
 
 User = get_user_model()
 
@@ -265,6 +266,89 @@ class LinkedIndividualOfferTests(TestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, "completed")
 
+    def test_active_order_assigned_to_current_expert_is_available_for_linking(self):
+        order = self._order(expert=self.expert_user, status="in_progress")
+
+        response = self.api_client.get(
+            "/api/orders/orders/client_available_orders/",
+            {"client_id": self.client_user.id},
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        self.assertIn(order.id, [item["id"] for item in response.json()])
+
+    def test_active_order_can_receive_additional_linked_offer(self):
+        order = self._order(expert=self.expert_user, status="in_progress", budget=1200)
+        create_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/send_message/",
+            {
+                "message_type": "offer",
+                "offer_data": {
+                    "description": "Additional work",
+                    "cost": 400,
+                    "prepayment_percent": 0,
+                    "deadline": (timezone.now() + timedelta(days=6)).isoformat(),
+                    "linked_order_id": order.id,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_200_OK, create_response.content)
+
+        self.api_client.force_authenticate(user=self.client_user)
+        accept_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": create_response.json()["id"]},
+            format="json",
+        )
+        self.assertEqual(accept_response.status_code, status.HTTP_200_OK, accept_response.content)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "in_progress")
+        self.assertEqual(order.budget, Decimal("400"))
+
+    def test_active_linked_offer_reconciles_existing_hold_instead_of_freezing_twice(self):
+        from apps.wallet.models import Settlement
+
+        order = self._order(expert=self.expert_user, status="in_progress", budget=1200)
+        WalletService.topup(self.client_user, 2000)
+        quote = order_quote(1200)
+        WalletService.fund_distributed_escrow(
+            client=self.client_user,
+            expert=self.expert_user,
+            base_amount=quote["base_amount"],
+            service_fee=quote["service_fee"],
+            fund_amount=750,
+            order=order,
+            description="Initial reserve",
+        )
+        create_response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/send_message/",
+            {
+                "message_type": "offer",
+                "offer_data": {
+                    "description": "Replacement offer",
+                    "cost": 1000,
+                    "prepayment_percent": 50,
+                    "linked_order_id": order.id,
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(create_response.status_code, status.HTTP_200_OK, create_response.content)
+        self.api_client.force_authenticate(user=self.client_user)
+        response = self.api_client.post(
+            f"/api/chat/chats/{self.chat.id}/accept_offer/",
+            {"message_id": create_response.json()["id"]},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        order.refresh_from_db()
+        settlement = Settlement.objects.get(order=order)
+        self.client_user.refresh_from_db()
+        self.assertEqual(order.budget, Decimal("1000"))
+        self.assertEqual(settlement.funded_base + settlement.funded_service_fee, Decimal("625"))
+        self.assertEqual(self.client_user.balance, Decimal("1375"))
+
     def test_order_with_expert_cannot_be_linked(self):
         order = self._order(expert=self.other_expert)
         response = self.api_client.post(
@@ -280,7 +364,7 @@ class LinkedIndividualOfferTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("уже есть", response.json()["detail"])
+        self.assertIn("заказ", response.json()["detail"].lower())
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)

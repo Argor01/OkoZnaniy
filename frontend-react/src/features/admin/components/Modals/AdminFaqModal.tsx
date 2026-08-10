@@ -217,6 +217,42 @@ const AdminFaqModal: React.FC<AdminFaqModalProps> = ({ visible, onClose, isMobil
               },
             ]}
           />
+
+        <div className={styles.faqModalSection}>
+          <Text strong className={styles.faqModalSectionTitle}>Текущие операционные правила</Text>
+          <Collapse
+            accordion
+            expandIcon={({ isActive }) => <PlusOutlined className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`} />}
+            expandIconPosition="end"
+            className={styles.faqModalCollapse}
+            items={[
+              {
+                key: 'current-10',
+                label: <Text className={styles.faqModalItemTitle}>Как обрабатывать отмену оплаченного заказа?</Text>,
+                children: <Text className={styles.faqModalItemText}>После отмены предоплата остаётся в эскроу. Не возвращайте её вручную до решения спора. Эксперт может подать жалобу на клиента; проверяйте чат заказа, загруженные файлы и историю транзакций.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-11',
+                label: <Text className={styles.faqModalItemTitle}>Как работают отзывы между сторонами?</Text>,
+                children: <Text className={styles.faqModalItemText}>После завершения заказа клиент оценивает эксперта, а эксперт оценивает клиента. Отзывы привязаны к заказу и влияют на средний рейтинг соответствующего пользователя.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-12',
+                label: <Text className={styles.faqModalItemTitle}>Как работает предоплата в ставках и индивидуальных предложениях?</Text>,
+                children: <Text className={styles.faqModalItemText}>Допустимы значения от 0% до 100%. Для индивидуального предложения резервируется выбранная доля стоимости вместе с сервисным сбором, доля эксперта отражается в его замороженном балансе. Остаток оплачивается отдельно.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-13',
+                label: <Text className={styles.faqModalItemTitle}>Почему готовая работа сразу видна в магазине?</Text>,
+                children: <Text className={styles.faqModalItemText}>Предварительная модерация временно отключена, поэтому работа публикуется сразу. Сам функционал сохранён и включается настройкой READY_WORK_MODERATION_ENABLED.</Text>,
+                className: styles.faqModalItem,
+              },
+            ]}
+          />
+        </div>
         </div>
       </div>
     </Modal>

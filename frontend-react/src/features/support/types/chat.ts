@@ -9,6 +9,7 @@ export interface Message {
   file_name?: string | null;
   file_url?: string | null;
   is_read: boolean;
+  is_pinned?: boolean;
   is_mine: boolean;
   created_at: string;
   message_type?: 'text' | 'offer' | 'work_offer' | 'work_delivery' | 'system';

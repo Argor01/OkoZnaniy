@@ -103,16 +103,18 @@ def _approve_review_order_atomically(order, user):
         if not _is_order_action_allowed(locked_order, user, 'can_approve_work'):
             raise ValueError('Действие недоступно для текущего состояния заказа.')
 
+        delivered_files = locked_order.files.filter(file_type__in=['solution', 'revision'])
+        if not delivered_files.exists() or delivered_files.filter(client_downloaded_at__isnull=True).exists():
+            raise ValueError('Сначала скачайте все файлы готовой работы.')
+
         payment_amount = _order_payment_amount(locked_order)
-        active_hold = _active_order_hold(locked_order)
         has_direct_payment = Transaction.objects.filter(
             order=locked_order,
             user=locked_order.client,
             type=TransactionType.PURCHASE,
         ).exists()
-        required_hold = money(order_quote(payment_amount)['base_amount'] + order_quote(payment_amount)['service_fee'])
-        if payment_amount > 0 and active_hold < required_hold and not has_direct_payment:
-            raise ValueError('Средства по заказу не зарезервированы.')
+        if payment_amount > 0 and not has_direct_payment:
+            _reserve_order_hold_if_needed(locked_order, payment_amount, 100)
 
         _release_order_hold_if_any(locked_order)
         locked_order.status = 'completed'
@@ -391,12 +393,15 @@ class OrderViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             return Response({'detail': 'client_id должен быть числом.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        eligible = models.Q(status='new', expert__isnull=True)
+        if user.is_staff:
+            eligible |= models.Q(status__in=['in_progress', 'revision'], expert__isnull=False)
+        else:
+            eligible |= models.Q(status__in=['in_progress', 'revision'], expert=user)
+
         orders = (
-            Order.objects.filter(
-                client_id=client_id,
-                status='new',
-                expert__isnull=True,
-            )
+            Order.objects.filter(client_id=client_id)
+            .filter(eligible)
             .select_related('subject', 'work_type')
             .distinct()
             .order_by('-created_at')
@@ -843,7 +848,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             order = _approve_review_order_atomically(order, user)
         except InsufficientFunds:
             return Response(
-                {'detail': 'Не удалось выпустить резерв по заказу. Проверьте баланс клиента.'},
+                {'detail': 'Недостаточно средств для доплаты и завершения заказа.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except ValueError as exc:
@@ -951,6 +956,25 @@ class OrderViewSet(viewsets.ModelViewSet):
             )
             message.full_clean()
             message.save()
+            safe_call(
+                NotificationService.create_notification,
+                recipient=order.expert,
+                type='status_changed',
+                title='Работа отправлена на доработку',
+                message=(
+                    f'Клиент вернул заказ №{order.id} на доработку. '
+                    f'Комментарий: {revision_comment}'
+                ),
+                related_object_id=order.id,
+                related_object_type='order',
+                data={
+                    'order_id': order.id,
+                    'old_status': 'review',
+                    'new_status': 'revision',
+                    'revision_comment': revision_comment,
+                    'target': f'/orders/{order.id}',
+                },
+            )
         return Response(self.get_serializer(order).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
@@ -1074,11 +1098,16 @@ class OrderViewSet(viewsets.ModelViewSet):
                 raise ValueError
         except (TypeError, ValueError):
             return Response({'error': 'Оценка должна быть числом от 1 до 5'}, status=status.HTTP_400_BAD_REQUEST)
-        review, created = ClientReview.objects.update_or_create(
+        if ClientReview.objects.filter(order=order).exists():
+            return Response({'error': 'Отзыв о клиенте уже оставлен'}, status=status.HTTP_400_BAD_REQUEST)
+        review = ClientReview.objects.create(
             order=order,
-            defaults={'expert': request.user, 'client': order.client, 'rating': rating, 'comment': (request.data.get('comment') or '').strip()},
+            expert=request.user,
+            client=order.client,
+            rating=rating,
+            comment=(request.data.get('comment') or '').strip(),
         )
-        return Response({'id': review.id, 'rating': review.rating, 'comment': review.comment, 'created_at': review.created_at}, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+        return Response({'id': review.id, 'rating': review.rating, 'comment': review.comment, 'created_at': review.created_at}, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def create_review(self, request, pk=None):
@@ -1444,6 +1473,13 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     def download(self, request, order_pk=None, pk=None):
         order_file = self.get_object()
         self._mark_expert_view(request, order_file)
+        if (
+            request.user.id == order_file.order.client_id
+            and order_file.file_type in ['solution', 'revision']
+            and order_file.client_downloaded_at is None
+        ):
+            order_file.client_downloaded_at = timezone.now()
+            order_file.save(update_fields=['client_downloaded_at'])
         file_handle = order_file.file.open()
         
         # Получаем MIME-тип файла

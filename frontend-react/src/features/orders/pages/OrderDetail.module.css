@@ -1041,3 +1041,79 @@
 :global([data-theme="dark"]) .bidItemSelected :global(.ant-typography) {
   color: #f8fafc !important;
 }
+
+
+/* Bid cards: keep actions and payment chips inside the card at every width. */
+.bidItem,
+.bidItemSelected {
+  min-width: 0;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.bidItem :global(.ant-list-item-meta),
+.bidItemSelected :global(.ant-list-item-meta),
+.bidItem :global(.ant-list-item-meta-content),
+.bidItemSelected :global(.ant-list-item-meta-content) {
+  min-width: 0;
+}
+
+.bidItem :global(.ant-list-item-action),
+.bidItemSelected :global(.ant-list-item-action) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.bidItem :global(.ant-list-item-action > li),
+.bidItemSelected :global(.ant-list-item-action > li) {
+  padding: 0 4px;
+}
+
+.assignButton {
+  max-width: 100%;
+  height: auto !important;
+  white-space: normal !important;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.bidPrepaymentTag {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .bidItem,
+  .bidItemSelected {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .bidItem :global(.ant-list-item-action),
+  .bidItemSelected :global(.ant-list-item-action) {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .bidItem :global(.ant-list-item-action > li),
+  .bidItemSelected :global(.ant-list-item-action > li) {
+    padding: 0;
+    margin: 0;
+  }
+
+  .bidChipsRow {
+    align-items: flex-start;
+  }
+
+  .bidAmountTag,
+  .bidPrepaymentTag {
+    width: fit-content;
+    max-width: 100%;
+  }
+}

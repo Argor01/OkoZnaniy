@@ -197,7 +197,7 @@ const UserProfile: FC = () => {
           Назад
         </Button>
 
-        <Card>
+        <Card className={styles.publicProfileShell}>
           <Space direction="vertical" size="large" className={styles.fullWidth}>
             {currentUser && Number(currentUser.id) === Number(userData.id) ? (
               <PendingReviewsCard />
@@ -207,11 +207,6 @@ const UserProfile: FC = () => {
               
                             <Card className={styles.headerCard}>
                 <Space direction="vertical" size={12} className={styles.fullWidth}>
-                  <div className={styles.headerRow}>
-                    <Text type="secondary" className={styles.profileLabel}>
-                      ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
-                    </Text>
-                  </div>
                   <div className={styles.profileIdentityCard}>
                     <Avatar
                       size={72}
@@ -247,7 +242,7 @@ const UserProfile: FC = () => {
               </Card>
 
               
-              <SurfaceCard title={<SectionHeader title="РЕЙТИНГ И СТАТИСТИКА" />}>
+              <SurfaceCard title={<SectionHeader title="Рейтинг и статистика" />} className={styles.statsSurface}>
                 {(statsLoading || expertStatsLoading) ? (
                   <div className={styles.statsLoading}>
                     <Spin size="large" />

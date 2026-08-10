@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { notificationsApi, Notification as ApiNotification } from '@/features/common/api/notifications';
 import { Notification } from '@/features/notifications';
 import { logger } from '@/utils/logger';
+import { useWebSocket, type WSEvent } from '@/hooks/useWebSocket';
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -92,11 +93,26 @@ export const useNotifications = () => {
     }
   };
 
+  const handleLiveNotification = useCallback((_event: WSEvent) => {
+    void loadNotifications();
+  }, [loadNotifications]);
+
+  useWebSocket({
+    onNotification: handleLiveNotification,
+    onConnect: loadNotifications,
+  });
+
   useEffect(() => {
-    loadNotifications();
-    
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
+    void loadNotifications();
+    const interval = window.setInterval(loadNotifications, 10000);
+    const refresh = () => void loadNotifications();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, [loadNotifications]);
 
   return {

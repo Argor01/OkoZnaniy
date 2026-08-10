@@ -14,7 +14,14 @@ import {
 import { 
   MessageOutlined,
   FilterOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  FileTextOutlined,
+  BookOutlined,
+  ClockCircleOutlined,
+  DollarOutlined,
+  PercentageOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -239,6 +246,57 @@ export const UserConversationsSection: React.FC = () => {
     const client = chat.client ? `Клиент: ${getDisplayName(chat.client)}` : '';
     const expert = chat.expert ? `Эксперт: ${getDisplayName(chat.expert)}` : '';
     return [client, expert].filter(Boolean).join(' • ');
+  };
+
+  const formatOfferValue = (value: unknown, fallback = 'Не указано') => {
+    const text = String(value ?? '').trim();
+    return text || fallback;
+  };
+
+  const getOfferStatus = (status?: string) => {
+    const labels: Record<string, { label: string; tone: string }> = {
+      new: { label: 'Ожидает решения', tone: 'pending' },
+      accepted: { label: 'Предложение принято', tone: 'accepted' },
+      rejected: { label: 'Предложение отклонено', tone: 'rejected' },
+      cancelled: { label: 'Предложение отменено', tone: 'rejected' },
+    };
+    return labels[String(status || 'new')] || { label: String(status || 'Ожидает решения'), tone: 'pending' };
+  };
+
+  const renderOfferCard = (message: Message) => {
+    const offer = message.offer_data || {};
+    const state = getOfferStatus(offer.status);
+    const costRaw = Number(offer.cost);
+    const cost = Number.isFinite(costRaw) && costRaw > 0
+      ? `${costRaw.toLocaleString('ru-RU')} ₽`
+      : 'Договорная';
+    const deadline = offer.deadline
+      ? dayjs(offer.deadline).format('DD.MM.YYYY')
+      : 'Не указан';
+    const Icon = state.tone === 'accepted' ? CheckCircleOutlined : state.tone === 'rejected' ? CloseCircleOutlined : ClockCircleOutlined;
+
+    return (
+      <div className={styles.offerCard}>
+        <div className={styles.offerHeader}>
+          <span className={styles.offerHeaderIcon}><FileTextOutlined /></span>
+          <div>
+            <div className={styles.offerTitle}>Индивидуальное предложение</div>
+            {offer.linked_order_id && <div className={styles.offerOrder}>Заказ #{offer.linked_order_id}</div>}
+          </div>
+        </div>
+        <div className={styles.offerGrid}>
+          <div className={styles.offerField}><BookOutlined /><span>Предмет<strong>{formatOfferValue(offer.subject)}</strong></span></div>
+          <div className={styles.offerField}><FileTextOutlined /><span>Тип работы<strong>{formatOfferValue(offer.work_type)}</strong></span></div>
+          <div className={styles.offerField}><ClockCircleOutlined /><span>Срок выполнения<strong>{deadline}</strong></span></div>
+          <div className={styles.offerField}><DollarOutlined /><span>Стоимость<strong>{cost}</strong></span></div>
+          <div className={styles.offerField}><PercentageOutlined /><span>Предоплата<strong>{Number(offer.prepayment_percent ?? 0)}%</strong></span></div>
+        </div>
+        {formatOfferValue(offer.description, '') && (
+          <div className={styles.offerDescription}>{formatOfferValue(offer.description, '')}</div>
+        )}
+        <div className={`${styles.offerStatus} ${styles[`offerStatus_${state.tone}`]}`}><Icon /> {state.label}</div>
+      </div>
+    );
   };
 
   const getMessagePreview = (message: Message) => {
@@ -508,10 +566,12 @@ export const UserConversationsSection: React.FC = () => {
                     </Text>
                   </div>  
                 
-                  <div className={styles.messageBubble}>
-                    <Text className={styles.messageText}>
-                      {getMessagePreview(msg)}
-                    </Text>
+                  <div className={`${styles.messageBubble} ${msg.message_type === 'offer' && msg.offer_data ? styles.messageBubbleOffer : ''}`}>
+                    {msg.message_type === 'offer' && msg.offer_data ? (
+                      renderOfferCard(msg)
+                    ) : (
+                      <Text className={styles.messageText}>{getMessagePreview(msg)}</Text>
+                    )}
                     {msg.file && (
                       <div className={styles.messageFile}>
                         <a href={msg.file} target="_blank" rel="noopener noreferrer">

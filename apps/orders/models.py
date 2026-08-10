@@ -346,6 +346,12 @@ class OrderFile(models.Model):
         verbose_name="Просмотрен экспертом"
     )
 
+    client_downloaded_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Скачан клиентом"
+    )
+
     class Meta:
         verbose_name = "Файл заказа"
         verbose_name_plural = "Файлы заказа"

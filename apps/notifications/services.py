@@ -276,6 +276,28 @@ class NotificationService:
                 related_object_id=order.id,
                 related_object_type='order'
             )
+        # Просим эксперта оценить клиента после завершения заказа.
+        if order.expert and order.client_id:
+            from apps.orders.models import ClientReview
+            if not ClientReview.objects.filter(order=order).exists():
+                NotificationService.create_notification(
+                    recipient=order.expert,
+                    type=NotificationType.ORDER_COMPLETED,
+                    title="Оцените клиента",
+                    message=(
+                        f"Заказ {NotificationService._order_ref(order)} завершён. "
+                        "Оставьте отзыв о работе с клиентом."
+                    ),
+                    related_object_id=order.id,
+                    related_object_type='order',
+                    data={
+                        'order_id': order.id,
+                        'target': f'/orders/{order.id}',
+                        'action_label': 'Оставить отзыв о клиенте',
+                    },
+                    expires_in=timedelta(days=30),
+                )
+
         # Просим клиента оставить отзыв о работе эксперта
         if order.client and order.expert_id:
             from apps.experts.models import ExpertReview

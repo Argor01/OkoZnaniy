@@ -20,6 +20,7 @@ export const ORDER_STATUSES = {
   CANCELLED: 'cancelled',
   DISPUTE: 'dispute',
   EXPIRED: 'expired',
+  READY_WORK_TRANSFER: 'ready_work_transfer',
 } as const;
 
 export const ORDER_STATUS_LABELS: Record<string, string> = {
@@ -36,6 +37,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
   cancelled: 'Отменён',
   dispute: 'Спор',
   expired: 'Истёк срок',
+  ready_work_transfer: 'Передача готовой работы',
   under_review: 'На проверке',
   canceled: 'Отменён',
 };
@@ -54,6 +56,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   cancelled: 'red',
   dispute: 'volcano',
   expired: 'default',
+  ready_work_transfer: 'blue',
 };
 
 export const ORDER_PRIORITIES = {

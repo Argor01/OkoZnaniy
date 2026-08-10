@@ -111,9 +111,6 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [isDragOverChat, setIsDragOverChat] = useState(false);
   const [offerModalOpen, setOfferModalOpen] = useState(false);
   const [workOfferModalOpen, setWorkOfferModalOpen] = useState(false);
-  const [acceptWorkDeliveryModalOpen, setAcceptWorkDeliveryModalOpen] = useState(false);
-  const [acceptWorkDeliveryMessageId, setAcceptWorkDeliveryMessageId] = useState<number | null>(null);
-  const [acceptWorkDeliveryRating, setAcceptWorkDeliveryRating] = useState<number>(5);
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const [orderLoading, setOrderLoading] = useState(false);
   const [order, setOrder] = useState<OrderForChat | null>(null);
@@ -150,10 +147,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const [contextChat, setContextChat] = useState<{ userId: number; title: string } | null>(null);
   const [orderIntroByChatId, setOrderIntroByChatId] = useState<Record<number, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<any>(null);
   const workFileInputRef = useRef<HTMLInputElement>(null);
   const workOfferFileInputRef = useRef<HTMLInputElement>(null);
   const dragDepthRef = useRef(0);
+  const pinnedMessageIndexRef = useRef(0);
   const hasCachedChatsRef = useRef(false);
 
   // Адаптив: фиксируем модалку при открытии клавиатуры на мобильных
@@ -309,7 +308,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
     // Автоскролл вниз
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      { const container = messagesScrollRef.current; if (container) container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' }); }
     }, 100);
 
     // Отмечаем входящее сообщение прочитанным, если чат открыт
@@ -926,42 +925,60 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   }, [chatContextTitle, hydrateClosedOrdersForChat, loadChats, syncChatListItemFromDetail, toPositiveNumber]);
 
+  const initialOpenRequestRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (visible) {
-      void loadChats(hasCachedChatsRef.current);
+    if (!visible) {
+      initialOpenRequestRef.current = null;
+      return;
+    }
 
-      if (selectedOrderId && selectedUserId) {
-        loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
-        return;
-      }
+    void loadChats(hasCachedChatsRef.current);
+    const requestKey = `${selectedOrderId || 0}:${selectedUserId || 0}`;
+    if (initialOpenRequestRef.current === requestKey) return;
+    initialOpenRequestRef.current = requestKey;
 
-      if (selectedOrderId && !selectedUserId) {
-        const openOrderChat = async () => {
-          try {
-            const orderData = await ordersApi.getById(selectedOrderId);
-            const currentIdRaw = Number((userProfile as { id?: unknown } | undefined)?.id);
-            const currentId = Number.isFinite(currentIdRaw) && currentIdRaw > 0 ? currentIdRaw : 0;
-            const clientId = toPositiveNumber((orderData as { client?: { id?: unknown } | null; client_id?: unknown })?.client?.id)
-              ?? toPositiveNumber((orderData as { client_id?: unknown })?.client_id);
-            const expertId = toPositiveNumber((orderData as { expert?: { id?: unknown } | null; expert_id?: unknown })?.expert?.id)
-              ?? toPositiveNumber((orderData as { expert_id?: unknown })?.expert_id);
-            const otherUserId = currentId && clientId === currentId ? expertId : clientId;
-            if (otherUserId) {
-              await loadOrCreateChatByOrderAndUser(selectedOrderId, otherUserId);
-            } else {
-              setActiveOrderId(selectedOrderId);
-            }
-          } catch {
-            antMessage.error('Не удалось открыть чат заказа');
+    if (selectedOrderId) {
+      const openOrderChat = async () => {
+        try {
+          const orderData = await ordersApi.getById(selectedOrderId);
+          const orderStatus = String((orderData as { status?: unknown } | undefined)?.status || '').toLowerCase();
+          if (['cancelled', 'canceled'].includes(orderStatus)) {
+            setSelectedChat(null);
+            setActiveOrderId(selectedOrderId);
+            antMessage.info('Заказ отменён, чат недоступен');
+            return;
           }
-        };
-        void openOrderChat();
-        return;
-      }
 
-      if (selectedUserId) {
-        loadOrCreateChatWithUser(selectedUserId);
-      }
+          if (selectedUserId) {
+            await loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
+            return;
+          }
+
+          const currentIdRaw = Number((userProfile as { id?: unknown } | undefined)?.id);
+          const currentId = Number.isFinite(currentIdRaw) && currentIdRaw > 0 ? currentIdRaw : 0;
+          const clientId = toPositiveNumber((orderData as { client?: { id?: unknown } | null; client_id?: unknown })?.client?.id)
+            ?? toPositiveNumber((orderData as { client_id?: unknown })?.client_id);
+          const expertId = toPositiveNumber((orderData as { expert?: { id?: unknown } | null; expert_id?: unknown })?.expert?.id)
+            ?? toPositiveNumber((orderData as { expert_id?: unknown })?.expert_id);
+          const otherUserId = currentId && clientId === currentId ? expertId : clientId;
+          if (otherUserId) {
+            await loadOrCreateChatByOrderAndUser(selectedOrderId, otherUserId);
+          } else {
+            setActiveOrderId(selectedOrderId);
+          }
+        } catch {
+          setSelectedChat(null);
+          setActiveOrderId(null);
+          antMessage.warning('Заказ удалён или недоступен');
+        }
+      };
+      void openOrderChat();
+      return;
+    }
+
+    if (selectedUserId) {
+      void loadOrCreateChatWithUser(selectedUserId);
     }
   }, [visible, selectedUserId, selectedOrderId, loadChats, loadOrCreateChatByOrderAndUser, loadOrCreateChatWithUser, toPositiveNumber, userProfile]);
 
@@ -1237,10 +1254,12 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const isClosedOrder = order?.status === 'completed' || order?.status === 'cancelled';
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [selectedChat?.messages]);
+    const container = messagesScrollRef.current;
+    if (!container) return;
+    window.requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
+  }, [selectedChat?.id, selectedChat?.messages]);
 
     const currentUserId = useMemo(() => {
     const profileId = Number((userProfile as { id?: unknown } | undefined)?.id);
@@ -1514,21 +1533,10 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
 
   const handleAcceptWorkDelivery = async (messageId: number) => {
     if (!selectedChat) return;
-    setAcceptWorkDeliveryMessageId(messageId);
-    setAcceptWorkDeliveryRating(5);
-    setAcceptWorkDeliveryModalOpen(true);
-  };
-
-  const handleConfirmAcceptWorkDelivery = async () => {
-    if (!selectedChat) return;
-    const messageId = acceptWorkDeliveryMessageId;
-    if (!messageId) return;
     try {
-      await chatApi.acceptWorkDelivery(selectedChat.id, messageId, acceptWorkDeliveryRating);
-      setAcceptWorkDeliveryModalOpen(false);
-      setAcceptWorkDeliveryMessageId(null);
+      await chatApi.acceptWorkDelivery(selectedChat.id, messageId);
       await Promise.all([loadChatDetail(selectedChat.id), loadChats()]);
-      antMessage.success('Работа принята');
+      antMessage.success('Файл работы принят. Итогово примите заказ после скачивания.');
     } catch (error: unknown) {
       antMessage.error(getErrorDetail(error) || 'Ошибка принятия работы');
     }
@@ -2163,6 +2171,28 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     }
   };
 
+  const formatMessageDay = useCallback((dateString: string) => {
+    const date = dayjs(dateString);
+    const today = dayjs().startOf('day');
+    const diff = today.diff(date.startOf('day'), 'day');
+    if (diff === 0) return 'Сегодня';
+    if (diff === 1) return 'Вчера';
+    return date.format('D MMMM');
+  }, []);
+
+  const handlePinMessage = useCallback(async (messageId: number) => {
+    if (!selectedChat?.id) return;
+    try {
+      const result = await chatApi.pinMessage(selectedChat.id, messageId);
+      setSelectedChat((prev) => prev ? {
+        ...prev,
+        messages: prev.messages.map((message) => message.id === messageId ? { ...message, is_pinned: result.is_pinned } : message),
+      } : prev);
+    } catch (error: unknown) {
+      antMessage.error(getErrorDetail(error) || 'Не удалось изменить закрепление');
+    }
+  }, [selectedChat?.id]);
+
   const showChatListLoading = loading && safeChatList.length === 0;
 
   useEffect(() => {
@@ -2672,6 +2702,36 @@ const handleOverdueComplaint = async () => {
     
     return result;
   }, [selectedChat?.messages]);
+
+  const displayMessages = useMemo(() => {
+    const result: any[] = [];
+    let previousDay = '';
+    groupedMessages.forEach((message) => {
+      const dayKey = dayjs(message.created_at).format('YYYY-MM-DD');
+      if (dayKey !== previousDay) {
+        result.push({ __dateDivider: true, id: `day-${dayKey}`, label: formatMessageDay(message.created_at) });
+        previousDay = dayKey;
+      }
+      result.push(message);
+    });
+    return result;
+  }, [formatMessageDay, groupedMessages]);
+
+  const pinnedMessages = useMemo(
+    () => groupedMessages.filter((message) => message.is_pinned && message.message_type !== 'system'),
+    [groupedMessages],
+  );
+
+  const scrollToNextPinnedMessage = useCallback(() => {
+    if (pinnedMessages.length === 0) return;
+    const index = pinnedMessageIndexRef.current % pinnedMessages.length;
+    const target = document.querySelector(`[data-chat-message-id="${pinnedMessages[index].id}"]`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target?.classList.add(styles.messagePinnedHighlight);
+    window.setTimeout(() => target?.classList.remove(styles.messagePinnedHighlight), 1600);
+    pinnedMessageIndexRef.current = (index + 1) % pinnedMessages.length;
+  }, [pinnedMessages]);
+
   const isChatFrozen = Boolean(selectedChat?.is_frozen || order?.is_frozen);
   const hasActiveConversation = Boolean(selectedChat || isSupportChatSelected);
   const useStackedConversationLayout = isMobile || isTablet;
@@ -2684,8 +2744,9 @@ const handleOverdueComplaint = async () => {
     ? {
         width: '100%',
         margin: '0 auto',
-        minHeight: isMobile ? 'calc(var(--chat-modal-vh, var(--app-vh, 100dvh)) - 64px)' : 'calc(100vh - 64px)',
-        maxHeight: isMobile ? 'calc(var(--chat-modal-vh, var(--app-vh, 100dvh)) - 64px)' : 'calc(100vh - 64px)',
+        height: isMobile ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
+        minHeight: 0,
+        maxHeight: isMobile ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
       }
     : undefined;
 
@@ -3205,6 +3266,7 @@ const handleOverdueComplaint = async () => {
 
           
           <div
+            ref={messagesScrollRef}
             className={`${styles.chatMessages} ${isMobile ? styles.chatMessagesMobile : ''} ${isDragOverChat ? styles.chatMessagesDragOver : ''}`}
             onDragEnter={handleChatDragEnter}
             onDragOver={handleChatDragOver}
@@ -3243,7 +3305,15 @@ const handleOverdueComplaint = async () => {
                         </div>
                       </div>
                     ) : null}
-                    {groupedMessages.map((msg: any, idx: number) => {
+                    {pinnedMessages.length > 0 && (
+                      <button type="button" className={styles.pinnedMessagesButton} onClick={scrollToNextPinnedMessage}>
+                        <PushpinFilled /> <span>Закреплено: {pinnedMessages.length}</span>
+                      </button>
+                    )}
+                    {displayMessages.map((msg: any, idx: number) => {
+                  if (msg.__dateDivider) {
+                    return <div key={msg.id} className={styles.messageDateDivider}><span>{msg.label}</span></div>;
+                  }
                   const isOffer = msg.message_type === 'offer' && !!msg.offer_data;
                   const isWorkOffer = msg.message_type === 'work_offer' && !!msg.offer_data;
                   const workDeliveryFiles = Array.isArray(msg.offer_data?.files) ? msg.offer_data.files : [];
@@ -3379,11 +3449,21 @@ const workDeliveryStatus = isWorkOffer
                   return (
                     <div
                       key={msg.id}
-                      className={messageRowClass}
+                      data-chat-message-id={msg.id}
+                      className={`${messageRowClass} ${msg.is_pinned ? styles.messageRowPinned : ''}`}
                     >
-                      <div
-                        className={messageBubbleClass}
-                      >
+                      <div className={messageBubbleClass}>
+                        <div className={styles.messagePinControls}>
+                          {msg.is_pinned && <span className={styles.messagePinnedBadge}><PushpinFilled /> Закреплено</span>}
+                          <Button
+                            type="text"
+                            size="small"
+                            icon={msg.is_pinned ? <PushpinFilled /> : <PushpinOutlined />}
+                            aria-label={msg.is_pinned ? 'Открепить сообщение' : 'Закрепить сообщение'}
+                            onClick={() => void handlePinMessage(msg.id)}
+                            className={styles.messagePinButton}
+                          />
+                        </div>
                         {isWorkDelivery ? (
                           <Card size="small" className={messageCardClass}>
                             <div className={styles.messageCardTitle}>Готовая работа</div>
@@ -3854,6 +3934,14 @@ const workDeliveryStatus = isWorkOffer
                         sendMessage();
                       }
                     }}
+                    onFocus={() => {
+                      if (!isMobile && !isTablet) return;
+                      window.requestAnimationFrame(() => {
+                        const container = messagesScrollRef.current;
+                        if (container) container.scrollTop = container.scrollHeight;
+                        window.scrollTo({ top: 0, behavior: 'auto' });
+                      });
+                    }}
                     disabled={sending}
                   />
                 </div>
@@ -4252,26 +4340,6 @@ const workDeliveryStatus = isWorkOffer
               placeholder="Напишите пару слов (необязательно)"
               autoSize={{ minRows: 3, maxRows: 6 }}
             />
-          </div>
-        </div>
-      </Modal>
-      <Modal
-        open={acceptWorkDeliveryModalOpen}
-        centered
-        onCancel={() => {
-          setAcceptWorkDeliveryModalOpen(false);
-          setAcceptWorkDeliveryMessageId(null);
-        }}
-        onOk={handleConfirmAcceptWorkDelivery}
-        okText="Принять"
-        cancelText="Отмена"
-        title="Оцените работу"
-        destroyOnHidden
-      >
-        <div className={styles.simpleModalContent}>
-          <div>
-            <Text className={styles.formLabelSmall}>Оценка</Text>
-            <Rate value={acceptWorkDeliveryRating} onChange={(v) => setAcceptWorkDeliveryRating(v)} />
           </div>
         </div>
       </Modal>

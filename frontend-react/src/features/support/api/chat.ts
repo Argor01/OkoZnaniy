@@ -169,8 +169,18 @@ export const chatApi = {
     await apiClient.delete(`/chat/chats/${chatId}/`);
   },
 
+  pinMessage: async (chatId: number, messageId: number): Promise<{ id: number; is_pinned: boolean }> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/pin_message/`, { message_id: messageId });
+    return response.data;
+  },
+
   togglePin: async (chatId: number): Promise<void> => {
     await apiClient.post(`/chat/chats/${chatId}/toggle_pin/`);
+  },
+
+  toggleMessagePin: async (chatId: number, messageId: number): Promise<Message> => {
+    const response = await apiClient.post(`/chat/chats/${chatId}/toggle_message_pin/`, { message_id: messageId });
+    return response.data;
   },
 
   markAsUnread: async (chatId: number): Promise<void> => {

@@ -94,15 +94,14 @@ const EmployeeList: React.FC = () => {
 
   const deactivateMutation = useMutation({
     mutationFn: (id: number) => deactivateEmployee(id),
-    onSuccess: (updated: Employee) => {
+    onSuccess: async () => {
+      setDetailModalVisible(false);
+      setSelectedEmployee(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['director-personnel'] }),
+        queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] }),
+      ]);
       message.success('Сотрудник деактивирован');
-      queryClient.setQueryData(['director-personnel'], (prev: Employee[] | undefined) => {
-        if (!prev) return prev;
-        return prev.map((e) => (e.id === updated.id ? { ...e, ...updated } : e));
-      });
-      setSelectedEmployee((prev) => (prev && prev.id === updated.id ? { ...prev, ...updated } : prev));
-      queryClient.invalidateQueries({ queryKey: ['director-personnel'] });
-      queryClient.invalidateQueries({ queryKey: ['director-expert-applications'] });
     },
     onError: (error: any) => {
       const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Ошибка при деактивации сотрудника';

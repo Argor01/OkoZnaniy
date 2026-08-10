@@ -31,14 +31,40 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
   const placeBidMutation = useMutation({
     mutationFn: (data: { amount: number; prepayment_percent: number; comment?: string }) => 
       ordersApi.placeBid(orderId, data),
-    onSuccess: () => {
+    onSuccess: async (createdBid) => {
       message.success('Отклик успешно отправлен!');
       setBidSuccess(true);
+
+      queryClient.setQueryData(['order-bids', String(orderId)], (prev: unknown) => {
+        const list = Array.isArray(prev) ? prev : [];
+        return list.some((bid: any) => bid?.id === createdBid.id) ? list : [...list, createdBid];
+      });
+      queryClient.setQueryData(['order-bids', orderId], (prev: unknown) => {
+        const list = Array.isArray(prev) ? prev : [];
+        return list.some((bid: any) => bid?.id === createdBid.id) ? list : [...list, createdBid];
+      });
+
+      const patchOrder = (data: any): any => {
+        if (!data) return data;
+        if (Array.isArray(data)) return data.map((item) => item?.id === orderId ? { ...item, user_has_bid: true } : item);
+        if (Array.isArray(data.results)) return { ...data, results: patchOrder(data.results) };
+        return data.id === orderId ? { ...data, user_has_bid: true } : data;
+      };
+      queryClient.setQueriesData({ queryKey: ['orders-feed'] }, patchOrder);
+      queryClient.setQueriesData({ queryKey: ['available-orders'] }, patchOrder);
+      queryClient.setQueriesData({ queryKey: ['orders'] }, patchOrder);
+      queryClient.setQueriesData({ queryKey: ['order', String(orderId)] }, patchOrder);
+      queryClient.setQueriesData({ queryKey: ['order', orderId] }, patchOrder);
+
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['order-bids', String(orderId)], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['order', String(orderId)], type: 'active' }),
+        queryClient.invalidateQueries({ queryKey: ['orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['orders-feed'] }),
+        queryClient.invalidateQueries({ queryKey: ['available-orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['user-orders'] }),
+      ]);
       onBidSubmitted?.(orderId);
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.invalidateQueries({ queryKey: ['orders-feed'] });
-      queryClient.invalidateQueries({ queryKey: ['order-bids', orderId] });
-      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     },
     onError: (error: unknown) => {
       const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;

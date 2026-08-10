@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, Typography, Spin, Space, Avatar, Button, message as antMessage } from 'antd';
 import { ErrorBoundary } from '@/features/common';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { ordersApi } from '@/features/orders/api/orders';
 import { apiClient } from '@/api/client';
 import { getMediaUrl } from '@/config/api';
 import { translateStatusInText } from '@/utils/constants';
+import { useWebSocket, type WSEvent } from '@/hooks/useWebSocket';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import styles from './NotificationsModalNew.module.css';
@@ -222,6 +223,17 @@ const resolveNotificationActions = (notification: Notification): NotificationAct
   }
 
   if (orderId) {
+    const isCancelledOrder =
+      ['cancelled', 'canceled'].includes(statusFromData) ||
+      ['order_cancelled', 'order_canceled'].includes(notification.type) ||
+      source.includes('отмен');
+
+    if (isCancelledOrder) {
+      return [
+        { key: 'open-order', label: 'Открыть заказ', target: `/orders/${orderId}`, primary: true },
+      ];
+    }
+
     if (notification.type === 'new_bid') {
       return [
         { key: 'open-order', label: 'Открыть заказ', target: `/orders/${orderId}`, primary: true },
@@ -271,23 +283,55 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (visible) {
-      loadNotifications();
-    }
-  }, [visible]);
-
-  const loadNotifications = async () => {
-    setLoading(true);
+  const loadNotifications = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const data = await notificationsApi.getAll();
-      setNotifications(data);
+      setNotifications(Array.isArray(data) ? [...data] : []);
     } catch (error) {
-      antMessage.error('Не удалось загрузить уведомления');
+      if (!silent) antMessage.error('Не удалось загрузить уведомления');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
-  };
+  }, []);
+
+  const handleLiveNotification = useCallback((event: WSEvent) => {
+    const incoming = event.data as Notification | Notification[] | undefined;
+    const items = Array.isArray(incoming) ? incoming : incoming ? [incoming] : [];
+    if (items.length === 0) {
+      void loadNotifications(true);
+      return;
+    }
+    setNotifications((prev) => {
+      const next = [...prev];
+      items.forEach((item) => {
+        const index = next.findIndex((current) => current.id === item.id);
+        if (index >= 0) next[index] = { ...next[index], ...item };
+        else next.unshift(item);
+      });
+      return next.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    });
+  }, [loadNotifications]);
+
+  useWebSocket({
+    enabled: visible,
+    onNotification: handleLiveNotification,
+    onConnect: () => void loadNotifications(true),
+  });
+
+  useEffect(() => {
+    if (!visible) return;
+    void loadNotifications();
+    const refresh = () => void loadNotifications(true);
+    const interval = window.setInterval(refresh, 10000);
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [visible, loadNotifications]);
 
   const handleMarkAsRead = async (notification: Notification) => {
     if (notification.is_read) return;

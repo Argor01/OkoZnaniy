@@ -741,3 +741,95 @@
     align-items: flex-start;
   }
 }
+
+
+/* Public profile aligned with the account page visual system. */
+.page {
+  background: oklch(96% 0.008 285);
+  padding: 24px clamp(16px, 4vw, 40px) 48px;
+}
+
+.pageInner { max-width: 1120px; }
+
+.publicProfileShell {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.publicProfileShell > :global(.ant-card-body) { padding: 0 !important; }
+
+.backButton {
+  min-height: 44px;
+  border-radius: 12px;
+  border-color: oklch(88% 0.015 285);
+  color: oklch(38% 0.08 295);
+  background: oklch(99% 0.004 285);
+}
+
+.profileStack { gap: 20px; }
+
+.headerCard {
+  padding: 0;
+  border: 1px solid oklch(90% 0.012 285) !important;
+  border-radius: 20px !important;
+  background: oklch(99% 0.005 285) !important;
+  box-shadow: 0 10px 30px oklch(35% 0.035 285 / .07) !important;
+}
+
+.headerCard :global(.ant-card-body) { padding: 28px 32px !important; }
+.profileIdentityCard { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 20px; }
+.profileIdentityAvatar { width: 88px !important; height: 88px !important; background: oklch(52% .19 295); border: 3px solid oklch(98% .006 285); box-shadow: 0 8px 20px oklch(35% .05 295 / .18); }
+.profileIdentityMeta { gap: 6px; }
+.nameText { color: oklch(24% .025 285); font-size: clamp(1.5rem, 3vw, 2rem) !important; line-height: 1.15; }
+.usernameText { color: oklch(54% .018 285); font-size: .875rem; }
+.inlineRoleBadge { padding: 5px 12px; border: 1px solid oklch(82% .08 165); font-size: .875rem; }
+.inlineRoleBadge_expert { color: oklch(42% .12 165); background: oklch(95% .04 165); }
+.inlineRoleBadge_client { color: oklch(46% .16 295); background: oklch(95% .035 295); border-color: oklch(83% .07 295); }
+.writeMessageButton { min-height: 44px; border-radius: 12px; box-shadow: none; background: oklch(52% .19 295); }
+
+.statsSurface,
+.sectionMargin,
+.reviewsCard {
+  border: 1px solid oklch(90% .012 285) !important;
+  border-radius: 18px !important;
+  background: oklch(99% .005 285) !important;
+  box-shadow: 0 8px 24px oklch(35% .035 285 / .05) !important;
+}
+
+.statsSurface :global(.ant-card-head),
+.sectionMargin :global(.ant-card-head),
+.reviewsCard :global(.ant-card-head) { border-bottom-color: oklch(91% .012 285); }
+
+.statsGrid { grid-template-columns: minmax(220px, .8fr) minmax(280px, 1.2fr); gap: 0; border: 1px solid oklch(90% .012 285); border-radius: 14px; overflow: hidden; }
+.statCardCenter, .statCardBlock { padding: 20px 24px; background: oklch(97.5% .008 285); }
+.statCardBlock { border-left: 1px solid oklch(90% .012 285); }
+.statValueRating, .statValuePrimary { font-size: 2rem; color: oklch(52% .19 295); }
+.statNumberLarge { color: oklch(52% .19 295); }
+.expertInfoGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.expertInfoRow { padding: 14px 0; border-bottom: 1px solid oklch(92% .01 285); }
+.reviewItem { background: oklch(97.5% .008 285); border-color: oklch(90% .012 285); border-radius: 12px; }
+
+@media (max-width: 640px) {
+  .page { padding: 16px 12px 36px; }
+  .headerCard :global(.ant-card-body) { padding: 20px 16px !important; }
+  .profileIdentityCard { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .profileIdentityAvatar { width: 72px !important; height: 72px !important; }
+  .writeMessageButton { grid-column: 1 / -1; width: 100%; margin: 8px 0 0; }
+  .nameText { white-space: normal; text-wrap: balance; }
+  .statsGrid { grid-template-columns: 1fr; }
+  .statCardBlock { border-left: 0; border-top: 1px solid oklch(90% .012 285); }
+  .expertInfoGrid { grid-template-columns: 1fr; }
+  .reviewsHeader { align-items: flex-start; gap: 12px; }
+}
+
+:global([data-theme="dark"]) .page { background: oklch(16% .015 285); }
+:global([data-theme="dark"]) .headerCard,
+:global([data-theme="dark"]) .statsSurface,
+:global([data-theme="dark"]) .sectionMargin,
+:global([data-theme="dark"]) .reviewsCard { background: oklch(22% .018 285) !important; border-color: oklch(34% .02 285) !important; box-shadow: none !important; }
+:global([data-theme="dark"]) .nameText { color: oklch(92% .01 285); }
+:global([data-theme="dark"]) .statCardCenter,
+:global([data-theme="dark"]) .statCardBlock,
+:global([data-theme="dark"]) .reviewItem { background: oklch(25% .018 285); }

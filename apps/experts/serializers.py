@@ -193,24 +193,66 @@ class ExpertRatingDetailSerializer(serializers.ModelSerializer):
 
 class ExpertStatisticsSerializer(serializers.ModelSerializer):
     expert = SimpleUserSerializer(read_only=True)
+    total_orders = serializers.SerializerMethodField()
+    active_orders = serializers.SerializerMethodField()
+    completed_orders = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    total_ratings = serializers.SerializerMethodField()
+    success_rate = serializers.SerializerMethodField()
     total_earnings = serializers.SerializerMethodField()
+    client_average_rating = serializers.SerializerMethodField()
     
     class Meta:
         model = ExpertStatistics
         fields = [
-            'id', 'expert', 'total_orders', 'completed_orders',
-            'average_rating', 'total_ratings', 'success_rate', 'total_earnings',
+            'id', 'expert', 'total_orders', 'active_orders', 'completed_orders',
+            'average_rating', 'client_average_rating', 'total_ratings', 'success_rate', 'total_earnings',
             'response_time_avg', 'last_updated'
         ]
         read_only_fields = fields 
 
+    def _orders(self, obj):
+        from apps.orders.models import Order
+        return Order.objects.filter(expert=obj.expert)
+
+    def get_total_orders(self, obj):
+        return self._orders(obj).count()
+
+    def get_active_orders(self, obj):
+        return self._orders(obj).filter(status__in=['awaiting_expert_acceptance', 'in_progress', 'review', 'revision']).count()
+
+    def get_completed_orders(self, obj):
+        return self._orders(obj).filter(status='completed').count()
+
+    def get_average_rating(self, obj):
+        from django.db.models import Avg
+        return float(obj.expert.reviews.filter(is_published=True).aggregate(avg=Avg('rating'))['avg'] or 0)
+
+    def get_total_ratings(self, obj):
+        return obj.expert.reviews.filter(is_published=True).count()
+
+    def get_success_rate(self, obj):
+        orders = self._orders(obj)
+        completed = orders.filter(status='completed').count()
+        finished = orders.filter(status__in=['completed', 'cancelled', 'expired']).count()
+        return round((completed / finished) * 100, 2) if finished else 0
+
+    def get_client_average_rating(self, obj):
+        from django.db.models import Avg
+        return float(obj.expert.client_reviews_received.aggregate(avg=Avg('rating'))['avg'] or 0)
+
     def get_total_earnings(self, obj):
+        from django.db.models import Sum
+        from apps.orders.models import Transaction, TransactionType
         request = self.context.get('request')
         if not request:
             return None
         user = request.user
         if user and (user.is_staff or obj.expert == user):
-            return obj.total_earnings
+            return Transaction.objects.filter(
+                user=obj.expert,
+                type=TransactionType.PAYOUT,
+            ).aggregate(total=Sum('amount'))['total'] or 0
         return None
 
 class ExpertMatchSerializer(serializers.ModelSerializer):

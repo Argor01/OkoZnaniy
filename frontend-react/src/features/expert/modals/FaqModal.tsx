@@ -412,6 +412,54 @@ const FaqModal: React.FC<FaqModalProps> = ({ visible, onClose, isMobile, isTable
               },
             ]}
           />
+
+        <div className={styles.faqModalSection}>
+          <Text strong className={styles.faqModalSectionTitle}>Заказы, оплата и отзывы</Text>
+          <Collapse
+            accordion
+            expandIcon={({ isActive }) => <PlusOutlined className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`} />}
+            expandIconPosition="end"
+            className={styles.faqModalCollapse}
+            items={[
+              {
+                key: 'current-1',
+                label: <Text className={styles.faqModalItemTitle}>Чем отличаются фиксированная и договорная цена?</Text>,
+                children: <Text className={styles.faqModalItemText}>При фиксированной цене заказчик указывает бюджет сразу. При договорной цене эксперты предлагают стоимость в откликах или согласуют её через индивидуальное предложение. Ставка эксперта может быть выше бюджета, указанного заказчиком.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-2',
+                label: <Text className={styles.faqModalItemTitle}>Как работает предоплата?</Text>,
+                children: <Text className={styles.faqModalItemText}>Эксперт указывает предоплату от 0% до 100%. При принятии предложения резервируется выбранная доля стоимости и сервисного сбора. При 0% заказ стартует без резерва, при частичной оплате остаток нужно доплатить до окончательного принятия работы.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-3',
+                label: <Text className={styles.faqModalItemTitle}>Как привязать индивидуальное предложение к заказу?</Text>,
+                children: <Text className={styles.faqModalItemText}>В чате включите «Привязать к существующему заказу» и выберите новый заказ клиента без назначенного эксперта. Предмет и тип работы подставятся из заказа автоматически, а стоимость, срок и предоплату задаёт эксперт.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-4',
+                label: <Text className={styles.faqModalItemTitle}>Что происходит с предоплатой при отмене?</Text>,
+                children: <Text className={styles.faqModalItemText}>После начала работы предоплата не возвращается клиенту автоматически. Она остаётся в эскроу до решения арбитража. Эксперт может открыть отменённый заказ и подать жалобу, приложив описание и доказательства.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-5',
+                label: <Text className={styles.faqModalItemTitle}>Могут ли обе стороны оставить отзыв?</Text>,
+                children: <Text className={styles.faqModalItemText}>Да. После завершения клиент оценивает эксперта, а эксперт может оценить клиента на странице заказа. Средние оценки отображаются в профиле и карточках заказа.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-6',
+                label: <Text className={styles.faqModalItemTitle}>Как опубликовать готовую работу в магазине?</Text>,
+                children: <Text className={styles.faqModalItemText}>Заполните карточку работы, укажите предмет, тип, стоимость и загрузите файлы. Сейчас работа публикуется сразу; механизм предварительной модерации сохранён и может быть включён администрацией позже.</Text>,
+                className: styles.faqModalItem,
+              },
+            ]}
+          />
+        </div>
         </div>
       </div>
     </Modal>

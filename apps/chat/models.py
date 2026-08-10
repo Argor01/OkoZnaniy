@@ -146,6 +146,7 @@ class Message(models.Model):
     offer_data = models.JSONField(blank=True, null=True, verbose_name="Данные предложения")
     
     is_read = models.BooleanField(default=False)
+    is_pinned = models.BooleanField(default=False, verbose_name='Закреплено')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -18,6 +18,7 @@ export interface UserProfile {
   application_approved?: boolean;
   application_reviewed_at?: string;
   date_joined?: string;
+  average_rating?: number;
   balance?: string;
   frozen_balance?: string;
 }

@@ -16,16 +16,13 @@ interface AboutTabProps {
 const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobile, onEdit }) => {
   const isExpert = profile?.role === 'expert';
   
-  const defaultBio = isExpert 
-    ? 'Здравствуйте! Я опытный специалист с 5-летним стажем работы в сфере образования. Специализируюсь на помощи студентам в выполнении учебных работ по математике, физике и программированию. Имею высшее техническое образование и опыт преподавания в университете. Гарантирую качественное выполнение работ в срок, индивидуальный подход к каждому заказу и полное соответствие требованиям. Всегда на связи и готов ответить на любые вопросы по выполняемой работе.'
+  const emptyBio = isExpert
+    ? 'Описание пока не заполнено.'
     : 'Расскажите немного о себе. Это поможет экспертам лучше понять ваши потребности и предложить наиболее подходящие решения.';
   
-  const defaultEducation = 'Московский государственный технический университет им. Н.Э. Баумана, факультет информатики и систем управления, специальность "Прикладная математика и информатика", 2015-2020 гг. Диплом с отличием.';
-  const defaultSkills = ['Математический анализ', 'Линейная алгебра', 'Дифференциальные уравнения', 'Теория вероятностей', 'Python', 'C++', 'JavaScript', 'Физика', 'Механика', 'Электродинамика'];
-
-  const skills = useMemo(() => 
-    profile?.skills ? profile.skills.split(',').map(s => s.trim()).filter(s => s) : (isExpert ? defaultSkills : []),
-    [profile?.skills, isExpert, defaultSkills]
+  const skills = useMemo(
+    () => profile?.skills ? profile.skills.split(',').map(s => s.trim()).filter(Boolean) : [],
+    [profile?.skills]
   );
 
   if (loading) {
@@ -46,7 +43,7 @@ const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobi
       </div>
       
       <Paragraph className={styles.aboutBio}>
-        {profile?.bio || defaultBio}
+        {profile?.bio || emptyBio}
       </Paragraph>
 
       {isExpert && (
@@ -70,11 +67,11 @@ const AboutTab: React.FC<AboutTabProps> = React.memo(({ profile, loading, isMobi
         </div>
       )}
 
-      {isExpert && (profile?.education || defaultEducation) && (
+      {isExpert && profile?.education && (
         <div className={styles.aboutSection}>
           <Title level={4} className={styles.aboutSectionTitle}>Образование</Title>
           <Paragraph className={styles.aboutSectionText}>
-            {profile?.education || defaultEducation}
+            {profile.education}
           </Paragraph>
         </div>
       )}

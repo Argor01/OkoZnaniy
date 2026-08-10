@@ -122,6 +122,9 @@ const ExpertDashboard: FC = () => {
     queryKey: ['expert-statistics', userProfile?.id],
     queryFn: () => expertsApi.getExpertStatistics(userProfile!.id),
     enabled: !!userProfile?.id,
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   });
 
   React.useEffect(() => {

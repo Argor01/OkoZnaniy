@@ -19,7 +19,7 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id', 'text', 'file', 'file_url', 'file_name', 'message_type', 'offer_data', 
-                  'sender', 'created_at', 'is_read', 'is_mine']
+                  'sender', 'created_at', 'is_read', 'is_pinned', 'is_mine']
     
     def get_is_mine(self, obj):
         request = self.context.get('request')

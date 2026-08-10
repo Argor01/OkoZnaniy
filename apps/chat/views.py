@@ -58,6 +58,8 @@ def _active_order_hold(order):
 
 
 def _fund_individual_offer(order, client, expert, base_amount, prepayment_percent):
+    from apps.wallet.models import Settlement
+
     percent_value = 50 if prepayment_percent is None else int(prepayment_percent)
     if percent_value < 0 or percent_value > 100:
         raise ValueError('Процент предоплаты должен быть от 0 до 100.')
@@ -65,18 +67,39 @@ def _fund_individual_offer(order, client, expert, base_amount, prepayment_percen
     quote = order_quote(base_amount)
     full_amount = money(quote['base_amount'] + quote['service_fee'])
     target = money(full_amount * Decimal(percent_value) / Decimal('100'))
-    if target <= 0:
-        return None
-
-    return WalletService.fund_distributed_escrow(
-        client=client,
-        expert=expert,
-        base_amount=quote['base_amount'],
-        service_fee=quote['service_fee'],
-        fund_amount=target,
-        order=order,
-        description=f'Предоплата {percent_value}% по заказу #{order.id}',
+    settlement = Settlement.objects.select_for_update().filter(order=order).first()
+    already_funded = money(
+        (settlement.funded_base + settlement.funded_service_fee) if settlement else 0
     )
+
+    if settlement and already_funded > target:
+        WalletService.refund_distributed_escrow(
+            settlement,
+            amount=money(already_funded - target),
+            description=f'Корректировка резерва по заказу #{order.id}',
+        )
+        settlement.refresh_from_db()
+        already_funded = money(settlement.funded_base + settlement.funded_service_fee)
+
+    result = None
+    delta = money(target - already_funded)
+    if delta > 0:
+        result = WalletService.fund_distributed_escrow(
+            client=client,
+            expert=expert,
+            base_amount=quote['base_amount'],
+            service_fee=quote['service_fee'],
+            fund_amount=delta,
+            order=order,
+            description=f'Предоплата {percent_value}% по заказу #{order.id}',
+        )
+        settlement = result['settlement']
+
+    if settlement:
+        settlement.base_amount = quote['base_amount']
+        settlement.service_fee = quote['service_fee']
+        settlement.save(update_fields=['base_amount', 'service_fee'])
+    return result
 
 
 def _contact_ban_other_response(user, action_detail='Действие'):
@@ -335,15 +358,14 @@ class ChatViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                if linked_order.status != 'new':
+                is_new_unassigned = linked_order.status == 'new' and linked_order.expert_id is None
+                is_current_expert_order = (
+                    linked_order.status in {'in_progress', 'revision'}
+                    and linked_order.expert_id == request.user.id
+                )
+                if not (is_new_unassigned or is_current_expert_order):
                     return Response(
-                        {'detail': 'Привязать можно только заказ в статусе «Новый».'},
-                        status=status.HTTP_400_BAD_REQUEST
-                    )
-
-                if linked_order.expert_id is not None:
-                    return Response(
-                        {'detail': 'У этого заказа уже есть назначенный эксперт.'},
+                        {'detail': 'У заказа уже есть другой эксперт или заказ недоступен для привязки.'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
@@ -700,6 +722,10 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'РќРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЃРІРѕСЋ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
 
         rating = request.data.get('rating', None)
+        # Оценка обычного заказа создаётся только при итоговой приёмке заказа.
+        # Здесь рейтинг допустим лишь для покупки готовой работы.
+        if chat.order_id:
+            rating = None
         if rating is not None and rating != '':
             try:
                 rating = int(rating)
@@ -1009,15 +1035,27 @@ class ChatViewSet(viewsets.ModelViewSet):
 
                 if linked_order_id:
                     order = Order.objects.select_for_update().get(pk=linked_order_id)
-                    if order.status != 'new':
-                        return Response({'detail': 'Заказ уже взят в работу.'}, status=status.HTTP_400_BAD_REQUEST)
-                    if order.expert_id is not None:
-                        return Response({'detail': 'У заказа уже есть эксперт.'}, status=status.HTTP_400_BAD_REQUEST)
-                    order.expert = expert_user
-                    order.budget = cost
-                    order.deadline = deadline
-                    order.status = 'in_progress'
-                    order.save(update_fields=['expert', 'budget', 'deadline', 'status', 'updated_at'])
+                    is_new_unassigned = order.status == 'new' and order.expert_id is None
+                    is_current_expert_order = (
+                        order.status in {'in_progress', 'revision'}
+                        and order.expert_id == expert_user.id
+                    )
+                    if not (is_new_unassigned or is_current_expert_order):
+                        return Response(
+                            {'detail': 'Заказ недоступен для этого предложения.'},
+                            status=status.HTTP_400_BAD_REQUEST,
+                        )
+                    if is_new_unassigned:
+                        order.expert = expert_user
+                        order.budget = cost
+                        order.deadline = deadline
+                        order.status = 'in_progress'
+                        order.save(update_fields=['expert', 'budget', 'deadline', 'status', 'updated_at'])
+                    else:
+                        order.budget = cost
+                        if deadline:
+                            order.deadline = deadline
+                        order.save(update_fields=['budget', 'deadline', 'updated_at'])
                 else:
                     order = Order.objects.create(
                         client=client_user,
@@ -1153,6 +1191,19 @@ class ChatViewSet(viewsets.ModelViewSet):
         return Response({'status': 'success'})
 
     @action(detail=True, methods=['post'])
+    def toggle_message_pin(self, request, pk=None):
+        chat = self.get_object()
+        if request.user not in chat.participants.all():
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
+        message_id = request.data.get('message_id')
+        message = get_object_or_404(Message, id=message_id, chat=chat)
+        if message.message_type == 'system':
+            return Response({'detail': 'Системное сообщение нельзя закрепить'}, status=status.HTTP_400_BAD_REQUEST)
+        message.is_pinned = not message.is_pinned
+        message.save(update_fields=['is_pinned'])
+        return Response(MessageSerializer(message, context={'request': request}).data)
+
+    @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):
         """РћС‚РјРµС‚РёС‚СЊ РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚Рµ РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ"""
         chat = self.get_object()
@@ -1189,6 +1240,21 @@ class ChatViewSet(viewsets.ModelViewSet):
         readable_messages_for_chat(chat).exclude(sender=request.user).exclude(message_type='system').update(is_read=False)
         
         return Response({'status': 'success'})
+
+    @action(detail=True, methods=['post'])
+    def pin_message(self, request, pk=None):
+        chat = self.get_object()
+        if request.user not in chat.participants.all() and not request.user.is_staff:
+            return Response({'detail': 'Недостаточно прав.'}, status=status.HTTP_403_FORBIDDEN)
+        message_id = request.data.get('message_id')
+        if not message_id:
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+        message = get_object_or_404(Message, id=message_id, chat=chat)
+        if message.message_type == 'system':
+            return Response({'detail': 'Системное сообщение нельзя закрепить'}, status=status.HTTP_400_BAD_REQUEST)
+        message.is_pinned = not message.is_pinned
+        message.save(update_fields=['is_pinned'])
+        return Response({'id': message.id, 'is_pinned': message.is_pinned})
 
     @action(detail=True, methods=['post'])
     def toggle_pin(self, request, pk=None):

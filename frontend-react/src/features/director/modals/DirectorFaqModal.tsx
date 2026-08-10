@@ -360,6 +360,42 @@ const DirectorFaqModal: React.FC<DirectorFaqModalProps> = ({ visible, onClose, i
               },
             ]}
           />
+
+        <div className={styles.faqModalSection}>
+          <Text strong className={styles.faqModalSectionTitle}>Актуальные правила платформы</Text>
+          <Collapse
+            accordion
+            expandIcon={({ isActive }) => <PlusOutlined className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`} />}
+            expandIconPosition="end"
+            className={styles.faqModalCollapse}
+            items={[
+              {
+                key: 'current-20',
+                label: <Text className={styles.faqModalItemTitle}>Из чего считается общая статистика?</Text>,
+                children: <Text className={styles.faqModalItemText}>Оборот равен сумме бюджетов завершённых заказов за период. Средний чек равен обороту, делённому на число завершённых заказов. Активные заказы учитывают ожидание эксперта или оплаты, работу, проверку и доработку. Проценты сравниваются с предыдущим периодом такой же длины.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-21',
+                label: <Text className={styles.faqModalItemTitle}>Из чего считается финансовая статистика?</Text>,
+                children: <Text className={styles.faqModalItemText}>Чистая прибыль равна комиссии платформы плюс ручные доходы минус ручные расходы. Пополнения, выводы, возвраты и выплаты берутся из реальных транзакций. Выплаты экспертам показываются отдельно и повторно из комиссии не вычитаются.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-22',
+                label: <Text className={styles.faqModalItemTitle}>Что происходит с предоплатой после отмены заказа?</Text>,
+                children: <Text className={styles.faqModalItemText}>Предоплата остаётся в эскроу и не возвращается автоматически. Эксперт может подать жалобу на отменённый заказ. Арбитраж изучает переписку, файлы и финансовые операции, затем принимает решение о распределении средств.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-23',
+                label: <Text className={styles.faqModalItemTitle}>Как сейчас работает магазин готовых работ?</Text>,
+                children: <Text className={styles.faqModalItemText}>Новые готовые работы публикуются сразу. Механизм модерации не удалён: его можно повторно включить настройкой READY_WORK_MODERATION_ENABLED.</Text>,
+                className: styles.faqModalItem,
+              },
+            ]}
+          />
+        </div>
         </div>
       </div>
     </Modal>

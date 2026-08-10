@@ -17,6 +17,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db import connection
+from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
@@ -24,8 +25,9 @@ from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
-from apps.orders.models import Bid, Order, Transaction, TransactionType
+from apps.orders.models import Bid, Order, OrderFile, Transaction, TransactionType
 from apps.wallet.services import WalletService
+from apps.wallet.policy import order_quote
 
 User = get_user_model()
 
@@ -163,6 +165,15 @@ class OrderReviewLifecycleTests(TestCase):
         defaults.update(overrides)
         return Order.objects.create(**defaults)
 
+    def _add_downloaded_work(self, order):
+        return OrderFile.objects.create(
+            order=order,
+            file=ContentFile(b"completed work", name="work.txt"),
+            file_type="solution",
+            uploaded_by=self.expert_user,
+            client_downloaded_at=timezone.now(),
+        )
+
     def test_expert_can_submit_work_for_review(self):
         order = self._create_order(status="in_progress")
         self.api_client.force_authenticate(user=self.expert_user)
@@ -185,6 +196,7 @@ class OrderReviewLifecycleTests(TestCase):
 
     def test_client_can_approve_review_order(self):
         order = self._create_order(status="review")
+        self._add_downloaded_work(order)
         WalletService.topup(self.client_user, Decimal("6250"))
         WalletService.hold(self.client_user, Decimal("6250"), order=order)
         self.api_client.force_authenticate(user=self.client_user)
@@ -200,8 +212,36 @@ class OrderReviewLifecycleTests(TestCase):
         self.assertEqual(self.client_user.frozen_balance, Decimal("0.00"))
         self.assertEqual(self.expert_user.balance, Decimal("5000.00"))
 
+    def test_client_can_approve_with_partial_reserve_and_available_balance(self):
+        order = self._create_order(status="review", budget=Decimal("1000"))
+        self._add_downloaded_work(order)
+        WalletService.topup(self.client_user, Decimal("1250"))
+        quote = order_quote(Decimal("1000"))
+        WalletService.fund_distributed_escrow(
+            client=self.client_user,
+            expert=self.expert_user,
+            base_amount=quote["base_amount"],
+            service_fee=quote["service_fee"],
+            fund_amount=Decimal("625"),
+            order=order,
+            description="Резерв 50%",
+        )
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
+        order.refresh_from_db()
+        self.client_user.refresh_from_db()
+        self.expert_user.refresh_from_db()
+        self.assertEqual(order.status, "completed")
+        self.assertEqual(self.client_user.balance, Decimal("0.00"))
+        self.assertEqual(self.expert_user.frozen_balance, Decimal("0.00"))
+        self.assertEqual(self.expert_user.balance, Decimal("1000.00"))
+
     def test_client_cannot_approve_review_order_without_reserved_funds(self):
         order = self._create_order(status="review")
+        self._add_downloaded_work(order)
         self.api_client.force_authenticate(user=self.client_user)
 
         response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
@@ -209,7 +249,39 @@ class OrderReviewLifecycleTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         order.refresh_from_db()
         self.assertEqual(order.status, "review")
-        self.assertIn("не зарезервированы", response.json()["detail"])
+        self.assertIn("Недостаточно средств", response.json()["detail"])
+
+    def test_client_cannot_approve_before_downloading_work(self):
+        order = self._create_order(status="review", budget=Decimal("1000"))
+        OrderFile.objects.create(
+            order=order,
+            file=ContentFile(b"completed work", name="work.txt"),
+            file_type="solution",
+            uploaded_by=self.expert_user,
+        )
+        WalletService.topup(self.client_user, Decimal("1250"))
+        self.api_client.force_authenticate(user=self.client_user)
+
+        response = self.api_client.post(f"/api/orders/orders/{order.id}/approve/", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Сначала скачайте", response.json()["detail"])
+        order.refresh_from_db()
+        self.assertEqual(order.status, "review")
+
+    def test_expert_can_leave_client_review_only_once_after_completion(self):
+        order = self._create_order(status="completed")
+        self.api_client.force_authenticate(user=self.expert_user)
+        url = f"/api/orders/orders/{order.id}/create-client-review/"
+
+        first = self.api_client.post(url, {"rating": 5, "comment": "Great client"}, format="json")
+        second = self.api_client.post(url, {"rating": 3, "comment": "Changed"}, format="json")
+
+        self.assertEqual(first.status_code, status.HTTP_201_CREATED, first.content)
+        self.assertEqual(second.status_code, status.HTTP_400_BAD_REQUEST, second.content)
+        order.refresh_from_db()
+        self.assertEqual(order.client_review.rating, 5)
+        self.assertEqual(order.client_review.comment, "Great client")
 
     def test_other_client_cannot_approve_review_order(self):
         order = self._create_order(status="review")
@@ -244,6 +316,16 @@ class OrderReviewLifecycleTests(TestCase):
                 offer_data__revision_comment="Please fix the calculations",
             ).exists()
         )
+        from apps.notifications.models import Notification, NotificationType
+        notification = Notification.objects.filter(
+            recipient=self.expert_user,
+            type=NotificationType.STATUS_CHANGED,
+            related_object_id=order.id,
+            related_object_type='order',
+        ).latest('created_at')
+        self.assertEqual(notification.title, 'Работа отправлена на доработку')
+        self.assertEqual(notification.data.get('new_status'), 'revision')
+        self.assertEqual(notification.data.get('revision_comment'), 'Please fix the calculations')
 
     def test_revision_requires_comment(self):
         order = self._create_order(status="review")

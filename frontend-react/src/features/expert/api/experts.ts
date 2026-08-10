@@ -306,6 +306,7 @@ export const expertsApi = {
     return {
       ...(raw as ExpertStatistics),
       average_rating: Number.isFinite(average_rating) ? average_rating : 0,
+      client_average_rating: Number((raw as { client_average_rating?: unknown }).client_average_rating || 0),
       total_earnings: Number.isFinite(total_earnings ?? NaN) ? total_earnings : null,
     };
   },

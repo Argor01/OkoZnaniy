@@ -1336,3 +1336,68 @@
   }
 }
 
+
+
+/* Full read-only individual offer, matching the client/expert chat card. */
+.messageBubbleOffer {
+  width: min(100%, 620px);
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.offerCard {
+  overflow: hidden;
+  border: 1px solid var(--color-border-primary, #e3ddf0);
+  border-radius: 16px;
+  background: var(--color-bg-container, #fff);
+  box-shadow: 0 8px 24px rgba(74, 45, 118, .08);
+}
+
+.offerHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border-secondary, #eee9f5);
+  background: var(--color-fill-secondary, #f8f5ff);
+}
+
+.offerHeaderIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  color: #6435a5;
+  background: #eee7ff;
+  font-size: 18px;
+}
+
+.offerTitle { color: var(--color-text, #211a2c); font-size: 16px; font-weight: 700; }
+.offerOrder { margin-top: 2px; color: var(--color-text-secondary, #7b7288); font-size: 12px; }
+.offerGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 16px 18px 8px; }
+.offerField { min-width: 0; display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 9px; padding: 10px; border-radius: 11px; background: var(--color-fill-quaternary, #faf9fc); }
+.offerField > :global(.anticon) { color: #6435a5; font-size: 16px; }
+.offerField span { min-width: 0; display: grid; gap: 2px; color: var(--color-text-secondary, #81788c); font-size: 11px; line-height: 1.25; }
+.offerField strong { color: var(--color-text, #211a2c); font-size: 13px; overflow-wrap: anywhere; }
+.offerDescription { margin: 8px 18px 14px; padding: 12px 14px; border-radius: 11px; color: var(--color-text, #30263d); background: var(--color-fill-secondary, #f6f3fa); white-space: pre-wrap; overflow-wrap: anywhere; }
+.offerStatus { display: flex; align-items: center; gap: 7px; margin: 0 18px 16px; padding: 9px 11px; border-radius: 10px; font-size: 13px; font-weight: 650; }
+.offerStatus_pending { color: #805a00; background: #fff6d8; }
+.offerStatus_accepted { color: #08734e; background: #e5f8ef; }
+.offerStatus_rejected { color: #b42332; background: #fdebed; }
+
+@media (max-width: 768px) {
+  .messageBubbleOffer { width: 100%; }
+  .offerGrid { grid-template-columns: 1fr; padding: 12px 12px 6px; }
+  .offerHeader { padding: 14px 12px; }
+  .offerDescription { margin: 6px 12px 12px; }
+  .offerStatus { margin: 0 12px 12px; }
+}
+
+:global([data-theme="dark"]) .offerCard { border-color: #42384f; background: #211b2a; box-shadow: none; }
+:global([data-theme="dark"]) .offerHeader { border-color: #42384f; background: #2a2235; }
+:global([data-theme="dark"]) .offerField { background: #292231; }
+:global([data-theme="dark"]) .offerDescription { background: #2d2537; }

@@ -345,6 +345,36 @@ const PartnerFaqModal: React.FC<PartnerFaqModalProps> = ({ visible, onClose, isM
               },
             ]}
           />
+
+        <div className={styles.faqModalSection}>
+          <Text strong className={styles.faqModalSectionTitle}>Кабинет партнёра</Text>
+          <Collapse
+            accordion
+            expandIcon={({ isActive }) => <PlusOutlined className={`${styles.faqModalExpandIcon} ${isActive ? styles.faqModalExpandIconActive : ''}`} />}
+            expandIconPosition="end"
+            className={styles.faqModalCollapse}
+            items={[
+              {
+                key: 'current-20',
+                label: <Text className={styles.faqModalItemTitle}>Что показывает карта партнёров?</Text>,
+                children: <Text className={styles.faqModalItemText}>Карта показывает города активных партнёров и общий список. В списке видны имя, город и количество рефералов. Контакты, координаты и суммы дохода других партнёров не раскрываются, карточки списка не открываются.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-21',
+                label: <Text className={styles.faqModalItemTitle}>Какие данные доступны в статистике?</Text>,
+                children: <Text className={styles.faqModalItemText}>В кабинете доступны ваши рефералы, переходы и начисления, история выплат и ожидаемый доход. Начисление появляется после завершения и финансового закрытия связанного заказа.</Text>,
+                className: styles.faqModalItem,
+              },
+              {
+                key: 'current-22',
+                label: <Text className={styles.faqModalItemTitle}>Где взять материалы и связаться с командой?</Text>,
+                children: <Text className={styles.faqModalItemText}>Реферальная ссылка и баннеры находятся в разделе «Промоматериалы». Для рабочих вопросов используйте внутреннюю коммуникацию в кабинете или обращение в поддержку.</Text>,
+                className: styles.faqModalItem,
+              },
+            ]}
+          />
+        </div>
         </div>
       </div>
     </Modal>

@@ -26,6 +26,7 @@ const OrderDetail: React.FC = () => {
   const [clientReviewRating, setClientReviewRating] = React.useState(5);
   const [clientReviewComment, setClientReviewComment] = React.useState('');
   const [clientReviewSubmitting, setClientReviewSubmitting] = React.useState(false);
+  const clientReviewPromptedRef = React.useRef(false);
   const {
     isMobile,
     bidModalVisible, setBidModalVisible,
@@ -65,12 +66,31 @@ const OrderDetail: React.FC = () => {
   } = useOrderDetail(orderId);
 
   const [deliveredFileIds, setDeliveredFileIds] = React.useState<number[]>([]);
+  const [deliveredFilesResolved, setDeliveredFilesResolved] = React.useState(false);
   const [viewedDeliveredIds, setViewedDeliveredIds] = React.useState<Set<number>>(new Set());
   const handleDeliveredFilesResolved = React.useCallback((ids: number[]) => {
+    setDeliveredFilesResolved(true);
     setDeliveredFileIds((prev) => (
       prev.length === ids.length && prev.every((v, i) => v === ids[i]) ? prev : ids
     ));
   }, []);
+  React.useEffect(() => {
+    const currentUserId = Number(userProfile?.id ?? 0);
+    const expertId = Number(order?.expert?.id ?? (order as any)?.expert_id ?? 0);
+    if (
+      !order ||
+      currentUserId <= 0 ||
+      currentUserId !== expertId ||
+      order.status !== 'completed' ||
+      order.client_review ||
+      clientReviewPromptedRef.current
+    ) return;
+    clientReviewPromptedRef.current = true;
+    setClientReviewRating(5);
+    setClientReviewComment('');
+    setClientReviewOpen(true);
+  }, [order, userProfile?.id]);
+
   const handleDeliveredFileViewed = React.useCallback((id: number) => {
     setViewedDeliveredIds((prev) => {
       if (prev.has(id)) return prev;
@@ -120,9 +140,9 @@ const OrderDetail: React.FC = () => {
     !userHasBid &&
     order.client?.id !== userProfile?.id
   );
-  const deliveredWorkReviewed = deliveredFileIds.length === 0
-    ? true
-    : deliveredFileIds.every((id) => viewedDeliveredIds.has(id));
+  const deliveredWorkReviewed = deliveredFilesResolved
+    && deliveredFileIds.length > 0
+    && deliveredFileIds.every((id) => viewedDeliveredIds.has(id));
 
   const expertReview = (() => {
     const raw = (order as any)?.rating ?? (order as any)?.expert_rating;
@@ -156,6 +176,7 @@ const OrderDetail: React.FC = () => {
       revision: 'Доработка',
       completed: 'Завершен',
       cancelled: 'Отменен',
+      ready_work_transfer: 'Передача готовой работы',
     };
     return texts[status] || status;
   };
@@ -210,7 +231,13 @@ const OrderDetail: React.FC = () => {
 
             {(isOrderOwner || isOrderExpert) && (
               <div className={styles.sectionBlock}>
-                <OrderTimeline order={order} onReviewClick={() => setReviewModalOpen(true)} />
+                <OrderTimeline order={order} onReviewClick={() => {
+                  if (!deliveredWorkReviewed) {
+                    Modal.warning({ title: 'Сначала скачайте работу', content: 'Скачайте все файлы готовой работы, затем нажмите итоговую кнопку «Принять».' });
+                    return;
+                  }
+                  setReviewModalOpen(true);
+                }} />
               </div>
             )}
 
@@ -350,8 +377,9 @@ const OrderDetail: React.FC = () => {
           setBidModalVisible(false);
           setOpeningBidModal(false);
         }}
-        onBidSubmitted={() => {
+        onBidSubmitted={async () => {
           setOpeningBidModal(false);
+          await refreshOrderWithLists();
         }}
         orderId={order.id}
         orderTitle={order.title}
