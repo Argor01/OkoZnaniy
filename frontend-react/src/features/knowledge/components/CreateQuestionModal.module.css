@@ -475,3 +475,16 @@
     background: #a8a8a8;
   }
 }
+
+
+/* AntD applies gray/error fills to the wrapper, force the question title surface white. */
+.questionModal .titleInput,
+.questionModal .titleInput:global(.ant-input-affix-wrapper),
+.questionModal .titleInput:global(.ant-input-affix-wrapper-status-error),
+.questionModal .titleInput :global(.ant-input),
+:global(.ant-modal-wrap) .questionModal :global(.ant-input-affix-wrapper).titleInput,
+:global(.ant-modal-wrap) .questionModal :global(.ant-input-affix-wrapper-status-error).titleInput {
+  background: #fff !important;
+  background-color: #fff !important;
+}
+.questionModal .titleInput :global(.ant-input-suffix) { background: transparent !important; }

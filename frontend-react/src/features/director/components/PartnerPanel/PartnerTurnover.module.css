@@ -988,3 +988,10 @@
 [data-theme="dark"] .mobileRangePicker :global(.ant-picker-suffix) {
   color: #f5f7fb;
 }
+
+
+.chartContainerPie :global(.recharts-legend-wrapper) { width: calc(100% - 16px) !important; left: 8px !important; }
+.chartContainerPie :global(.recharts-default-legend) { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; }
+.chartContainerPie :global(.recharts-legend-item) { margin-right: 0 !important; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chartContainerPie :global(.recharts-pie-label-text),
+.chartContainerPie :global(.recharts-pie-label-line) { display: none; }

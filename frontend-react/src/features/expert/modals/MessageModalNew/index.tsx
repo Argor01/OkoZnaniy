@@ -155,104 +155,63 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   const pinnedMessageIndexRef = useRef(0);
   const hasCachedChatsRef = useRef(false);
 
-  // Адаптив: фиксируем модалку при открытии клавиатуры на мобильных
+  // iOS/Yandex: клавиатура меняет visualViewport. Фиксируем документ и
+  // меняем только высоту оболочки чата, чтобы браузер не прокручивал всю страницу.
   useEffect(() => {
     if ((!isMobile && !isTablet) || (!visible && !renderAsPage)) return;
 
-    // Сохраняем позицию скролла и блокируем body
-    const scrollY = window.scrollY;
     const body = document.body;
     const html = document.documentElement;
-    const previousBodyStyles = {
-      position: body.style.position,
-      top: body.style.top,
-      left: body.style.left,
-      right: body.style.right,
-      width: body.style.width,
-      overflow: body.style.overflow,
-      touchAction: body.style.touchAction,
-      overscrollBehavior: body.style.overscrollBehavior,
-    };
-    const previousHtmlStyles = {
-      overflow: html.style.overflow,
-      overscrollBehavior: html.style.overscrollBehavior,
-    };
+    const scrollY = window.scrollY;
+    const previousBodyStyle = body.getAttribute('style');
+    const previousHtmlStyle = html.getAttribute('style');
+    const initialViewportHeight = window.visualViewport?.height || window.innerHeight;
 
-    if (!renderAsPage) {
-      body.style.position = 'fixed';
-      body.style.top = `-${scrollY}px`;
-      body.style.left = '0';
-      body.style.right = '0';
-      body.style.width = '100%';
-      body.style.overflow = 'hidden';
-      body.style.touchAction = 'pan-y';
-      body.style.overscrollBehavior = 'none';
-      html.style.overflow = 'hidden';
-      html.style.overscrollBehavior = 'none';
-    }
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    body.style.height = '100%';
+    body.style.overflow = 'hidden';
+    body.style.overscrollBehavior = 'none';
+    html.style.width = '100%';
+    html.style.height = '100%';
+    html.style.overflow = 'hidden';
+    html.style.overscrollBehavior = 'none';
 
-    const updateVh = () => {
-      const viewport = window.visualViewport;
-      const vh = viewport ? viewport.height : window.innerHeight;
-      const viewportTop = viewport ? Math.max(0, viewport.offsetTop) : 0;
-      const keyboardOffset = viewport
-        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
-        : 0;
-      html.style.setProperty('--app-vh', `${vh}px`);
-      html.style.setProperty('--chat-modal-vh', `${vh}px`);
-      html.style.setProperty('--chat-viewport-offset-top', `${viewportTop}px`);
-      html.style.setProperty('--chat-keyboard-offset', `${keyboardOffset}px`);
+    let frame = 0;
+    const updateViewport = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const viewport = window.visualViewport;
+        const height = Math.round(viewport?.height || window.innerHeight);
+        const keyboardHeight = Math.max(0, Math.round(initialViewportHeight - height));
+        html.style.setProperty('--app-vh', `${height}px`);
+        html.style.setProperty('--chat-modal-vh', `${height}px`);
+        html.style.setProperty('--chat-viewport-offset-top', '0px');
+        html.style.setProperty('--chat-keyboard-offset', `${keyboardHeight}px`);
+        html.toggleAttribute('data-chat-keyboard-open', keyboardHeight > 120);
+      });
     };
 
-    updateVh();
-
-    const vv = window.visualViewport;
-    if (vv) {
-      vv.addEventListener('resize', updateVh);
-      vv.addEventListener('scroll', updateVh);
-    } else {
-      window.addEventListener('resize', updateVh);
-    }
-
-    // Предотвращаем скролл на window при фокусе (iOS keyboard fix)
-    const preventWindowScroll = () => {
-      if (!renderAsPage) {
-        window.scrollTo(0, scrollY);
-      }
-    };
-    if (!renderAsPage) {
-      window.addEventListener('scroll', preventWindowScroll, { passive: false });
-    }
+    updateViewport();
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', updateViewport);
+    window.addEventListener('resize', updateViewport);
+    window.addEventListener('orientationchange', updateViewport);
 
     return () => {
-      if (vv) {
-        vv.removeEventListener('resize', updateVh);
-        vv.removeEventListener('scroll', updateVh);
-      } else {
-        window.removeEventListener('resize', updateVh);
-      }
-      if (!renderAsPage) {
-        window.removeEventListener('scroll', preventWindowScroll);
-      }
-      html.style.removeProperty('--app-vh');
-      html.style.removeProperty('--chat-modal-vh');
-      html.style.removeProperty('--chat-viewport-offset-top');
-      html.style.removeProperty('--chat-keyboard-offset');
-
-      // Восстанавливаем скролл
-      if (!renderAsPage) {
-        body.style.position = previousBodyStyles.position;
-        body.style.top = previousBodyStyles.top;
-        body.style.left = previousBodyStyles.left;
-        body.style.right = previousBodyStyles.right;
-        body.style.width = previousBodyStyles.width;
-        body.style.overflow = previousBodyStyles.overflow;
-        body.style.touchAction = previousBodyStyles.touchAction;
-        body.style.overscrollBehavior = previousBodyStyles.overscrollBehavior;
-        html.style.overflow = previousHtmlStyles.overflow;
-        html.style.overscrollBehavior = previousHtmlStyles.overscrollBehavior;
-        window.scrollTo(0, scrollY);
-      }
+      if (frame) window.cancelAnimationFrame(frame);
+      viewport?.removeEventListener('resize', updateViewport);
+      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('orientationchange', updateViewport);
+      html.removeAttribute('data-chat-keyboard-open');
+      if (previousBodyStyle === null) body.removeAttribute('style');
+      else body.setAttribute('style', previousBodyStyle);
+      if (previousHtmlStyle === null) html.removeAttribute('style');
+      else html.setAttribute('style', previousHtmlStyle);
+      window.requestAnimationFrame(() => window.scrollTo(0, scrollY));
     };
   }, [isMobile, isTablet, renderAsPage, visible]);
 
@@ -2744,9 +2703,9 @@ const handleOverdueComplaint = async () => {
     ? {
         width: '100%',
         margin: '0 auto',
-        height: isMobile ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
+        height: (isMobile || isTablet) ? 'calc(var(--chat-modal-vh, 100dvh) - 64px)' : 'calc(100vh - 64px)',
         minHeight: 0,
-        maxHeight: isMobile ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
+        maxHeight: (isMobile || isTablet) ? 'calc(var(--chat-modal-vh, 100dvh) - 64px)' : 'calc(100vh - 64px)',
       }
     : undefined;
 
@@ -3936,12 +3895,20 @@ const workDeliveryStatus = isWorkOffer
                     }}
                     onFocus={() => {
                       if (!isMobile && !isTablet) return;
-                      window.requestAnimationFrame(() => {
+                      const scrollMessages = () => {
                         const container = messagesScrollRef.current;
                         if (container) container.scrollTop = container.scrollHeight;
-                        window.scrollTo({ top: 0, behavior: 'auto' });
-                      });
+                      };
+                      window.requestAnimationFrame(scrollMessages);
+                      window.setTimeout(scrollMessages, 180);
+                      window.setTimeout(scrollMessages, 420);
                     }}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="sentences"
+                    spellCheck={false}
+                    inputMode="text"
+                    enterKeyHint="send"
                     disabled={sending}
                   />
                 </div>

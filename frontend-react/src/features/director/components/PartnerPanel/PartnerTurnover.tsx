@@ -377,10 +377,10 @@ const PartnerTurnover: React.FC = () => {
                               value: p.turnover || 0,
                             }))}
                             cx="50%"
-                            cy="50%"
+                            cy="43%"
                             labelLine={false}
-                            label={isMobile ? false : ({ name, percent }: any) => `${name}: ${((percent || 0) * 100).toFixed(1)}%`}
-                            outerRadius={isMobile ? 80 : 100}
+                            label={false}
+                            outerRadius={isMobile ? 72 : 88}
                             fill="#8884d8"
                             dataKey="value"
                           >
@@ -391,7 +391,13 @@ const PartnerTurnover: React.FC = () => {
                           <Tooltip 
                             formatter={(value: number) => formatCurrency(value)}
                           />
-                          <Legend />
+                          <Legend
+                            verticalAlign="bottom"
+                            align="center"
+                            iconType="circle"
+                            wrapperStyle={{ paddingTop: 10, lineHeight: '22px' }}
+                            formatter={(value: string) => value.length > 18 ? `${value.slice(0, 18)}…` : value}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>

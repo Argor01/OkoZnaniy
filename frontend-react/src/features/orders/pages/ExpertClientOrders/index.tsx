@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Typography, Table, Tag, Avatar, Space } from 'antd';
-import { SearchOutlined, UserOutlined, FilterOutlined } from '@ant-design/icons';
+import { Typography } from 'antd';
+import { SearchOutlined, FilterOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppInput, AppSelect, AppButton, BudgetRangeInput } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
 import { catalogApi, type Subject, type WorkType } from '@/features/common/api/catalog';
 import { ORDER_STATUS_LABELS } from '@/utils/constants';
-import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
 import styles from '../MyWorks/MyWorks.module.css';
+import OrdersList from '../MyWorks/OrdersList';
 import {useSubjects, useWorkTypes } from '@/hooks/queries';
 
 const { Title } = Typography;
@@ -208,7 +208,7 @@ const ExpertClientOrders: React.FC = () => {
 
       return true;
     });
-  }, [orders, inactiveOrders, activeTab, searchText]);
+  }, [orders, inactiveOrders, activeTab, searchText, orderIdSearch, selectedSubject, selectedWorkType, budgetRange]);
 
   const getStatusLabel = (status: string) => {
     return ORDER_STATUS_LABELS[status] || status;
@@ -242,84 +242,6 @@ const ExpertClientOrders: React.FC = () => {
     return `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(num)} ₽`;
   };
 
-  const columns: ColumnsType<Order> = [
-    {
-      title: 'Название',
-      dataIndex: 'title',
-      key: 'title',
-      render: (title: unknown, record: Order) => (
-        <div className={styles.titleCell}>
-          <div className={styles.titleText}>{String(title ?? 'Без названия')}</div>
-          {record?.work_type?.name || record?.subject?.name ? (
-            <div className={styles.titleMeta}>
-              {[record?.work_type?.name, record?.subject?.name].filter(Boolean).join(' • ')}
-            </div>
-          ) : null}
-        </div>
-      ),
-      sorter: (a: Order, b: Order) => String(a?.title ?? '').localeCompare(String(b?.title ?? '')),
-    },
-    {
-      title: 'Эксперт',
-      key: 'expert',
-      render: (_: unknown, record: Order) => {
-        const username = record?.expert?.username ?? 'Не назначен';
-        const avatarSrc = record?.expert?.avatar;
-        return (
-          <Space size={8}>
-            <Avatar size={24} src={avatarSrc} icon={<UserOutlined />} />
-            <span>{username}</span>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'Заказан',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      render: (value: unknown) => formatOrderDate(value),
-      sorter: (a: Order, b: Order) => {
-        const ta = typeof a?.created_at === 'string' ? dayjs(a.created_at).valueOf() : 0;
-        const tb = typeof b?.created_at === 'string' ? dayjs(b.created_at).valueOf() : 0;
-        return ta - tb;
-      },
-    },
-    {
-      title: 'Осталось',
-      dataIndex: 'deadline',
-      key: 'deadline',
-      render: (value: unknown, record: Order) => (isOverdueOrder(record) ? 'Просрочено' : formatRemaining(value, record?.status)),
-      sorter: (a: Order, b: Order) => {
-        const ta =
-          typeof a?.deadline === 'string'
-            ? (String(a?.status ?? '') === 'review' ? dayjs(a.deadline).add(5, 'day').valueOf() : dayjs(a.deadline).valueOf())
-            : 0;
-        const tb =
-          typeof b?.deadline === 'string'
-            ? (String(b?.status ?? '') === 'review' ? dayjs(b.deadline).add(5, 'day').valueOf() : dayjs(b.deadline).valueOf())
-            : 0;
-        return ta - tb;
-      },
-    },
-    {
-      title: 'Стоимость',
-      dataIndex: 'budget',
-      key: 'budget',
-      render: (value: unknown) => formatBudget(value),
-      sorter: (a: Order, b: Order) => Number(a?.budget ?? 0) - Number(b?.budget ?? 0),
-    },
-    {
-      title: 'Статус',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: unknown, record: Order) => (
-        <Tag className={styles.statusTag} color={isOverdueOrder(record) ? 'red' : undefined}>
-          {isOverdueOrder(record) ? 'Просрочен' : getStatusLabel(String(status ?? ''))}
-        </Tag>
-      ),
-      width: 140,
-    },
-  ];
 
   return (
     <div className={styles.contentContainer}>
@@ -481,18 +403,16 @@ const ExpertClientOrders: React.FC = () => {
         </div>
       </div>
 
-      <Table
-        className={styles.table}
-        columns={columns}
-        dataSource={filteredOrders}
-        rowKey={(record) => record.id}
-        loading={clientOrdersLoading || inactiveOrdersLoading}
-        pagination={{ pageSize: 10, showSizeChanger: true }}
-        scroll={{ x: 'max-content' }}
-        onRow={(record) => ({
-          onClick: () => navigate(`/orders/${record.id}`),
-          style: { cursor: 'pointer' },
-        })}
+      <OrdersList
+        orders={filteredOrders}
+        loading={(clientOrdersLoading || inactiveOrdersLoading)}
+        isClient={true}
+        onOpen={(id) => navigate(`/orders/${id}`)}
+        getStatusLabel={getStatusLabel}
+        formatOrderDate={formatOrderDate}
+        formatRemaining={formatRemaining}
+        formatBudget={formatBudget}
+        isOverdue={isOverdueOrder}
       />
     </div>
   );

@@ -597,3 +597,10 @@
 :global([data-theme="dark"]) .feedSystemTime {
   color: rgba(255, 255, 255, 0.45);
 }
+
+
+.refundSliderWrap { width: 100%; padding: 0 6px 22px; box-sizing: border-box; }
+.refundSliderWrap :global(.ant-slider) { margin: 10px 0 7px; }
+.refundSliderMarks { display: flex; justify-content: space-between; color: var(--text-secondary, #6b7280); font-size: 11px; line-height: 1; font-variant-numeric: tabular-nums; }
+.refundSliderMarks span:first-child { transform: translateX(-2px); }
+.refundSliderMarks span:last-child { transform: translateX(2px); }

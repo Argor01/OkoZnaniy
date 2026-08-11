@@ -633,24 +633,22 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                              {Math.round((baseAmount * refundPercentage) / 100).toLocaleString()} ₽
                           </Text>
                         </div>
-                        <Slider
-                          min={0}
-                          max={100}
-                          step={5}
-                          value={refundPercentage}
-                          onChange={setRefundPercentage}
-                          disabled={refundAlreadyDone}
-                          marks={{
-                            0: '0%',
-                            25: '25%',
-                            50: '50%',
-                            75: '75%',
-                            100: '100%',
-                          }}
-                          tooltip={{
-                            formatter: (value) => `${value}% (${Math.round((baseAmount * (value || 0)) / 100).toLocaleString()} ₽)`,
-                          }}
-                        />
+                        <div className={styles.refundSliderWrap}>
+                          <Slider
+                            min={0}
+                            max={100}
+                            step={5}
+                            value={refundPercentage}
+                            onChange={setRefundPercentage}
+                            disabled={refundAlreadyDone}
+                            tooltip={{
+                              formatter: (value) => `${value}% (${Math.round((baseAmount * (value || 0)) / 100).toLocaleString()} ₽)`,
+                            }}
+                          />
+                          <div className={styles.refundSliderMarks} aria-hidden="true">
+                            {[0, 25, 50, 75, 100].map((value) => <span key={value}>{value}%</span>)}
+                          </div>
+                        </div>
                       </div>
 
                       <Form.Item

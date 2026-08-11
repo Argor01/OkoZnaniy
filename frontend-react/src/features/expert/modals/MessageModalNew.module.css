@@ -4469,3 +4469,63 @@
   .messageDateDivider { margin: 9px 0 6px; }
   .pinnedMessagesButton { top: 4px; padding: 7px 10px; font-size: 12px; }
 }
+
+
+/* Final iOS/Yandex keyboard contract: one fixed viewport, no page scroll or zoom. */
+@media (max-width: 1024px) {
+  .chatPageWrap {
+    position: fixed !important;
+    top: 64px !important;
+    right: 0 !important;
+    bottom: auto !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: calc(var(--chat-modal-vh, 100dvh) - 64px) !important;
+    min-height: 0 !important;
+    max-height: calc(var(--chat-modal-vh, 100dvh) - 64px) !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  .chatPageWrap .chatModalContainer,
+  .chatPageWrap .chatPanel {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+  }
+
+  .chatPageWrap .chatMessages {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chatInput,
+  .chatInputMobile,
+  .chatInput :global(textarea),
+  .chatInputMobile :global(textarea) {
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+  }
+
+  .chatInputContainerMobile {
+    flex: 0 0 auto !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+
+@media (max-width: 1024px) {
+  :global(html[data-chat-keyboard-open]) .chatInputContainerMobile {
+    padding-bottom: 2px !important;
+  }
+}
+
+
+@media (max-width: 1024px) {
+  .chatPageWrap .chatInputContainerMobile {
+    bottom: 4px;
+  }
+}
