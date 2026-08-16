@@ -32,6 +32,7 @@ import { knowledgeApi, Category, Question } from '../api/knowledgeApi';
 import { CreateQuestionModal } from '../components/CreateQuestionModal';
 import { logger } from '@/utils/logger';
 import { getDisplayUsername } from '@/utils/formatters';
+import { SEO } from '@/features/common';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -132,6 +133,11 @@ export const KnowledgePortal: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <SEO
+        title="Око Ответы — Вопросы и ответы от экспертов | Око Знаний"
+        description="Задавайте вопросы по учебным предметам и получайте ответы от проверенных экспертов. База знаний для студентов: курсовые, рефераты, контрольные."
+        canonical="https://okoznaniy.ru/knowledge"
+      />
       <div className={styles.header}>
         <Title level={2} className={styles.headerTitle}>Око Ответы</Title>
         <Text className={styles.headerSubtitle}>

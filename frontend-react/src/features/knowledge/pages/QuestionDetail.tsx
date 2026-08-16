@@ -33,6 +33,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { knowledgeApi, Question, Answer } from '../api/knowledgeApi';
 import { logger } from '@/utils/logger';
 import { getDisplayUsername } from '@/utils/formatters';
+import { SEO } from '@/features/common';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -208,6 +209,11 @@ const QuestionDetail: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <SEO
+        title={`${question.title} — Око Ответы | Око Знаний`}
+        description={question.description?.slice(0, 160) || question.title}
+        canonical={`https://okoznaniy.ru/knowledge/${id}`}
+      />
       <Button 
         icon={<ArrowLeftOutlined />} 
         onClick={handleBack}

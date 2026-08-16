@@ -18,6 +18,7 @@ import 'dayjs/locale/ru';
 import styles from './ArticleDetail.module.css';
 import { useCurrentUser } from '@/hooks/queries';
 import { formatUserName } from '@/utils/formatters';
+import { SEO } from '@/features/common';
 
 dayjs.locale('ru');
 
@@ -120,6 +121,11 @@ const ArticleDetail: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <SEO
+        title={`${article.title} — База знаний | Око Знаний`}
+        description={article.description?.slice(0, 160) || article.title}
+        canonical={`https://okoznaniy.ru/knowledge-base/${id}`}
+      />
       <Button
         type="text"
         icon={<ArrowLeftOutlined />}

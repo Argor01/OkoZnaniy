@@ -11,6 +11,7 @@ import { logger } from '@/utils/logger';
 import Filters from './components/Filters';
 import WorksList from './components/WorksList';
 import styles from './ShopReadyWorks.module.css';
+import { SEO } from '@/features/common';
 
 const { Title } = Typography;
 
@@ -194,6 +195,11 @@ const ShopReadyWorks: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <SEO
+        title="Магазин готовых работ — Купить курсовые, дипломные | Око Знаний"
+        description="Купите готовые учебные работы с гарантией: курсовые, дипломные, рефераты, контрольные. Проверенные авторы, антиплагиат."
+        canonical="https://okoznaniy.ru/shop/ready-works"
+      />
       <Title level={2} className={styles.pageTitle}>
         Магазин готовых работ
       </Title>

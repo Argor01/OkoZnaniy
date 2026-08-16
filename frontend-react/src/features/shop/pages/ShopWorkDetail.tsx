@@ -27,6 +27,7 @@ import type { WorkFile } from '@/features/shop/types';
 import { useCurrentUser } from '@/hooks/queries';
 import { formatCurrency, getDisplayUsername, isEmailLike, truncateFileName } from '@/utils/formatters';
 import styles from './ShopWorkDetail.module.css';
+import { SEO } from '@/features/common';
 
 const { Title, Text } = Typography;
 
@@ -193,6 +194,11 @@ const ShopWorkDetail: React.FC = () => {
 
   return (
     <div className={styles.page}>
+      <SEO
+        title={`${work.title} — Магазин | Око Знаний`}
+        description={work.description?.slice(0, 160) || work.title}
+        canonical={`https://okoznaniy.ru/shop/works/${workId}`}
+      />
       <div className={styles.pageInner}>
         <AppButton
           icon={<ArrowLeftOutlined />}

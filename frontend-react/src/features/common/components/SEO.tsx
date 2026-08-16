@@ -9,6 +9,7 @@ interface SEOProps {
   ogImage?: string;
   ogUrl?: string;
   canonical?: string;
+  robots?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -19,7 +20,8 @@ const SEO: React.FC<SEOProps> = ({
   ogDescription,
   ogImage = '/og-image.jpg',
   ogUrl = 'https://okoznaniy.ru',
-  canonical
+  canonical,
+  robots = 'index, follow',
 }) => {
   useEffect(() => {
     
@@ -42,8 +44,8 @@ const SEO: React.FC<SEOProps> = ({
     
     setMetaTag('description', description);
     setMetaTag('keywords', keywords);
-    setMetaTag('robots', 'index, follow');
-    setMetaTag('googlebot', 'index, follow');
+    setMetaTag('robots', robots);
+    setMetaTag('googlebot', robots);
     setMetaTag('author', 'Око Знаний');
     setMetaTag('language', 'Russian');
     setMetaTag('geo.region', 'RU');
@@ -75,7 +77,7 @@ const SEO: React.FC<SEOProps> = ({
       }
       linkElement.setAttribute('href', canonical);
     }
-  }, [title, description, keywords, ogTitle, ogDescription, ogImage, ogUrl, canonical]);
+  }, [title, description, keywords, ogTitle, ogDescription, ogImage, ogUrl, canonical, robots]);
 
   const organizationJsonLd = {
     "@context": "https://schema.org",

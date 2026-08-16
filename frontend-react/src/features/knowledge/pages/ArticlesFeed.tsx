@@ -20,6 +20,7 @@ import 'dayjs/locale/ru';
 import styles from './ArticlesFeed.module.css';
 import { useCurrentUser, useWorkTypes, useSubjects } from '@/hooks/queries';
 import { formatUserName } from '@/utils/formatters';
+import { SEO } from '@/features/common';
 
 dayjs.extend(relativeTime);
 dayjs.locale('ru');
@@ -97,6 +98,11 @@ const ArticlesFeed: React.FC = () => {
 
   return (
     <div className={styles.container}>
+      <SEO
+        title="База знаний — Статьи и материалы от экспертов | Око Знаний"
+        description="Читайте полезные статьи и материалы по учебным предметам от профессиональных экспертов. База знаний для студентов."
+        canonical="https://okoznaniy.ru/knowledge-base"
+      />
       <div className={styles.header}>
         <Title level={2}>
           <BookOutlined style={{ marginRight: 8 }} />
