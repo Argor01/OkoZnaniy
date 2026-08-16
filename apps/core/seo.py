@@ -232,10 +232,106 @@ def _render_articles_list():
     )
 
 
+def _render_homepage():
+    """Серверный рендер главной страницы для поисковых ботов."""
+    canonical = BASE_URL
+    jsonld = [
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Око Знаний",
+            "url": BASE_URL,
+            "logo": f"{BASE_URL}/assets/logo.png",
+            "description": "Онлайн сервис помощи студентам: эксперты, база знаний, вопросы и ответы.",
+            "address": {"@type": "PostalAddress", "addressCountry": "RU"},
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "availableLanguage": "Russian",
+            },
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Око Знаний",
+            "url": BASE_URL,
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": f"{BASE_URL}/search?q={{search_term_string}}",
+                "query-input": "required name=search_term_string",
+            },
+        },
+    ]
+    body = """
+    <article>
+      <h1>Око Знаний — помощь студентам онлайн</h1>
+      <p><strong>Око Знаний</strong> — онлайн-сервис помощи студентам. Разместите задание и получите помощь от профессиональных экспертов.</p>
+
+      <h2>Как это работает</h2>
+      <ol>
+        <li>Разместите задание — опишите задачу, укажите сроки и бюджет</li>
+        <li>Получите отклики от экспертов — сравните предложения, отзывы и рейтинг</li>
+        <li>Выберите эксперта и начните работу — общайтесь в чате, отслеживайте прогресс</li>
+        <li>Получите готовую работу — проверьте через антиплагиат, внесите правки при необходимости</li>
+      </ol>
+
+      <h2>Что мы предлагаем</h2>
+      <ul>
+        <li><strong>Курсовые работы</strong> — написание и редактирование курсовых по любым предметам</li>
+        <li><strong>Дипломные работы</strong> — помощь с дипломными проектами и ВКР</li>
+        <li><strong>Рефераты и контрольные</strong> — быстрое выполнение учебных заданий</li>
+        <li><strong>Эссе и доклады</strong> — написание и оформление по ГОСТ</li>
+        <li><strong>Консультации</strong> — помощь с решением задач и разбором тем</li>
+      </ul>
+
+      <h2>Преимущества</h2>
+      <ul>
+        <li>Проверенные эксперты с подтверждённой квалификацией</li>
+        <li>Защита платежей — заморозка средств до подтверждения результата</li>
+        <li>Бесплатные корректировки в течение гарантийного срока</li>
+        <li>База знаний с готовыми материалами и ответами</li>
+        <li>Круглосуточная поддержка</li>
+      </ul>
+
+      <h2>База знаний</h2>
+      <p>Бесплатный доступ к вопросам и ответам студентов и экспертов:
+        <a href="{knowledge}">Око Ответы</a> и
+        <a href="{articles}">База знаний</a>.
+      </p>
+
+      <h2>Для экспертов</h2>
+      <p>Станьте экспертом на Око Знаний:
+        <a href="{become_expert}">Узнать больше</a>.
+        Получайте заказы, повышайте рейтинг, зарабатывайте.
+      </p>
+
+      <h2>Для партнёров</h2>
+      <p>Партнёрская программа — зарабатывайте 25% с каждого заказа:
+        <a href="{become_partner}">Подключиться</a>.
+      </p>
+    </article>
+    """.format(
+        knowledge=f"{BASE_URL}/knowledge",
+        articles=f"{BASE_URL}/knowledge-base",
+        become_expert=f"{BASE_URL}/become-expert",
+        become_partner=f"{BASE_URL}/become-partner",
+    )
+    title = "Око Знаний — помощь студентам | Курсовые, Дипломы, Рефераты"
+    description = (
+        "Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене. "
+        "Разместите задание и получите помощь от профессиональных экспертов. "
+        "Курсовые, дипломы, рефераты, контрольные работы."
+    )
+    return _render_html(title, description, canonical, jsonld, body)
+
+
 def prerender(request):
     """Отдаёт SEO-HTML по исходному пути (?path=/knowledge/123)."""
     path = request.GET.get("path", "/")
     path = path.split("?", 1)[0].rstrip("/") or "/"
+
+    if path == "/":
+        return _render_homepage()
 
     m = re.match(r"^/knowledge/(\d+)$", path)
     if m:
