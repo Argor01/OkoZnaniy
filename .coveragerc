@@ -1,0 +1,17 @@
+[run]
+branch = True
+source = apps
+
+[report]
+omit =
+    */migrations/*
+    */tests.py
+    */test_*.py
+    */management/commands/*
+    */admin.py
+    */apps.py
+    */urls.py
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING
+    raise NotImplementedError
