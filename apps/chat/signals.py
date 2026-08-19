@@ -1,3 +1,4 @@
+import re
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import SupportChat, SupportMessage, Message, Chat
@@ -127,6 +128,22 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
     # Пропускаем системные сообщения
     if instance.message_type == 'system':
         return
+
+    # Формальное сообщение о только что созданной претензии может содержать
+    # процитированные контакты ответчика. Проверяем номер дела и истца по БД,
+    # а не доверяем одному префиксу сообщения, и не запускаем автобан.
+    formal_claim_match = re.match(r'^\s*🚨\s*ПРЕТЕНЗИЯ\s*#(\d+)\s*:', instance.text, re.IGNORECASE)
+    if formal_claim_match:
+        try:
+            from apps.arbitration.models import ArbitrationCase
+            is_verified_plaintiff_statement = ArbitrationCase.objects.filter(
+                id=int(formal_claim_match.group(1)),
+                plaintiff_id=instance.sender_id,
+            ).exclude(status__in=['closed', 'rejected']).exists()
+            if is_verified_plaintiff_statement:
+                return
+        except (TypeError, ValueError):
+            pass
 
     # Если по заказу из этого чата уже открыт активный арбитраж и автор сообщения
     # — истец, не баним его за упоминание контактов: он, скорее всего, цитирует

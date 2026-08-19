@@ -16,6 +16,7 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from apps.arbitration.models import ArbitrationCase
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
 from apps.chat.services import ContactDetectionService
@@ -585,3 +586,85 @@ class ChatConversationRoutingTests(TestCase):
 
         self.assertTrue(result["has_contacts"])
         self.assertIn("keywords", result["contact_types"])
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class ArbitrationStatementModerationTests(TestCase):
+    def test_verified_claim_statement_does_not_trigger_contact_ban(self):
+        client = User.objects.create_user(
+            username='claim_statement_client',
+            email='claim_statement_client@example.com',
+            password='pwd',
+            role='client',
+        )
+        expert = User.objects.create_user(
+            username='claim_statement_expert',
+            email='claim_statement_expert@example.com',
+            password='pwd',
+            role='expert',
+        )
+        subject = Subject.objects.create(name='Claim moderation subject')
+        work_type = WorkType.objects.create(name='Claim moderation work type')
+        order = Order.objects.create(
+            client=client,
+            expert=expert,
+            subject=subject,
+            work_type=work_type,
+            title='Claim moderation order',
+            description='Claim moderation order',
+            budget=1000,
+            deadline=timezone.now() + timedelta(days=2),
+            status='in_progress',
+        )
+        order_chat = Chat.objects.create(client=client, expert=expert, order=order)
+        order_chat.participants.set([client, expert])
+        case = ArbitrationCase.objects.create(
+            plaintiff=client,
+            defendant=expert,
+            order=order,
+            reason='other',
+            subject='Contact evidence',
+            description='The defendant sent +79991234567',
+            status='submitted',
+        )
+        order.freeze(f'Открыт арбитраж {case.case_number}')
+        order_chat.freeze(f'Открыт арбитраж {case.case_number}')
+
+        support_chat = Chat.objects.create(client=client)
+        support_chat.participants.add(client)
+        Message.objects.create(
+            chat=support_chat,
+            sender=client,
+            text=f'🚨 ПРЕТЕНЗИЯ #{case.id}: Другое\n\nОтветчик прислал +79991234567',
+        )
+
+        client.refresh_from_db()
+        order.refresh_from_db()
+        order_chat.refresh_from_db()
+        support_chat.refresh_from_db()
+        self.assertFalse(client.is_banned_for_contacts)
+        self.assertFalse(support_chat.is_frozen)
+        self.assertTrue(order.is_frozen)
+        self.assertIn('арбитраж', order.frozen_reason.lower())
+        self.assertTrue(order_chat.is_frozen)
+        self.assertIn('арбитраж', order_chat.frozen_reason.lower())
+
+    def test_fake_claim_prefix_still_triggers_contact_moderation(self):
+        client = User.objects.create_user(
+            username='fake_claim_client',
+            email='fake_claim_client@example.com',
+            password='pwd',
+            role='client',
+        )
+        chat = Chat.objects.create(client=client)
+        chat.participants.add(client)
+        Message.objects.create(
+            chat=chat,
+            sender=client,
+            text='🚨 ПРЕТЕНЗИЯ #999999: Другое\n\nМой телефон +79991234567',
+        )
+        client.refresh_from_db()
+        chat.refresh_from_db()
+        self.assertTrue(client.is_banned_for_contacts)
+        self.assertTrue(chat.is_frozen)
+        self.assertIn('контакт', chat.frozen_reason.lower())
