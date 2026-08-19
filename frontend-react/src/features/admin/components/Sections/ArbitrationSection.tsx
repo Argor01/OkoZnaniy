@@ -49,15 +49,19 @@ interface ArbitrationCase {
   case_number: string;
   plaintiff: {
     id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string | null;
+    username?: string;
+    display_username?: string;
   };
   defendant?: {
     id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string | null;
+    username?: string;
+    display_username?: string;
   };
   subject: string;
   status: string;
@@ -77,8 +81,10 @@ interface ArbitrationCase {
   evidence_files?: Array<{ name?: string; file_name?: string; url?: string; file_url?: string }>;
   assigned_admin?: {
     id: number;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+    display_username?: string;
   };
   order?: {
     id: number;
@@ -157,8 +163,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       filtered = filtered.filter((item) =>
         item.case_number.toLowerCase().includes(query) ||
         item.subject.toLowerCase().includes(query) ||
-        item.plaintiff.first_name.toLowerCase().includes(query) ||
-        item.plaintiff.last_name.toLowerCase().includes(query)
+        getUserDisplayName(item.plaintiff).toLowerCase().includes(query) ||
+        getUserSecondaryLabel(item.plaintiff).toLowerCase().includes(query)
       );
     }
 
@@ -180,6 +186,30 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       window.history.replaceState({}, '', '/admin/dashboard');
     }
   }, [initialCaseNumber, cases]);
+
+  const getUserDisplayName = (user?: {
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+    display_username?: string;
+    email?: string | null;
+  } | null) => {
+    if (!user) return 'Не указан';
+    const fullName = [user.first_name, user.last_name]
+      .map((part) => String(part ?? '').trim())
+      .filter(Boolean)
+      .join(' ');
+    return fullName || user.display_username || user.username || user.email || 'Пользователь';
+  };
+
+  const getUserSecondaryLabel = (user?: {
+    email?: string | null;
+    username?: string;
+    display_username?: string;
+  } | null) => {
+    if (!user) return '';
+    return user.email || user.display_username || user.username || '';
+  };
 
   const getStatusConfig = (status: string) => {
     const configs: Record<string, { color: string; icon: React.ReactNode }> = {
@@ -409,8 +439,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
         <Space>
           <UserOutlined style={{ color: '#6435a5' }} />
           <Space direction="vertical" size={0}>
-            <Text strong>{record.plaintiff.first_name} {record.plaintiff.last_name}</Text>
-            <Text type="secondary" style={{ fontSize: 12 }}>{record.plaintiff.email}</Text>
+            <Text strong>{getUserDisplayName(record.plaintiff)}</Text>
+            {getUserSecondaryLabel(record.plaintiff) ? <Text type="secondary" style={{ fontSize: 12 }}>{getUserSecondaryLabel(record.plaintiff)}</Text> : null}
           </Space>
         </Space>
       ),
@@ -424,8 +454,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
           <Space>
             <UserOutlined style={{ color: '#fa8c16' }} />
             <Space direction="vertical" size={0}>
-              <Text strong>{record.defendant.first_name} {record.defendant.last_name}</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>{record.defendant.email}</Text>
+              <Text strong>{getUserDisplayName(record.defendant)}</Text>
+              {getUserSecondaryLabel(record.defendant) ? <Text type="secondary" style={{ fontSize: 12 }}>{getUserSecondaryLabel(record.defendant)}</Text> : null}
             </Space>
           </Space>
         ) : (
@@ -464,7 +494,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       width: 160,
       render: (_, record) => (
         record.assigned_admin ? (
-          <Text>{record.assigned_admin.first_name} {record.assigned_admin.last_name}</Text>
+          <Text>{getUserDisplayName(record.assigned_admin)}</Text>
         ) : (
           <Text type="secondary">Не назначен</Text>
         )
@@ -588,8 +618,18 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               const evidenceFiles = Array.isArray(detailData.evidence_files) ? detailData.evidence_files : [];
               return (
                 <Descriptions bordered size="small" column={1}>
-                  <Descriptions.Item label="Истец">{detailData.plaintiff?.first_name} {detailData.plaintiff?.last_name} · {detailData.plaintiff?.email}</Descriptions.Item>
-                  <Descriptions.Item label="Ответчик">{detailData.defendant ? `${detailData.defendant.first_name} ${detailData.defendant.last_name} · ${detailData.defendant.email}` : 'Не указан'}</Descriptions.Item>
+                  <Descriptions.Item label="Истец">
+                    {getUserDisplayName(detailData.plaintiff)}
+                    {getUserSecondaryLabel(detailData.plaintiff) && getUserSecondaryLabel(detailData.plaintiff) !== getUserDisplayName(detailData.plaintiff)
+                      ? ` · ${getUserSecondaryLabel(detailData.plaintiff)}`
+                      : ''}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ответчик">
+                    {getUserDisplayName(detailData.defendant)}
+                    {detailData.defendant && getUserSecondaryLabel(detailData.defendant) && getUserSecondaryLabel(detailData.defendant) !== getUserDisplayName(detailData.defendant)
+                      ? ` · ${getUserSecondaryLabel(detailData.defendant)}`
+                      : ''}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Причина спора">{detailData.reason_display || detailData.reason || 'Не указана'}</Descriptions.Item>
                   <Descriptions.Item label="Финансовое требование">{detailData.refund_type_display || ({ none: 'Возврат не требуется', partial: 'Частичный возврат', full: 'Полный возврат' } as Record<string, string>)[detailData.refund_type] || 'Не указано'}</Descriptions.Item>
                   <Descriptions.Item label="Запрошенный возврат">
@@ -619,7 +659,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                       #{detailData.purchase.id} · {detailData.purchase.work_title} · {detailData.purchase.price_paid} ₽
                       <br />
                       <Text type="secondary" style={{ fontSize: 12 }}>
-                        Покупатель: {detailData.purchase.buyer_username} · Продавец: {detailData.purchase.author_username}
+                        Покупатель: {detailData.purchase.buyer_username || 'Не указан'} · Продавец: {detailData.purchase.author_username || 'Не указан'}
                       </Text>
                     </Descriptions.Item>
                   ) : null}

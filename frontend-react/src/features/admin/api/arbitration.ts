@@ -6,15 +6,19 @@ export interface ArbitrationCase {
   case_number: string;
   plaintiff: {
     id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string | null;
+    username?: string;
+    display_username?: string;
   };
   defendant?: {
     id: number;
-    first_name: string;
-    last_name: string;
-    email: string;
+    first_name?: string;
+    last_name?: string;
+    email?: string | null;
+    username?: string;
+    display_username?: string;
   };
   subject: string;
   status: string;
@@ -34,8 +38,10 @@ export interface ArbitrationCase {
   evidence_files?: Array<{ name?: string; file_name?: string; url?: string; file_url?: string }>;
   assigned_admin?: {
     id: number;
-    first_name: string;
-    last_name: string;
+    first_name?: string;
+    last_name?: string;
+    username?: string;
+    display_username?: string;
   };
   created_at: string;
   updated_at: string;
