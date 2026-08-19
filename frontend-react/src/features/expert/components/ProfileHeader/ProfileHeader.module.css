@@ -67,7 +67,11 @@
 
 @container (max-width: 380px) {
   .identityRow { grid-template-columns: 64px minmax(0, 1fr) 44px; }
-  .ratingsGroup { grid-template-columns: 1fr; }
+  .ratingsGroup { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .ratingItem { gap: 6px; }
+  .profileStatLabel { font-size: .75rem; line-height: 1.2; white-space: nowrap; }
+  .profileStatRate { font-size: .875rem; }
+  .ratingValueRow strong { font-size: .875rem; }
   .metricsGroup { grid-template-columns: repeat(2, 1fr); }
 }
 

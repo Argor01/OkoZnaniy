@@ -203,6 +203,31 @@
     min-height: 44px;
   }
 
+  .filtersActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .filtersActions :global(.ant-btn) {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 1.15;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .filtersActions :global(.ant-btn > span) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   /* Таблица */
   .arbitrationSection :global(.ant-table-wrapper) {
     overflow-x: auto;
