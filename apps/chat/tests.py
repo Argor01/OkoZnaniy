@@ -427,6 +427,17 @@ class ChatConversationRoutingTests(TestCase):
         self.assertEqual(response.json()["id"], self.order_chat.id)
         self.assertEqual(response.json()["order_id"], self.order.id)
 
+    def test_participant_can_open_order_chat_with_stale_self_user_id(self):
+        response = self.api_client.post(
+            "/api/chat/chats/get_or_create_by_order_and_user/",
+            {"order_id": self.order.id, "user_id": self.client_user.id},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["order_id"], self.order.id)
+        self.assertEqual(response.json()["id"], self.order_chat.id)
+
     def test_expert_can_open_assigned_order_subdialog(self):
         self.api_client.force_authenticate(user=self.expert_user)
 

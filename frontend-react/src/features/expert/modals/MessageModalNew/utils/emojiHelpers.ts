@@ -26,7 +26,7 @@ export const isEmojiRenderable = (emoji: string): boolean => {
   const canvas = document.createElement('canvas');
   canvas.width = 32;
   canvas.height = 32;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) return true;
 
   const render = (symbol: string): Uint8ClampedArray => {

@@ -1362,7 +1362,10 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         if order.expert_id:
             participant_ids = {order.client_id, order.expert_id}
-            if request.user.id in participant_ids and other_user.id in participant_ids and other_user.id != request.user.id:
+            # The order itself is the source of truth. Notification payloads can
+            # contain a stale or self user_id while the order chat is being
+            # created, so do not reject a real participant over that hint.
+            if request.user.id in participant_ids:
                 chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
                 chat.hidden_for_users.remove(request.user)
                 serializer = ChatDetailSerializer(chat, context={'request': request})
