@@ -9,10 +9,12 @@ import { QUERY_KEYS } from '@/config/queryKeys';
 export const DashboardRedirect: React.FC = () => {
   const token = localStorage.getItem('access_token');
 
-  const { data: userProfile, isLoading } = useQuery({
+  const { data: userProfile, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.user.profile,
     queryFn: () => authApi.getCurrentUser(),
     enabled: !!token,
+    retry: 2,
+    staleTime: 0,
   });
 
   if (!token) return <Navigate to={ROUTES.login} replace />;
@@ -24,6 +26,8 @@ export const DashboardRedirect: React.FC = () => {
       </div>
     );
   }
+
+  if (isError) return <Navigate to={ROUTES.login} replace />;
 
   const role = userProfile?.role ?? '';
 

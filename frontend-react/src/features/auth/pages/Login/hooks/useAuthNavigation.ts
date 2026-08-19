@@ -20,6 +20,8 @@ export function useAuthNavigation() {
     }
     switch (role) {
       case 'client':
+        navigate(ROUTES.dashboard);
+        break;
       case 'expert':
         navigate(ROUTES.expert.root);
         break;

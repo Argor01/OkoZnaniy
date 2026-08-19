@@ -37,6 +37,7 @@ import {
 import styles from './AllOrdersSection.module.css';
 import { logger } from '@/utils/logger';
 import { truncateDisplayName } from '@/utils/formatters';
+import { useSubjects } from '@/hooks/queries';
 
 const { Text } = Typography;
 const { Search } = Input;
@@ -160,6 +161,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderModalVisible, setOrderModalVisible] = useState(false);
+  const { data: catalogSubjects = [] } = useSubjects();
 
   useEffect(() => {
     if (initialOrderId && orders.length > 0 && !selectedOrder) {
@@ -407,14 +409,15 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             className={styles.allOrdersSelectSubject}
             value={subjectFilter}
             onChange={setSubjectFilter}
-          >
-            <Option value="all">Все предметы</Option>
-            <Option value="Математика">Математика</Option>
-            <Option value="Информатика">Информатика</Option>
-            <Option value="История">История</Option>
-            <Option value="Физика">Физика</Option>
-            <Option value="Химия">Химия</Option>
-          </Select>
+            showSearch
+            optionFilterProp="label"
+            options={[
+              { value: 'all', label: 'Все предметы' },
+              ...catalogSubjects
+                .filter((subject) => subject?.name)
+                .map((subject) => ({ value: subject.name, label: subject.name })),
+            ]}
+          />
 
           <RangePicker
             placeholder={['Дата от', 'Дата до']}
