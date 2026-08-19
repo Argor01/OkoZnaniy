@@ -1801,12 +1801,26 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       };
       
       const claimType = claimTypeMap[selectedClaimCategory] || 'other';
+      const reasonMap: Record<string, string> = {
+        'Заказ не выполнен': 'order_not_completed',
+        'Заказ выполнен некачественно/частично': 'poor_quality',
+        'Заказ не оплачен': 'payment_dispute',
+        'Необоснованный отзыв': 'other',
+        'Магазин готовых работ': 'ready_work_dispute',
+        'Другое': 'other',
+      };
+      const requestedRefundType: 'full' | 'none' =
+        refundType && refundType !== 'Возврат средств не требуется' ? 'full' : 'none';
 
       const claim = await supportRequestsApi.createClaim({
         order_id: effectiveOrderId || undefined,
         claim_type: claimType,
         subject: selectedClaimCategory,
         description: claimText.trim(),
+        reason: reasonMap[selectedClaimCategory] || 'other',
+        refund_type: requestedRefundType,
+        refund_percentage: requestedRefundType === 'full' ? 100 : 0,
+        deadline_relevant: orderRelevance === 'Заказ актуален',
       });
 
       let claimMessage = `🚨 ПРЕТЕНЗИЯ #${claim.id}: ${selectedClaimCategory}\n\n`;

@@ -170,7 +170,7 @@ export const supportRequestsApi = {
       refund_type: payload.refund_type ?? 'none',
       requested_refund_percentage: requestedRefundPercentage,
       requested_refund_amount: null,
-      deadline_relevant: false,
+      deadline_relevant: payload.deadline_relevant ?? false,
       evidence_files: [],
     });
     return normalizeArbitrationCase(response.data);

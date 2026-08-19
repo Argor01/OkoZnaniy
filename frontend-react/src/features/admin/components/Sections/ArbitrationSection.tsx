@@ -66,6 +66,15 @@ interface ArbitrationCase {
   priority_display: string;
   reason: string;
   reason_display: string;
+  description?: string;
+  refund_type?: 'none' | 'partial' | 'full';
+  refund_type_display?: string;
+  requested_refund_percentage?: number | string;
+  requested_refund_amount?: number | string | null;
+  approved_refund_percentage?: number | string | null;
+  approved_refund_amount?: number | string | null;
+  deadline_relevant?: boolean;
+  evidence_files?: Array<{ name?: string; file_name?: string; url?: string; file_url?: string }>;
   assigned_admin?: {
     id: number;
     first_name: string;
@@ -75,6 +84,7 @@ interface ArbitrationCase {
     id: number;
     title: string;
     budget: number;
+    final_price?: number | string | null;
   };
   purchase?: {
     id: number;
@@ -88,6 +98,7 @@ interface ArbitrationCase {
   };
   created_at: string;
   updated_at: string;
+  submitted_at?: string | null;
   messages_count: number;
   unread_count: number;
 }
@@ -243,6 +254,12 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       setModalOpen(true);
       const detail = await arbitrationApi.getCase(caseItem.id);
       setDetailData(detail);
+      const requestedPercentage = Number(detail.requested_refund_percentage ?? 0);
+      setRefundPercentage(
+        Number.isFinite(requestedPercentage) && requestedPercentage >= 0 && requestedPercentage <= 100
+          ? requestedPercentage
+          : 0
+      );
       const feed = await arbitrationApi.getActivityFeed(detail.id);
       setFeedData(feed.feed || []);
     } catch {
@@ -561,23 +578,54 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
               </Tag>
             </Space>
 
-            <Descriptions bordered size="small" column={1}>
-              <Descriptions.Item label="Истец">{detailData.plaintiff?.first_name} {detailData.plaintiff?.last_name} · {detailData.plaintiff?.email}</Descriptions.Item>
-              <Descriptions.Item label="Ответчик">{detailData.defendant ? `${detailData.defendant.first_name} ${detailData.defendant.last_name} · ${detailData.defendant.email}` : 'Не указан'}</Descriptions.Item>
-              <Descriptions.Item label="Описание">
-                <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{detailData.description || 'Описание не заполнено'}</Paragraph>
-              </Descriptions.Item>
-              {detailData.order ? <Descriptions.Item label="Заказ">#{detailData.order.id} · {detailData.order.title}</Descriptions.Item> : null}
-              {detailData.purchase ? (
-                <Descriptions.Item label="Покупка">
-                  #{detailData.purchase.id} · {detailData.purchase.work_title} · {detailData.purchase.price_paid} ₽
-                  <br />
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Покупатель: {detailData.purchase.buyer_username} · Продавец: {detailData.purchase.author_username}
-                  </Text>
-                </Descriptions.Item>
-              ) : null}
-            </Descriptions>
+            {(() => {
+              const orderAmount = Number(detailData.order?.final_price ?? detailData.order?.budget ?? 0);
+              const requestedPercentage = Number(detailData.requested_refund_percentage ?? 0);
+              const storedRequestedAmount = Number(detailData.requested_refund_amount ?? 0);
+              const requestedAmount = storedRequestedAmount > 0
+                ? storedRequestedAmount
+                : Math.round((orderAmount * requestedPercentage) / 100 * 100) / 100;
+              const evidenceFiles = Array.isArray(detailData.evidence_files) ? detailData.evidence_files : [];
+              return (
+                <Descriptions bordered size="small" column={1}>
+                  <Descriptions.Item label="Истец">{detailData.plaintiff?.first_name} {detailData.plaintiff?.last_name} · {detailData.plaintiff?.email}</Descriptions.Item>
+                  <Descriptions.Item label="Ответчик">{detailData.defendant ? `${detailData.defendant.first_name} ${detailData.defendant.last_name} · ${detailData.defendant.email}` : 'Не указан'}</Descriptions.Item>
+                  <Descriptions.Item label="Причина спора">{detailData.reason_display || detailData.reason || 'Не указана'}</Descriptions.Item>
+                  <Descriptions.Item label="Финансовое требование">{detailData.refund_type_display || ({ none: 'Возврат не требуется', partial: 'Частичный возврат', full: 'Полный возврат' } as Record<string, string>)[detailData.refund_type] || 'Не указано'}</Descriptions.Item>
+                  <Descriptions.Item label="Запрошенный возврат">
+                    {requestedPercentage > 0 ? `${requestedPercentage}%` : '0%'}
+                    {requestedAmount > 0 ? ` · ${requestedAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽` : ''}
+                  </Descriptions.Item>
+                  {orderAmount > 0 ? <Descriptions.Item label="Сумма заказа">{orderAmount.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₽</Descriptions.Item> : null}
+                  <Descriptions.Item label="Сроки важны для спора">{detailData.deadline_relevant ? 'Да' : 'Нет'}</Descriptions.Item>
+                  <Descriptions.Item label="Описание заявления">
+                    <Paragraph style={{ marginBottom: 0, whiteSpace: 'pre-wrap' }}>{detailData.description || 'Описание не заполнено'}</Paragraph>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Подано">{detailData.submitted_at || detailData.created_at ? new Date(detailData.submitted_at || detailData.created_at).toLocaleString('ru-RU') : 'Не указано'}</Descriptions.Item>
+                  {evidenceFiles.length > 0 ? (
+                    <Descriptions.Item label="Доказательства">
+                      <Space direction="vertical" size={4}>
+                        {evidenceFiles.map((file: any, index: number) => {
+                          const href = file.url || file.file_url;
+                          const name = file.name || file.file_name || `Файл ${index + 1}`;
+                          return href ? <a key={`${href}-${index}`} href={href} target="_blank" rel="noreferrer">{name}</a> : <Text key={index}>{name}</Text>;
+                        })}
+                      </Space>
+                    </Descriptions.Item>
+                  ) : null}
+                  {detailData.order ? <Descriptions.Item label="Заказ">#{detailData.order.id} · {detailData.order.title}</Descriptions.Item> : null}
+                  {detailData.purchase ? (
+                    <Descriptions.Item label="Покупка">
+                      #{detailData.purchase.id} · {detailData.purchase.work_title} · {detailData.purchase.price_paid} ₽
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>
+                        Покупатель: {detailData.purchase.buyer_username} · Продавец: {detailData.purchase.author_username}
+                      </Text>
+                    </Descriptions.Item>
+                  ) : null}
+                </Descriptions>
+              );
+            })()}
 
             <Card size="small" title="Действия">
               <Space wrap>

@@ -121,6 +121,20 @@ class ArbitrationCaseAPITests(TestCase):
         self.assertFalse(self.client_user.is_banned_for_contacts)
         self.assertIsNone(self.client_user.contact_ban_reason)
 
+    def test_submit_claim_calculates_requested_refund_amount_when_omitted(self):
+        self.api_client.force_authenticate(user=self.client_user)
+        response = self.api_client.post(
+            '/api/arbitration/cases/submit-claim/',
+            self._claim_payload(requested_refund_amount=None),
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        case = ArbitrationCase.objects.get(order=self.order)
+        self.assertEqual(case.requested_refund_percentage, 50)
+        self.assertEqual(case.requested_refund_amount, 7500)
+        self.assertEqual(response.data['requested_refund_amount'], '7500.00')
+
     def test_expert_can_submit_complaint_after_client_cancels(self):
         self.order.status = 'cancelled'
         self.order.save(update_fields=['status', 'updated_at'])

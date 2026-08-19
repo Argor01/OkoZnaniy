@@ -83,5 +83,6 @@ export interface CreateClaimPayload {
   reason?: string;
   refund_type?: 'full' | 'partial' | 'none';
   refund_percentage?: number;
+  deadline_relevant?: boolean;
   order_id?: number;
 }

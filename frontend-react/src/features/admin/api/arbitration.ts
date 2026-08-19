@@ -23,6 +23,15 @@ export interface ArbitrationCase {
   priority_display: string;
   reason: string;
   reason_display: string;
+  description?: string;
+  refund_type?: 'none' | 'partial' | 'full';
+  refund_type_display?: string;
+  requested_refund_percentage?: number | string;
+  requested_refund_amount?: number | string | null;
+  approved_refund_percentage?: number | string | null;
+  approved_refund_amount?: number | string | null;
+  deadline_relevant?: boolean;
+  evidence_files?: Array<{ name?: string; file_name?: string; url?: string; file_url?: string }>;
   assigned_admin?: {
     id: number;
     first_name: string;
@@ -30,6 +39,7 @@ export interface ArbitrationCase {
   };
   created_at: string;
   updated_at: string;
+  submitted_at?: string | null;
   messages_count: number;
   unread_count: number;
 }

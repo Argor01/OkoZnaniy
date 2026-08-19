@@ -298,6 +298,13 @@ class ArbitrationSubmissionSerializer(serializers.Serializer):
         validated_data['requested_refund_percentage'] = Decimal(str(validated_data.get('requested_refund_percentage', 0)))
         if validated_data.get('requested_refund_amount') is not None:
             validated_data['requested_refund_amount'] = Decimal(str(validated_data['requested_refund_amount']))
+        elif order is not None and validated_data['requested_refund_percentage'] > 0:
+            order_amount = order.final_price if order.final_price is not None else order.budget
+            validated_data['requested_refund_amount'] = (
+                Decimal(str(order_amount or 0))
+                * validated_data['requested_refund_percentage']
+                / Decimal('100')
+            ).quantize(Decimal('0.01'))
         
         # Создаем дело
         case = ArbitrationCase.objects.create(
