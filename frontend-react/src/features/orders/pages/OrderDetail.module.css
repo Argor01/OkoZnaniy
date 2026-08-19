@@ -1072,25 +1072,7 @@
 }
 
 .bidActionButton {
-  height: 36px !important;
-  min-height: 36px;
-  min-width: 108px;
-  padding: 0 16px !important;
-  border-radius: 8px !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  line-height: 1 !important;
-  white-space: nowrap;
-}
-
-.assignButton {
   max-width: 100%;
-  min-width: 178px;
-  height: 36px !important;
-  white-space: nowrap !important;
-  text-align: center;
-  line-height: 1 !important;
 }
 
 .bidPrepaymentTag {
@@ -1122,10 +1104,26 @@
     flex: 1 1 140px;
   }
 
-  .bidActionButton,
+  .bidActionButton {
+    width: 100%;
+    min-width: 108px;
+    height: 36px !important;
+    min-height: 36px;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    line-height: 1 !important;
+    white-space: nowrap;
+  }
+
   .assignButton {
     width: 100%;
     min-width: 0;
+    height: 36px !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
   }
 
   .bidChipsRow {

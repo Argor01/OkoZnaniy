@@ -572,7 +572,8 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
           dataSource={filteredCases}
           loading={loading}
           rowKey="id"
-          scroll={{ x: 1300 }}
+          scroll={{ x: 1510 }}
+          tableLayout="fixed"
           pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (total) => `Всего: ${total} дел` }}
           onRow={(record) => ({ onClick: () => loadCaseDetails(record), style: { cursor: 'pointer' } })}
         />

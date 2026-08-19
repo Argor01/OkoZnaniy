@@ -31,6 +31,15 @@
   cursor: pointer;
 }
 
+.arbitrationSection :global(.ant-table-cell) {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.arbitrationSection :global(.ant-table-cell .ant-space) {
+  max-width: 100%;
+}
+
 .arbitrationSection :global(.ant-tag) {
   border-radius: 4px;
   padding: 2px 8px;

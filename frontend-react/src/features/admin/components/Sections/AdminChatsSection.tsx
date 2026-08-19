@@ -550,6 +550,7 @@ const RoomsTab: React.FC<{ uid: number }> = ({ uid }) => {
         destroyOnClose
       >
         <List
+          className={styles.membersList}
           dataSource={selRoom?.members ?? []}
           renderItem={(member: any) => (
             <List.Item>

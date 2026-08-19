@@ -65,6 +65,18 @@
   flex-shrink: 0;
 }
 
+.membersList {
+  max-height: min(62vh, 560px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+.membersList :global(.ant-list-item-meta-title),
+.membersList :global(.ant-list-item-meta-description) {
+  overflow-wrap: anywhere;
+}
+
 /* ========== Chat List Item ========== */
 .chatListItem {
   padding: 12px 16px;
