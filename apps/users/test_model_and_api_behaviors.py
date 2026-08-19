@@ -219,3 +219,52 @@ class UserApiBehaviorTests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertGreaterEqual(len(response.data), 1)
+
+
+class BlockedAccountAccessTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='blocked_access_user',
+            email='blocked_access@example.com',
+            password='testpass123',
+            role='client',
+        )
+        login_client = APIClient()
+        response = login_client.post(
+            '/api/users/token/',
+            {'username': self.user.email, 'password': 'testpass123'},
+            format='json',
+            secure=True,
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.access_cookie = response.cookies['oko_access'].value
+        self.refresh_cookie = response.cookies['oko_refresh'].value
+        self.user.is_active = False
+        self.user.blocked_at = timezone.now()
+        self.user.block_reason = 'Нарушение правил'
+        self.user.save(update_fields=['is_active', 'blocked_at', 'block_reason'])
+
+    def _blocked_client(self):
+        client = APIClient()
+        client.cookies['oko_access'] = self.access_cookie
+        client.cookies['oko_refresh'] = self.refresh_cookie
+        return client
+
+    def test_existing_access_cookie_stops_working_immediately(self):
+        response = self._blocked_client().get('/api/users/me/', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_blocked_client_cannot_create_order(self):
+        response = self._blocked_client().post('/api/orders/orders/', {}, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_blocked_expert_cannot_access_available_orders(self):
+        self.user.role = 'expert'
+        self.user.save(update_fields=['role'])
+        response = self._blocked_client().get('/api/orders/orders/available/', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_refresh_cookie_cannot_restore_blocked_session(self):
+        response = self._blocked_client().post('/api/users/token/refresh/', {}, format='json', secure=True)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn('заблокирован', str(response.data).lower())

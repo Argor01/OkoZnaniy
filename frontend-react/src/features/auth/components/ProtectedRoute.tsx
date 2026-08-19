@@ -19,6 +19,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     queryFn: () => authApi.getCurrentUser(),
     enabled: !!token && !shouldRedirect,
     retry: false,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: 'always',
   });
 
   React.useEffect(() => {

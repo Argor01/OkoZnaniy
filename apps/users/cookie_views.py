@@ -1,7 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .cookie_auth import ACCESS_COOKIE, REFRESH_COOKIE
 
@@ -14,8 +16,25 @@ class CookieTokenRefreshView(APIView):
         refresh = request.COOKIES.get(REFRESH_COOKIE)
         if not refresh:
             return Response({"detail": "Refresh cookie missing"}, status=status.HTTP_401_UNAUTHORIZED)
+        token = RefreshToken(refresh)
+        user_id = token.get("user_id")
+        user = get_user_model().objects.filter(pk=user_id).first()
+        if user is None:
+            return Response({"detail": "Пользователь не найден"}, status=status.HTTP_401_UNAUTHORIZED)
+        user.unblock_if_expired()
+        user.refresh_from_db(fields=["is_active", "block_reason", "unblock_date"])
+        if not user.is_active:
+            detail = "Ваш аккаунт заблокирован."
+            if user.block_reason:
+                detail += f" Причина: {user.block_reason}"
+            return Response(
+                {"detail": detail, "code": "user_inactive"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         serializer = TokenRefreshSerializer(data={"refresh": refresh})
         serializer.is_valid(raise_exception=True)
+
         # AuthCookieMiddleware moves access (and rotated refresh, if enabled)
         # into HttpOnly cookies and removes them from the JSON body.
         return Response(serializer.validated_data)
