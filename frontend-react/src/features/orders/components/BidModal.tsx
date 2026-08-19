@@ -35,20 +35,24 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
       message.success('Отклик успешно отправлен!');
       setBidSuccess(true);
 
-      queryClient.setQueryData(['order-bids', String(orderId)], (prev: unknown) => {
-        const list = Array.isArray(prev) ? prev : [];
-        return list.some((bid: any) => bid?.id === createdBid.id) ? list : [...list, createdBid];
-      });
-      queryClient.setQueryData(['order-bids', orderId], (prev: unknown) => {
-        const list = Array.isArray(prev) ? prev : [];
-        return list.some((bid: any) => bid?.id === createdBid.id) ? list : [...list, createdBid];
-      });
+      const createdBidId = Number(createdBid?.id);
+      if (Number.isFinite(createdBidId) && createdBidId > 0) {
+        queryClient.setQueryData(['order-bids', String(orderId)], (prev: unknown) => {
+          const list = Array.isArray(prev) ? prev : [];
+          return list.some((bid: any) => Number(bid?.id) === createdBidId) ? list : [...list, createdBid];
+        });
+        queryClient.setQueryData(['order-bids', orderId], (prev: unknown) => {
+          const list = Array.isArray(prev) ? prev : [];
+          return list.some((bid: any) => Number(bid?.id) === createdBidId) ? list : [...list, createdBid];
+        });
+      }
 
       const patchOrder = (data: any): any => {
         if (!data) return data;
         if (Array.isArray(data)) return data.map((item) => item?.id === orderId ? { ...item, user_has_bid: true } : item);
+        if (typeof data !== 'object') return data;
         if (Array.isArray(data.results)) return { ...data, results: patchOrder(data.results) };
-        return data.id === orderId ? { ...data, user_has_bid: true } : data;
+        return data?.id === orderId ? { ...data, user_has_bid: true } : data;
       };
       queryClient.setQueriesData({ queryKey: ['orders-feed'] }, patchOrder);
       queryClient.setQueriesData({ queryKey: ['available-orders'] }, patchOrder);

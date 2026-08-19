@@ -1602,35 +1602,30 @@ class BidViewSet(viewsets.ModelViewSet):
         if order.expert_id:
             raise PermissionDenied('У заказа уже есть назначенный эксперт. Заказчик должен выбрать исполнителя вручную.')
         
-        # Создаем или обновляем ставку
         if not _is_order_action_allowed(order, user, 'can_bid'):
             raise PermissionDenied('Action is not available for the current order state.')
 
-        # Удаляем старые неактивные ставки (rejected/cancelled), чтобы создать новую
-        # с актуальным created_at и без устаревших данных
+        # Повторный активный отклик отсекается в create(). Старые завершенные
+        # отклики удаляем, затем сохраняем новый через serializer, чтобы DRF
+        # гарантированно вернул созданный объект с id в ответе.
         Bid.objects.filter(
             order=order,
             expert=user,
         ).exclude(status=BidStatus.ACTIVE).delete()
 
-        bid, created = Bid.objects.get_or_create(
-            order=order, 
-            expert=user, 
-            defaults=serializer.validated_data
+        bid = serializer.save(
+            order=order,
+            expert=user,
+            status=BidStatus.ACTIVE,
         )
-        if not created:
-            for attr, value in serializer.validated_data.items():
-                setattr(bid, attr, value)
-            bid.status = BidStatus.ACTIVE
-            bid.save()
 
         try:
-            safe_call(NotificationService.notify_new_bid,
+            safe_call(
+                NotificationService.notify_new_bid,
                 order=order,
                 bid=bid,
                 expert=user,
-                is_updated=not created)
+                is_updated=False,
+            )
         except Exception:
             logger.exception("Не удалось создать уведомление о новом отклике", extra={"order_id": order.id, "bid_id": bid.id, "expert_id": user.id})
-        
-        return bid

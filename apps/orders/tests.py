@@ -520,6 +520,24 @@ class OrderChatBootstrapTests(TestCase):
         order_chat = Chat.objects.get(pk=response.json()["chat_id"])
         self.assertEqual(order_chat.order_id, order.id)
 
+    def test_bid_creation_returns_created_bid_with_id(self):
+        order = self._create_order()
+        self.api_client.force_authenticate(user=self.expert_user)
+
+        response = self.api_client.post(
+            f"/api/orders/orders/{order.id}/bids/",
+            {"amount": "3000", "comment": "Готов выполнить", "prepayment_percent": 50},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.content)
+        self.assertIsInstance(response.data, dict)
+        self.assertIsInstance(response.data.get("id"), int)
+        bid = Bid.objects.get(pk=response.data["id"])
+        self.assertEqual(bid.order_id, order.id)
+        self.assertEqual(bid.expert_id, self.expert_user.id)
+        self.assertEqual(bid.amount, Decimal("3000.00"))
+
     def test_contact_banned_expert_cannot_use_order_feed_or_bid(self):
         order = self._create_order()
         self.expert_user.is_banned_for_contacts = True
