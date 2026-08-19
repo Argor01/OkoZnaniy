@@ -42,6 +42,9 @@
 
 .chatMessagesMobile {
   padding: 12px;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chatMessagesContent {

@@ -129,7 +129,8 @@
 }
 
 .chatInputMobile {
-  font-size: 14px;
+  /* 16px prevents Safari from zooming the whole page on focus. */
+  font-size: 16px;
 }
 
 .chatAttachButton {

@@ -168,7 +168,9 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const initialViewportHeight = window.visualViewport?.height || window.innerHeight;
 
     body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
+    // The chat owns the mobile viewport. Keeping the document at 0 prevents
+    // iOS from revealing the page underneath when the keyboard opens.
+    body.style.top = '0px';
     body.style.left = '0';
     body.style.right = '0';
     body.style.width = '100%';
@@ -192,6 +194,14 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         html.style.setProperty('--chat-viewport-offset-top', '0px');
         html.style.setProperty('--chat-keyboard-offset', `${keyboardHeight}px`);
         html.toggleAttribute('data-chat-keyboard-open', keyboardHeight > 120);
+        if (keyboardHeight > 120) {
+          body.style.height = `${height}px`;
+          body.style.maxHeight = `${height}px`;
+          window.scrollTo(0, 0);
+        } else {
+          body.style.height = '100%';
+          body.style.maxHeight = '100%';
+        }
       });
     };
 
@@ -2717,9 +2727,9 @@ const handleOverdueComplaint = async () => {
     ? {
         width: '100%',
         margin: '0 auto',
-        height: (isMobile || isTablet) ? 'calc(var(--chat-modal-vh, 100dvh) - 64px)' : 'calc(100vh - 64px)',
+        height: (isMobile || isTablet) ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
         minHeight: 0,
-        maxHeight: (isMobile || isTablet) ? 'calc(var(--chat-modal-vh, 100dvh) - 64px)' : 'calc(100vh - 64px)',
+        maxHeight: (isMobile || isTablet) ? 'var(--chat-modal-vh, 100dvh)' : 'calc(100vh - 64px)',
       }
     : undefined;
 
@@ -3909,13 +3919,20 @@ const workDeliveryStatus = isWorkOffer
                     }}
                     onFocus={() => {
                       if (!isMobile && !isTablet) return;
-                      const scrollMessages = () => {
+                      const keepChatAnchored = () => {
+                        // iOS Safari may scroll the fixed page instead of the
+                        // internal message list when the keyboard opens.
+                        window.scrollTo(0, 0);
+                        document.documentElement.scrollTop = 0;
+                        document.body.scrollTop = 0;
                         const container = messagesScrollRef.current;
                         if (container) container.scrollTop = container.scrollHeight;
                       };
-                      window.requestAnimationFrame(scrollMessages);
-                      window.setTimeout(scrollMessages, 180);
-                      window.setTimeout(scrollMessages, 420);
+                      window.requestAnimationFrame(keepChatAnchored);
+                      window.setTimeout(keepChatAnchored, 80);
+                      window.setTimeout(keepChatAnchored, 220);
+                      window.setTimeout(keepChatAnchored, 480);
+                      window.setTimeout(keepChatAnchored, 760);
                     }}
                     autoComplete="off"
                     autoCorrect="off"

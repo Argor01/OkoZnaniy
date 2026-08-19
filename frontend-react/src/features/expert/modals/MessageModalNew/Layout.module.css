@@ -94,6 +94,9 @@
 
 .chatModalContainerMobile {
   flex-direction: column;
+  height: var(--chat-modal-vh, 100dvh);
+  max-height: var(--chat-modal-vh, 100dvh);
+  min-height: 0;
 }
 
 .chatMenuButton {
