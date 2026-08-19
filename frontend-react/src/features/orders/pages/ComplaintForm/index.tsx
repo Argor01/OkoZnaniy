@@ -10,6 +10,7 @@ import { AppButton, AppCard } from '@/components/ui';
 import { truncateDisplayName } from '@/utils/formatters';
 import { UserOutlined, DollarOutlined, NumberOutlined, BookOutlined, ReadOutlined, ClockCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { formatCurrency } from '@/utils/formatters';
+import { ORDER_STATUS_LABELS } from '@/utils/constants';
 import styles from './ComplaintForm.module.css';
 import { logger } from '@/utils/logger';
 import { useCurrentUser } from '@/hooks/queries';
