@@ -69,8 +69,10 @@ const OrderBids: React.FC<OrderBidsProps> = ({
               )}
               <List
                 className={styles.bidsList}
-                dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => ['active', 'invited', 'accepted'].includes(bid.status || 'active')) : []}
+                dataSource={Array.isArray(bids) ? bids.filter((bid: Bid) => bid?.id && bid?.expert?.id && ['active', 'invited', 'accepted'].includes(bid.status || 'active')) : []}
                 renderItem={(bid: Bid) => {
+                  const expert = bid?.expert;
+                  if (!expert?.id) return null;
                   const bidAmount = Number(bid.amount ?? 0);
                   const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
                   const bidAmountText = !Number.isFinite(bidAmount) || bidAmount === 0
@@ -82,7 +84,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                   const hasValidPrice = Number.isFinite(bidAmount) && bidAmount > 0;
                   const bidStatus = bid.status || 'active';
                   const isAssignedBid = bidStatus === 'accepted' || (
-                    order.expert?.id === bid.expert.id &&
+                    order.expert?.id === expert.id &&
                     ['awaiting_expert_acceptance', 'in_progress', 'review', 'revision', 'completed'].includes(order.status)
                   );
                   const canAssignBid = isOrderOwner && bidStatus === 'active' && !isAssignedBid && (
@@ -105,9 +107,10 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                             ? [
                                 <AppButton
                                   size={isMobile ? 'small' : 'middle'}
+                                  className={styles.bidActionButton}
                                   icon={<MessageOutlined />}
                                   onClick={async () => {
-                                    dashboard.openOrderChat(order.id, bid.expert.id);
+                                    dashboard.openOrderChat(order.id, expert.id);
                                   }}
                                 >
                                   Написать
@@ -116,10 +119,10 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                                   key="assign"
                                   size={isMobile ? 'small' : 'middle'}
                                   type="primary"
-                                  className={styles.assignButton}
-                                  loading={assigningExpertId === bid.expert.id}
+                                  className={`${styles.bidActionButton} ${styles.assignButton}`}
+                                  loading={assigningExpertId === expert.id}
                                   onClick={async () => {
-                                    onAssignExpert(bid.id, bid.expert.id, bid.expert.username);
+                                    onAssignExpert(bid.id, expert.id, expert.username || expert.display_username || 'Эксперт');
                                   }}
                                 >
                                   Назначить исполнителем
@@ -131,7 +134,7 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                                     size={isMobile ? 'small' : 'middle'}
                                     icon={<MessageOutlined />}
                                     onClick={async () => {
-                                      dashboard.openOrderChat(order.id, bid.expert.id);
+                                      dashboard.openOrderChat(order.id, expert.id);
                                     }}
                                   >
                                     Написать
@@ -144,15 +147,15 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                         avatar={
                           <Avatar
                             size={isMobile ? 48 : 64}
-                            src={bid.expert.avatar}
+                            src={expert.avatar}
                             icon={<UserOutlined />}
                             className={styles.bidAvatar}
                             onClick={() => {
-                              const username = bid.expert.username;
+                              const username = expert.username;
                               if (username) {
                                 navigate(`/user/${username}`);
                               } else {
-                                logger.error('Expert username not available:', bid.expert);
+                                logger.error('Expert username not available:', expert);
                                 message.error('Не удалось открыть профиль эксперта');
                               }
                             }}
@@ -164,26 +167,26 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                               <AppButton
                                 variant="link"
                                 onClick={() => {
-                                  const username = bid.expert.username;
+                                  const username = expert.username;
                                   if (username) {
                                     navigate(`/user/${username}`);
                                   } else {
-                                    logger.error('Expert username not available:', bid.expert);
+                                    logger.error('Expert username not available:', expert);
                                     message.error('Не удалось открыть профиль эксперта');
                                   }
                                 }}
                                 className={styles.bidUserLink}
                               >
-                                <Text strong>{getDisplayUsername(bid.expert)}</Text>
+                                <Text strong>{getDisplayUsername(expert)}</Text>
                               </AppButton>
                               <Space size={4} className={styles.bidRatingRow}>
                                 <StarOutlined className={styles.ratingStar} />
                                 <Text>{bid.expert_rating || 0}</Text>
                               </Space>
                             </Space>
-                            {bid.expert.bio && (
+                            {expert.bio && (
                               <Text type="secondary" className={styles.bidBio}>
-                                {bid.expert.bio}
+                                {expert.bio}
                               </Text>
                             )}
                           </Space>

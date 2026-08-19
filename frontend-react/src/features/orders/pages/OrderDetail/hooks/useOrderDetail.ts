@@ -83,7 +83,7 @@ export function useOrderDetail(orderId?: string) {
 
   const currentUserBid = useMemo(() => {
     if (!Array.isArray(bids)) return null;
-    return bids.find((bid: Bid) => bid.expert.id === userProfile?.id) ?? null;
+    return bids.find((bid: Bid) => bid?.expert?.id === userProfile?.id) ?? null;
   }, [bids, userProfile]);
 
   const userHasBid = useMemo(() => Boolean(currentUserBid), [currentUserBid]);
