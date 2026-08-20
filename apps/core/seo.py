@@ -81,7 +81,7 @@ def sitemap_xml(request):
     return HttpResponse("".join(parts), content_type="application/xml; charset=utf-8")
 
 
-def _render_html(title, description, canonical, jsonld, body_html):
+def _render_html(title, description, canonical, jsonld, body_html, og_type="website"):
     ld = json.dumps(jsonld, ensure_ascii=False)
     return HttpResponse(
         f"""<!DOCTYPE html>
@@ -93,7 +93,7 @@ def _render_html(title, description, canonical, jsonld, body_html):
 <meta name="description" content="{escape(description)}">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="{escape(canonical)}">
-<meta property="og:type" content="article">
+<meta property="og:type" content="{escape(og_type)}">
 <meta property="og:title" content="{escape(title)}">
 <meta property="og:description" content="{escape(description)}">
 <meta property="og:url" content="{escape(canonical)}">
@@ -159,7 +159,7 @@ def _render_question(question):
     )
     title = f"{question.title} — Око ответы"
     description = _truncate(question.description or (best.content if best else question.title))
-    return _render_html(title, description, canonical, jsonld, body)
+    return _render_html(title, description, canonical, jsonld, body, og_type="article")
 
 
 def _render_article(article):
@@ -187,7 +187,7 @@ def _render_article(article):
     )
     title = f"{article.title} — База знаний Око Знаний"
     description = _truncate(article.description or article.title)
-    return _render_html(title, description, canonical, jsonld, body)
+    return _render_html(title, description, canonical, jsonld, body, og_type="article")
 
 
 def _render_questions_list():
@@ -242,7 +242,7 @@ def _render_homepage():
             "name": "Око Знаний",
             "url": BASE_URL,
             "logo": f"{BASE_URL}/assets/logo.png",
-            "description": "Онлайн сервис помощи студентам: эксперты, база знаний, вопросы и ответы.",
+            "description": "Сервис помощи студентам: эксперты, база знаний, вопросы и ответы.",
             "address": {"@type": "PostalAddress", "addressCountry": "RU"},
             "contactPoint": {
                 "@type": "ContactPoint",
@@ -261,11 +261,37 @@ def _render_homepage():
                 "query-input": "required name=search_term_string",
             },
         },
+        {
+            "@context": "https://schema.org",
+            "@type": "SiteNavigationElement",
+            "name": "Навигация",
+            "url": BASE_URL,
+            "hasPart": [
+                {"@type": "SiteNavigationElement", "name": "Задания", "url": f"{BASE_URL}/orders-feed", "description": "Размещайте задания и получайте отклики от экспертов"},
+                {"@type": "SiteNavigationElement", "name": "Око Ответы", "url": f"{BASE_URL}/knowledge", "description": "Вопросы и ответы студентов и экспертов"},
+                {"@type": "SiteNavigationElement", "name": "База знаний", "url": f"{BASE_URL}/knowledge-base", "description": "Статьи, готовые работы и учебные материалы"},
+                {"@type": "SiteNavigationElement", "name": "Магазин работ", "url": f"{BASE_URL}/shop", "description": "Готовые курсовые, дипломные и рефераты к скачиванию"},
+                {"@type": "SiteNavigationElement", "name": "Станьте экспертом", "url": f"{BASE_URL}/become-expert", "description": "Получайте заказы и зарабатывайте на своих знаниях"},
+                {"@type": "SiteNavigationElement", "name": "Партнёрам", "url": f"{BASE_URL}/become-partner", "description": "Партнёрская программа — 25% с каждого заказа"},
+            ],
+        },
     ]
     body = """
     <article>
-      <h1>Око Знаний — помощь студентам онлайн</h1>
-      <p><strong>Око Знаний</strong> — онлайн-сервис помощи студентам. Разместите задание и получите помощь от профессиональных экспертов.</p>
+      <h1>Око Знаний — помощь студентам</h1>
+      <p><strong>Око Знаний</strong> — сервис помощи студентам. Разместите задание и получите помощь от профессиональных экспертов.</p>
+
+      <nav>
+        <h2>Разделы сайта</h2>
+        <ul>
+          <li><a href="{orders_feed}">Заказы</a> — Размещайте задания и получайте отклики от экспертов. Быстрое выполнение курсовых, дипломных и других работ.</li>
+          <li><a href="{knowledge}">Око Ответы</a> — Сервис вопросов и ответов для студентов и экспертов. Найдите готовый ответ или задайте свой вопрос.</li>
+          <li><a href="{knowledge_base}">База знаний</a> — Статьи и готовые учебные материалы по всем дисциплинам: курсовые, дипломные, рефераты.</li>
+          <li><a href="{shop}">Магазин работ</a> — Готовые курсовые, дипломные и рефераты к скачиванию с проверкой на антиплагиат.</li>
+          <li><a href="{become_expert}">Станьте экспертом</a> — Получайте заказы, повышайте рейтинг, зарабатывайте на своих знаниях.</li>
+          <li><a href="{become_partner}">Партнёрам</a> — Партнёрская программа: зарабатывайте 25% с каждого привлечённого заказа.</li>
+        </ul>
+      </nav>
 
       <h2>Как это работает</h2>
       <ol>
@@ -292,33 +318,18 @@ def _render_homepage():
         <li>База знаний с готовыми материалами и ответами</li>
         <li>Круглосуточная поддержка</li>
       </ul>
-
-      <h2>База знаний</h2>
-      <p>Бесплатный доступ к вопросам и ответам студентов и экспертов:
-        <a href="{knowledge}">Око Ответы</a> и
-        <a href="{articles}">База знаний</a>.
-      </p>
-
-      <h2>Для экспертов</h2>
-      <p>Станьте экспертом на Око Знаний:
-        <a href="{become_expert}">Узнать больше</a>.
-        Получайте заказы, повышайте рейтинг, зарабатывайте.
-      </p>
-
-      <h2>Для партнёров</h2>
-      <p>Партнёрская программа — зарабатывайте 25% с каждого заказа:
-        <a href="{become_partner}">Подключиться</a>.
-      </p>
     </article>
     """.format(
+        orders_feed=f"{BASE_URL}/orders-feed",
         knowledge=f"{BASE_URL}/knowledge",
-        articles=f"{BASE_URL}/knowledge-base",
+        knowledge_base=f"{BASE_URL}/knowledge-base",
+        shop=f"{BASE_URL}/shop",
         become_expert=f"{BASE_URL}/become-expert",
         become_partner=f"{BASE_URL}/become-partner",
     )
     title = "Око Знаний — помощь студентам | Курсовые, Дипломы, Рефераты"
     description = (
-        "Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене. "
+        "Сервис помощи студентам: быстро, надёжно, по выгодной цене. "
         "Разместите задание и получите помощь от профессиональных экспертов. "
         "Курсовые, дипломы, рефераты, контрольные работы."
     )
@@ -354,6 +365,6 @@ def prerender(request):
     body = "<h1>Око Знаний</h1><p>Помощь студентам, база знаний и ответы экспертов.</p>"
     return _render_html(
         "Око Знаний — помощь студентам, база знаний и ответы экспертов",
-        "Онлайн-сервис помощи студентам: эксперты, база знаний, вопросы и ответы.",
+        "Сервис помощи студентам: эксперты, база знаний, вопросы и ответы.",
         BASE_URL, jsonld, body,
     )

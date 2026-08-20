@@ -15,7 +15,7 @@ const FirstScreen: React.FC = () => {
         <div className={styles.firstScreenWrapper}>
           <div ref={contentRef} className={styles.firstScreenContent}>
             <h1 className={styles.firstScreenContentTitle}>
-              Онлайн сервис помощи студентам: быстро, надёжно, по выгодной цене
+              Сервис помощи студентам: быстро, надёжно, по выгодной цене
             </h1>
             <div className={styles.firstScreenContentDescripton}>
               Экономьте время: Разместите задание, и эксперт быстро поможет с консультацией
