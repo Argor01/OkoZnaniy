@@ -7,13 +7,13 @@ const Footer: React.FC = () => (
     <div className={landingStyles.mcontainer}>
       <div className={styles.footerWrapper}>
         <div className={styles.footerContacts}>
-          <a className={styles.footerContactsLink} href="mailto:support@site.ru">
+          <a className={styles.footerContactsLink} href="mailto:support@okoznaniy.ru">
             <img className={styles.footerContactsLinkIcon} src="/assets/icons/email.svg" alt="email" />
-            <span className={styles.footerContactsLinkText}>support@site.ru</span>
+            <span className={styles.footerContactsLinkText}>support@okoznaniy.ru</span>
           </a>
-          <a className={styles.footerContactsLink} href="tel:88003243423">
+          <a className={styles.footerContactsLink} href="tel:88005007857">
             <img className={styles.footerContactsLinkIcon} src="/assets/icons/phone.svg" alt="phone" />
-            <span className={styles.footerContactsLinkText}>8 800 ( 324 ) - 34 -23</span>
+            <span className={styles.footerContactsLinkText}>8 800 500-78-57</span>
           </a>
         </div>
 
@@ -22,6 +22,9 @@ const Footer: React.FC = () => (
           <a className={styles.footerDocumentsLink} href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer">Согласие на обработку ПД</a>
           <a className={styles.footerDocumentsLink} href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Клиент)</a>
           <a className={styles.footerDocumentsLink} href="/docs/user_agreement_expert.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Эксперт)</a>
+          <a className={styles.footerDocumentsLink} href="/offer">Договор оферты</a>
+          <a className={styles.footerDocumentsLink} href="/payment-and-refund">Оплата и возврат</a>
+          <a className={styles.footerDocumentsLink} href="/contacts">Контакты и реквизиты</a>
         </div>
       </div>
     </div>

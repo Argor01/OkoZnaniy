@@ -38,6 +38,9 @@ def robots_txt(request):
         "Allow: /knowledge-base",
         "Allow: /become-expert",
         "Allow: /become-partner",
+        "Allow: /contacts",
+        "Allow: /offer",
+        "Allow: /payment-and-refund",
         "Disallow: /api/",
         "Disallow: /django-admin/",
         "Disallow: /admin",
@@ -71,6 +74,9 @@ def sitemap_xml(request):
         _url_node(f"{BASE_URL}/knowledge", changefreq="daily", priority="0.9"),
         _url_node(f"{BASE_URL}/knowledge-base", changefreq="daily", priority="0.9"),
         _url_node(f"{BASE_URL}/become-expert", changefreq="monthly", priority="0.7"),
+        _url_node(f"{BASE_URL}/contacts", changefreq="yearly", priority="0.4"),
+        _url_node(f"{BASE_URL}/offer", changefreq="yearly", priority="0.4"),
+        _url_node(f"{BASE_URL}/payment-and-refund", changefreq="yearly", priority="0.4"),
         _url_node(f"{BASE_URL}/become-partner", changefreq="monthly", priority="0.7"),
     ]
     for q in Question.objects.only("id", "updated_at").iterator():

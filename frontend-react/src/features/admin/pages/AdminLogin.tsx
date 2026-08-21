@@ -341,6 +341,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
           </Form.Item>
         </Form>
 
+        {import.meta.env.DEV && (
         <>
           <Divider className={styles.adminLoginDivider}>
             Быстрый вход
@@ -369,6 +370,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             </div>
           </div>
         </>
+        )}
       </Card>
     </div>
   );

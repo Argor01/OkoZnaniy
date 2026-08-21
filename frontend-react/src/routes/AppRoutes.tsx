@@ -15,6 +15,7 @@ import { shopRoutes } from './shopRoutes';
 import { supportRoutes } from './supportRoutes';
 import { knowledgeRoutes } from './knowledgeRoutes';
 import { walletRoutes } from './walletRoutes';
+import { legalRoutes } from './legalRoutes';
 
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
@@ -56,6 +57,9 @@ export const AppRoutes: React.FC = () => {
 
       {/* Wallet Routes */}
       {walletRoutes}
+
+      {/* Правовые страницы: реквизиты, оферта, оплата и возврат */}
+      {legalRoutes}
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />

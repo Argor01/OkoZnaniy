@@ -6,6 +6,7 @@ import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import { authApi } from '@/features/auth/api/auth';
 import { ROUTES } from '@/utils/constants';
+import { COMPANY, PAYMENT_SYSTEMS } from '@/features/legal/companyInfo';
 import styles from './AppFooter.module.css';
 
 const { Footer } = Layout;
@@ -112,6 +113,9 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
               <a href="/#about" className={styles.link}>О компании</a>
               <a href={agreementLink} target="_blank" rel="noopener noreferrer" className={styles.link}>Пользовательское соглашение</a>
               <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer" className={styles.link}>Политика конфиденциальности</a>
+              <a href="/offer" className={styles.link}>Договор оферты</a>
+              <a href="/payment-and-refund" className={styles.link}>Оплата и возврат</a>
+              <a href="/contacts" className={styles.link}>Контакты и реквизиты</a>
             </div>
           </div>
 
@@ -155,6 +159,17 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
               </button>
             </div>
           )}
+        </div>
+
+        <div className={styles.legalStrip}>
+          <div className={styles.paySystems}>
+            {PAYMENT_SYSTEMS.map((s) => (
+              <img key={s.alt} src={s.src} alt={s.alt} loading="lazy" />
+            ))}
+          </div>
+          <div className={styles.requisitesLine}>
+            {COMPANY.shortName} · ОГРН {COMPANY.ogrn} · ИНН {COMPANY.inn} · {COMPANY.legalAddress}
+          </div>
         </div>
 
         <div className={styles.copyright}>

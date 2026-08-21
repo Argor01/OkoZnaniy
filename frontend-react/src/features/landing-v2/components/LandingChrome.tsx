@@ -114,6 +114,9 @@ export const FooterDark: React.FC = () => (
           <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer">Согласие на обработку ПД</a>
           <a href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Клиент)</a>
           <a href="/docs/user_agreement_expert.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Эксперт)</a>
+          <a href="/offer">Договор оферты</a>
+          <a href="/payment-and-refund">Оплата и возврат</a>
+          <a href="/contacts">Контакты и реквизиты</a>
         </div>
       </div>
       <div className={styles.footerBottom}>
