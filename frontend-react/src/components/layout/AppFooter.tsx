@@ -164,7 +164,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
         <div className={styles.legalStrip}>
           <div className={styles.paySystems}>
             {PAYMENT_SYSTEMS.map((s) => (
-              <img key={s.alt} src={s.src} alt={s.alt} loading="lazy" />
+              <img key={s.alt} src={s.src} alt={s.alt} />
             ))}
           </div>
           <div className={styles.requisitesLine}>

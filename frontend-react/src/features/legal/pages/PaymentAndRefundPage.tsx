@@ -33,7 +33,7 @@ const PaymentAndRefundPage: React.FC = () => (
       <h3>Принимаемые карты</h3>
       <div className={styles.logos}>
         {PAYMENT_SYSTEMS.map((s) => (
-          <img key={s.alt} src={s.src} alt={s.alt} loading="lazy" />
+          <img key={s.alt} src={s.src} alt={s.alt} />
         ))}
       </div>
       <p>

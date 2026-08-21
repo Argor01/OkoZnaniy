@@ -67,7 +67,7 @@ const ContactsPage: React.FC = () => (
       <h2>Принимаем к оплате</h2>
       <div className={styles.logos}>
         {PAYMENT_SYSTEMS.map((s) => (
-          <img key={s.alt} src={s.src} alt={s.alt} loading="lazy" />
+          <img key={s.alt} src={s.src} alt={s.alt} />
         ))}
       </div>
     </section>
