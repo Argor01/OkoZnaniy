@@ -508,7 +508,6 @@
   align-items: flex-start !important;
   transition: all 0.2s ease;
   position: relative;
-  overflow: hidden;
 }
 
 .bidItem:hover,
@@ -955,7 +954,7 @@
   .expertOfferGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .orderActionsSection {
     margin-top: 12px;
   }
@@ -973,6 +972,7 @@
 
   .bidChipsRow {
     justify-content: flex-start;
+    align-items: flex-start;
     gap: 8px;
   }
 
@@ -983,6 +983,28 @@
   .bidRatingRow {
     position: static;
     margin-left: 0;
+  }
+
+  .bidActionButton {
+    height: 36px !important;
+    min-height: 36px;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    line-height: 1 !important;
+  }
+
+  .assignButton {
+    height: 36px !important;
+    line-height: 1 !important;
+  }
+
+  .bidAmountTag,
+  .bidPrepaymentTag {
+    width: fit-content;
+    max-width: 100%;
   }
 }
 
@@ -1122,33 +1144,7 @@
 }
 
 @media (max-width: 768px) {
-  .bidItem,
-  .bidItemSelected {
-    display: flex !important;
-    flex-direction: column;
-    align-items: stretch !important;
-  }
-
-  .bidItem :global(.ant-list-item-action),
-  .bidItemSelected :global(.ant-list-item-action) {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-    margin-left: 0;
-    margin-top: 12px;
-    gap: 8px;
-  }
-
-  .bidItem :global(.ant-list-item-action > li),
-  .bidItemSelected :global(.ant-list-item-action > li) {
-    padding: 0;
-    margin: 0;
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
   .bidActionButton {
-    width: 100%;
     height: 36px !important;
     min-height: 36px;
     padding: 0 12px !important;
@@ -1157,14 +1153,10 @@
     align-items: center;
     justify-content: center;
     line-height: 1 !important;
-    white-space: nowrap;
   }
 
   .assignButton {
-    width: 100%;
-    min-width: 0;
     height: 36px !important;
-    white-space: nowrap !important;
     line-height: 1 !important;
   }
 
