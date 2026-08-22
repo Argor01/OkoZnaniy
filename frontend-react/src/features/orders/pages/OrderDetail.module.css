@@ -643,6 +643,12 @@
   color: var(--text-primary);
 }
 
+:global([data-theme="dark"]) .bidComment {
+  background: color-mix(in srgb, rgba(124, 58, 237, 0.15) 42%, #1a1d27 58%);
+  border-color: color-mix(in srgb, rgba(124, 58, 237, 0.3) 58%, #1a1d27 42%);
+  color: var(--color-text-base, #cbd5e1);
+}
+
 .bidAction,
 .statusTagWrap {
   display: flex;
@@ -1080,6 +1086,33 @@
   white-space: normal;
   overflow-wrap: anywhere;
   line-height: 1.3;
+}
+
+@media (max-width: 1024px) {
+  .bidItem,
+  .bidItemSelected {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .bidItem :global(.ant-list-item-action),
+  .bidItemSelected :global(.ant-list-item-action) {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-left: 0;
+  }
+
+  .bidItem :global(.ant-list-item-action > li),
+  .bidItemSelected :global(.ant-list-item-action > li) {
+    padding: 0;
+    margin: 0;
+  }
+
+  .bidActionButton {
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 768px) {

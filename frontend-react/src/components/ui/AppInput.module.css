@@ -22,9 +22,19 @@
   border: 1px solid var(--border-color, #d9d9d9);
 }
 
+:global([data-theme="dark"]) .default {
+  background: var(--color-bg-input, #1e2230);
+  border-color: var(--color-border-base, #2d3348);
+  color: var(--color-text-base, #cbd5e1);
+}
+
 .filled {
   background: #f3f4f6;
   border: 1px solid transparent;
+}
+
+:global([data-theme="dark"]) .filled {
+  background: var(--color-bg-elevated, #22262f);
 }
 
 .filled:hover,
@@ -32,4 +42,11 @@
 .filled:focus-within,
 .filled:global(.ant-input-number-focused) {
   background: #fff;
+}
+
+:global([data-theme="dark"]) .filled:hover,
+:global([data-theme="dark"]) .filled:focus,
+:global([data-theme="dark"]) .filled:focus-within,
+:global([data-theme="dark"]) .filled:global(.ant-input-number-focused) {
+  background: var(--color-bg-input, #1e2230);
 }

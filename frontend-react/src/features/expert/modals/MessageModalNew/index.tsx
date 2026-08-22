@@ -3900,9 +3900,7 @@ const workDeliveryStatus = isWorkOffer
                 </div>
               )}
               
-              <div 
-                className={`${styles.chatInputRow} ${isMobile ? styles.chatInputRowMobile : ''}`}
-              >
+              <div className={`${styles.chatInputContainer2} ${isMobile ? styles.chatInputContainer2Mobile : ''}`}>
                 <div className={styles.chatInputField}>
                   <Input.TextArea
                     ref={messageInputRef}
@@ -3920,8 +3918,6 @@ const workDeliveryStatus = isWorkOffer
                     onFocus={() => {
                       if (!isMobile && !isTablet) return;
                       const keepChatAnchored = () => {
-                        // iOS Safari may scroll the fixed page instead of the
-                        // internal message list when the keyboard opens.
                         window.scrollTo(0, 0);
                         document.documentElement.scrollTop = 0;
                         document.body.scrollTop = 0;
@@ -3943,35 +3939,8 @@ const workDeliveryStatus = isWorkOffer
                     disabled={sending}
                   />
                 </div>
-                
-                <div className={`${styles.chatInputActions} ${isMobile ? styles.chatInputActionsMobile : ''}`}>
-                  <Popover
-                    overlayClassName={styles.chatEmojiPopover}
-                    content={
-                      <EmojiPicker
-                        onEmojiClick={handleEmojiClick}
-                        width={isMobile && typeof window !== 'undefined' ? Math.min(336, Math.max(280, window.innerWidth - 32)) : 320}
-                        height={isMobile ? 320 : 380}
-                        emojiVersion={emojiVersion as any}
-                        theme={isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
-                      />
-                    }
-                    trigger="click"
-                    open={emojiPickerOpen}
-                    onOpenChange={setEmojiPickerOpen}
-                    placement={isMobile ? 'top' : 'topRight'}
-                    getPopupContainer={() => document.body}
-                    zIndex={1060}
-                  >
-                    <Button
-                      type="default"
-                      icon={<SmileOutlined />}
-                      className={`${styles.chatEmojiButton} ${isMobile ? styles.chatEmojiButtonMobile : ''}`}
-                      disabled={sending}
-                      title="Добавить эмодзи"
-                    />
-                  </Popover>
-                  
+
+                <div className={`${styles.chatInputActions2} ${isMobile ? styles.chatInputActions2Mobile : ''}`}>
                   <Upload
                     beforeUpload={handleFileSelect}
                     showUploadList={false}
@@ -3979,24 +3948,53 @@ const workDeliveryStatus = isWorkOffer
                     accept=".doc,.docx,.pdf,.rtf,.txt,.odt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.gif,.bmp,.svg,.zip,.rar,.7z"
                   >
                     <Button
-                      type="default"
+                      type="text"
                       icon={<PaperClipOutlined />}
-                      className={`${styles.chatAttachButton} ${isMobile ? styles.chatAttachButtonMobile : ''}`}
+                      className={`${styles.chatAttachButton2} ${isMobile ? styles.chatAttachButton2Mobile : ''}`}
                       disabled={sending}
                       title="Прикрепить файл"
                     />
                   </Upload>
 
-                  <Button
-                    type="primary"
-                    icon={<SendOutlined />}
-                    className={`${styles.chatSendButton} ${isMobile ? styles.chatSendButtonMobile : ''} ${
-                      (!hasVisibleMessageContent(messageText) && attachedFiles.length === 0) ? styles.chatSendButtonDisabled : ''
-                    }`}
-                    onClick={sendMessage}
-                    loading={sending}
-                    disabled={!hasVisibleMessageContent(messageText) && attachedFiles.length === 0}
-                  />
+                  <div className={styles.chatInputActions2Right}>
+                    <Popover
+                      overlayClassName={styles.chatEmojiPopover}
+                      content={
+                        <EmojiPicker
+                          onEmojiClick={handleEmojiClick}
+                          width={isMobile && typeof window !== 'undefined' ? Math.min(336, Math.max(280, window.innerWidth - 32)) : 320}
+                          height={isMobile ? 320 : 380}
+                          emojiVersion={emojiVersion as any}
+                          theme={isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                        />
+                      }
+                      trigger="click"
+                      open={emojiPickerOpen}
+                      onOpenChange={setEmojiPickerOpen}
+                      placement={isMobile ? 'top' : 'topRight'}
+                      getPopupContainer={() => document.body}
+                      zIndex={1060}
+                    >
+                      <Button
+                        type="text"
+                        icon={<SmileOutlined />}
+                        className={`${styles.chatEmojiButton2} ${isMobile ? styles.chatEmojiButton2Mobile : ''}`}
+                        disabled={sending}
+                        title="Добавить эмодзи"
+                      />
+                    </Popover>
+
+                    <Button
+                      type="primary"
+                      icon={<SendOutlined />}
+                      className={`${styles.chatSendButton2} ${isMobile ? styles.chatSendButton2Mobile : ''} ${
+                        (!hasVisibleMessageContent(messageText) && attachedFiles.length === 0) ? styles.chatSendButton2Disabled : ''
+                      }`}
+                      onClick={sendMessage}
+                      loading={sending}
+                      disabled={!hasVisibleMessageContent(messageText) && attachedFiles.length === 0}
+                    />
+                  </div>
                 </div>
               </div>
 
