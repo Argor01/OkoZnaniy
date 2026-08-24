@@ -21,6 +21,7 @@ from .serializers import (
 from .models import WithdrawalRequest
 from .policy import money, percent, ACQUIRING_FEE_PERCENT
 from .services import WalletService, InsufficientFunds
+from apps.verification.services import VerificationRequired, ensure_can_withdraw
 
 MIN_WITHDRAWAL = Decimal('100.00')
 MAX_WITHDRAWAL = Decimal('500000.00')
@@ -148,6 +149,13 @@ class WalletViewSet(viewsets.ViewSet):
             return Response(
                 {'detail': f'Дневной лимит вывода превышен. Осталось: {MAX_WITHDRAWAL - daily_withdrawn} ₽'},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            ensure_can_withdraw(request.user)
+        except VerificationRequired as e:
+            return Response(
+                {'detail': e.message, 'code': e.code},
+                status=status.HTTP_403_FORBIDDEN,
             )
         digits = ser.validated_data['card_number']
         masked = '**** **** **** ' + digits[-4:]

@@ -90,6 +90,7 @@ INSTALLED_APPS = [
     'apps.knowledge',
     'apps.payments',
     'apps.wallet',
+    'apps.verification',
     'apps.regression_tests',
 ]
 
@@ -563,3 +564,17 @@ LOGGING = {
 }
 # Ready-work moderation can be re-enabled later without code changes.
 READY_WORK_MODERATION_ENABLED = os.getenv('READY_WORK_MODERATION_ENABLED', 'False') == 'True'
+
+
+# --- Верификация получателей выплат -------------------------------------
+# Пока False — анкеты собираются, но выплаты не блокируются.
+# Переключить в True, когда эксперты успеют пройти верификацию.
+WITHDRAWAL_REQUIRES_VERIFICATION = os.getenv("WITHDRAWAL_REQUIRES_VERIFICATION") == "True"
+
+# Если ФНС недоступна, статус самозанятого выяснить нельзя.
+# True — выплату пропускаем (приоритет доступности),
+# False — блокируем до восстановления сервиса (приоритет строгости).
+ALLOW_WITHDRAWAL_WHEN_FNS_DOWN = os.getenv("ALLOW_WITHDRAWAL_WHEN_FNS_DOWN", "True") == "True"
+
+# Насколько долго доверяем прошлому ответу ФНС, минут.
+NPD_CACHE_MINUTES = int(os.getenv("NPD_CACHE_MINUTES", "60"))

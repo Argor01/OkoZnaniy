@@ -46,6 +46,7 @@ urlpatterns = [
     path('api/knowledge/', include('apps.knowledge.urls')),
     path('api/payments/', include('apps.payments.urls')),
     path('api/wallet/', include('apps.wallet.urls')),
+    path('api/verification/', include('apps.verification.urls')),
     path("api/accounts/", include("allauth.urls")),
 ]
 
