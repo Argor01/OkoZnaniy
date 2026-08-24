@@ -25,6 +25,8 @@ export interface Message {
     title?: string;
     delivery_status?: 'pending' | 'awaiting_upload' | 'delivered' | 'accepted' | 'rejected';
     delivered_message_id?: number;
+    files?: Array<{ id?: number; name?: string; url?: string; file?: string }>;
+    revision_comment?: string;
   } | null;
 }
 

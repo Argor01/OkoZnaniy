@@ -3,6 +3,9 @@
 """
 import secrets
 import string
+import logging
+
+logger = logging.getLogger(__name__)
 from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
@@ -60,7 +63,7 @@ def send_password_reset_code(email, code):
         )
         return True
     except Exception as e:
-        print(f"Error sending password reset email: {e}")
+        logger.exception("Password reset email delivery failed")
         return False
 
 

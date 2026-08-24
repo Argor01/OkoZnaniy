@@ -197,6 +197,7 @@ export interface NetProfit {
   total: number;
   income: number;
   expense: number;
+  expert_payments?: number;
   previous_period?: number;
   previousPeriod?: number;
   change?: number;

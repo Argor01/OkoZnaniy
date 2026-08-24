@@ -304,6 +304,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     openNotificationsModal: () => { closeAllModals(); setNotificationsModalVisible(true); },
     openArbitrationModal: () => { closeAllModals(); setArbitrationModalVisible(true); },
     openFinanceModal: () => { closeAllModals(); setFinanceModalVisible(true); },
+    openFriendsModal: () => { closeAllModals(); navigate('/friends'); },
     openFaqModal: () => { closeAllModals(); setFaqModalVisible(true); },
     openFriendProfileModal: (friend: User) => {
         closeAllModals();

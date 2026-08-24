@@ -1,6 +1,7 @@
 export interface UserProfile {
   id: number;
   username: string;
+  display_username?: string;
   email: string;
   first_name: string;
   last_name: string;

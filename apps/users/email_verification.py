@@ -220,7 +220,7 @@ def verify_code(email, code):
         return True, "Email успешно подтвержден", user
         
     except Exception as e:
-        print(f"Ошибка проверки кода: {e}")
+        logger.exception("Email verification code check failed")
         return False, "Ошибка проверки кода", None
 
 

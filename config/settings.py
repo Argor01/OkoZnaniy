@@ -276,6 +276,9 @@ SESSION_CACHE_ALIAS = 'default'
 
 # Настройки Redis для Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0'))
+if TESTING:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

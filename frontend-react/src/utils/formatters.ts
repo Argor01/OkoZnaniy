@@ -171,7 +171,7 @@ const getStableAnonymousNumber = (user: {
   display_username?: string | null;
   email?: string | null;
 }): number => {
-  const seedSource = `${user.id ?? ''}|${user.username ?? ''}|${user.email ?? ''}` || 'user';
+  const seedSource = `${user.id ?? ''}|${user.username ?? ''}|${user.email ?? ''}`;
   const digest = sha256Hex(seedSource);
   return 1000 + (parseInt(digest.slice(0, 8), 16) % 9000);
 };

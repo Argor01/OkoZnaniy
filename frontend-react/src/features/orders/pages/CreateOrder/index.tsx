@@ -24,6 +24,8 @@ import { logger } from '@/utils/logger';
 
 const { Title } = Typography;
 
+interface DeadlineTimeValues { hours: number; minutes: number }
+
 interface CreateOrderFormValues {
   title: string;
   description: string;

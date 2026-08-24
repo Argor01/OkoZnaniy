@@ -113,7 +113,7 @@ export const KnowledgeBaseSection: React.FC = () => {
 
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [resolveDeletionId, setResolveDeletionId] = useState<number | null>(null);
-  const [resolveDecision, setResolveDecision] = useState<string>('upheld');
+  const [resolveDecision, setResolveDecision] = useState<'upheld' | 'restored'>('upheld');
   const [resolveResponse, setResolveResponse] = useState('');
   const [resolveLoading, setResolveLoading] = useState(false);
 

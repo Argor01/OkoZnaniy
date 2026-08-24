@@ -230,7 +230,7 @@ class UserViewSet(viewsets.ModelViewSet):
         # Логируем ошибки валидации для дебага 400 ошибок
         logger.error(f"[Registration] Validation errors: {serializer.errors}")
         try:
-            print("[User Registration] validation errors:", serializer.errors)
+            logger.warning("User registration validation failed")
         except Exception:
             pass
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -1596,33 +1596,11 @@ from django.core.cache import cache
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def telegram_auth_status(request, auth_id):
-    """Проверка статуса авторизации через Telegram"""
-    print(f"🔍 API: Проверяем auth_id: {auth_id}")
-    
-    # Убираем префикс auth_ если он есть, так как бот уже убрал его при сохранении
+    """Return Telegram authentication status without logging tokens or cache contents."""
     clean_auth_id = auth_id.replace('auth_', '', 1) if auth_id.startswith('auth_') else auth_id
-    cache_key = f'telegram_auth_{clean_auth_id}'
-    print(f"🔑 API: Cache key: {cache_key}")
-    
-    # Проверяем все ключи в Redis для отладки
-    from django_redis import get_redis_connection
-    try:
-        redis_conn = get_redis_connection("default")
-        all_keys = redis_conn.keys('telegram_auth_*')
-        print(f"🗝️ API: Все ключи в Redis: {[k.decode() if isinstance(k, bytes) else k for k in all_keys]}")
-    except Exception as e:
-        print(f"❌ API: Ошибка получения ключей из Redis: {e}")
-    
-    auth_data = cache.get(cache_key)
-    print(f"📦 API: Cache data: {auth_data}")
-    
+    auth_data = cache.get(f'telegram_auth_{clean_auth_id}')
     if auth_data:
-        print(f"✅ API: Возвращаем authenticated=True")
-        # НЕ удаляем сразу - пусть истечет через 5 минут
-        # Это позволяет фронту получить данные даже если первый запрос не сработал
         return Response(auth_data, status=status.HTTP_200_OK)
-    
-    print(f"❌ API: Возвращаем authenticated=False")
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
 
 

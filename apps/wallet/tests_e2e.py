@@ -1,11 +1,12 @@
 from datetime import timedelta
 from decimal import Decimal
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase,override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 from apps.catalog.models import Subject,WorkType
-from apps.orders.models import Bid,Order,Transaction,TransactionType
+from apps.orders.models import Bid,Order,OrderFile,Transaction,TransactionType
 from apps.payments.models import Payment
 from apps.shop.models import Purchase,ReadyWork
 from apps.users.models import PartnerEarning
@@ -45,7 +46,7 @@ class WalletInteractionE2E(TestCase):
   self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/accept_bid/',{'bid_id':b.id},format='json'); self.assertEqual(r.status_code,200,r.content)
   self.auth(self.e); r=self.api.post(f'/api/orders/orders/{o.id}/accept_assignment/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual(self.c.frozen_balance,0); self.assertEqual(self.e.frozen_balance,500); self.assertEqual(self.p.frozen_balance,125)
   self.auth(self.c); r=self.api.post(f'/api/orders/orders/{o.id}/pay-remaining/',{},format='json'); self.assertEqual(r.status_code,200,r.content); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual(self.c.frozen_balance,0); self.assertEqual(self.e.frozen_balance,1000); self.assertEqual(self.p.frozen_balance,250)
-  o.status='review'; o.save(update_fields=['status']); r=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(r.status_code,200,r.content)
+  o.status='review'; o.save(update_fields=['status']); OrderFile.objects.create(order=o,file=SimpleUploadedFile('solution.txt', b'solution'),file_type='solution',uploaded_by=self.e,client_downloaded_at=timezone.now()); r=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(r.status_code,200,r.content)
   self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db(); self.assertEqual((self.c.balance,self.c.frozen_balance,self.e.balance,self.p.balance),(0,0,1000,250)); pe=PartnerEarning.objects.get(order=o); self.assertTrue(pe.is_paid)
  def test_partial_order_cannot_release(self):
   WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,expert=self.e,subject=self.s,work_type=self.wt,title='partial',description='partial',budget=1000,deadline=timezone.now()+timedelta(days=5),status='review'); WalletService.hold(self.c,625,order=o)
@@ -62,7 +63,7 @@ class WalletInteractionE2E(TestCase):
   self.c.refresh_from_db(); self.assertEqual(self.c.balance,0); self.assertFalse(WithdrawalRequest.objects.filter(user=self.c).exists())
  def test_completed_order_refund_claws_back_partner_and_creates_expert_debt(self):
   WalletService.topup(self.c,1250); o=Order.objects.create(client=self.c,expert=self.e,subject=self.s,work_type=self.wt,title='refund later',description='refund',budget=1000,deadline=timezone.now()+timedelta(days=2),status='review'); WalletService.fund_distributed_escrow(client=self.c,expert=self.e,base_amount=1000,service_fee=250,fund_amount=1250,order=o)
-  self.auth(self.c); done=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(done.status_code,200,done.content)
+  OrderFile.objects.create(order=o,file=SimpleUploadedFile('solution.txt', b'solution'),file_type='solution',uploaded_by=self.e,client_downloaded_at=timezone.now()); self.auth(self.c); done=self.api.post(f'/api/orders/orders/{o.id}/approve/',{},format='json'); self.assertEqual(done.status_code,200,done.content)
   st=o.wallet_settlement; self.e.refresh_from_db(); self.e.balance=0; self.e.save(update_fields=['balance'])
   result=WalletService.clawback_settlement(st,50,description='E2E поздний возврат')
   self.assertEqual(result['refund'],Decimal('625')); self.c.refresh_from_db(); self.e.refresh_from_db(); self.p.refresh_from_db()

@@ -7,9 +7,10 @@ import {
   HistoryOutlined, MessageOutlined, PlusOutlined, RightOutlined, RiseOutlined,
   RocketOutlined, ShoppingOutlined, StarFilled, ThunderboltOutlined, TrophyOutlined,
   WalletOutlined,
-  AppstoreOutlined, BankOutlined, GiftOutlined, SettingOutlined as _SettingOutlined, FileTextOutlined as _FileTextOutlined,
+  AppstoreOutlined, SettingOutlined as _SettingOutlined, FileTextOutlined as _FileTextOutlined,
+  ArrowUpOutlined, ArrowDownOutlined, MailOutlined, PhoneOutlined,
 } from '@ant-design/icons';
-import { App, Avatar, Button, Empty, message, Skeleton, Tag, Tooltip, Typography } from 'antd';
+import { App, Avatar, Button, Empty, Input, message, Skeleton, Tag, Tooltip, Typography } from 'antd';
 import { Segmented } from 'antd';
 import { apiClient } from '@/api/client';
 import { truncateDisplayName } from '@/utils/formatters';
@@ -201,6 +202,10 @@ const ProfileV2: React.FC = () => {
     + (me?.last_name?.[0] || '').toUpperCase();
 
   const achievementContext = { daysOnSite, orders: total, completed };
+  const user = me ?? {};
+  const txsAll: Array<any> = Array.isArray(txs) ? txs : [];
+  const achievements = ACHIEVEMENTS.map((item) => ({ key: item.key, icon: item.icon, title: item.name, desc: item.hint, unlocked: item.cond(achievementContext) }));
+  const statusPill = (status: string) => <Tag>{status || '—'}</Tag>;
 
   if (meQ.isLoading) {
     return (

@@ -11,6 +11,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
@@ -20,7 +21,7 @@ from apps.arbitration.models import ArbitrationCase
 from apps.catalog.models import Subject, WorkType
 from apps.chat.models import Chat, Message
 from apps.chat.services import ContactDetectionService
-from apps.orders.models import Order, Transaction, TransactionType
+from apps.orders.models import Order, OrderFile, Transaction, TransactionType
 from apps.wallet.services import WalletService
 from apps.wallet.policy import order_quote
 
@@ -260,6 +261,7 @@ class LinkedIndividualOfferTests(TestCase):
 
         order.status = "review"
         order.save(update_fields=["status", "updated_at"])
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type="solution", uploaded_by=self.expert_user, client_downloaded_at=timezone.now())
         approve_response = self.api_client.post(
             f"/api/orders/orders/{order.id}/approve/", {}, format="json"
         )

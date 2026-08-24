@@ -1,6 +1,9 @@
 from django.db.models import Avg, Count, Q, Sum, F, ExpressionWrapper, FloatField
 from django.utils import timezone
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import ExpertStatistics, Specialization
 from apps.orders.models import Order
 
@@ -259,7 +262,7 @@ class ExpertStatisticsService:
                 ExpertStatisticsService.update_expert_statistics(expert)
                 updated_count += 1
             except Exception as e:
-                print(f"Ошибка обновления статистики эксперта {expert.id}: {str(e)}")
+                logger.exception("Expert statistics update failed for %s", expert.id)
         return updated_count
 
 
@@ -492,7 +495,7 @@ class ExpertOrderService:
         try:
             NotificationService.notify_expert_assigned(order)
         except Exception as e:
-            print(f"Ошибка отправки уведомления: {str(e)}")
+            logger.exception("Expert notification delivery failed")
         
         return True, 'Заказ успешно взят в работу'
 

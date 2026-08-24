@@ -11,6 +11,7 @@ from datetime import timedelta
 from unittest.mock import patch, MagicMock
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
 from django.db import transaction as db_tx
 from django.db import IntegrityError
@@ -21,7 +22,7 @@ from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType, DiscountRule
 from apps.orders.models import (
-    Bid, BidStatus, Order, Transaction, TransactionType,
+    Bid, BidStatus, Order, OrderFile, Transaction, TransactionType,
 )
 from apps.payments.models import Payment, PaymentMethod, PaymentStatus
 from apps.payments.services import PaymentService
@@ -373,6 +374,7 @@ class OrderLifecycleTests(TestCase):
         order = self._order(status='review', expert=self.expert)
         WalletService.hold(self.client_u, Decimal('625'), order=order)
         self.api.force_authenticate(self.client_u)
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type='solution', uploaded_by=self.expert, client_downloaded_at=timezone.now())
         resp = self.api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(resp.status_code, http.HTTP_200_OK, resp.content)
         order.refresh_from_db()
@@ -853,6 +855,7 @@ class FullE2EFlowTests(TestCase):
 
         # 5. Client approves → release
         api.force_authenticate(client_u)
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type='solution', uploaded_by=expert, client_downloaded_at=timezone.now())
         resp = api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(resp.status_code, http.HTTP_200_OK, resp.content)
 

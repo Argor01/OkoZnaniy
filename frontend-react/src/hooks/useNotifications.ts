@@ -99,13 +99,13 @@ export const useNotifications = () => {
 
   useWebSocket({
     onNotification: handleLiveNotification,
-    onConnect: loadNotifications,
+    onConnect: (): void => { void loadNotifications(); },
   });
 
   useEffect(() => {
     void loadNotifications();
     const interval = window.setInterval(loadNotifications, 10000);
-    const refresh = () => void loadNotifications();
+    const refresh = (): void => { void loadNotifications(); };
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
     return () => {

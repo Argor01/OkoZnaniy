@@ -117,6 +117,7 @@ export const articlesApi = {
     search?: string;
     work_type?: string;
     subject?: string;
+    author_id?: number;
   }): Promise<Article[]> => {
     const response = await apiClient.get('/knowledge/articles/', { params });
     return response.data.results || response.data;
@@ -226,7 +227,7 @@ export const knowledgeApi = {
     return response.data;
   },
 
-  toggleLike: async (answerId: number): Promise<{ liked: boolean; likes_count: number }> => {
+  toggleLike: async (answerId: number): Promise<{ liked: boolean; likes_count: number; is_best_answer?: boolean }> => {
     const response = await apiClient.post(`/knowledge/answers/${answerId}/toggle_like/`);
     return response.data;
   },

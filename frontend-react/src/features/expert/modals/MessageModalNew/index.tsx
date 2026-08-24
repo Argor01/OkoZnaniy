@@ -15,7 +15,7 @@ import {
   CheckOutlined,
   SendOutlined,
   PaperClipOutlined,
-  FileOutlined,
+  FileOutlined, FileDoneOutlined,
   FilePdfOutlined,
   FileWordOutlined,
   FileImageOutlined,

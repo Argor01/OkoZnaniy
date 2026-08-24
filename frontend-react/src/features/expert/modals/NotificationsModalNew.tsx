@@ -316,13 +316,13 @@ const NotificationsModal: React.FC<NotificationsModalProps> = ({
   useWebSocket({
     enabled: visible,
     onNotification: handleLiveNotification,
-    onConnect: () => void loadNotifications(true),
+    onConnect: (): void => { void loadNotifications(true); },
   });
 
   useEffect(() => {
     if (!visible) return;
     void loadNotifications();
-    const refresh = () => void loadNotifications(true);
+    const refresh = (): void => { void loadNotifications(true); };
     const interval = window.setInterval(refresh, 10000);
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);

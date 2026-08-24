@@ -3,6 +3,9 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 from .models import Notification, NotificationType
 
 User = get_user_model()
@@ -706,7 +709,7 @@ class EmailService:
             
             return True
         except Exception as e:
-            print(f"Ошибка отправки email: {e}")
+            logger.exception("Email delivery failed")
             # Fallback на простую отправку
             try:
                 send_mail(
@@ -718,7 +721,7 @@ class EmailService:
                 )
                 return True
             except Exception as e2:
-                print(f"Ошибка fallback отправки email: {e2}")
+                logger.exception("Fallback email delivery failed")
                 return False
 
     @staticmethod
@@ -801,7 +804,7 @@ class EmailService:
             
             return True
         except Exception as e:
-            print(f"Ошибка отправки партнерского email: {e}")
+            logger.exception("Partner email delivery failed")
             # Fallback на простую отправку
             try:
                 send_mail(
@@ -813,5 +816,5 @@ class EmailService:
                 )
                 return True
             except Exception as e2:
-                print(f"Ошибка fallback отправки партнерского email: {e2}")
+                logger.exception("Partner fallback email delivery failed")
                 return False

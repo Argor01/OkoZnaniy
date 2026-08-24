@@ -115,7 +115,6 @@ const SkillsSelectNew: React.FC<SkillsSelectNewProps> = ({
           String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
         }
         getPopupContainer={getPopupContainer}
-        popupStyle={popupStyle}
         popupRender={(menu) => (
           <>
             {menu}

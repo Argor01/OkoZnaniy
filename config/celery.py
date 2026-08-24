@@ -12,6 +12,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Автоматическое обнаружение и регистрация задач из приложений
 app.autodiscover_tasks()
+# vk_bot is not a Django app, so autodiscovery cannot find its tasks.
+app.conf.imports = tuple(app.conf.imports or ()) + ('vk_bot.tasks',)
 
 # Настройка периодических задач
 app.conf.beat_schedule = {

@@ -3,13 +3,14 @@ from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.catalog.models import Subject, WorkType
-from apps.orders.models import Bid, BidStatus, Order, Transaction, TransactionType
+from apps.orders.models import Bid, BidStatus, Order, OrderFile, Transaction, TransactionType
 from apps.payments.models import Payment, PaymentStatus
 from apps.payments.services import PaymentService
 from apps.users.models import PartnerEarning
@@ -181,6 +182,7 @@ class WalletOrderLedgerTests(TestCase):
         WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
 
         self.api.force_authenticate(self.client_user)
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type='solution', uploaded_by=self.expert, client_downloaded_at=timezone.now())
         response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
@@ -199,7 +201,7 @@ class WalletOrderLedgerTests(TestCase):
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.PAYOUT).exists())
         self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.COMMISSION).exists())
 
-    def test_reject_refunds_order_hold_to_available_balance(self):
+    def test_reject_preserves_order_hold_for_arbitration(self):
         order = self._order()
         WalletService.topup(self.client_user, Decimal('1250.00'))
         WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
@@ -214,9 +216,9 @@ class WalletOrderLedgerTests(TestCase):
 
         self.assertEqual(order.status, 'cancelled')
         self.assertEqual(self.client_user.balance, Decimal('1250.00'))
-        self.assertEqual(self.client_user.frozen_balance, Decimal('0.00'))
+        self.assertEqual(self.client_user.frozen_balance, Decimal('1250.00'))
         self.assertEqual(self.expert.balance, Decimal('0.00'))
-        self.assertTrue(Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists())
+        self.assertFalse(Transaction.objects.filter(order=order, type=TransactionType.REFUND).exists())
 
     def test_external_order_payment_callback_creates_idempotent_wallet_hold(self):
         order = self._order(status_value='waiting_payment')
@@ -282,6 +284,7 @@ class WalletOrderLedgerTests(TestCase):
         WalletService.hold(self.client_user, Decimal('1250.00'), order=order)
 
         self.api.force_authenticate(self.client_user)
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type='solution', uploaded_by=self.expert, client_downloaded_at=timezone.now())
         response = self.api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
 
@@ -375,6 +378,7 @@ class WalletOrderLedgerTests(TestCase):
         self.assertEqual(paid.status_code, status.HTTP_200_OK, paid.content)
         order.status = 'review'
         order.save(update_fields=['status', 'updated_at'])
+        OrderFile.objects.create(order=order, file=SimpleUploadedFile('solution.txt', b'solution'), file_type='solution', uploaded_by=self.expert, client_downloaded_at=timezone.now())
         approved = self.api.post(f'/api/orders/orders/{order.id}/approve/')
         self.assertEqual(approved.status_code, status.HTTP_200_OK, approved.content)
 

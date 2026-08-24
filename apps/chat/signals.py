@@ -1,6 +1,10 @@
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from .models import SupportChat, SupportMessage, Message, Chat
 from .services import ContactDetectionService, ChatModerationService, is_locked_direct_chat, violation_type_label
 from apps.admin_panel.models import SupportRequest, SupportMessage as AdminSupportMessage
@@ -249,7 +253,7 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
                 tags=['#нарушение', '#контакты', f'#{violation_type}']
             )
             
-            print(f"Создан тикет #{support_ticket.ticket_number} для нарушения в чате #{instance.chat.id}")
+            logger.info("Created moderation ticket %s for chat %s", support_ticket.ticket_number, instance.chat.id)
             
             # Добавляем системное сообщение о заморозке
             from django.db import transaction

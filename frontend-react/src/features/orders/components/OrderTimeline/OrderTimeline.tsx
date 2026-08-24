@@ -21,8 +21,10 @@ type TimelineOrder = {
   expert?: unknown;
   expert_id?: number | null;
   available_actions?: OrderAvailableActions;
+  payment_status?: string | null;
+  pay_status?: string | null;
   files?: Array<{ file_type?: string | null; description?: string | null; created_at?: string | null }>;
-} & Record<string, unknown>;
+};
 
 interface OrderTimelineProps {
   order: TimelineOrder;

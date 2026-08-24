@@ -59,15 +59,17 @@ class OrderFileSerializer(serializers.ModelSerializer):
         )
 
     def get_file_size(self, obj):
-        if obj.file and hasattr(obj.file, 'size'):
+        if not obj.file:
+            return "0 B"
+        try:
             size = obj.file.size
-            # Конвертируем размер в человекочитаемый формат
-            for unit in ['B', 'KB', 'MB', 'GB']:
-                if size < 1024:
-                    return f"{size:.1f} {unit}"
-                size /= 1024
-            return f"{size:.1f} TB"
-        return "0 B"
+        except (FileNotFoundError, OSError):
+            return "0 B"
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024:
+                return f"{size:.1f} {unit}"
+            size /= 1024
+        return f"{size:.1f} TB"
 
 class OrderCommentSerializer(serializers.ModelSerializer):
     author = PublicUserProfileSerializer(read_only=True)

@@ -56,7 +56,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const canEditOrder = (availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'))) && order.status !== 'expired';
-  const canCancelOrder = ((availableActions?.can_delete ?? order.status === 'new') && order.status === 'new') && order.status !== 'expired';
+  const canCancelOrder = (availableActions?.can_delete ?? order.status === 'new') && order.status === 'new';
   const isExpired = order.status === 'expired';
 
   return (
