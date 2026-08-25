@@ -134,3 +134,32 @@ def tbank_callback(request):
         logger.exception('T-Bank callback failed for OrderId=%s', order_id)
         return Response('ERROR', status=status.HTTP_400_BAD_REQUEST)
     return Response('OK' if success else 'ERROR', status=status.HTTP_200_OK if success else status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST', 'GET'])
+@permission_classes([permissions.AllowAny])
+def uralsib_callback(request):
+    """Уведомление о платеже от шлюза RBS Банка Уралсиб.
+
+    RBS шлёт колбэк как GET с параметрами в query string либо как POST.
+    Отвечаем 200 в любом случае: шлюз повторяет доставку при ошибке,
+    а решение об оплате принимается по запросу статуса, не по колбэку.
+    """
+    from .providers.uralsib_rbs import UralsibRBSClient
+
+    data = request.data if request.method == 'POST' and request.data else request.query_params
+    data = {k: v for k, v in data.items()}
+    logger.info('Уралсиб RBS колбэк: %s', {k: v for k, v in data.items() if k != 'checksum'})
+
+    try:
+        payment = UralsibRBSClient().process_callback(data)
+    except Exception:  # noqa: BLE001
+        logger.exception('Уралсиб RBS: ошибка обработки колбэка')
+        return HttpResponse('ERROR', status=200)
+
+    if payment is None:
+        return HttpResponse('OK', status=200)
+
+    with transaction.atomic():
+        PaymentService.process_payment_callback(payment.payment_id, data)
+    return HttpResponse('OK', status=200)

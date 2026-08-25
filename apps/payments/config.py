@@ -23,6 +23,19 @@ PAYMENT_SETTINGS = {
     'NOTIFICATION_URL': getattr(settings, 'PAYMENT_NOTIFICATION_URL', '/api/payments/callback/'),
 }
 
+URALSIB_SETTINGS = {
+    # Тестовый контур: https://uralsib.rbsuat.com/payment/rest
+    # Боевой URL банк сообщает при подключении.
+    'API_URL': getattr(settings, 'URALSIB_API_URL', 'https://uralsib.rbsuat.com/payment/rest'),
+    'USERNAME': getattr(settings, 'URALSIB_USERNAME', ''),
+    'PASSWORD': getattr(settings, 'URALSIB_PASSWORD', ''),
+    'CALLBACK_SECRET': getattr(settings, 'URALSIB_CALLBACK_SECRET', ''),
+    'SUCCESS_URL': getattr(settings, 'URALSIB_SUCCESS_URL', ''),
+    'FAIL_URL': getattr(settings, 'URALSIB_FAIL_URL', ''),
+    'CURRENCY': getattr(settings, 'URALSIB_CURRENCY', '643'),
+    'TIMEOUT': getattr(settings, 'URALSIB_TIMEOUT', 20),
+}
+
 TBANK_SETTINGS = {
     'API_URL': getattr(settings, 'TBANK_API_URL', 'https://securepay.tinkoff.ru/v2'),
     'TERMINAL_KEY': getattr(settings, 'TBANK_TERMINAL_KEY', ''),

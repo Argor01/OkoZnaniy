@@ -581,3 +581,16 @@ ALLOW_WITHDRAWAL_WHEN_FNS_DOWN = os.getenv("ALLOW_WITHDRAWAL_WHEN_FNS_DOWN", "Tr
 
 # Насколько долго доверяем прошлому ответу ФНС, минут.
 NPD_CACHE_MINUTES = int(os.getenv("NPD_CACHE_MINUTES", "60"))
+
+
+# --- Эквайринг Банка Уралсиб (шлюз RBS) ---------------------------------
+URALSIB_API_URL = os.getenv("URALSIB_API_URL", "https://uralsib.rbsuat.com/payment/rest")
+URALSIB_USERNAME = os.getenv("URALSIB_USERNAME", "")
+URALSIB_PASSWORD = os.getenv("URALSIB_PASSWORD", "")
+URALSIB_CALLBACK_SECRET = os.getenv("URALSIB_CALLBACK_SECRET", "")
+URALSIB_SUCCESS_URL = os.getenv("URALSIB_SUCCESS_URL", "")
+URALSIB_FAIL_URL = os.getenv("URALSIB_FAIL_URL", "")
+URALSIB_CURRENCY = os.getenv("URALSIB_CURRENCY", "643")
+
+# Какой эквайер обслуживает оплату картой: uralsib или alfabank.
+CARD_ACQUIRER = os.getenv("CARD_ACQUIRER", "uralsib")
