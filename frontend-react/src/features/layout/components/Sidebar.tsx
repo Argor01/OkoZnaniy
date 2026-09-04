@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Layout, Menu, Avatar, Typography, Badge, Button } from 'antd';
 import {
   UserOutlined,
+  AppstoreOutlined,
   ShoppingOutlined,
   FileDoneOutlined,
   MessageOutlined,
@@ -139,18 +140,23 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
     }
     
     if (key === 'works') {
+      navigate('/works');
       return;
     }
     if (key === 'shop-ready-works') {
+      navigate('/shop/ready-works');
       return;
     }
     if (key === 'shop-add-work') {
+      navigate('/shop/add-work');
       return;
     }
     if (key === 'shop-purchased') {
+      navigate('/shop/purchased');
       return;
     }
     if (key === 'orders-feed') {
+      navigate('/orders-feed');
       return;
     }
     if (key.startsWith('orders-') || key === 'orders') {
@@ -224,6 +230,28 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <UserOutlined />,
       label: 'Аккаунт',
     },
+    // Мобильная навигация: в мобильном хедере этих кнопок больше нет,
+    // переход по разделам возможен только отсюда.
+    isMobile ? {
+      key: 'orders-feed',
+      icon: <AppstoreOutlined />,
+      label: 'Лента заказов',
+    } : null,
+    (isMobile && isExpert) ? {
+      key: 'works',
+      icon: <FileDoneOutlined />,
+      label: 'Заказы в работе',
+    } : null,
+    (isMobile && isExpert) ? {
+      key: 'shop-menu',
+      icon: <ShopOutlined />,
+      label: 'Магазин',
+      children: [
+        { key: 'shop-ready-works', label: 'Магазин готовых работ' },
+        { key: 'shop-add-work', label: 'Добавить работу' },
+        { key: 'shop-purchased', label: 'Купленные работы' },
+      ],
+    } : null,
     {
       key: 'messages',
       icon: unreadMessages > 0 ? (
@@ -352,7 +380,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       <Menu
         mode="inline"
         selectedKeys={[selectedKey]}
-        openKeys={isMobile ? ['orders', 'expert-client-orders'] : openKeys}
+        openKeys={isMobile ? ['orders', 'expert-client-orders', 'shop-menu'] : openKeys}
         onOpenChange={(keys) => {
           if (!isMobile) {
             setOpenKeys(keys);

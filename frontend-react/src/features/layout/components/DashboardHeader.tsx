@@ -1,7 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { Badge, Button, Dropdown, Layout, Space, Typography, message } from 'antd';
 import {
-  UserOutlined,
   EditOutlined,
   MessageOutlined,
   BellOutlined,
@@ -19,7 +18,6 @@ import {
   AppstoreOutlined,
   SunOutlined,
   MoonOutlined,
-  WalletOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -73,7 +71,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
   onMessagesClick,
   onNotificationsClick,
   onSupportClick,
-  onBalanceClick,
   onProfileClick,
   onLogout,
   onMenuClick,
@@ -279,47 +276,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           />
         ) : null}
         {!isMobile && renderNavItems()}
-        {isMobile && (
-          <div className={styles.mobileNavIcons}>
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.key;
-              
-              if (item.children) {
-                const isChildActive = item.children.some(child => location.pathname === child.key);
-                const menuItems: MenuProps['items'] = item.children.map(child => ({
-                  key: child.key,
-                  label: child.label,
-                  onClick: () => navigate(child.key),
-                }));
-
-                return (
-                  <Dropdown 
-                    key={item.key} 
-                    menu={{ items: menuItems }}
-                    trigger={['click']}
-                    placement="bottomLeft"
-                  >
-                    <Button 
-                      type="text" 
-                      className={`${styles.mobileNavIcon} ${isChildActive ? styles.mobileNavIconActive : ''}`}
-                      icon={item.icon}
-                    />
-                  </Dropdown>
-                );
-              }
-
-              return (
-                <Button
-                  key={item.key}
-                  type="text"
-                  className={`${styles.mobileNavIcon} ${isActive ? styles.mobileNavIconActive : ''}`}
-                  icon={item.icon}
-                  onClick={() => navigate(item.key)}
-                />
-              );
-            })}
-          </div>
-        )}
+        {/* На мобильной версии навигация живёт только в сайдбаре:
+            кнопки разделов (лента заказов и т.д.) убраны из хедера. */}
       </div>
 
       <div className={styles.headerLogo}>
@@ -415,73 +373,22 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
           
           {isMobile && (
             <>
-              <Badge count={unreadMessages} size="small" offset={[-3, 3]}>
-                <Button
-                  type="text"
-                  icon={<MessageOutlined />}
-                  onClick={onMessagesClick}
-                  className={styles.iconButton}
-                />
-              </Badge>
+              <Button
+                type="text"
+                className={styles.themeToggle}
+                icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+                onClick={toggleTheme}
+                title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+              />
 
-              <Badge count={unreadNotifications} size="small" offset={[-3, 3]}>
-                <Button
-                  type="text"
-                  icon={<BellOutlined />}
-                  onClick={onNotificationsClick}
-                  className={styles.iconButton}
-                />
-              </Badge>
-
-              <Dropdown
-                menu={{
-                  items: [
-                    {
-                      key: 'wallet',
-                      label: 'Финансы',
-                      icon: <WalletOutlined />,
-                      onClick: onBalanceClick,
-                    },
-                    { type: 'divider' },
-                    {
-                      key: 'theme',
-                      label: isDark ? 'Светлая тема' : 'Тёмная тема',
-                      icon: isDark ? <SunOutlined /> : <MoonOutlined />,
-                      onClick: toggleTheme,
-                    },
-                    { type: 'divider' },
-                    {
-                      key: 'edit-profile',
-                      label: 'Редактировать профиль',
-                      icon: <EditOutlined />,
-                      onClick: onProfileClick,
-                    },
-                    {
-                      key: 'logout',
-                      label: 'Выход',
-                      icon: <LogoutOutlined />,
-                      danger: true,
-                      onClick: onLogout,
-                    },
-                  ],
-                }}
-                placement="bottomRight"
-                trigger={['click']}
-              >
-                <div className={styles.mobileAvatarButton}>
-                  {userProfile?.avatar ? (
-                    <img
-                      src={userProfile.avatar}
-                      alt=""
-                      className={styles.mobileAvatarImg}
-                    />
-                  ) : (
-                    <div className={styles.mobileAvatarPlaceholder}>
-                      <UserOutlined />
-                    </div>
-                  )}
-                </div>
-              </Dropdown>
+              <Button
+                type="text"
+                danger
+                className={styles.iconButton}
+                icon={<LogoutOutlined />}
+                onClick={onLogout}
+                title="Выход"
+              />
             </>
           )}
         </Space>
