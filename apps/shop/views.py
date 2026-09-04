@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.http import FileResponse
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -191,6 +192,50 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
 
         serializer = PurchaseSerializer(purchase, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get'], url_path=r'files/(?P<file_id>[0-9]+)/download')
+    def download_file(self, request, pk=None, file_id=None):
+        """Отдаёт файл готовой работы с проверкой прав.
+
+        Прямой доступ к /media/ready_works/ закрыт на nginx, поэтому скачать
+        файл можно только здесь: автору, администратору (в т.ч. для модерации)
+        и покупателю с оплаченной покупкой.
+        """
+        # Берём работу напрямую: витринный queryset прячет неопубликованные,
+        # а автор и модератор должны иметь доступ и к ним.
+        work = get_object_or_404(ReadyWork, pk=pk)
+        user = request.user
+
+        allowed = bool(user.is_staff or work.author_id == user.id)
+        if not allowed:
+            allowed = Purchase.objects.filter(
+                work=work,
+                buyer=user,
+                status__in=[
+                    Purchase.Status.PAID,
+                    Purchase.Status.COMPLETED,
+                    Purchase.Status.DISPUTED,
+                ],
+            ).exists()
+        if not allowed:
+            return Response(
+                {'detail': 'Файл доступен только после оплаты работы.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        work_file = get_object_or_404(ReadyWorkFile, pk=file_id, work=work)
+        if not work_file.file:
+            return Response({'detail': 'Файл недоступен'}, status=status.HTTP_404_NOT_FOUND)
+
+        content_type, _ = mimetypes.guess_type(work_file.file.name)
+        response = FileResponse(
+            work_file.file.open(),
+            content_type=content_type or 'application/octet-stream',
+        )
+        response['Content-Length'] = work_file.file.size
+        filename = work_file.name or work_file.file.name.split('/')[-1]
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
 
 
 class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):

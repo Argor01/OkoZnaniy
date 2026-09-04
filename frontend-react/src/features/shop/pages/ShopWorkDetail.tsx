@@ -8,6 +8,7 @@ import {
   DownloadOutlined,
   EyeOutlined,
   FileOutlined,
+  LockOutlined,
   ShoppingCartOutlined,
   StarOutlined,
   UserOutlined,
@@ -31,7 +32,7 @@ import { SEO } from '@/features/common';
 
 const { Title, Text } = Typography;
 
-const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после покупки. В течение 10 дней можно открыть спор, если работа не устраивает.';
+const READY_WORK_PURCHASE_WARNING = 'Файл будет доступен для скачивания сразу после оплаты. Готовые работы возврату не подлежат, дальнейшие корректировки и доработки — за дополнительную плату.';
 
 const ShopWorkDetail: React.FC = () => {
   const { workId } = useParams<{ workId: string }>();
@@ -363,18 +364,38 @@ const ShopWorkDetail: React.FC = () => {
                                 key={`open-${file.id}`}
                                 variant="link"
                                 icon={<DownloadOutlined />}
-                                onClick={() => {
-                                  const fileWithLinks = file as WorkFile & { view_url?: string; file_url?: string };
-                                  const url = fileWithLinks.view_url || fileWithLinks.file_url || file.file;
-                                  if (url) {
-                                    window.open(url, '_blank');
+                                onClick={async () => {
+                                  if (!purchase) return;
+                                  try {
+                                    const blob = await shopApi.downloadPurchaseFile(purchase.id);
+                                    const objectUrl = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = objectUrl;
+                                    link.download = file.name || 'work';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    link.remove();
+                                    window.URL.revokeObjectURL(objectUrl);
+                                  } catch {
+                                    message.error('Не удалось скачать файл');
                                   }
                                 }}
                               >
-                                Открыть
+                                Скачать
                               </AppButton>,
                             ]
-                          : []
+                          : userProfile?.id === work.author?.id
+                            ? []
+                            : [
+                                <AppButton
+                                  key={`buy-${file.id}`}
+                                  variant="link"
+                                  icon={<LockOutlined />}
+                                  onClick={handlePurchase}
+                                >
+                                  Купить, чтобы скачать
+                                </AppButton>,
+                              ]
                       }
                     >
                       <List.Item.Meta

@@ -41,7 +41,7 @@ class ReadyWorkFileSerializer(serializers.ModelSerializer):
 
 
 class ReadyWorkSerializer(serializers.ModelSerializer):
-    files = ReadyWorkFileSerializer(many=True, read_only=True)
+    files = serializers.SerializerMethodField()
     subject_name = serializers.CharField(source='subject.name', read_only=True)
     work_type_name = serializers.CharField(source='work_type.name', read_only=True)
     author_name = serializers.CharField(source='author.get_full_name', read_only=True)
@@ -64,6 +64,49 @@ class ReadyWorkSerializer(serializers.ModelSerializer):
             'moderation_status', 'is_active', 'created_at', 'updated_at', 'files',
         ]
         read_only_fields = ['author', 'moderation_status', 'created_at', 'updated_at']
+
+    def get_files(self, obj):
+        """Прямые ссылки на файлы отдаём только тем, кто имеет на них право.
+
+        Всем остальным — лишь метаданные (имя, тип, размер): витрина остаётся
+        информативной, но скачать работу без оплаты нельзя.
+        """
+        from .models import Purchase
+
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        files = list(obj.files.all())
+
+        allowed = False
+        if user is not None and getattr(user, 'is_authenticated', False):
+            if user.is_staff or obj.author_id == user.id:
+                allowed = True
+            else:
+                allowed = Purchase.objects.filter(
+                    work=obj,
+                    buyer=user,
+                    status__in=[
+                        Purchase.Status.PAID,
+                        Purchase.Status.COMPLETED,
+                        Purchase.Status.DISPUTED,
+                    ],
+                ).exists()
+
+        payload = []
+        for f in files:
+            item = {
+                'id': f.id,
+                'name': f.name,
+                'file_type': f.file_type,
+                'file_size': f.file_size,
+            }
+            # Прямые ссылки на /media/ не отдаём вообще: скачивание идёт только
+            # через эндпоинт с проверкой прав.
+            if allowed:
+                path = f'/api/shop/works/{obj.pk}/files/{f.id}/download/'
+                item['download_url'] = request.build_absolute_uri(path) if request else path
+            payload.append(item)
+        return payload
 
     def get_is_favorite(self, obj):
         request = self.context.get('request')
