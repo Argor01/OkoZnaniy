@@ -82,6 +82,19 @@ const getVisibleOfferDescription = (description?: string | null) => {
   return trimmed && !TECHNICAL_OFFER_DESCRIPTIONS.has(trimmed.toLowerCase()) ? trimmed : '';
 };
 
+/**
+ * Стоимость предложения для показа: клиенту — с уже включённым сервисным
+ * сбором (client_cost с бэкенда), эксперту — его собственная цена.
+ * При неизвестной роли показываем клиентскую сумму: клиент не должен видеть
+ * цену без комиссии ни при каких условиях.
+ */
+const offerCostText = (data: unknown, isExpertViewer: boolean): string => {
+  const d = (data ?? {}) as { cost?: unknown; client_cost?: unknown };
+  const raw = isExpertViewer ? d.cost : (d.client_cost ?? d.cost);
+  const n = Number(raw);
+  return Number.isFinite(n) ? n.toLocaleString('ru-RU') : String(raw ?? '');
+};
+
 const MessageModalNew: React.FC<MessageModalProps> = ({ 
   visible, 
   onClose,
@@ -3589,7 +3602,7 @@ const workDeliveryStatus = isWorkOffer
                                   <div>
                                     <div className={styles.offerLabel}>Стоимость</div>
                                     <div className={styles.offerValue}>
-                                      {typeof msg.offer_data?.cost === 'number' ? msg.offer_data.cost.toLocaleString('ru-RU') : msg.offer_data?.cost} ₽
+                                      {offerCostText(msg.offer_data, currentUserRole === 'expert')} ₽
                                     </div>
                                   </div>
                                 </div>
@@ -3671,7 +3684,7 @@ const workDeliveryStatus = isWorkOffer
                                 <Text type="secondary">Стоимость</Text>
                                 <div>
                                   <Text strong className={styles.textSuccess}>
-                                    {Number((msg.offer_data as WorkOfferData | null)?.cost).toLocaleString('ru-RU')} ₽
+                                    {offerCostText(msg.offer_data, currentUserRole === 'expert')} ₽
                                   </Text>
                                 </div>
                               </div>

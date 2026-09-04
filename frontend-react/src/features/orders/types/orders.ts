@@ -44,6 +44,8 @@ export interface OrderExpert {
 // OrderSubject, OrderTopic, OrderWorkType, OrderComplexity are imported from ./catalog
 
 export interface Bid {
+  /** Итоговая сумма для клиента: ставка автора + сервисный сбор. */
+  client_amount?: string;
   id: number;
   order: number;
   expert: OrderExpert;

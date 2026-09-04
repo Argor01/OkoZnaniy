@@ -118,7 +118,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   };
   const isOwner = isOrderOwner(order);
   const canShowBidAction = canBid ?? !hasMyBid;
-  const isBidDisabled = hasMyBid || checkingMyBid || !canShowBidAction;
+  // Эксперт, который уже откликнулся, может изменить свою ставку — поэтому
+  // кнопка остаётся активной, а не превращается в надпись «вы откликнулись».
+  const isBidDisabled = checkingMyBid || (!hasMyBid && !canShowBidAction);
 
   return (
     <AppCard
@@ -264,14 +266,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({
             variant={hasMyBid ? 'secondary' : 'primary'}
             disabled={isBidDisabled}
             size={isMobile ? 'middle' : 'large'}
-            className={`${styles.orderBidButton} ${hasMyBid ? styles.orderBidButtonDisabled : styles.orderBidButtonActive}`}
+            className={`${styles.orderBidButton} ${styles.orderBidButtonActive}`}
             onClick={(e) => {
               e.stopPropagation();
               if (isBidDisabled) return;
               onBid?.(order);
             }}
           >
-            {hasMyBid ? 'Вы уже откликнулись' : 'Откликнуться'}
+            {hasMyBid ? 'Изменить ставку' : 'Откликнуться'}
           </AppButton>
         ) : userProfile?.role === 'client' ? (
           <AppButton 

@@ -12,6 +12,8 @@ interface BidModalProps {
   orderTitle: string;
   orderBudget?: number;
   onBidSubmitted?: (orderId: number) => void;
+  /** Если передана активная ставка — модалка работает в режиме редактирования. */
+  existingBid?: { id: number; amount?: string | number; prepayment_percent?: number; comment?: string | null } | null;
 }
 
 type BidFormValues = {
@@ -21,7 +23,7 @@ type BidFormValues = {
   is_negotiable?: boolean;
 };
 
-const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget, onBidSubmitted }) => {
+const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTitle, orderBudget, onBidSubmitted, existingBid }) => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
   const [bidSuccess, setBidSuccess] = useState(false);
@@ -76,11 +78,49 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
     },
   });
 
+  const isEdit = !!existingBid;
+
+  const updateBidMutation = useMutation({
+    mutationFn: (data: { amount: number; prepayment_percent: number; comment?: string }) =>
+      ordersApi.updateBid(orderId, Number(existingBid?.id), data),
+    onSuccess: async () => {
+      message.success('Ставка обновлена');
+      setBidSuccess(true);
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['order-bids', String(orderId)], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['order-bids', orderId], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['order', String(orderId)], type: 'active' }),
+      ]);
+      onBidSubmitted?.(orderId);
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      message.error(detail || 'Не удалось изменить ставку');
+    },
+  });
+
+  const isPending = placeBidMutation.isPending || updateBidMutation.isPending;
+
+  // При открытии в режиме редактирования подставляем текущие значения ставки.
+  React.useEffect(() => {
+    if (!visible || !existingBid) return;
+    const amountNum = Number(existingBid.amount ?? 0);
+    const negotiable = !Number.isFinite(amountNum) || amountNum === 0;
+    setIsNegotiable(negotiable);
+    form.setFieldsValue({
+      amount: negotiable ? undefined : amountNum,
+      prepayment_percent: Number(existingBid.prepayment_percent ?? 50),
+      comment: existingBid.comment ?? '',
+      is_negotiable: negotiable,
+    });
+  }, [visible, existingBid, form]);
+
   const handleSubmit = async (values: BidFormValues) => {
-    if (placeBidMutation.isPending || submitGuardRef.current) return;
+    const activeMutation = isEdit ? updateBidMutation : placeBidMutation;
+    if (activeMutation.isPending || submitGuardRef.current) return;
     submitGuardRef.current = true;
     try {
-      await placeBidMutation.mutateAsync({
+      await activeMutation.mutateAsync({
         amount: isNegotiable ? 0 : Number(values.amount),
         prepayment_percent: Number(values.prepayment_percent),
         comment: values.comment,
@@ -91,7 +131,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
   };
 
   const handleClose = () => {
-    if (placeBidMutation.isPending) return;
+    if (isPending) return;
     form.resetFields();
     setBidSuccess(false);
     setIsNegotiable(false);
@@ -100,21 +140,21 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
 
   return (
     <Modal
-      title={bidSuccess ? 'Отклик отправлен!' : 'Откликнуться на заказ'}
+      title={bidSuccess ? (isEdit ? 'Ставка обновлена!' : 'Отклик отправлен!') : (isEdit ? 'Изменить ставку' : 'Откликнуться на заказ')}
       open={visible}
       onCancel={handleClose}
       footer={null}
       className={styles.bidModal}
       width="min(500px, calc(100vw - 24px))"
-      closable={!placeBidMutation.isPending}
-      maskClosable={!placeBidMutation.isPending}
-      keyboard={!placeBidMutation.isPending}
+      closable={!isPending}
+      maskClosable={!isPending}
+      keyboard={!isPending}
     >
       {bidSuccess ? (
         <Result
           status="success"
-          title="Ваш отклик успешно отправлен!"
-          subTitle="Заказчик получит уведомление и сможет связаться с вами"
+          title={isEdit ? 'Ставка обновлена!' : 'Ваш отклик успешно отправлен!'}
+          subTitle={isEdit ? 'Заказчик увидит новую сумму вашей ставки' : 'Заказчик получит уведомление и сможет связаться с вами'}
           extra={[
             <AppButton variant="primary" key="close" onClick={handleClose}>
               Закрыть
@@ -157,13 +197,13 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
               <AppInput 
                 placeholder="Например: 5000" 
                 type="number" 
-                disabled={isNegotiable || placeBidMutation.isPending}
+                disabled={isNegotiable || isPending}
               />
             </Form.Item>
 
             <Form.Item name="is_negotiable" valuePropName="checked" style={{ marginBottom: 12, marginTop: -12 }}>
               <Checkbox
-                disabled={placeBidMutation.isPending}
+                disabled={isPending}
                 onChange={(e) => {
                   setIsNegotiable(e.target.checked);
                   if (e.target.checked) {
@@ -198,7 +238,7 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
                 type="number"
                 min={0}
                 max={100}
-                disabled={placeBidMutation.isPending}
+                disabled={isPending}
               />
             </Form.Item>
 
@@ -209,19 +249,19 @@ const BidModal: React.FC<BidModalProps> = ({ visible, onClose, orderId, orderTit
               <AppInput.TextArea
                 rows={4}
                 placeholder="Напишите, почему вы подходите для этого заказа..."
-                disabled={placeBidMutation.isPending}
+                disabled={isPending}
               />
             </Form.Item>
 
             <div className={styles.formActions}>
-              <AppButton variant="secondary" onClick={handleClose} disabled={placeBidMutation.isPending}>
+              <AppButton variant="secondary" onClick={handleClose} disabled={isPending}>
                 Отмена
               </AppButton>
               <AppButton
                 variant="primary"
                 htmlType="submit"
-                loading={placeBidMutation.isPending}
-                disabled={placeBidMutation.isPending || bidSuccess}
+                loading={isPending}
+                disabled={isPending || bidSuccess}
               >
                 Отправить отклик
               </AppButton>

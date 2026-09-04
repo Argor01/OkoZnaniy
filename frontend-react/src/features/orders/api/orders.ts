@@ -188,6 +188,11 @@ export const ordersApi = {
   },
 
   
+  updateBid: async (orderId: number, bidId: number, data: { amount: number; prepayment_percent: number; comment?: string }): Promise<Bid> => {
+    const response = await apiClient.patch(`${API_ENDPOINTS.orders.bids(orderId)}${bidId}/`, data);
+    return response.data;
+  },
+
   placeBid: async (orderId: number, data: { amount: number; prepayment_percent: number; comment?: string }): Promise<Bid> => {
     const response = await apiClient.post(API_ENDPOINTS.orders.bids(orderId), data);
     return response.data;

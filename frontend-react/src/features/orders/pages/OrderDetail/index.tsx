@@ -264,7 +264,7 @@ const OrderDetail: React.FC = () => {
               <div className={styles.sectionBlock}>
                 {!deliveredWorkReviewed && (
                   <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-                    Скачайте работу и проверьте результат. После успешного скачивания станут доступны кнопки принятия, доработки и отклонения.
+                    Скачайте работу и проверьте результат — после этого станут доступны «Принять» и «Отклонить». Отправить на доработку можно сразу, не скачивая: например, если файл не открывается или прислали не то.
                   </Text>
                 )}
                 <Space className={styles.reviewActionsRow} wrap>
@@ -279,7 +279,7 @@ const OrderDetail: React.FC = () => {
                   <AppButton
                     variant="secondary"
                     loading={reviewActionLoading === 'revision'}
-                    disabled={!canRequestRevision || !deliveredWorkReviewed}
+                    disabled={!canRequestRevision}
                     onClick={() => setRevisionModalOpen(true)}
                   >
                     На доработку
@@ -341,6 +341,17 @@ const OrderDetail: React.FC = () => {
               </div>
             )}
 
+            {userHasBid && currentUserBid?.status === 'active' && order.status === 'new' && !order.expert && (
+              <div className={`${styles.bidAction} ${styles.sectionBlock}`}>
+                <AppButton
+                  variant="primary"
+                  onClick={() => setBidModalVisible(true)}
+                >
+                  Изменить ставку
+                </AppButton>
+              </div>
+            )}
+
             {userHasBid && currentUserBid?.status !== 'rejected' && currentUserBid?.status !== 'cancelled' && (
               <div className={`${styles.statusTagWrap} ${styles.sectionBlock}`}>
                 <Tag
@@ -384,6 +395,7 @@ const OrderDetail: React.FC = () => {
         orderId={order.id}
         orderTitle={order.title}
         orderBudget={order.budget ? Number(order.budget) : undefined}
+        existingBid={currentUserBid && currentUserBid.status === 'active' ? currentUserBid : null}
       />
 
       <Modal

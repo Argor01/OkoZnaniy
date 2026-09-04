@@ -1584,6 +1584,22 @@ class BidViewSet(viewsets.ModelViewSet):
                 )
         return super().create(request, *args, **kwargs)
 
+    def perform_update(self, serializer):
+        """Эксперт правит собственную активную ставку, пока заказ свободен."""
+        bid = self.get_object()
+        user = self.request.user
+
+        if bid.expert_id != user.id and not user.is_staff:
+            raise PermissionDenied('Можно редактировать только свою ставку.')
+        if bid.status != BidStatus.ACTIVE:
+            raise PermissionDenied('Редактировать можно только активную ставку.')
+        if bid.order.status != 'new':
+            raise PermissionDenied('Заказ уже в работе — ставку изменить нельзя.')
+        if bid.order.expert_id:
+            raise PermissionDenied('Исполнитель уже назначен — ставку изменить нельзя.')
+
+        serializer.save()
+
     def perform_create(self, serializer):
         order_id = self.kwargs['order_pk']
         order = get_object_or_404(Order, id=order_id)

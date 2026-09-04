@@ -91,10 +91,23 @@ class BidSerializer(serializers.ModelSerializer):
         max_value=Decimal(str(MAX_ORDER_BUDGET)),
     )
 
+    client_amount = serializers.SerializerMethodField()
+
     class Meta:
         model = Bid
-        fields = ['id', 'order', 'expert', 'amount', 'prepayment_percent', 'comment', 'created_at', 'status', 'expert_rating']
-        read_only_fields = ['id', 'expert', 'created_at', 'order', 'status', 'expert_rating']
+        fields = ['id', 'order', 'expert', 'amount', 'client_amount', 'prepayment_percent', 'comment', 'created_at', 'status', 'expert_rating']
+        read_only_fields = ['id', 'expert', 'created_at', 'order', 'status', 'expert_rating', 'client_amount']
+
+    def get_client_amount(self, obj):
+        """Итоговая сумма для клиента: ставка автора + сервисный сбор.
+
+        Клиенту показываем одно число, без расшифровки комиссии — ровно
+        столько резервируется и списывается при оплате заказа.
+        """
+        from apps.wallet.policy import order_quote
+
+        quote = order_quote(obj.amount)
+        return str(quote['base_amount'] + quote['service_fee'])
 
     def get_expert_rating(self, obj):
         try:

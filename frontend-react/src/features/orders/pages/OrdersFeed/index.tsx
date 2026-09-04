@@ -68,6 +68,9 @@ const OrdersFeed: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 840);
   const [bidModalVisible, setBidModalVisible] = useState(false);
+  const [editingBid, setEditingBid] = useState<
+    { id: number; amount?: string | number; prepayment_percent?: number; comment?: string | null } | null
+  >(null);
   const [selectedOrderForBid, setSelectedOrderForBid] = useState<OrdersFeedOrder | null>(null);
   const [myBidsByOrderId, setMyBidsByOrderId] = useState<Record<number, boolean | 'loading'>>({});
   const [currentPage, setCurrentPage] = useState(1);
@@ -567,8 +570,24 @@ const OrdersFeed: React.FC = () => {
                     handleDeleteOrder(id);
                   }
                 }}
-                onBid={(order) => {
+                onBid={async (order) => {
                   setSelectedOrderForBid(order);
+                  setEditingBid(null);
+                  // Отклик уже есть — подтягиваем свою ставку одним запросом и
+                  // открываем модалку на редактирование, а не на новый отклик.
+                  if (hasMyBid) {
+                    try {
+                      const bids = await ordersApi.getBids(order.id);
+                      const mine = bids.find(
+                        (b) =>
+                          Number(b?.expert?.id) === Number(userProfile?.id) &&
+                          (b?.status ?? 'active') === 'active'
+                      );
+                      if (mine) setEditingBid(mine as unknown as { id: number });
+                    } catch {
+                      // не получилось — откроется обычная форма отклика
+                    }
+                  }
                   setBidModalVisible(true);
                 }}
                 onClick={(id) => navigate(`/orders/${id}`)}
@@ -606,6 +625,7 @@ const OrdersFeed: React.FC = () => {
           onClose={() => {
             setBidModalVisible(false);
             setSelectedOrderForBid(null);
+            setEditingBid(null);
           }}
           onBidSubmitted={(orderId) => {
             setMyBidsByOrderId((prev) => ({ ...prev, [orderId]: true }));
@@ -613,6 +633,7 @@ const OrdersFeed: React.FC = () => {
           orderId={selectedOrderForBid.id}
           orderTitle={selectedOrderForBid.title}
           orderBudget={Number.isFinite(Number(selectedOrderForBid.budget)) ? Number(selectedOrderForBid.budget) : undefined}
+          existingBid={editingBid}
         />
       )}
     </div>

@@ -15,12 +15,35 @@ class MessageSerializer(serializers.ModelSerializer):
     sender = PublicUserProfileSerializer(read_only=True)
     is_mine = serializers.SerializerMethodField()
     file_url = serializers.FileField(source='file', read_only=True)
+    offer_data = serializers.SerializerMethodField()
     
     class Meta:
         model = Message
         fields = ['id', 'text', 'file', 'file_url', 'file_name', 'message_type', 'offer_data', 
                   'sender', 'created_at', 'is_read', 'is_pinned', 'is_mine']
     
+    def get_offer_data(self, obj):
+        """Добавляет к предложению client_cost — сумму с сервисным сбором.
+
+        Клиенту показываем итог, который реально спишется, эксперту — его
+        собственную стоимость. Считаем на чтении, поэтому поле появляется и у
+        предложений, отправленных до этой правки.
+        """
+        data = obj.offer_data
+        if not isinstance(data, dict):
+            return data
+        cost = data.get('cost')
+        if cost is None or cost == '':
+            return data
+        try:
+            from apps.wallet.policy import order_quote
+            quote = order_quote(cost)
+        except (TypeError, ValueError, ArithmeticError):
+            return data
+        enriched = dict(data)
+        enriched['client_cost'] = str(quote['base_amount'] + quote['service_fee'])
+        return enriched
+
     def get_is_mine(self, obj):
         request = self.context.get('request')
         if request and request.user:

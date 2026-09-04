@@ -73,7 +73,9 @@ const OrderBids: React.FC<OrderBidsProps> = ({
                 renderItem={(bid: Bid) => {
                   const expert = bid?.expert;
                   if (!expert?.id) return null;
-                  const bidAmount = Number(bid.amount ?? 0);
+                  // Клиенту показываем итоговую сумму с уже включённым сервисным
+                  // сбором (именно она спишется), эксперту — его собственную ставку.
+                  const bidAmount = Number((isOrderOwner ? bid.client_amount : undefined) ?? bid.amount ?? 0);
                   const prepaymentPercent = Number(bid.prepayment_percent ?? 0);
                   const bidAmountText = !Number.isFinite(bidAmount) || bidAmount === 0
                     ? 'Договорная'
