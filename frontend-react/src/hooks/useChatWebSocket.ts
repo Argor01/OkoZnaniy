@@ -39,12 +39,12 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
 
     const token = localStorage.getItem('access_token');
     const hasJwtToken = !!token && token !== 'cookie-session' && token.split('.').length === 3;
-    if (!hasJwtToken) {
-      setIsConnected(false);
-      return;
-    }
+    // Cookie-session users authenticate the socket via the HttpOnly oko_access
+    // cookie (sent on the same-origin handshake); JWT clients still pass ?token=.
     const wsUrl = API_BASE_URL.replace('http', 'ws').replace('https', 'wss');
-    const url = `${wsUrl}/ws/chat/${chatId}/?token=${token}`;
+    const url = hasJwtToken
+      ? `${wsUrl}/ws/chat/${chatId}/?token=${token}`
+      : `${wsUrl}/ws/chat/${chatId}/`;
 
     const ws = new WebSocket(url);
 

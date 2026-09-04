@@ -25,7 +25,9 @@ class AuthCookieMiddleware:
         if access:
             response.set_cookie(
                 ACCESS_COOKIE, access, max_age=60 * 60,
-                path="/api/", **common,
+                # path="/" (не "/api/"): cookie должен уходить и на WebSocket-
+                # хендшейк /ws/..., иначе real-time не авторизуется у cookie-сессий.
+                path="/", **common,
             )
         if refresh:
             response.set_cookie(

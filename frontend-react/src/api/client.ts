@@ -46,6 +46,22 @@ const redirectToLoginIfAllowed = () => {
   window.location.assign(ROUTES.login);
 };
 
+// Single-flight token refresh: a burst of concurrent 401s (the app polls
+// several endpoints on short intervals) must trigger only ONE refresh call,
+// and all waiters share its outcome. Prevents refresh races and logout storms.
+let refreshInFlight: Promise<void> | null = null;
+const performTokenRefresh = (): Promise<void> => {
+  if (!refreshInFlight) {
+    refreshInFlight = axios
+      .post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {}, { withCredentials: true })
+      .then(() => undefined)
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }
+  return refreshInFlight;
+};
+
 // --- Request interceptor ---
 apiClient.interceptors.request.use((config) => {
   // Auto-remove Content-Type for FormData (let browser set boundary)
@@ -112,12 +128,18 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await axios.post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {}, { withCredentials: true });
+        await performTokenRefresh();
         return apiClient(originalRequest);
-      } catch {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        redirectToLoginIfAllowed();
+      } catch (refreshError) {
+        // Only force logout when the refresh endpoint itself rejected the
+        // session (expired/invalid). Network blips or timeouts must NOT log the
+        // user out — otherwise a brief connectivity drop kicks everyone to login.
+        const refreshStatus = (refreshError as AxiosError)?.response?.status;
+        if (refreshStatus === 401 || refreshStatus === 403) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          redirectToLoginIfAllowed();
+        }
         return Promise.reject(error);
       }
     }

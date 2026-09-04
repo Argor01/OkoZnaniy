@@ -129,13 +129,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
   const connect = useCallback(() => {
     if (!enabled) return;
-    const token = localStorage.getItem('access_token');
-    const hasJwtToken = !!token && token !== 'cookie-session' && token.split('.').length === 3;
-    if (!hasJwtToken) {
-      logger.log('[WS] Skipped: JWT token is not available for WebSocket auth');
-      setIsConnected(false);
-      return;
-    }
+    // Auth is carried by the HttpOnly oko_access cookie on the same-origin
+    // handshake; JWT clients additionally append ?token= (see getWebSocketUrl).
+    // We therefore connect for cookie-session users too instead of bailing out.
 
     if (wsRef.current) {
       wsRef.current.close();

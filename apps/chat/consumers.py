@@ -19,9 +19,13 @@ class AuthenticatedConsumer(AsyncJsonWebsocketConsumer):
     user = None
 
     async def connect(self):
-        # Получаем токен из query string
+        # Токен берём из query string, а если его нет — из HttpOnly cookie
+        # oko_access (cookie-сессия). Так real-time работает и для браузерных
+        # пользователей, у которых JWT недоступен в JS.
         query_string = self.scope.get("query_string", b"").decode()
         token = self._get_token_from_query(query_string)
+        if not token:
+            token = self._get_token_from_cookies()
 
         if token:
             self.user = await self._get_user_from_token(token)
@@ -35,6 +39,22 @@ class AuthenticatedConsumer(AsyncJsonWebsocketConsumer):
         """Извлекает JWT токен из query string."""
         params = dict(param.split("=") for param in query_string.split("&") if "=" in param)
         return params.get("token")
+
+    def _get_token_from_cookies(self) -> str | None:
+        """Извлекает access-JWT из HttpOnly cookie oko_access в WS-хендшейке."""
+        from http.cookies import SimpleCookie
+
+        headers = dict(self.scope.get("headers") or [])
+        raw = headers.get(b"cookie")
+        if not raw:
+            return None
+        jar = SimpleCookie()
+        try:
+            jar.load(raw.decode("latin1"))
+        except Exception:
+            return None
+        morsel = jar.get("oko_access")
+        return morsel.value if morsel else None
 
     @database_sync_to_async
     def _get_user_from_token(self, token: str):
