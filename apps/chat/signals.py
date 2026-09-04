@@ -2,10 +2,12 @@ import re
 import logging
 
 logger = logging.getLogger(__name__)
-from django.db.models.signals import post_save
+from django.db.models import Q
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from .models import SupportChat, SupportMessage, Message, Chat
+from apps.orders.models import Order
 from .services import ContactDetectionService, ChatModerationService, is_locked_direct_chat, violation_type_label
 from apps.admin_panel.models import SupportRequest, SupportMessage as AdminSupportMessage
 
@@ -309,3 +311,42 @@ def check_message_for_contacts(sender, instance, created, **kwargs):
             if instance.file:
                 instance.file.delete(save=False)
             instance.delete()
+
+
+@receiver(pre_delete, sender=Order)
+def move_order_chat_before_order_delete(sender, instance, **kwargs):
+    """Не даёт удалению заказа упасть из-за дубля личного чата.
+
+    Chat.order объявлен как SET_NULL, а чат без заказа считается личным, и на
+    пару (клиент, эксперт) он может быть только один — это гарантирует
+    ограничение unique_direct_chat_pair. Из-за этого при удалении заказа его
+    чат пытался стать вторым личным чатом той же пары, и весь DELETE падал с
+    IntegrityError: удалить такой заказ было невозможно.
+
+    Здесь переносим сообщения чата заказа в уже существующий личный чат и
+    убираем опустевший чат заказа: переписка сохраняется, дубль не создаётся.
+    Если личного чата у пары ещё нет, не делаем ничего — SET_NULL сам корректно
+    превратит чат заказа в личный.
+    """
+    order_chats = Chat.objects.filter(order=instance).exclude(
+        Q(client__isnull=True) | Q(expert__isnull=True)
+    )
+    for chat in order_chats:
+        direct_chat = (
+            Chat.objects.filter(order__isnull=True)
+            .filter(
+                Q(client_id=chat.client_id, expert_id=chat.expert_id)
+                | Q(client_id=chat.expert_id, expert_id=chat.client_id)
+            )
+            .exclude(pk=chat.pk)
+            .first()
+        )
+        if not direct_chat:
+            continue
+        moved = Message.objects.filter(chat=chat).update(chat=direct_chat)
+        chat_pk = chat.pk
+        chat.delete()
+        logger.info(
+            "Удаление заказа #%s: чат %s объединён с личным чатом %s, перенесено сообщений: %s",
+            instance.pk, chat_pk, direct_chat.pk, moved,
+        )

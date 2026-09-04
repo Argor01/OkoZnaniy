@@ -231,7 +231,12 @@ class WalletOrderLedgerTests(TestCase):
             payment_id='callback-order-payment',
         )
 
-        with patch('apps.payments.services.AlfaBankClient.process_callback', return_value=payment):
+        # Тест проверяет идемпотентность леджера, а не конкретного эквайрера.
+        # Подменяем оба карточных клиента: какой бы провайдер ни был выбран
+        # настройками, callback вернёт наш платёж, и тест не сломается при
+        # следующей смене банка.
+        with patch('apps.payments.services.AlfaBankClient.process_callback', return_value=payment), \
+             patch('apps.payments.services.UralsibRBSClient.process_callback', return_value=payment):
             self.assertTrue(PaymentService.process_payment_callback(payment.payment_id, {'orderId': payment.payment_id}))
             self.assertTrue(PaymentService.process_payment_callback(payment.payment_id, {'orderId': payment.payment_id}))
 
