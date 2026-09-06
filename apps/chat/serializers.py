@@ -33,7 +33,12 @@ class MessageSerializer(serializers.ModelSerializer):
         if not isinstance(data, dict):
             return data
         cost = data.get('cost')
-        if cost is None or cost == '':
+        # Считаем только для чисел. В offer_data лежит свободный JSON, и на
+        # пустых list/dict Decimal(str(value or 0)) молча давал 0.00 —
+        # клиенту показалась бы цена «0 ₽» вместо исходного значения.
+        if isinstance(cost, bool) or not isinstance(cost, (int, float, str)):
+            return data
+        if isinstance(cost, str) and not cost.strip():
             return data
         try:
             from apps.wallet.policy import order_quote
