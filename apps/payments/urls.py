@@ -8,5 +8,8 @@ router.register('payments', PaymentViewSet, basename='payment')
 urlpatterns = [
     path('payments/tbank/callback/', tbank_callback, name='tbank-callback'),
     path('payments/uralsib/callback/', uralsib_callback, name='uralsib-callback'),
+    # Обработчик общий для всех банков на шлюзе RBS (Уралсиб, Сбербанк).
+    # Прежний адрес оставлен: он уже прописан на стороне Уралсиба.
+    path('payments/rbs/callback/', uralsib_callback, name='rbs-callback'),
     path('', include(router.urls)),
 ]
