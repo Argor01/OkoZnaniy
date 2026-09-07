@@ -36,6 +36,19 @@ URALSIB_SETTINGS = {
     'TIMEOUT': getattr(settings, 'URALSIB_TIMEOUT', 20),
 }
 
+SBERBANK_SETTINGS = {
+    # Тестовый контур: https://3dsec.sberbank.ru/payment/rest
+    # Боевой URL банк сообщает при подключении.
+    'API_URL': getattr(settings, 'SBERBANK_API_URL', 'https://3dsec.sberbank.ru/payment/rest'),
+    'USERNAME': getattr(settings, 'SBERBANK_USERNAME', ''),
+    'PASSWORD': getattr(settings, 'SBERBANK_PASSWORD', ''),
+    'CALLBACK_SECRET': getattr(settings, 'SBERBANK_CALLBACK_SECRET', ''),
+    'SUCCESS_URL': getattr(settings, 'SBERBANK_SUCCESS_URL', ''),
+    'FAIL_URL': getattr(settings, 'SBERBANK_FAIL_URL', ''),
+    'CURRENCY': getattr(settings, 'SBERBANK_CURRENCY', '643'),
+    'TIMEOUT': getattr(settings, 'SBERBANK_TIMEOUT', 20),
+}
+
 TBANK_SETTINGS = {
     'API_URL': getattr(settings, 'TBANK_API_URL', 'https://securepay.tinkoff.ru/v2'),
     'TERMINAL_KEY': getattr(settings, 'TBANK_TERMINAL_KEY', ''),

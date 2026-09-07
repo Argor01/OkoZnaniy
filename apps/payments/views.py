@@ -145,14 +145,15 @@ def uralsib_callback(request):
     Отвечаем 200 в любом случае: шлюз повторяет доставку при ошибке,
     а решение об оплате принимается по запросу статуса, не по колбэку.
     """
-    from .providers.uralsib_rbs import UralsibRBSClient
+    from .services import PaymentService
 
     data = request.data if request.method == 'POST' and request.data else request.query_params
     data = {k: v for k, v in data.items()}
     logger.info('Уралсиб RBS колбэк: %s', {k: v for k, v in data.items() if k != 'checksum'})
 
     try:
-        payment = UralsibRBSClient().process_callback(data)
+        rbs_client = PaymentService._card_rbs_client()
+        payment = rbs_client.process_callback(data) if rbs_client else None
     except Exception:  # noqa: BLE001
         logger.exception('Уралсиб RBS: ошибка обработки колбэка')
         return HttpResponse('ERROR', status=200)

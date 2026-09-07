@@ -592,5 +592,17 @@ URALSIB_SUCCESS_URL = os.getenv("URALSIB_SUCCESS_URL", "")
 URALSIB_FAIL_URL = os.getenv("URALSIB_FAIL_URL", "")
 URALSIB_CURRENCY = os.getenv("URALSIB_CURRENCY", "643")
 
+# Сбербанк работает на том же шлюзе RBS, что и Уралсиб.
+# Тестовый контур: https://3dsec.sberbank.ru/payment/rest
+# Боевой адрес и учётные данные банк выдаёт при подключении
+# (логин РИНН + пароль шлюза из СберБизнеса).
+SBERBANK_API_URL = os.getenv("SBERBANK_API_URL", "https://3dsec.sberbank.ru/payment/rest")
+SBERBANK_USERNAME = os.getenv("SBERBANK_USERNAME", "")
+SBERBANK_PASSWORD = os.getenv("SBERBANK_PASSWORD", "")
+SBERBANK_CALLBACK_SECRET = os.getenv("SBERBANK_CALLBACK_SECRET", "")
+SBERBANK_SUCCESS_URL = os.getenv("SBERBANK_SUCCESS_URL", "")
+SBERBANK_FAIL_URL = os.getenv("SBERBANK_FAIL_URL", "")
+SBERBANK_CURRENCY = os.getenv("SBERBANK_CURRENCY", "643")
+
 # Какой эквайер обслуживает оплату картой: uralsib или alfabank.
 CARD_ACQUIRER = os.getenv("CARD_ACQUIRER", "uralsib")

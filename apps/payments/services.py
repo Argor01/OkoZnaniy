@@ -7,7 +7,7 @@ from .models import Payment, PaymentMethod, PaymentStatus
 from .providers.alfabank import AlfaBankClient
 from .providers.sbp import SBPClient
 from .providers.tbank import TBankClient
-from .providers.uralsib_rbs import UralsibRBSClient
+from .providers.rbs import SberbankRBSClient, UralsibRBSClient
 from apps.wallet.policy import order_quote, money
 
 
@@ -69,8 +69,9 @@ class PaymentService:
             if rail == 'tbank':
                 result = TBankClient().process_callback(data)
             elif rail == PaymentMethod.CARD:
-                if PaymentService._card_acquirer() == 'uralsib':
-                    result = UralsibRBSClient().process_callback(data)
+                rbs_client = PaymentService._card_rbs_client()
+                if rbs_client is not None:
+                    result = rbs_client.process_callback(data)
                 else:
                     result = AlfaBankClient().process_callback(data)
             elif rail == PaymentMethod.SBP:
@@ -145,6 +146,18 @@ class PaymentService:
     def _get_tbank_payment_link(payment: Payment) -> str:
         return TBankClient().register_payment(payment)['formUrl']
 
+    # Банки на шлюзе RBS: протокол один, различаются адрес и учётные данные.
+    _RBS_ACQUIRERS = {
+        'uralsib': (UralsibRBSClient, 'Уралсиб'),
+        'sberbank': (SberbankRBSClient, 'Сбербанк'),
+    }
+
+    @staticmethod
+    def _card_rbs_client():
+        """Клиент RBS для текущего эквайрера или None, если банк не на RBS."""
+        entry = PaymentService._RBS_ACQUIRERS.get(PaymentService._card_acquirer())
+        return entry[0]() if entry else None
+
     @staticmethod
     def _card_acquirer() -> str:
         """Какой банк обслуживает оплату картой. Переключается CARD_ACQUIRER."""
@@ -155,10 +168,15 @@ class PaymentService:
         """Ссылка на платёжную форму выбранного карточного эквайера."""
         from .config import ALFABANK_SETTINGS, URALSIB_SETTINGS
         acquirer = PaymentService._card_acquirer()
-        if acquirer == 'uralsib':
-            if not URALSIB_SETTINGS.get('USERNAME'):
-                raise ValueError('Оплата картой временно недоступна: эквайринг Уралсиб не настроен')
-            return UralsibRBSClient().register_payment(payment)['formUrl']
+        entry = PaymentService._RBS_ACQUIRERS.get(acquirer)
+        if entry is not None:
+            client_cls, bank_label = entry
+            client = client_cls()
+            if not client.configured:
+                raise ValueError(
+                    f'Оплата картой временно недоступна: эквайринг {bank_label} не настроен'
+                )
+            return client.register_payment(payment)['formUrl']
         if not ALFABANK_SETTINGS.get('USERNAME'):
             raise ValueError('Оплата картой временно недоступна: эквайринг не настроен')
         return PaymentService._get_alfabank_payment_link(payment)
@@ -174,8 +192,9 @@ class PaymentService:
         if payment.status != PaymentStatus.COMPLETED:
             raise ValueError('Возврат возможен только по оплаченному платежу')
         rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
-        if rail == 'card' and PaymentService._card_acquirer() == 'uralsib':
-            result = UralsibRBSClient().refund(payment, amount)
+        rbs_client = PaymentService._card_rbs_client() if rail == 'card' else None
+        if rbs_client is not None:
+            result = rbs_client.refund(payment, amount)
         else:
             raise ValueError(
                 f'Автоматический возврат для метода «{payment.payment_method}» не реализован'

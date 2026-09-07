@@ -1,7 +1,8 @@
-"""Эквайринг Банка Уралсиб через платёжный шлюз RBS.
+"""Эквайринг через платёжный шлюз RBS.
 
-RBS — тот же движок, что у Альфа-Банка и Сбербанка, поэтому набор
-методов стандартный:
+RBS — общая платформа: на ней работают Сбербанк, Уралсиб и Альфа-Банк.
+Протокол один и тот же, отличаются только адрес шлюза и учётные данные,
+поэтому здесь один клиент и тонкие наследники под конкретные банки:
 
     register.do                — регистрация заказа, возвращает formUrl
     getOrderStatusExtended.do  — статус заказа
@@ -13,8 +14,10 @@ RBS — тот же движок, что у Альфа-Банка и Сберб�
 именно на этом ошибается providers/alfabank.py, который писался
 по тому же протоколу, но так и не был доведён до боя.
 
-Тестовый контур: https://uralsib.rbsuat.com/payment/rest/
-Учётная запись для песочницы заводится самостоятельно и бессрочна.
+Тестовые контуры:
+    Уралсиб   https://uralsib.rbsuat.com/payment/rest/
+    Сбербанк  https://3dsec.sberbank.ru/payment/rest/
+Боевые адреса банк сообщает при подключении.
 """
 from __future__ import annotations
 
@@ -27,7 +30,7 @@ from typing import Any, Dict, Optional
 
 import requests
 
-from ..config import URALSIB_SETTINGS
+from ..config import SBERBANK_SETTINGS, URALSIB_SETTINGS
 from ..models import Payment, PaymentStatus
 
 logger = logging.getLogger("oko.payments")
@@ -65,7 +68,7 @@ def _description(payment: Payment) -> str:
     return "Пополнение кошелька на okoznaniy.ru"
 
 
-class UralsibRBSError(Exception):
+class RBSError(Exception):
     """Шлюз вернул ошибку в поле errorCode."""
 
     def __init__(self, code, message):
@@ -74,17 +77,28 @@ class UralsibRBSError(Exception):
         self.message = message
 
 
-class UralsibRBSClient:
+class RBSClient:
+    """Базовый клиент шлюза. Банк задаётся атрибутами наследника."""
+
+    # Переопределяются в наследниках
+    SETTINGS: Dict[str, Any] = {}
+    LABEL = "RBS"
+    META_PREFIX = "rbs"
+    SETTINGS_HINT = ""
+
     def __init__(self):
-        self.api_url = URALSIB_SETTINGS["API_URL"].rstrip("/")
-        self.username = URALSIB_SETTINGS["USERNAME"]
-        self.password = URALSIB_SETTINGS["PASSWORD"]
-        self.callback_secret = URALSIB_SETTINGS.get("CALLBACK_SECRET") or ""
-        self.timeout = float(URALSIB_SETTINGS.get("TIMEOUT") or 20)
+        self.api_url = self.SETTINGS["API_URL"].rstrip("/")
+        self.username = self.SETTINGS["USERNAME"]
+        self.password = self.SETTINGS["PASSWORD"]
+        self.callback_secret = self.SETTINGS.get("CALLBACK_SECRET") or ""
+        self.timeout = float(self.SETTINGS.get("TIMEOUT") or 20)
 
     @property
     def configured(self) -> bool:
         return bool(self.username and self.password)
+
+    def _meta_key(self, name: str) -> str:
+        return f"{self.META_PREFIX}_{name}"
 
     # ------------------------------------------------------------------
     # Транспорт
@@ -93,7 +107,7 @@ class UralsibRBSClient:
     def _post(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
         if not self.configured:
             raise ValueError(
-                "Эквайринг Уралсиб не настроен: задайте URALSIB_USERNAME и URALSIB_PASSWORD"
+                f"Эквайринг {self.LABEL} не настроен: задайте {self.SETTINGS_HINT}"
             )
         payload = {
             **{k: v for k, v in params.items() if v not in (None, "")},
@@ -113,8 +127,8 @@ class UralsibRBSClient:
         code = str(body.get("errorCode", "0") or "0")
         if code != "0":
             message = body.get("errorMessage") or "Ошибка платёжного шлюза"
-            logger.warning("Уралсиб RBS %s → errorCode=%s %s", method, code, message)
-            raise UralsibRBSError(code, message)
+            logger.warning("%s %s → errorCode=%s %s", self.LABEL, method, code, message)
+            raise RBSError(code, message)
         return body
 
     # ------------------------------------------------------------------
@@ -127,9 +141,9 @@ class UralsibRBSClient:
         body = self._post("register.do", {
             "orderNumber": order_number,
             "amount": int(Decimal(str(payment.amount)) * 100),  # в копейках
-            "currency": URALSIB_SETTINGS.get("CURRENCY", "643"),  # RUB
-            "returnUrl": URALSIB_SETTINGS.get("SUCCESS_URL", ""),
-            "failUrl": URALSIB_SETTINGS.get("FAIL_URL", ""),
+            "currency": self.SETTINGS.get("CURRENCY", "643"),  # RUB
+            "returnUrl": self.SETTINGS.get("SUCCESS_URL", ""),
+            "failUrl": self.SETTINGS.get("FAIL_URL", ""),
             "description": _description(payment),
             "language": "ru",
             "sessionTimeoutSecs": 24 * 60 * 60,
@@ -137,8 +151,8 @@ class UralsibRBSClient:
 
         payment.metadata = {
             **(payment.metadata or {}),
-            "uralsib_order_id": body["orderId"],
-            "uralsib_order_number": order_number,
+            self._meta_key("order_id"): body["orderId"],
+            self._meta_key("order_number"): order_number,
             "form_url": body["formUrl"],
         }
         payment.save(update_fields=["metadata", "updated_at"])
@@ -146,9 +160,9 @@ class UralsibRBSClient:
 
     def get_order_status(self, payment: Payment) -> Dict[str, Any]:
         """Спрашивает шлюз о текущем состоянии заказа."""
-        order_id = (payment.metadata or {}).get("uralsib_order_id")
+        order_id = (payment.metadata or {}).get(self._meta_key("order_id"))
         if not order_id:
-            raise ValueError("Платёж не зарегистрирован в Уралсибе")
+            raise ValueError(f"Платёж не зарегистрирован в {self.LABEL}")
         return self._post("getOrderStatusExtended.do", {"orderId": order_id})
 
     def refund(self, payment: Payment, amount: Optional[Decimal] = None) -> Dict[str, Any]:
@@ -157,15 +171,15 @@ class UralsibRBSClient:
         amount=None — полный возврат. Частичный возврат допустим
         на сумму не больше оплаченной.
         """
-        order_id = (payment.metadata or {}).get("uralsib_order_id")
+        order_id = (payment.metadata or {}).get(self._meta_key("order_id"))
         if not order_id:
-            raise ValueError("Платёж не зарегистрирован в Уралсибе")
+            raise ValueError(f"Платёж не зарегистрирован в {self.LABEL}")
         value = Decimal(str(amount if amount is not None else payment.amount))
         body = self._post("refund.do", {
             "orderId": order_id,
             "amount": int(value * 100),
         })
-        logger.info("Уралсиб RBS: возврат %s по платежу %s", value, payment.payment_id)
+        logger.info("%s: возврат %s по платежу %s", self.LABEL, value, payment.payment_id)
         return body
 
     # ------------------------------------------------------------------
@@ -210,31 +224,35 @@ class UralsibRBSClient:
         payment = None
         if order_id:
             payment = Payment.objects.filter(
-                metadata__uralsib_order_id=order_id,
+                **{f"metadata__{self._meta_key('order_id')}": order_id},
             ).first()
         if payment is None and order_number:
             payment = Payment.objects.filter(
-                metadata__uralsib_order_number=order_number,
+                **{f"metadata__{self._meta_key('order_number')}": order_number},
             ).first()
         if payment is None:
-            logger.warning("Уралсиб RBS: колбэк по неизвестному заказу %s", order_id or order_number)
+            logger.warning(
+                "%s: колбэк по неизвестному заказу %s", self.LABEL, order_id or order_number
+            )
             return None
 
         if self.callback_secret and not self.verify_callback(data):
-            logger.warning("Уралсиб RBS: неверная подпись колбэка для %s", payment.payment_id)
+            logger.warning("%s: неверная подпись колбэка для %s", self.LABEL, payment.payment_id)
             return None
 
         try:
             status_body = self.get_order_status(payment)
-        except (UralsibRBSError, ValueError, requests.RequestException) as e:
-            logger.error("Уралсиб RBS: не удалось подтвердить статус %s: %s", payment.payment_id, e)
+        except (RBSError, ValueError, requests.RequestException) as e:
+            logger.error(
+                "%s: не удалось подтвердить статус %s: %s", self.LABEL, payment.payment_id, e
+            )
             return None
 
         order_status = status_body.get("orderStatus")
         if order_status not in PAID_STATUSES:
             logger.info(
-                "Уралсиб RBS: заказ %s не оплачен, orderStatus=%s",
-                payment.payment_id, order_status,
+                "%s: заказ %s не оплачен, orderStatus=%s",
+                self.LABEL, payment.payment_id, order_status,
             )
             if order_status == OrderStatus.DECLINED and payment.status != PaymentStatus.COMPLETED:
                 payment.status = PaymentStatus.FAILED
@@ -243,8 +261,26 @@ class UralsibRBSClient:
 
         payment.metadata = {
             **(payment.metadata or {}),
-            "uralsib_status": order_status,
-            "uralsib_approval_code": status_body.get("approvalCode", ""),
+            self._meta_key("status"): order_status,
+            self._meta_key("approval_code"): status_body.get("approvalCode", ""),
         }
         payment.save(update_fields=["metadata", "updated_at"])
         return payment
+
+
+class UralsibRBSClient(RBSClient):
+    SETTINGS = URALSIB_SETTINGS
+    LABEL = "Уралсиб RBS"
+    META_PREFIX = "uralsib"
+    SETTINGS_HINT = "URALSIB_USERNAME и URALSIB_PASSWORD"
+
+
+class SberbankRBSClient(RBSClient):
+    SETTINGS = SBERBANK_SETTINGS
+    LABEL = "Сбербанк RBS"
+    META_PREFIX = "sberbank"
+    SETTINGS_HINT = "SBERBANK_USERNAME и SBERBANK_PASSWORD"
+
+
+# Historical alias: раньше ошибка называлась по банку.
+UralsibRBSError = RBSError

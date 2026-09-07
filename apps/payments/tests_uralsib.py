@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
 from apps.payments.models import Payment, PaymentMethod, PaymentStatus
-from apps.payments.providers.uralsib_rbs import (
+from apps.payments.providers.rbs import (
     OrderStatus, UralsibRBSClient, UralsibRBSError,
 )
 
@@ -41,7 +41,7 @@ class _FakeResponse:
 
 def _patched_settings():
     return patch.dict(
-        "apps.payments.providers.uralsib_rbs.URALSIB_SETTINGS", TEST_SETTINGS, clear=False,
+        "apps.payments.providers.rbs.URALSIB_SETTINGS", TEST_SETTINGS, clear=False,
     )
 
 
@@ -61,7 +61,7 @@ class UralsibClientTests(TestCase):
 
     def test_not_configured_raises(self):
         with patch.dict(
-            "apps.payments.providers.uralsib_rbs.URALSIB_SETTINGS",
+            "apps.payments.providers.rbs.URALSIB_SETTINGS",
             {**TEST_SETTINGS, "USERNAME": "", "PASSWORD": ""},
             clear=False,
         ):
@@ -78,7 +78,7 @@ class UralsibClientTests(TestCase):
             captured["data"] = data
             return _FakeResponse({"orderId": "ord-77", "formUrl": "https://pay/form"})
 
-        with _patched_settings(), patch("apps.payments.providers.uralsib_rbs.requests.post", fake_post):
+        with _patched_settings(), patch("apps.payments.providers.rbs.requests.post", fake_post):
             result = UralsibRBSClient().register_payment(self.payment)
 
         self.assertEqual(result["formUrl"], "https://pay/form")
@@ -97,7 +97,7 @@ class UralsibClientTests(TestCase):
         def fake_post(url, data=None, timeout=None):
             return _FakeResponse({"errorCode": "1", "errorMessage": "Заказ уже оплачен"})
 
-        with _patched_settings(), patch("apps.payments.providers.uralsib_rbs.requests.post", fake_post):
+        with _patched_settings(), patch("apps.payments.providers.rbs.requests.post", fake_post):
             with self.assertRaises(UralsibRBSError) as ctx:
                 UralsibRBSClient().register_payment(self.payment)
         self.assertEqual(ctx.exception.code, "1")
@@ -112,7 +112,7 @@ class UralsibClientTests(TestCase):
             captured["data"] = data
             return _FakeResponse({"errorCode": "0"})
 
-        with _patched_settings(), patch("apps.payments.providers.uralsib_rbs.requests.post", fake_post):
+        with _patched_settings(), patch("apps.payments.providers.rbs.requests.post", fake_post):
             UralsibRBSClient().refund(self.payment, Decimal("500.00"))
 
         self.assertTrue(captured["url"].endswith("/refund.do"))
