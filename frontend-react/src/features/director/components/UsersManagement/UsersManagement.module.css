@@ -1,0 +1,80 @@
+.container {
+  width: 100%;
+}
+
+.card {
+  width: 100%;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.roleSelect {
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.counter {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.nameCell {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.username {
+  font-size: 12px;
+}
+
+.rating {
+  white-space: nowrap;
+}
+
+.feeRadio {
+  display: block;
+  margin: 8px 0 16px;
+}
+
+.hint {
+  display: block;
+  font-size: 12px;
+  margin-left: 24px;
+}
+
+.percentInput {
+  width: 160px;
+  margin-left: 24px;
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    gap: 8px;
+  }
+
+  .roleSelect {
+    width: 130px;
+  }
+
+  .counter {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .percentInput {
+    margin-left: 0;
+  }
+}

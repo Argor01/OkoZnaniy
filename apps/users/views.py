@@ -884,9 +884,9 @@ class UserViewSet(viewsets.ModelViewSet):
         можно задать любому пользователю, остальные поля — партнёру.
         """
         user = request.user
-        if user.role != 'admin':
+        if user.role not in ['admin', 'director']:
             return Response(
-                {'error': 'Доступно только для администраторов'},
+                {'error': 'Доступно только для администраторов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -1096,11 +1096,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def admin_all_users(self, request):
-        """Получение всех пользователей для админки"""
+        """Получение всех пользователей для админки и кабинета директора"""
         user = request.user
-        if user.role != 'admin':
+        if user.role not in ['admin', 'director']:
             return Response(
-                {'error': 'Доступно только для администраторов'},
+                {'error': 'Доступно только для администраторов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
 

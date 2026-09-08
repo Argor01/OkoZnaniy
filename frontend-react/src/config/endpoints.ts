@@ -27,6 +27,8 @@ export const API_ENDPOINTS = {
     publicStats: '/public/stats/',
     supportUser: '/users/support_user/',
     updateProfile: '/users/update_me/',
+    adminAllUsers: '/users/admin_all_users/',
+    adminUpdatePartner: (id: number) => `/users/${id}/admin_update_partner/`,
     submitExpertApplication: '/users/submit_expert_application/',
     submitImprovementSuggestion: '/users/submit_improvement_suggestion/',
     improvementSuggestions: '/users/improvement_suggestions/',

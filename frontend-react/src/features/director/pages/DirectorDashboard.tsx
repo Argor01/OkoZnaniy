@@ -23,6 +23,7 @@ import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics
 import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
 import ImprovementRecommendations from '../components/ImprovementRecommendations/ImprovementRecommendations';
+import UsersManagement from '../components/UsersManagement';
 import DirectorFaqModal from '../modals/DirectorFaqModal';
 import { ThemeToggle } from '@/components/ui';
 import ErrorBoundary from '@/features/common/components/ErrorBoundary';
@@ -170,6 +171,13 @@ const DirectorDashboard: React.FC = () => {
       icon: <StopOutlined />,
       label: 'Баны за обмен контактами',
       component: <ErrorBoundary><ContactBannedUsers /></ErrorBoundary>,
+    },
+
+    {
+      key: 'users',
+      icon: <TeamOutlined />,
+      label: 'Пользователи',
+      component: <ErrorBoundary><UsersManagement /></ErrorBoundary>,
     },
     {
       key: 'improvement-recommendations',

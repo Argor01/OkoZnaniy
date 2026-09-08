@@ -141,6 +141,8 @@ class UserSerializer(serializers.ModelSerializer):
             'avatar', 'bio', 'experience_years', 'hourly_rate',
             'education', 'skills', 'portfolio_url', 'is_verified',
             'referral_code', 'partner_commission_rate',
+            'service_fee_percent',
+            'average_rating',
             'total_referrals', 'active_referrals', 'total_earnings',
             'city', 'email_verified', 'is_active', 'is_blocked',
             'date_joined', 'last_login', 'blocked_at', 'block_reason',
@@ -157,6 +159,17 @@ class UserSerializer(serializers.ModelSerializer):
     def get_is_blocked(self, obj):
         return not obj.is_active
     
+    average_rating = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        from django.db.models import Avg
+        if getattr(obj, 'role', None) == 'client':
+            return float(obj.client_reviews_received.aggregate(avg=Avg('rating'))['avg'] or 0)
+        try:
+            return float(obj.statistics.average_rating)
+        except Exception:
+            return 0.0
+
     def get_email(self, obj):
         """Email показывается только владельцу аккаунта или админам"""
         request = self.context.get('request')
