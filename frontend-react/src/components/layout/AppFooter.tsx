@@ -99,6 +99,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>Служба поддержки</h3>
             <a href="tel:88005007857" className={styles.contactPhone}>8 (800) 500-78-57</a>
+            <a href="tel:+79314674689" className={styles.contactPhone}>+7 931 467-46-89</a>
             <a href="mailto:support@okoznaniy.ru" className={styles.contactEmail}>support@okoznaniy.ru</a>
             <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
             {!hideContactAndExpert && (
