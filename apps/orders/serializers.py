@@ -106,7 +106,7 @@ class BidSerializer(serializers.ModelSerializer):
         """
         from apps.wallet.policy import order_quote
 
-        quote = order_quote(obj.amount)
+        quote = order_quote(obj.amount, client=obj.order.client)
         return str(quote['base_amount'] + quote['service_fee'])
 
     def get_expert_rating(self, obj):

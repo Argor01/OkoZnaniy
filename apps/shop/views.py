@@ -179,7 +179,7 @@ class ReadyWorkViewSet(viewsets.ModelViewSet):
             purchase.delivered_file_size = first_file.file_size or 0
 
         purchase.save()
-        quote = order_quote(work.price)
+        quote = order_quote(work.price, client=request.user)
         try:
             WalletService.fund_distributed_escrow(
                 client=request.user, expert=work.author, purchase=purchase,
@@ -261,7 +261,7 @@ class PurchaseViewSet(viewsets.ReadOnlyModelViewSet):
         purchase = self.get_object()
         if purchase.status != Purchase.Status.PAID:
             return Response({'detail': 'Покупка уже завершена или находится в споре.'}, status=status.HTTP_400_BAD_REQUEST)
-        quote = order_quote(purchase.price_paid)
+        quote = order_quote(purchase.price_paid, client=purchase.buyer)
         WalletService.release_distributed_escrow(purchase.wallet_settlement, description=f'Досрочная разблокировка покупки «{purchase.work.title}»')
         purchase.status = Purchase.Status.COMPLETED
         purchase.hold_until = timezone.now()

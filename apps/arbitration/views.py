@@ -104,7 +104,7 @@ def _process_arbitration_refund(case, refund_percentage):
     # Ветка для покупки готовой работы
     if case.purchase:
         purchase = case.purchase
-        quote = order_quote(purchase.price_paid)
+        quote = order_quote(purchase.price_paid, client=purchase.buyer)
         settlement = getattr(purchase, 'wallet_settlement', None)
         if settlement is not None:
             try:
@@ -185,7 +185,10 @@ def _process_arbitration_refund(case, refund_percentage):
 
     refund_decimal = Decimal(str(refund_percentage))
     client_amount = money(active_hold * refund_decimal / Decimal('100'))
-    quote = order_quote(order.final_price if order.final_price is not None else order.budget)
+    quote = order_quote(
+        order.final_price if order.final_price is not None else order.budget,
+        client=order.client,
+    )
     full_escrow = money(quote['base_amount'] + quote['service_fee'])
     funded_ratio = min(Decimal('1'), money(active_hold) / full_escrow) if full_escrow else Decimal('0')
     remaining_ratio = funded_ratio * (Decimal('100') - refund_decimal) / Decimal('100')

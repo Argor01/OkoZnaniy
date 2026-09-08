@@ -84,6 +84,13 @@ class User(AbstractUser):
     # Поля партнерской системы
     referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Реферальный код")
     partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Процент партнера (%)")
+    # Индивидуальный сервисный сбор с клиента. Пусто — общий процент площадки
+    # (CLIENT_SERVICE_FEE_PERCENT), 0 — заказы без комиссии.
+    service_fee_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="Индивидуальный сервисный сбор (%)",
+        help_text="Пусто — общий процент площадки. 0 — без комиссии.",
+    )
     total_referrals = models.PositiveIntegerField(default=0, verbose_name="Всего рефералов")
     active_referrals = models.PositiveIntegerField(default=0, verbose_name="Активных рефералов")
     total_earnings = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Общий доход")

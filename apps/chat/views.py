@@ -64,7 +64,7 @@ def _fund_individual_offer(order, client, expert, base_amount, prepayment_percen
     if percent_value < 0 or percent_value > 100:
         raise ValueError('Процент предоплаты должен быть от 0 до 100.')
 
-    quote = order_quote(base_amount)
+    quote = order_quote(base_amount, client=client)
     full_amount = money(quote['base_amount'] + quote['service_fee'])
     target = money(full_amount * Decimal(percent_value) / Decimal('100'))
     settlement = Settlement.objects.select_for_update().filter(order=order).first()

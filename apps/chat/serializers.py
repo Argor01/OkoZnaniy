@@ -42,7 +42,7 @@ class MessageSerializer(serializers.ModelSerializer):
             return data
         try:
             from apps.wallet.policy import order_quote
-            quote = order_quote(cost)
+            quote = order_quote(cost, client=getattr(obj.chat, 'client', None))
         except (TypeError, ValueError, ArithmeticError):
             return data
         enriched = dict(data)

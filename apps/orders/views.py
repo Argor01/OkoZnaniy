@@ -162,7 +162,7 @@ def _reject_review_order_atomically(order, user):
 
 def _reserve_order_hold_if_needed(order, amount=None, prepayment_percent=100):
     base = amount if amount is not None else _order_payment_amount(order)
-    quote = order_quote(base)
+    quote = order_quote(base, client=order.client)
     full_hold = money(quote['base_amount'] + quote['service_fee'])
     percent_value = 100 if prepayment_percent is None else int(prepayment_percent)
     if percent_value not in (0, 25, 50, 75, 100):
@@ -178,7 +178,7 @@ def _release_order_hold_if_any(order):
     active_hold = money(_active_order_hold(order))
     if active_hold <= 0 or not order.expert_id:
         return None
-    quote = order_quote(_order_payment_amount(order))
+    quote = order_quote(_order_payment_amount(order), client=order.client)
     expected = money(quote['base_amount'] + quote['service_fee'])
     if active_hold < expected:
         raise InsufficientFunds('Заказ оплачен не полностью.')
@@ -876,7 +876,8 @@ class OrderViewSet(viewsets.ModelViewSet):
                 user=order.client,
                 type=TransactionType.PURCHASE,
             ).exists()
-        required_hold = money(order_quote(payment_amount)['base_amount'] + order_quote(payment_amount)['service_fee'])
+        approve_quote = order_quote(payment_amount, client=order.client)
+        required_hold = money(approve_quote['base_amount'] + approve_quote['service_fee'])
         if payment_amount > 0 and active_hold < required_hold and not has_direct_payment:
             return Response(
                 {'detail': 'Средства по заказу не зарезервированы. Принятие работы и завершение заказа недоступны.'},

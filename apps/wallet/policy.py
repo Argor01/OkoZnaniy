@@ -21,10 +21,23 @@ def percent(amount, rate) -> Decimal:
     return money(money(amount) * Decimal(str(rate)) / Decimal('100'))
 
 
-def order_quote(base_amount) -> dict:
-    """The acquirer charges 1.5% over base + 25% client service fee."""
+def client_service_fee_percent(client=None) -> Decimal:
+    """Процент сервисного сбора для конкретного клиента.
+
+    У пользователя может быть индивидуальный процент: пусто — общий процент
+    площадки, 0 — без комиссии. Это единственное место, где решается ставка:
+    если резерв и списание посчитают её по-разному, эскроу разъедется.
+    """
+    override = getattr(client, 'service_fee_percent', None) if client is not None else None
+    if override is None:
+        return CLIENT_SERVICE_FEE_PERCENT
+    return Decimal(str(override))
+
+
+def order_quote(base_amount, client=None) -> dict:
+    """Эквайринг берёт 1.5% сверху, сервисный сбор — по ставке клиента."""
     base = money(base_amount)
-    service_fee = percent(base, CLIENT_SERVICE_FEE_PERCENT)
+    service_fee = percent(base, client_service_fee_percent(client))
     subtotal = base + service_fee
     acquiring_fee = percent(subtotal, ACQUIRING_FEE_PERCENT)
     return {

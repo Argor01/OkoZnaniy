@@ -19,7 +19,7 @@ class PaymentService:
         """
         if not order.expert_id:
             raise ValueError('Сначала выберите исполнителя: средства должны блокироваться у автора.')
-        quote = order_quote(order.final_price or order.budget)
+        quote = order_quote(order.final_price or order.budget, client=order.client)
         payment = Payment.objects.create(
             order=order,
             user=order.client,
@@ -107,7 +107,10 @@ class PaymentService:
         order = payment.order
         client = order.client
         base_amount = money(payment.metadata.get('base_amount') or order.final_price or order.budget)
-        service_fee = money(payment.metadata.get('service_fee') or order_quote(base_amount)['service_fee'])
+        service_fee = money(
+            payment.metadata.get('service_fee')
+            or order_quote(base_amount, client=client)['service_fee']
+        )
         escrow_amount = money(base_amount + service_fee)
 
         if not Transaction.objects.filter(

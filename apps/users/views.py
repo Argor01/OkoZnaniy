@@ -875,8 +875,14 @@ class UserViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
-    def admin_update_partner(self, request, pk=None):
-        """Обновление партнера администратором"""
+    def admin_update_partner(self, request, pk=None, username=None, *args, **kwargs):
+        """Обновление партнера администратором
+
+        Роутер UserViewSet передаёт значение из URL в kwarg ``username``
+        (lookup_field='username'), фронтенд отправляет числовой id.
+        Принимаем оба варианта. Сервисный сбор (service_fee_percent)
+        можно задать любому пользователю, остальные поля — партнёру.
+        """
         user = request.user
         if user.role != 'admin':
             return Response(
@@ -884,8 +890,18 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
+        lookup = pk if pk is not None else username
+        if lookup is None:
+            return Response(
+                {'error': 'Пользователь не указан'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        lookup_str = str(lookup)
         try:
-            partner = User.objects.get(pk=pk, role='partner')
+            if lookup_str.isdigit():
+                partner = User.objects.get(pk=int(lookup_str))
+            else:
+                partner = User.objects.get(username=lookup_str)
         except User.DoesNotExist:
             return Response(
                 {'error': 'Партнер не найден'},
@@ -893,7 +909,11 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         # Обновляем только разрешенные поля
-        allowed_fields = ['first_name', 'last_name', 'partner_commission_rate', 'is_verified']
+        allowed_fields = [
+            'first_name', 'last_name', 'partner_commission_rate', 'is_verified',
+            # Индивидуальный сервисный сбор: пусто — общий процент, 0 — без комиссии.
+            'service_fee_percent',
+        ]
         for field in allowed_fields:
             if field in request.data:
                 setattr(partner, field, request.data[field])
