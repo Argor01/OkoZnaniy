@@ -52,6 +52,13 @@ docker compose up -d --build backend celery
 https://okoznaniy.ru/api/payments/yookassa/callback/
 ```
 
+Работает и длинный вариант `/api/payments/payments/yookassa/callback/`:
+роутер DRF подключён под префиксом `payments/`, а приложение — под
+`api/payments/`, поэтому его собственные маршруты получают этот сегмент
+дважды (так же выглядит колбэк Уралсиба). Для внешнего адреса оставлен
+короткий путь — повторяющийся сегмент в кабинете только провоцирует
+ошибку.
+
 События: `payment.succeeded`, `payment.canceled`, `refund.succeeded`.
 
 Подписи у уведомлений ЮKassa нет — проверять нечего. Поэтому доверие

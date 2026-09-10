@@ -282,6 +282,15 @@ class YooKassaCallbackEndpointTests(TestCase):
             self.url, data=self.body, content_type='application/json', **extra
         )
 
+    def test_both_callback_addresses_reach_the_handler(self):
+        """Короткий адрес прописан в кабинете, длинный оставлен рабочим."""
+        from django.urls import resolve
+
+        short = '/api/payments/yookassa/callback/'
+        long = '/api/payments/payments/yookassa/callback/'
+        self.assertEqual(self.url, short)
+        self.assertEqual(resolve(short).func, resolve(long).func)
+
     def test_notification_from_foreign_address_is_rejected(self):
         response = self._post(HTTP_X_REAL_IP='8.8.8.8')
         self.assertEqual(response.status_code, 403)
