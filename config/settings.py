@@ -604,5 +604,16 @@ SBERBANK_SUCCESS_URL = os.getenv("SBERBANK_SUCCESS_URL", "")
 SBERBANK_FAIL_URL = os.getenv("SBERBANK_FAIL_URL", "")
 SBERBANK_CURRENCY = os.getenv("SBERBANK_CURRENCY", "643")
 
-# Какой эквайер обслуживает оплату картой: uralsib или alfabank.
+# --- Эквайринг ЮKassa (API v3) ------------------------------------------
+# Тестовый магазин отличается только парой ключей: shopId тестового
+# магазина и секретный ключ вида test_*. Адрес API общий.
+YOOKASSA_API_URL = os.getenv("YOOKASSA_API_URL", "https://api.yookassa.ru/v3")
+YOOKASSA_SHOP_ID = os.getenv("YOOKASSA_SHOP_ID", "")
+YOOKASSA_SECRET_KEY = os.getenv("YOOKASSA_SECRET_KEY", "")
+# Куда ЮKassa вернёт плательщика с платёжной формы.
+YOOKASSA_RETURN_URL = os.getenv("YOOKASSA_RETURN_URL", f"{FRONTEND_URL}/payment/result")
+YOOKASSA_CURRENCY = os.getenv("YOOKASSA_CURRENCY", "RUB")
+
+# Какой эквайер обслуживает оплату картой: uralsib, sberbank,
+# yookassa или alfabank.
 CARD_ACQUIRER = os.getenv("CARD_ACQUIRER", "uralsib")

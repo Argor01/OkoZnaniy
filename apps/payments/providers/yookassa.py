@@ -1,0 +1,392 @@
+"""Эквайринг ЮKassa (API v3).
+
+ЮKassa — агрегатор, а не банк: на её платёжной форме плательщик сам
+выбирает карту, СБП, ЮMoney или SberPay. Поэтому отдельные рельсы под
+каждый способ здесь не нужны — есть один платёж и одна ссылка на форму.
+
+    POST /v3/payments        — создание платежа, возвращает confirmation_url
+    GET  /v3/payments/{id}   — статус платежа
+    POST /v3/refunds         — возврат средств
+
+Авторизация — HTTP Basic: логин это shopId магазина, пароль — секретный
+ключ. Тестовый магазин отличается только парой ключей: адрес API общий,
+тестовость определяет ключ вида ``test_*``.
+
+Каждый POST требует заголовок Idempotence-Key. Повтор запроса с тем же
+ключом не создаёт второй платёж, а возвращает первый — это единственная
+защита от двойного списания, когда ответ шлюза потерялся в сети.
+
+Подписи у уведомлений ЮKassa нет — проверять нечего. Доверие строится
+на двух рубежах: адрес отправителя должен принадлежать сетям ЮKassa,
+а решение об оплате принимается только после запроса статуса через API.
+Само уведомление — лишь повод сходить за правдой.
+"""
+from __future__ import annotations
+
+import ipaddress
+import logging
+import uuid
+from decimal import Decimal
+from typing import Any, Dict, Optional
+
+import requests
+
+from ..config import YOOKASSA_SETTINGS
+from ..models import Payment, PaymentStatus
+
+logger = logging.getLogger("oko.payments")
+
+# Пространство имён для Idempotence-Key: ключ должен быть стабильным для
+# одной и той же попытки оплаты и разным для разных.
+_IDEMPOTENCE_NS = uuid.UUID("4b0d1f6c-7c4a-4f8a-9d3e-2f6f1a5c8b70")
+
+
+class PaymentState:
+    """Значения поля status из документации ЮKassa."""
+    PENDING = "pending"                          # ждёт действия плательщика
+    WAITING_FOR_CAPTURE = "waiting_for_capture"  # деньги удержаны, ждут подтверждения
+    SUCCEEDED = "succeeded"                      # оплачен
+    CANCELED = "canceled"                        # отменён или отклонён
+
+
+# Сети, из которых ЮKassa отправляет уведомления.
+# Источник: https://yookassa.ru/developers/using-api/webhooks
+TRUSTED_NETWORKS = tuple(
+    ipaddress.ip_network(cidr)
+    for cidr in (
+        "185.71.76.0/27",
+        "185.71.77.0/27",
+        "77.75.153.0/25",
+        "77.75.156.11/32",
+        "77.75.156.35/32",
+        "77.75.154.128/25",
+        "2a02:5180::/32",
+    )
+)
+
+
+def callback_client_ip(request) -> str:
+    """Адрес отправителя уведомления.
+
+    Берём X-Real-IP: nginx ставит туда $remote_addr, то есть адрес, который
+    он видит сам. X-Forwarded-For для проверки доступа не годится — его
+    начало приходит от клиента и подделывается тривиально.
+    """
+    real_ip = (request.META.get("HTTP_X_REAL_IP") or "").strip()
+    if real_ip:
+        return real_ip
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR") or ""
+    if forwarded:
+        # Последний элемент дописан ближайшим прокси и не подделывается клиентом.
+        return forwarded.split(",")[-1].strip()
+    return (request.META.get("REMOTE_ADDR") or "").strip()
+
+
+def is_trusted_ip(raw_ip: str) -> bool:
+    """Принадлежит ли адрес сетям ЮKassa."""
+    if not raw_ip:
+        return False
+    try:
+        address = ipaddress.ip_address(raw_ip)
+    except ValueError:
+        logger.warning("ЮKassa: не удалось разобрать адрес отправителя %r", raw_ip)
+        return False
+    return any(address in network for network in TRUSTED_NETWORKS)
+
+
+def _description(payment: Payment) -> str:
+    if getattr(payment, "order_id", None):
+        return f"Оплата заказа №{payment.order_id} на okoznaniy.ru"
+    return "Пополнение кошелька на okoznaniy.ru"
+
+
+class YooKassaError(Exception):
+    """Шлюз вернул ошибку."""
+
+    def __init__(self, code, message):
+        super().__init__(f"[{code}] {message}")
+        self.code = code
+        self.message = message
+
+
+class YooKassaClient:
+    """Клиент API ЮKassa v3."""
+
+    SETTINGS: Dict[str, Any] = YOOKASSA_SETTINGS
+    LABEL = "ЮKassa"
+    META_PREFIX = "yookassa"
+    SETTINGS_HINT = "YOOKASSA_SHOP_ID и YOOKASSA_SECRET_KEY"
+
+    def __init__(self):
+        self.api_url = self.SETTINGS["API_URL"].rstrip("/")
+        self.shop_id = str(self.SETTINGS.get("SHOP_ID") or "")
+        self.secret_key = self.SETTINGS.get("SECRET_KEY") or ""
+        self.currency = self.SETTINGS.get("CURRENCY", "RUB")
+        self.timeout = float(self.SETTINGS.get("TIMEOUT") or 20)
+        self.return_url = self.SETTINGS.get("RETURN_URL") or ""
+
+    @property
+    def configured(self) -> bool:
+        return bool(self.shop_id and self.secret_key)
+
+    @property
+    def test_mode(self) -> bool:
+        """Тестовый магазин определяется префиксом ключа, не настройкой."""
+        return self.secret_key.startswith("test_")
+
+    def _meta_key(self, name: str) -> str:
+        return f"{self.META_PREFIX}_{name}"
+
+    # ------------------------------------------------------------------
+    # Транспорт
+    # ------------------------------------------------------------------
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        payload: Optional[Dict[str, Any]] = None,
+        idempotence_key: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        if not self.configured:
+            raise ValueError(
+                f"Эквайринг {self.LABEL} не настроен: задайте {self.SETTINGS_HINT}"
+            )
+        headers = {"Content-Type": "application/json"}
+        if idempotence_key:
+            headers["Idempotence-Key"] = idempotence_key
+
+        response = requests.request(
+            method,
+            f"{self.api_url}/{path.lstrip('/')}",
+            json=payload,
+            headers=headers,
+            auth=(self.shop_id, self.secret_key),
+            timeout=self.timeout,
+        )
+        try:
+            body = response.json()
+        except ValueError:
+            logger.error(
+                "%s %s %s → нераспознанный ответ (HTTP %s)",
+                self.LABEL, method, path, response.status_code,
+            )
+            raise YooKassaError("bad_response", "Платёжный шлюз вернул некорректный ответ")
+
+        # Ошибку ЮKassa отдаёт объектом type=error с кодом и описанием.
+        if response.status_code >= 400 or body.get("type") == "error":
+            code = body.get("code") or str(response.status_code)
+            message = body.get("description") or "Ошибка платёжного шлюза"
+            logger.warning("%s %s %s → %s %s", self.LABEL, method, path, code, message)
+            raise YooKassaError(code, message)
+        return body
+
+    def _idempotence_key(self, scope: str) -> str:
+        return str(uuid.uuid5(_IDEMPOTENCE_NS, scope))
+
+    @staticmethod
+    def _amount(value) -> Dict[str, str]:
+        return {"value": f"{Decimal(str(value)):.2f}"}
+
+    def _return_url(self, payment: Payment) -> str:
+        base = self.return_url.rstrip("/")
+        return f"{base}?payment={payment.payment_id}" if base else ""
+
+    # ------------------------------------------------------------------
+    # Операции
+    # ------------------------------------------------------------------
+
+    def register_payment(self, payment: Payment) -> Dict[str, str]:
+        """Создаёт платёж и возвращает ссылку на платёжную форму.
+
+        Ключ идемпотентности выводится из payment_id: одна наша запись
+        Payment соответствует ровно одному платежу в ЮKassa, поэтому
+        повторный вызов вернёт уже созданный платёж, а не спишет дважды.
+        """
+        if not self.return_url:
+            raise ValueError(
+                f"Эквайринг {self.LABEL} не настроен: задайте YOOKASSA_RETURN_URL"
+            )
+
+        body = self._request(
+            "POST", "payments",
+            {
+                "amount": {**self._amount(payment.amount), "currency": self.currency},
+                "capture": True,  # одностадийная схема: удержание и списание разом
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": self._return_url(payment),
+                },
+                "description": _description(payment)[:128],  # ЮKassa режет на 128
+                "metadata": {
+                    "payment_id": payment.payment_id,
+                    "order_id": str(payment.order_id or ""),
+                },
+            },
+            idempotence_key=self._idempotence_key(f"payment:{payment.payment_id}"),
+        )
+
+        confirmation_url = (body.get("confirmation") or {}).get("confirmation_url")
+        if not confirmation_url:
+            # Так бывает, если платёж по этому ключу уже отменён.
+            raise YooKassaError(
+                "no_confirmation_url",
+                "ЮKassa не вернула ссылку на оплату: платёж уже завершён или отменён",
+            )
+
+        payment.metadata = {
+            **(payment.metadata or {}),
+            self._meta_key("payment_id"): body["id"],
+            self._meta_key("status"): body.get("status", ""),
+            self._meta_key("test"): body.get("test", self.test_mode),
+            "form_url": confirmation_url,
+        }
+        payment.save(update_fields=["metadata", "updated_at"])
+        logger.info(
+            "%s: создан платёж %s на %s (наш %s)",
+            self.LABEL, body["id"], payment.amount, payment.payment_id,
+        )
+        return {"formUrl": confirmation_url, "orderId": body["id"]}
+
+    def _remote_id(self, payment: Payment) -> str:
+        remote_id = (payment.metadata or {}).get(self._meta_key("payment_id"))
+        if not remote_id:
+            raise ValueError(f"Платёж не зарегистрирован в {self.LABEL}")
+        return remote_id
+
+    def get_payment_status(self, payment: Payment) -> Dict[str, Any]:
+        """Спрашивает шлюз о текущем состоянии платежа."""
+        return self._request("GET", f"payments/{self._remote_id(payment)}")
+
+    # Совместимость с карточными клиентами на шлюзе RBS: сервисный слой
+    # обращается к эквайрерам по одному и тому же имени метода.
+    get_order_status = get_payment_status
+
+    def refund(self, payment: Payment, amount: Optional[Decimal] = None) -> Dict[str, Any]:
+        """Возврат средств плательщику.
+
+        amount=None — полный возврат. Частичный возможен на сумму
+        не больше оплаченной.
+        """
+        remote_id = self._remote_id(payment)
+        value = Decimal(str(amount if amount is not None else payment.amount))
+        body = self._request(
+            "POST", "refunds",
+            {
+                "payment_id": remote_id,
+                "amount": {**self._amount(value), "currency": self.currency},
+            },
+            idempotence_key=self._idempotence_key(f"refund:{payment.payment_id}:{value:.2f}"),
+        )
+        logger.info("%s: возврат %s по платежу %s", self.LABEL, value, payment.payment_id)
+        return body
+
+    # ------------------------------------------------------------------
+    # Уведомления
+    # ------------------------------------------------------------------
+
+    def _find_payment(self, obj: Dict[str, Any]) -> Optional[Payment]:
+        """Находит нашу запись по идентификатору ЮKassa или по metadata."""
+        remote_id = obj.get("id")
+        payment = None
+        if remote_id:
+            payment = Payment.objects.filter(
+                **{f"metadata__{self._meta_key('payment_id')}": remote_id},
+            ).first()
+        if payment is None:
+            our_id = (obj.get("metadata") or {}).get("payment_id")
+            if our_id:
+                payment = Payment.objects.filter(payment_id=our_id).first()
+        return payment
+
+    def process_callback(self, data: Dict[str, Any]) -> Optional[Payment]:
+        """Обрабатывает уведомление и возвращает платёж, если он оплачен.
+
+        Возврат None означает «денег не прибавилось»: неизвестный платёж,
+        отмена, возврат или ещё не завершённая оплата. Сумму сверяем с
+        нашей записью — доверять можно только тому, что подтвердил API.
+        """
+        event = data.get("event") or ""
+        obj = data.get("object") or {}
+        if not isinstance(obj, dict) or not obj:
+            return None
+
+        if event == "refund.succeeded":
+            return self._apply_refund_notification(obj)
+
+        payment = self._find_payment(obj)
+        if payment is None:
+            logger.warning(
+                "%s: уведомление по неизвестному платежу %s", self.LABEL, obj.get("id"),
+            )
+            return None
+
+        # Уведомление могло быть подделано или устареть: за состоянием
+        # идём в API, оно первоисточник.
+        try:
+            body = self.get_payment_status(payment)
+        except (YooKassaError, ValueError, requests.RequestException) as e:
+            logger.error(
+                "%s: не удалось подтвердить статус %s: %s", self.LABEL, payment.payment_id, e,
+            )
+            raise
+
+        state = body.get("status")
+        payment.metadata = {
+            **(payment.metadata or {}),
+            self._meta_key("status"): state or "",
+        }
+        payment.save(update_fields=["metadata", "updated_at"])
+
+        if state == PaymentState.CANCELED:
+            reason = (body.get("cancellation_details") or {}).get("reason", "")
+            logger.info(
+                "%s: платёж %s отменён (%s)", self.LABEL, payment.payment_id, reason,
+            )
+            if payment.status != PaymentStatus.COMPLETED:
+                payment.status = PaymentStatus.FAILED
+                payment.save(update_fields=["status", "updated_at"])
+            return None
+
+        if state != PaymentState.SUCCEEDED or not body.get("paid"):
+            logger.info(
+                "%s: платёж %s ещё не оплачен, status=%s",
+                self.LABEL, payment.payment_id, state,
+            )
+            return None
+
+        paid_value = Decimal(str((body.get("amount") or {}).get("value") or "0"))
+        if paid_value < Decimal(str(payment.amount)):
+            logger.error(
+                "%s: платёж %s оплачен на %s вместо %s — не зачисляем",
+                self.LABEL, payment.payment_id, paid_value, payment.amount,
+            )
+            return None
+
+        payment.metadata = {
+            **(payment.metadata or {}),
+            self._meta_key("paid_amount"): f"{paid_value:.2f}",
+            self._meta_key("income_amount"): (
+                (body.get("income_amount") or {}).get("value", "")
+            ),
+        }
+        payment.save(update_fields=["metadata", "updated_at"])
+        return payment
+
+    def _apply_refund_notification(self, obj: Dict[str, Any]) -> None:
+        """Отмечает возврат. Денег на кошельке от этого не прибавляется."""
+        remote_id = obj.get("payment_id")
+        if not remote_id:
+            return None
+        payment = Payment.objects.filter(
+            **{f"metadata__{self._meta_key('payment_id')}": remote_id},
+        ).first()
+        if payment is None:
+            logger.warning("%s: возврат по неизвестному платежу %s", self.LABEL, remote_id)
+            return None
+        if obj.get("status") == PaymentState.SUCCEEDED and payment.status != PaymentStatus.REFUNDED:
+            payment.status = PaymentStatus.REFUNDED
+            payment.metadata = {**(payment.metadata or {}), "refund": obj}
+            payment.save(update_fields=["status", "metadata", "updated_at"])
+            logger.info("%s: зафиксирован возврат по платежу %s", self.LABEL, payment.payment_id)
+        return None

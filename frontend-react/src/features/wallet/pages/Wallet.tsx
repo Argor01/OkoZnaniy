@@ -27,6 +27,7 @@ const QUICK_SUMS = [500, 1000, 5000, 10000];
 const METHODS = [
   { value: 'tbank', label: 'Т-Банк', icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />, hint: 'Оплата картой через Т-Банк' },
   { value: 'sberpay_qr', label: 'СберPay QR', icon: <img src="/assets/banks/sberpay.svg" alt="СберPay" width={112} height={32} />, hint: 'Сканируй QR в Сбер Онлайн' },
+  { value: 'yookassa', label: 'ЮKassa', icon: <CreditCardOutlined />, hint: 'Карта, СБП или ЮMoney' },
 ];
 
 function formatMoney(v: string | number | undefined): string {

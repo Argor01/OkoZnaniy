@@ -1,7 +1,8 @@
 import apiClient from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
 
-export type PaymentMethod = 'tbank' | 'sbp' | 'card' | 'sberbank' | 'sberpay_qr';
+export type PaymentMethod =
+  | 'tbank' | 'sbp' | 'card' | 'sberbank' | 'sberpay_qr' | 'yookassa';
 
 export interface PaymentCreateRequest {
   order_id: number;

@@ -36,7 +36,7 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
 class TopupRequestSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=100)
     payment_method = serializers.ChoiceField(
-        choices=['tbank', 'sberpay_qr', 'sberbank', 'card', 'sbp'],
+        choices=['tbank', 'sberpay_qr', 'sberbank', 'card', 'sbp', 'yookassa'],
         default='sberpay_qr',
     )
 

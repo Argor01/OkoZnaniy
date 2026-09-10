@@ -47,6 +47,10 @@ services:
       TBANK_NOTIFICATION_URL: ${TBANK_NOTIFICATION_URL:-}
       TBANK_SUCCESS_URL: ${TBANK_SUCCESS_URL:-}
       TBANK_FAIL_URL: ${TBANK_FAIL_URL:-}
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
+      YOOKASSA_RETURN_URL: ${YOOKASSA_RETURN_URL:-}
+      YOOKASSA_API_URL: ${YOOKASSA_API_URL:-https://api.yookassa.ru/v3}
     healthcheck: &backend_health
       test: ["CMD-SHELL", "python -c \"import socket; s=socket.create_connection(('127.0.0.1',8000),5); s.close()\""]
       interval: 30s

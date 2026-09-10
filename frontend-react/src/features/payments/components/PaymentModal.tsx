@@ -26,6 +26,12 @@ const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactN
     icon: <QrcodeOutlined />,
     description: "Сканируй QR в приложении Сбер Онлайн",
   },
+  {
+    value: "yookassa",
+    label: "ЮKassa",
+    icon: <CreditCardOutlined />,
+    description: "Карта, СБП или ЮMoney — способ выбирается на странице оплаты",
+  },
 ];
 
 const PaymentModal: React.FC<PaymentModalProps> = ({

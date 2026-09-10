@@ -18,6 +18,7 @@ import { walletRoutes } from './walletRoutes';
 import { legalRoutes } from './legalRoutes';
 
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
+const PaymentResult = lazy(() => import('@/features/payments/pages/PaymentResult'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
 
 export const AppRoutes: React.FC = () => {
@@ -60,6 +61,18 @@ export const AppRoutes: React.FC = () => {
 
       {/* Правовые страницы: реквизиты, оферта, оплата и возврат */}
       {legalRoutes}
+
+      {/* Возврат с платёжной формы эквайера */}
+      <Route
+        path="/payment/result"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <PaymentResult />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* 404 */}
       <Route path="*" element={<NotFound />} />

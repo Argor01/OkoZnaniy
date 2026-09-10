@@ -58,3 +58,14 @@ TBANK_SETTINGS = {
     'SUCCESS_URL': getattr(settings, 'TBANK_SUCCESS_URL', ''),
     'FAIL_URL': getattr(settings, 'TBANK_FAIL_URL', ''),
 }
+
+YOOKASSA_SETTINGS = {
+    # Адрес один для боевого и тестового магазина: тестовость определяет
+    # секретный ключ вида test_*.
+    'API_URL': getattr(settings, 'YOOKASSA_API_URL', 'https://api.yookassa.ru/v3'),
+    'SHOP_ID': getattr(settings, 'YOOKASSA_SHOP_ID', ''),
+    'SECRET_KEY': getattr(settings, 'YOOKASSA_SECRET_KEY', ''),
+    'RETURN_URL': getattr(settings, 'YOOKASSA_RETURN_URL', ''),
+    'CURRENCY': getattr(settings, 'YOOKASSA_CURRENCY', 'RUB'),
+    'TIMEOUT': getattr(settings, 'YOOKASSA_TIMEOUT', 20),
+}

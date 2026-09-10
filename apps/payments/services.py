@@ -8,6 +8,7 @@ from .providers.alfabank import AlfaBankClient
 from .providers.sbp import SBPClient
 from .providers.tbank import TBankClient
 from .providers.rbs import SberbankRBSClient, UralsibRBSClient
+from .providers.yookassa import YooKassaClient
 from apps.wallet.policy import order_quote, money
 
 
@@ -35,6 +36,7 @@ class PaymentService:
     _NORMALIZE_METHOD = {
         'card': 'card', 'sberbank': 'card',
         'sbp': 'sbp', 'sberpay_qr': 'sbp', 'tbank': 'tbank',
+        'yookassa': 'yookassa',
     }
 
     @staticmethod
@@ -46,6 +48,11 @@ class PaymentService:
         if rail is None:
             raise ValueError(f'Неподдерживаемый метод оплаты: {payment.payment_method}')
         from .config import ALFABANK_SETTINGS, SBP_SETTINGS, TBANK_SETTINGS
+        if rail == 'yookassa':
+            client = YooKassaClient()
+            if not client.configured:
+                raise ValueError('Оплата через ЮKassa временно недоступна: магазин не настроен')
+            return client.register_payment(payment)['formUrl']
         if rail == 'tbank':
             if not TBANK_SETTINGS.get('TERMINAL_KEY'):
                 raise ValueError('Т-Банк временно недоступен: эквайринг не настроен')
@@ -66,12 +73,14 @@ class PaymentService:
             
             # Определяем провайдера платежа
             rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
-            if rail == 'tbank':
+            if rail == 'yookassa':
+                result = YooKassaClient().process_callback(data)
+            elif rail == 'tbank':
                 result = TBankClient().process_callback(data)
             elif rail == PaymentMethod.CARD:
-                rbs_client = PaymentService._card_rbs_client()
-                if rbs_client is not None:
-                    result = rbs_client.process_callback(data)
+                card_client = PaymentService._card_client()
+                if card_client is not None:
+                    result = card_client.process_callback(data)
                 else:
                     result = AlfaBankClient().process_callback(data)
             elif rail == PaymentMethod.SBP:
@@ -155,10 +164,24 @@ class PaymentService:
         'sberbank': (SberbankRBSClient, 'Сбербанк'),
     }
 
+    # Все эквайреры карточной рельсы: банки на RBS и агрегатор ЮKassa.
+    # Клиенты отвечают на один и тот же набор методов, поэтому сервисному
+    # слою не нужно знать, кто именно обслуживает платёж.
+    _CARD_ACQUIRERS = {
+        **_RBS_ACQUIRERS,
+        'yookassa': (YooKassaClient, 'ЮKassa'),
+    }
+
     @staticmethod
     def _card_rbs_client():
         """Клиент RBS для текущего эквайрера или None, если банк не на RBS."""
         entry = PaymentService._RBS_ACQUIRERS.get(PaymentService._card_acquirer())
+        return entry[0]() if entry else None
+
+    @staticmethod
+    def _card_client():
+        """Клиент текущего карточного эквайрера или None, если это Альфа-Банк."""
+        entry = PaymentService._CARD_ACQUIRERS.get(PaymentService._card_acquirer())
         return entry[0]() if entry else None
 
     @staticmethod
@@ -171,7 +194,7 @@ class PaymentService:
         """Ссылка на платёжную форму выбранного карточного эквайера."""
         from .config import ALFABANK_SETTINGS, URALSIB_SETTINGS
         acquirer = PaymentService._card_acquirer()
-        entry = PaymentService._RBS_ACQUIRERS.get(acquirer)
+        entry = PaymentService._CARD_ACQUIRERS.get(acquirer)
         if entry is not None:
             client_cls, bank_label = entry
             client = client_cls()
@@ -195,9 +218,12 @@ class PaymentService:
         if payment.status != PaymentStatus.COMPLETED:
             raise ValueError('Возврат возможен только по оплаченному платежу')
         rail = PaymentService._NORMALIZE_METHOD.get(payment.payment_method)
-        rbs_client = PaymentService._card_rbs_client() if rail == 'card' else None
-        if rbs_client is not None:
-            result = rbs_client.refund(payment, amount)
+        if rail == 'yookassa':
+            acquirer_client = YooKassaClient()
+        else:
+            acquirer_client = PaymentService._card_client() if rail == 'card' else None
+        if acquirer_client is not None:
+            result = acquirer_client.refund(payment, amount)
         else:
             raise ValueError(
                 f'Автоматический возврат для метода «{payment.payment_method}» не реализован'

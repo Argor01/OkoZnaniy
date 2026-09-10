@@ -74,6 +74,34 @@ class PaymentViewSet(viewsets.ModelViewSet):
             'payment_link': payment_link
         })
 
+    @action(detail=False, methods=['get'], url_path='status')
+    def payment_status(self, request):
+        """Статус платежа по нашему payment_id.
+
+        Нужен странице возврата с платёжной формы: плательщик приходит
+        обратно раньше, чем уведомление от банка, и должен видеть, чем
+        всё закончилось. Выборка идёт через get_queryset, поэтому чужой
+        платёж по этому адресу не посмотреть.
+        """
+        payment_id = request.query_params.get('payment')
+        if not payment_id:
+            return Response(
+                {'error': 'Не указан payment'}, status=status.HTTP_400_BAD_REQUEST,
+            )
+        payment = self.get_queryset().filter(payment_id=payment_id).first()
+        if payment is None:
+            return Response(
+                {'error': 'Платёж не найден'}, status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response({
+            'payment_id': payment.payment_id,
+            'status': payment.status,
+            'amount': str(payment.amount),
+            'order_id': payment.order_id,
+            'purpose': payment.purpose,
+            'paid_at': payment.paid_at,
+        })
+
     @action(detail=True, methods=['get'])
     def qr_code(self, request, pk=None):
         payment = self.get_object()
@@ -164,3 +192,50 @@ def uralsib_callback(request):
     with transaction.atomic():
         PaymentService.process_payment_callback(payment.payment_id, data)
     return HttpResponse('OK', status=200)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def yookassa_callback(request):
+    """Уведомление о платеже от ЮKassa.
+
+    Подписи у уведомления нет, поэтому проверяем адрес отправителя, а
+    решение об оплате принимает провайдер — по ответу API, а не по телу
+    уведомления.
+
+    Коды ответа выбраны под поведение ЮKassa: всё, что не 2xx, она
+    повторит в течение суток. Поэтому 500 отдаём только при сбое на нашей
+    стороне, который имеет смысл повторить, а на чужой или неактуальный
+    платёж отвечаем 200, чтобы не собирать бесконечные ретраи.
+    """
+    from .providers.yookassa import YooKassaClient, callback_client_ip, is_trusted_ip
+
+    sender_ip = callback_client_ip(request)
+    if not is_trusted_ip(sender_ip):
+        logger.warning('ЮKassa: уведомление с недоверенного адреса %s', sender_ip)
+        return HttpResponse('FORBIDDEN', status=status.HTTP_403_FORBIDDEN)
+
+    data = request.data if isinstance(request.data, dict) else {}
+    logger.info(
+        'ЮKassa колбэк: event=%s object=%s',
+        data.get('event'), (data.get('object') or {}).get('id'),
+    )
+
+    try:
+        payment = YooKassaClient().process_callback(data)
+    except Exception:  # noqa: BLE001
+        logger.exception('ЮKassa: ошибка обработки уведомления')
+        # Просим повторить: возможно, шлюз был недоступен на запросе статуса.
+        return HttpResponse('ERROR', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if payment is None:
+        return HttpResponse('OK', status=status.HTTP_200_OK)
+
+    try:
+        with transaction.atomic():
+            PaymentService.process_payment_callback(payment.payment_id, data)
+    except Exception:  # noqa: BLE001
+        logger.exception('ЮKassa: не удалось провести платёж %s', payment.payment_id)
+        return HttpResponse('ERROR', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return HttpResponse('OK', status=status.HTTP_200_OK)

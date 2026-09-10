@@ -10,6 +10,7 @@ class PaymentMethod(models.TextChoices):
     SBERBANK = 'sberbank', 'Sberbank'
     SBERPAY_QR = 'sberpay_qr', 'SberPay QR'
     TBANK = 'tbank', 'Т-Банк'
+    YOOKASSA = 'yookassa', 'ЮKassa'
 
 
 class PaymentStatus(models.TextChoices):

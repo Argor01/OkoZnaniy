@@ -188,6 +188,7 @@ export const API_ENDPOINTS = {
     createPayment: '/payments/payments/create_payment/',
     detail: (id: number) => `/payments/payments/${id}/`,
     checkStatus: (id: number) => `/payments/payments/${id}/`,
+    status: '/payments/payments/status/',
   },
   notifications: {
     sendRegistrationEmail: '/notifications/send-registration-email/',
