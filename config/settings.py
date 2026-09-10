@@ -604,6 +604,14 @@ SBERBANK_SUCCESS_URL = os.getenv("SBERBANK_SUCCESS_URL", "")
 SBERBANK_FAIL_URL = os.getenv("SBERBANK_FAIL_URL", "")
 SBERBANK_CURRENCY = os.getenv("SBERBANK_CURRENCY", "643")
 
+# --- Ставки комиссий ----------------------------------------------------
+# Сколько эквайер удерживает с входящего платежа. Добавляется к сумме
+# заказа или пополнения, то есть ложится на плательщика. Ставка зависит
+# от договора с эквайером, поэтому вынесена в окружение.
+ACQUIRING_FEE_PERCENT = os.getenv("ACQUIRING_FEE_PERCENT", "3.5")
+# Стоимость перевода на карту при выводе средств: другой тариф.
+PAYOUT_ACQUIRING_FEE_PERCENT = os.getenv("PAYOUT_ACQUIRING_FEE_PERCENT", "1.5")
+
 # --- Эквайринг ЮKassa (API v3) ------------------------------------------
 # Тестовый магазин отличается только парой ключей: shopId тестового
 # магазина и секретный ключ вида test_*. Адрес API общий.

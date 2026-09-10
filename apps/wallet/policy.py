@@ -4,7 +4,15 @@ from django.conf import settings
 
 MONEY = Decimal('0.01')
 CLIENT_SERVICE_FEE_PERCENT = Decimal(str(getattr(settings, 'CLIENT_SERVICE_FEE_PERCENT', '25')))
-ACQUIRING_FEE_PERCENT = Decimal(str(getattr(settings, 'ACQUIRING_FEE_PERCENT', '1.5')))
+# Приём платежей и выплаты тарифицируются эквайером по-разному, поэтому
+# ставки разные. ACQUIRING_FEE_PERCENT — то, что банк удерживает с
+# входящего платежа; эта сумма добавляется сверху и её платит клиент.
+ACQUIRING_FEE_PERCENT = Decimal(str(getattr(settings, 'ACQUIRING_FEE_PERCENT', '3.5')))
+# PAYOUT_ACQUIRING_FEE_PERCENT — стоимость перевода на карту при выводе,
+# она удерживается из суммы вывода.
+PAYOUT_ACQUIRING_FEE_PERCENT = Decimal(
+    str(getattr(settings, 'PAYOUT_ACQUIRING_FEE_PERCENT', '1.5'))
+)
 EXPERT_WITHDRAWAL_FEE_PERCENT = Decimal(str(getattr(settings, 'EXPERT_WITHDRAWAL_FEE_PERCENT', '15')))
 CLIENT_WITHDRAWAL_FEE_PERCENT = Decimal(str(getattr(settings, 'CLIENT_WITHDRAWAL_FEE_PERCENT', '0')))
 PARTNER_COMMISSION_PERCENT = Decimal(str(getattr(settings, 'PARTNER_COMMISSION_PERCENT', '25')))
@@ -35,7 +43,12 @@ def client_service_fee_percent(client=None) -> Decimal:
 
 
 def order_quote(base_amount, client=None) -> dict:
-    """Эквайринг берёт 1.5% сверху, сервисный сбор — по ставке клиента."""
+    """Эквайринг добавляется сверху, сервисный сбор — по ставке клиента.
+
+    Комиссия банка ложится на плательщика: он видит её отдельной строкой
+    и оплачивает вместе с заказом. Если считать её внутри суммы, разницу
+    доплачивает площадка.
+    """
     base = money(base_amount)
     service_fee = percent(base, client_service_fee_percent(client))
     subtotal = base + service_fee
@@ -53,7 +66,9 @@ def withdrawal_quote(amount, role) -> dict:
     gross = money(amount)
     platform_rate = EXPERT_WITHDRAWAL_FEE_PERCENT if role == 'expert' else CLIENT_WITHDRAWAL_FEE_PERCENT
     platform_fee = percent(gross, platform_rate)
-    acquiring_fee = percent(gross, ACQUIRING_FEE_PERCENT)
+    # Вывод — это перевод на карту, у него свой тариф, не равный ставке
+    # приёма платежей.
+    acquiring_fee = percent(gross, PAYOUT_ACQUIRING_FEE_PERCENT)
     net = money(gross - platform_fee - acquiring_fee)
     if net <= 0:
         raise ValueError('Сумма вывода после комиссий должна быть положительной')

@@ -19,9 +19,24 @@ from .serializers import (
     WithdrawRequestSerializer,
 )
 from .models import WithdrawalRequest
-from .policy import money, percent, ACQUIRING_FEE_PERCENT
+from .policy import (
+    money, percent, ACQUIRING_FEE_PERCENT, client_service_fee_percent, order_quote,
+)
 from .services import WalletService, InsufficientFunds
 from apps.verification.services import VerificationRequired, ensure_can_withdraw
+
+def _percent_label(value) -> str:
+    """Процент для интерфейса: 25, 3.5, 10 — без хвостовых нулей.
+
+    Общая ставка задаётся строкой, индивидуальная приходит из
+    DecimalField с двумя знаками. Без выравнивания интерфейс показал бы
+    одному клиенту «сбор 25%», а другому «сбор 10.00%».
+    """
+    text = '{:f}'.format(Decimal(str(value)))
+    if '.' in text:
+        text = text.rstrip('0').rstrip('.')
+    return text or '0'
+
 
 MIN_WITHDRAWAL = Decimal('100.00')
 MAX_WITHDRAWAL = Decimal('500000.00')
@@ -59,6 +74,49 @@ class WalletViewSet(viewsets.ViewSet):
         limit = int(request.query_params.get('limit') or 50)
         qs = WalletService.get_transactions(request.user, limit=limit, types=types or None)
         return Response(WalletTransactionSerializer(qs, many=True).data)
+
+    @action(detail=False, methods=['get'])
+    def quote(self, request):
+        """Разбивка суммы до оплаты: сколько спишется и сколько дойдёт.
+
+        Единственный источник этих цифр для интерфейса. Раньше фронтенд
+        считал сбор сам по зашитым процентам и расходился с сервером у
+        клиентов с индивидуальной ставкой сервисного сбора.
+        """
+        raw = request.query_params.get('amount') or '0'
+        try:
+            amount = money(raw)
+        except (ArithmeticError, TypeError, ValueError):
+            return Response(
+                {'detail': 'Некорректная сумма'}, status=status.HTTP_400_BAD_REQUEST,
+            )
+        if amount <= 0:
+            return Response(
+                {'detail': 'Некорректная сумма'}, status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if request.query_params.get('kind') == 'order':
+            quote = order_quote(amount, client=request.user)
+            return Response({
+                'kind': 'order',
+                'base_amount': str(quote['base_amount']),
+                'service_fee': str(quote['service_fee']),
+                'service_fee_percent': _percent_label(
+                    client_service_fee_percent(request.user)
+                ),
+                'acquiring_fee': str(quote['acquiring_fee']),
+                'acquiring_fee_percent': _percent_label(ACQUIRING_FEE_PERCENT),
+                'total': str(quote['total']),
+            })
+
+        acquiring_fee = percent(amount, ACQUIRING_FEE_PERCENT)
+        return Response({
+            'kind': 'topup',
+            'wallet_credit': str(amount),
+            'acquiring_fee': str(acquiring_fee),
+            'acquiring_fee_percent': _percent_label(ACQUIRING_FEE_PERCENT),
+            'total': str(money(amount + acquiring_fee)),
+        })
 
     @action(detail=False, methods=['post'])
     def topup(self, request):

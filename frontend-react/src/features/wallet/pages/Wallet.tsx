@@ -8,7 +8,9 @@ import {
   CreditCardOutlined, HistoryOutlined, LockOutlined, PlusOutlined,
   QrcodeOutlined, ReloadOutlined, WalletOutlined,
 } from '@ant-design/icons';
-import { walletApi, WalletBalance, WalletStats, WalletTransaction } from '../api/wallet';
+import {
+  walletApi, PaymentQuote, WalletBalance, WalletStats, WalletTransaction,
+} from '../api/wallet';
 import styles from './Wallet.module.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -220,6 +222,27 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
   const [amount, setAmount] = useState<number>(2000);
   const [method, setMethod] = useState<string>('sberpay_qr');
   const [busy, setBusy] = useState(false);
+  const [quote, setQuote] = useState<PaymentQuote | null>(null);
+
+  // Сумму к списанию считает сервер: проценты зависят от договора с
+  // эквайером и от ставки конкретного клиента.
+  useEffect(() => {
+    if (!open || !amount || amount < 100) {
+      setQuote(null);
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = window.setTimeout(() => {
+      walletApi
+        .quote(amount, 'topup')
+        .then((q) => { if (!cancelled) setQuote(q); })
+        .catch(() => { if (!cancelled) setQuote(null); });
+    }, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [open, amount]);
 
   const submit = async () => {
     if (!amount || amount < 100) {
@@ -280,6 +303,14 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
         className={styles.topupInput}
       />
 
+      {quote && (
+        <Paragraph type="secondary" className={styles.topupHint}>
+          Комиссия эквайринга {quote.acquiring_fee_percent}% —{' '}
+          {formatMoney(quote.acquiring_fee)} ₽. На баланс поступит{' '}
+          {formatMoney(amount)} ₽.
+        </Paragraph>
+      )}
+
       <Text strong className={styles.topupSectionLabel}>Способ оплаты</Text>
       <Radio.Group
         value={method}
@@ -305,7 +336,9 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
         onClick={submit}
         className={styles.topupSubmit}
       >
-        Оплатить {formatMoney(amount * 1.015)} ₽, на баланс {formatMoney(amount)} ₽
+        {quote
+          ? `Оплатить ${formatMoney(quote.total)} ₽, на баланс ${formatMoney(amount)} ₽`
+          : `Пополнить на ${formatMoney(amount)} ₽`}
       </Button>
     </Modal>
   );

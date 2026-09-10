@@ -37,6 +37,17 @@ export type TopupResponse = {
   payment_url: string;
 };
 
+export type PaymentQuote = {
+  kind: 'topup' | 'order';
+  total: string;
+  acquiring_fee: string;
+  acquiring_fee_percent: string;
+  wallet_credit?: string;
+  base_amount?: string;
+  service_fee?: string;
+  service_fee_percent?: string;
+};
+
 export type WithdrawResponse = {
   withdrawal_id: number;
   status: string;
@@ -49,6 +60,12 @@ export type WithdrawResponse = {
 };
 
 export const walletApi = {
+  // Разбивку считает сервер: у клиента может быть индивидуальная ставка
+  // сервисного сбора, а ставка эквайринга зависит от договора.
+  quote: async (amount: number, kind: 'topup' | 'order' = 'topup'): Promise<PaymentQuote> => {
+    const { data } = await apiClient.get('/wallet/quote/', { params: { amount, kind } });
+    return data;
+  },
   me: async (): Promise<WalletBalance> => {
     const { data } = await apiClient.get('/wallet/me/');
     return data;

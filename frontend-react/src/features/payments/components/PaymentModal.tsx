@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Radio, Typography, message, Space } from 'antd';
 import { CreditCardOutlined, BankOutlined, WalletOutlined, QrcodeOutlined } from '@ant-design/icons';
 import { paymentsApi, type PaymentMethod } from '../api/payments';
+import { walletApi, type PaymentQuote } from '@/features/wallet/api/wallet';
 
 const { Text } = Typography;
 
@@ -43,6 +44,22 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('sberpay_qr');
   const [loading, setLoading] = useState(false);
+  const [quote, setQuote] = useState<PaymentQuote | null>(null);
+
+  // Раньше сборы считались здесь по зашитым 25% и 1,5%. У клиента может
+  // быть индивидуальная ставка сервисного сбора, а ставка эквайринга
+  // зависит от договора, поэтому разбивку отдаёт сервер.
+  useEffect(() => {
+    if (!visible || !amount) {
+      return undefined;
+    }
+    let cancelled = false;
+    walletApi
+      .quote(amount, 'order')
+      .then((q) => { if (!cancelled) setQuote(q); })
+      .catch(() => { if (!cancelled) setQuote(null); });
+    return () => { cancelled = true; };
+  }, [visible, amount]);
 
   const handlePay = async () => {
     try {
@@ -84,9 +101,17 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       <div style={{ padding: '16px 0' }}>
         <Text style={{ marginBottom: 16, display: 'block' }}>
           Стоимость работы: <Text strong>{amount.toLocaleString('ru-RU')} ₽</Text><br />
-          Сервисный сбор 25%: <Text strong>{(amount * 0.25).toLocaleString('ru-RU')} ₽</Text><br />
-          Эквайринг 1,5%: <Text strong>{(amount * 1.25 * 0.015).toLocaleString('ru-RU')} ₽</Text><br />
-          Итого: <Text strong>{(amount * 1.25 * 1.015).toLocaleString('ru-RU')} ₽</Text>
+          {quote ? (
+            <>
+              Сервисный сбор {quote.service_fee_percent}%:{' '}
+              <Text strong>{Number(quote.service_fee).toLocaleString('ru-RU')} ₽</Text><br />
+              Эквайринг {quote.acquiring_fee_percent}%:{' '}
+              <Text strong>{Number(quote.acquiring_fee).toLocaleString('ru-RU')} ₽</Text><br />
+              Итого: <Text strong>{Number(quote.total).toLocaleString('ru-RU')} ₽</Text>
+            </>
+          ) : (
+            <Text type="secondary">Считаем итоговую сумму…</Text>
+          )}
         </Text>
         <Radio.Group
           value={selectedMethod}

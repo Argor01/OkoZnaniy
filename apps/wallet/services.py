@@ -25,7 +25,7 @@ from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
 from datetime import timedelta
-from .policy import (EXPERT_WITHDRAWAL_FEE_PERCENT, ACQUIRING_FEE_PERCENT, REFERRAL_LIFETIME_DAYS, money, percent, withdrawal_quote)
+from .policy import (EXPERT_WITHDRAWAL_FEE_PERCENT, REFERRAL_LIFETIME_DAYS, money, percent, withdrawal_quote)
 
 from apps.orders.models import Transaction, TransactionType
 

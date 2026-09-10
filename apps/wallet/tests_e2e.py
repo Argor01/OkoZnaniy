@@ -31,7 +31,9 @@ class WalletInteractionE2E(TestCase):
   self.auth(self.c); data={'amount':'1000','payment_method':'sberpay_qr'}
   a=self.api.post('/api/wallet/topup/',data,format='json'); b=self.api.post('/api/wallet/topup/',data,format='json')
   self.assertEqual(a.status_code,200,a.content); self.assertEqual(a.json()['payment_id'],b.json()['payment_id'])
-  self.assertEqual(Decimal(a.json()['amount']),Decimal('1015')); self.assertEqual(Decimal(a.json()['wallet_credit']),Decimal('1000')); self.assertEqual(Decimal(a.json()['acquiring_fee']),Decimal('15'))
+  # Эквайринг 3.5% сверх суммы пополнения: на баланс приходит ровно то,
+  # что просил клиент, комиссию банка он оплачивает отдельно.
+  self.assertEqual(Decimal(a.json()['amount']),Decimal('1035')); self.assertEqual(Decimal(a.json()['wallet_credit']),Decimal('1000')); self.assertEqual(Decimal(a.json()['acquiring_fee']),Decimal('35'))
   self.c.refresh_from_db(); self.assertEqual(self.c.balance,1000); self.assertEqual(Payment.objects.filter(user=self.c).count(),1); self.assertEqual(Transaction.objects.filter(user=self.c,type=TransactionType.TOPUP).count(),1)
   h=self.api.get('/api/wallet/transactions/'); st=self.api.get('/api/wallet/stats/'); me=self.api.get('/api/wallet/me/')
   self.assertEqual(h.json()[0]['type'],'topup'); self.assertEqual(Decimal(st.json()['total_topup']),1000); self.assertEqual(Decimal(me.json()['available_balance']),1000)
