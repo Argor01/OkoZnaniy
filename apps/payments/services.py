@@ -52,6 +52,7 @@ class PaymentService:
             client = YooKassaClient()
             if not client.configured:
                 raise ValueError('Оплата через ЮKassa временно недоступна: магазин не настроен')
+            PaymentService._ensure_test_shop_payer(payment, client)
             return client.register_payment(payment)['formUrl']
         if rail == 'tbank':
             if not TBANK_SETTINGS.get('TERMINAL_KEY'):
@@ -185,6 +186,41 @@ class PaymentService:
         return entry[0]() if entry else None
 
     @staticmethod
+    def _payer(payment: Payment):
+        """Кто платит: владелец платежа, а для оплаты заказа — его заказчик."""
+        if getattr(payment, 'user_id', None):
+            return payment.user
+        if getattr(payment, 'order_id', None):
+            return payment.order.client
+        return None
+
+    @staticmethod
+    def _ensure_test_shop_payer(payment: Payment, client) -> None:
+        """Не пускает реальных клиентов в тестовый магазин.
+
+        Ключ вида test_* создаёт платежи, которые ничего не списывают, но
+        возвращаются к нам успешными и зачисляются на кошелёк. Пока
+        подключён тестовый магазин, платить через него могут только
+        сотрудники и учётки @okoznaniy.test — иначе любой желающий
+        пополнит баланс несуществующими деньгами.
+
+        Проверка привязана к префиксу ключа, а не к отдельной настройке:
+        забыть переключить флаг легко, а подменить ключ незаметно — нет.
+        """
+        if not client.test_mode:
+            return
+        payer = PaymentService._payer(payment)
+        if payer is not None:
+            if getattr(payer, 'is_staff', False):
+                return
+            email = (getattr(payer, 'email', '') or '').lower()
+            if email.endswith('@okoznaniy.test'):
+                return
+        raise ValueError(
+            'Оплата через ЮKassa временно недоступна: подключён тестовый магазин'
+        )
+
+    @staticmethod
     def _card_acquirer() -> str:
         """Какой банк обслуживает оплату картой. Переключается CARD_ACQUIRER."""
         return (getattr(settings, 'CARD_ACQUIRER', 'uralsib') or 'uralsib').lower()
@@ -202,6 +238,8 @@ class PaymentService:
                 raise ValueError(
                     f'Оплата картой временно недоступна: эквайринг {bank_label} не настроен'
                 )
+            if isinstance(client, YooKassaClient):
+                PaymentService._ensure_test_shop_payer(payment, client)
             return client.register_payment(payment)['formUrl']
         if not ALFABANK_SETTINGS.get('USERNAME'):
             raise ValueError('Оплата картой временно недоступна: эквайринг не настроен')

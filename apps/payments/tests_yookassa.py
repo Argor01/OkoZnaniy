@@ -321,9 +321,11 @@ class CardAcquirerSwitchTests(TestCase):
     """Переключатель CARD_ACQUIRER должен уводить карточную рельсу в ЮKassa."""
 
     def setUp(self):
+        # Сотрудник: у тестового магазина оплата открыта только своим,
+        # а проверяется здесь маршрутизация, а не этот запрет.
         self.user = User.objects.create_user(
             username='yk_card', email='yk_card@example.com',
-            password='pwd', role='client',
+            password='pwd', role='admin', is_staff=True,
         )
         self.payment = Payment.objects.create(
             user=self.user, amount=Decimal('2000.00'),
@@ -401,3 +403,89 @@ class PaymentStatusEndpointTests(TestCase):
     def test_missing_parameter_is_a_bad_request(self):
         self.client.force_login(self.user)
         self.assertEqual(self.client.get(self.url).status_code, 400)
+
+
+LIVE_SETTINGS = {**YK_SETTINGS, 'SECRET_KEY': 'live_real_key'}
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class TestShopIsClosedForRealClientsTests(TestCase):
+    """Тестовый ключ создаёт платежи, которые ничего не списывают.
+
+    До нас они доходят успешными и зачисляются на кошелёк, поэтому пока
+    подключён тестовый магазин, платить через него могут только свои.
+    """
+
+    def setUp(self):
+        self.client_user = User.objects.create_user(
+            username='real_client', email='real@example.com',
+            password='pwd', role='client',
+        )
+        self.staff = User.objects.create_user(
+            username='staff_user', email='staff@example.com',
+            password='pwd', role='admin', is_staff=True,
+        )
+        self.tester = User.objects.create_user(
+            username='qa_user', email='qa@okoznaniy.test',
+            password='pwd', role='client',
+        )
+
+    def _payment_for(self, user, method='yookassa'):
+        return Payment.objects.create(
+            user=user, amount=Decimal('1000.00'),
+            payment_method=method, status=PaymentStatus.PENDING,
+            purpose=Payment.Purpose.TOPUP,
+            payment_id='yk-guard-%s' % user.pk,
+        )
+
+    def _link_for(self, user, settings_dict=None, method='yookassa'):
+        payment = self._payment_for(user, method=method)
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS',
+                   settings_dict or YK_SETTINGS), \
+             patch('apps.payments.providers.yookassa.requests.request',
+                   lambda *a, **kw: _FakeResponse(_payment_body(value='1000.00'))):
+            return PaymentService.get_payment_link(payment)
+
+    def test_real_client_cannot_pay_into_the_test_shop(self):
+        with self.assertRaises(ValueError) as ctx:
+            self._link_for(self.client_user)
+        self.assertIn('тестовый магазин', str(ctx.exception))
+
+    def test_staff_can_pay_into_the_test_shop(self):
+        self.assertEqual(self._link_for(self.staff), 'https://yoomoney.ru/checkout/x')
+
+    def test_test_account_can_pay_into_the_test_shop(self):
+        self.assertEqual(self._link_for(self.tester), 'https://yoomoney.ru/checkout/x')
+
+    def test_live_key_opens_payments_for_everyone(self):
+        link = self._link_for(self.client_user, settings_dict=LIVE_SETTINGS)
+        self.assertEqual(link, 'https://yoomoney.ru/checkout/x')
+
+    @override_settings(CARD_ACQUIRER='yookassa')
+    def test_card_rail_is_guarded_too(self):
+        """Через CARD_ACQUIRER=yookassa тестовый магазин тоже не обойти."""
+        with self.assertRaises(ValueError) as ctx:
+            self._link_for(self.client_user, method='card')
+        self.assertIn('тестовый магазин', str(ctx.exception))
+
+    def test_order_payment_checks_the_client_of_the_order(self):
+        """У оплаты заказа плательщик берётся из заказа, а не из user."""
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from apps.orders.models import Order
+
+        order = Order.objects.create(
+            client=self.client_user, title='Курсовая', description='test',
+            budget=Decimal('1000.00'), deadline=timezone.now() + timedelta(days=7),
+        )
+        payment = Payment.objects.create(
+            order=order, amount=Decimal('1000.00'),
+            payment_method='yookassa', status=PaymentStatus.PENDING,
+            payment_id='yk-guard-order',
+        )
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', YK_SETTINGS):
+            with self.assertRaises(ValueError) as ctx:
+                PaymentService.get_payment_link(payment)
+        self.assertIn('тестовый магазин', str(ctx.exception))
