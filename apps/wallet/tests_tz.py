@@ -144,3 +144,32 @@ class PaymentQuoteEndpointTests(TestCase):
 
     def test_anonymous_is_rejected(self):
         self.assertIn(self.client.get(self.url, {'amount': '100'}).status_code, (401, 403))
+
+
+class SandboxTopupReturnsARealPageTests(TestCase):
+    """Мгновенное пополнение в песочнице возвращало /payment/success/.
+
+    Такой страницы в SPA нет: пользователь после пополнения попадал на
+    404. Ссылка должна вести на настоящую страницу возврата.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='sandbox-payer', email='sandbox@okoznaniy.test',
+            password='pwd', role='client',
+        )
+
+    def test_sandbox_topup_points_at_the_result_page(self):
+        from django.test import override_settings
+
+        self.client.force_login(self.user)
+        with override_settings(PAYMENTS_SANDBOX=True, SECURE_SSL_REDIRECT=False):
+            body = self.client.post(
+                '/api/wallet/topup/',
+                data={'amount': '500', 'payment_method': 'yookassa'},
+                content_type='application/json',
+            ).json()
+
+        self.assertTrue(body['sandbox'])
+        self.assertTrue(body['payment_url'].startswith('/payment/result'))
+        self.assertIn(body['payment_id'], body['payment_url'])

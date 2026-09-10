@@ -65,6 +65,50 @@ class PaymentService:
         return PaymentService._get_sbp_link(payment)
 
     @staticmethod
+    def available_methods() -> list:
+        """Способы оплаты, которые действительно можно провести.
+
+        Неподключённый эквайер не должен светиться в интерфейсе: клиент
+        выбирал способ, жал «Оплатить» и упирался в «временно
+        недоступно» — ошибка всплывала уже после решения заплатить.
+        Как только эквайер настроен, он появляется в списке сам.
+        """
+        from .config import SBP_SETTINGS, TBANK_SETTINGS
+
+        methods = []
+        if YooKassaClient().configured:
+            methods.append({
+                'value': 'yookassa',
+                'label': 'ЮKassa',
+                'hint': 'Карта, СБП или ЮMoney',
+            })
+        if TBANK_SETTINGS.get('TERMINAL_KEY'):
+            methods.append({
+                'value': 'tbank',
+                'label': 'Т-Банк',
+                'hint': 'Оплата картой через Т-Банк',
+            })
+        if SBP_SETTINGS.get('MERCHANT_ID'):
+            methods.append({
+                'value': 'sberpay_qr',
+                'label': 'СберPay QR',
+                'hint': 'Сканируй QR в Сбер Онлайн',
+            })
+
+        # Отдельная кнопка «картой» нужна, только если карту обслуживает
+        # не ЮKassa: иначе это второй вход в тот же платёжный шлюз.
+        entry = PaymentService._CARD_ACQUIRERS.get(PaymentService._card_acquirer())
+        if entry is not None:
+            card_client = entry[0]()
+            if card_client.configured and not isinstance(card_client, YooKassaClient):
+                methods.append({
+                    'value': 'card',
+                    'label': 'Банковская карта',
+                    'hint': 'Оплата картой через %s' % entry[1],
+                })
+        return methods
+
+    @staticmethod
     def process_payment_callback(payment_id: str, data: Dict[str, Any]) -> bool:
         """
         Обрабатывает callback от платежной системы
@@ -185,6 +229,9 @@ class PaymentService:
         entry = PaymentService._CARD_ACQUIRERS.get(PaymentService._card_acquirer())
         return entry[0]() if entry else None
 
+    # Кому открыт тестовый магазин, пока не подключён боевой ключ.
+    TEST_SHOP_ROLES = frozenset({'director', 'admin'})
+
     @staticmethod
     def _payer(payment: Payment):
         """Кто платит: владелец платежа, а для оплаты заказа — его заказчик."""
@@ -211,7 +258,12 @@ class PaymentService:
             return
         payer = PaymentService._payer(payment)
         if payer is not None:
+            # Права на площадке размечены полем role: is_staff здесь не
+            # проставлен никому, поэтому одной проверки на него мало —
+            # она отсекала бы и директора с администратором.
             if getattr(payer, 'is_staff', False):
+                return
+            if getattr(payer, 'role', '') in PaymentService.TEST_SHOP_ROLES:
                 return
             email = (getattr(payer, 'email', '') or '').lower()
             if email.endswith('@okoznaniy.test'):

@@ -11,6 +11,9 @@ import {
 import {
   walletApi, PaymentQuote, WalletBalance, WalletStats, WalletTransaction,
 } from '../api/wallet';
+import {
+  paymentsApi, type AvailablePaymentMethod,
+} from '@/features/payments/api/payments';
 import styles from './Wallet.module.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -26,11 +29,15 @@ const FILTERS = [
 
 const QUICK_SUMS = [500, 1000, 5000, 10000];
 
-const METHODS = [
-  { value: 'tbank', label: 'Т-Банк', icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />, hint: 'Оплата картой через Т-Банк' },
-  { value: 'sberpay_qr', label: 'СберPay QR', icon: <img src="/assets/banks/sberpay.svg" alt="СберPay" width={112} height={32} />, hint: 'Сканируй QR в Сбер Онлайн' },
-  { value: 'yookassa', label: 'ЮKassa', icon: <CreditCardOutlined />, hint: 'Карта, СБП или ЮMoney' },
-];
+// Оформление способов оплаты. Какие из них показать, решает сервер:
+// он знает, какие эквайеры настроены.
+const METHOD_ICONS: Record<string, React.ReactNode> = {
+  tbank: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />,
+  sberpay_qr: <img src="/assets/banks/sberpay.svg" alt="СберPay" width={112} height={32} />,
+  yookassa: <CreditCardOutlined />,
+  card: <CreditCardOutlined />,
+  sbp: <QrcodeOutlined />,
+};
 
 function formatMoney(v: string | number | undefined): string {
   if (v === undefined || v === null) return '0';
@@ -223,6 +230,26 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
   const [method, setMethod] = useState<string>('sberpay_qr');
   const [busy, setBusy] = useState(false);
   const [quote, setQuote] = useState<PaymentQuote | null>(null);
+  const [methods, setMethods] = useState<AvailablePaymentMethod[]>([]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    paymentsApi
+      .methods()
+      .then((list) => {
+        setMethods(list);
+        // Выбранный способ мог отключиться, пока окно было закрыто.
+        if (list.length && !list.some((m) => m.value === method)) {
+          setMethod(list[0].value);
+        }
+      })
+      .catch(() => setMethods([]));
+    // method намеренно не в зависимостях: список тянем при открытии окна,
+    // а не на каждый выбор способа.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   // Сумму к списанию считает сервер: проценты зависят от договора с
   // эквайером и от ставки конкретного клиента.
@@ -317,10 +344,10 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
         onChange={(e) => setMethod(e.target.value)}
         className={styles.topupMethods}
       >
-        {METHODS.map((m) => (
+        {methods.map((m) => (
           <Radio key={m.value} value={m.value} className={styles.topupMethod}>
             <div className={styles.topupMethodInner}>
-              <span className={styles.topupMethodIcon}>{m.icon}</span>
+              <span className={styles.topupMethodIcon}>{METHOD_ICONS[m.value]}</span>
               <div>
                 <div className={styles.topupMethodLabel}>{m.label}</div>
                 <Text type="secondary" className={styles.topupMethodHint}>{m.hint}</Text>
@@ -333,6 +360,7 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
       <Button
         type="primary" size="large" block
         loading={busy}
+        disabled={!methods.length}
         onClick={submit}
         className={styles.topupSubmit}
       >

@@ -4,6 +4,12 @@ import { API_ENDPOINTS } from '@/config/endpoints';
 export type PaymentMethod =
   | 'tbank' | 'sbp' | 'card' | 'sberbank' | 'sberpay_qr' | 'yookassa';
 
+export interface AvailablePaymentMethod {
+  value: PaymentMethod;
+  label: string;
+  hint: string;
+}
+
 export interface PaymentCreateRequest {
   order_id: number;
   amount: number;
@@ -25,6 +31,14 @@ export interface PaymentResponse {
 }
 
 export const paymentsApi = {
+  // Список собирает сервер по настроенным эквайерам: показывать способ,
+  // который заведомо не проведётся, — значит ловить клиента на ошибку
+  // уже после того, как он решил заплатить.
+  methods: async (): Promise<AvailablePaymentMethod[]> => {
+    const response = await apiClient.get(API_ENDPOINTS.payments.methods);
+    return response.data;
+  },
+
   createPayment: async (data: PaymentCreateRequest): Promise<PaymentResponse> => {
     const response = await apiClient.post(API_ENDPOINTS.payments.createPayment, data);
     return response.data;

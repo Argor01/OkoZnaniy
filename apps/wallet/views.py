@@ -42,7 +42,7 @@ MIN_WITHDRAWAL = Decimal('100.00')
 MAX_WITHDRAWAL = Decimal('500000.00')
 
 
-def _sandbox_topup_allowed(user) -> bool:
+def _sandbox_topup_allowed(user) -> bool:  # noqa: C901
     """Instant no-acquirer top-ups are allowed only when PAYMENTS_SANDBOX
     is enabled AND the account is staff or a @okoznaniy.test test user.
     This keeps sandbox credits out of reach of real end users."""
@@ -161,7 +161,7 @@ class WalletViewSet(viewsets.ViewSet):
                 'method': method,
                 'sandbox': True,
                 'status': 'completed',
-                'payment_url': '/payment/success/',
+                'payment_url': '/payment/result?payment=%s' % payment.payment_id,
                 'balance': WalletBalanceSerializer(bal).data,
             })
         try:

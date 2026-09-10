@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Radio, Typography, message, Space } from 'antd';
 import { CreditCardOutlined, BankOutlined, WalletOutlined, QrcodeOutlined } from '@ant-design/icons';
-import { paymentsApi, type PaymentMethod } from '../api/payments';
+import {
+  paymentsApi, type AvailablePaymentMethod, type PaymentMethod,
+} from '../api/payments';
 import { walletApi, type PaymentQuote } from '@/features/wallet/api/wallet';
 
 const { Text } = Typography;
@@ -14,26 +16,15 @@ interface PaymentModalProps {
   onSuccess?: () => void;
 }
 
-const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: React.ReactNode; description: string }[] = [
-  {
-    value: "tbank",
-    label: "Т-Банк",
-    icon: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />,
-    description: "Оплата картой через Т-Банк",
-  },
-  {
-    value: "sberpay_qr",
-    label: "СберPay QR",
-    icon: <QrcodeOutlined />,
-    description: "Сканируй QR в приложении Сбер Онлайн",
-  },
-  {
-    value: "yookassa",
-    label: "ЮKassa",
-    icon: <CreditCardOutlined />,
-    description: "Карта, СБП или ЮMoney — способ выбирается на странице оплаты",
-  },
-];
+// Оформление способов оплаты. Какие показать, решает сервер: он знает,
+// какие эквайеры настроены.
+const METHOD_ICONS: Record<string, React.ReactNode> = {
+  tbank: <img src="/assets/banks/tbank.svg" alt="Т-Банк" width={112} height={32} />,
+  sberpay_qr: <QrcodeOutlined />,
+  yookassa: <CreditCardOutlined />,
+  card: <CreditCardOutlined />,
+  sbp: <QrcodeOutlined />,
+};
 
 const PaymentModal: React.FC<PaymentModalProps> = ({
   visible,
@@ -45,6 +36,23 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('sberpay_qr');
   const [loading, setLoading] = useState(false);
   const [quote, setQuote] = useState<PaymentQuote | null>(null);
+  const [methods, setMethods] = useState<AvailablePaymentMethod[]>([]);
+
+  useEffect(() => {
+    if (!visible) {
+      return;
+    }
+    paymentsApi
+      .methods()
+      .then((list) => {
+        setMethods(list);
+        if (list.length && !list.some((m) => m.value === selectedMethod)) {
+          setSelectedMethod(list[0].value);
+        }
+      })
+      .catch(() => setMethods([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
   // Раньше сборы считались здесь по зашитым 25% и 1,5%. У клиента может
   // быть индивидуальная ставка сервисного сбора, а ставка эквайринга
@@ -93,6 +101,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
       onCancel={onClose}
       onOk={handlePay}
       okText="Оплатить"
+      okButtonProps={{ disabled: !methods.length }}
       cancelText="Отмена"
       title="Выберите способ оплаты"
       confirmLoading={loading}
@@ -119,7 +128,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           style={{ width: '100%' }}
         >
           <Space direction="vertical" style={{ width: '100%' }}>
-            {PAYMENT_METHODS.map((method) => (
+            {methods.map((method) => (
               <Radio
                 key={method.value}
                 value={method.value}
@@ -135,11 +144,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 }}
               >
                 <Space>
-                  <span style={{ fontSize: 20 }}>{method.icon}</span>
+                  <span style={{ fontSize: 20 }}>{METHOD_ICONS[method.value]}</span>
                   <div>
                     <Text strong>{method.label}</Text>
                     <br />
-                    <Text type="secondary" style={{ fontSize: 12 }}>{method.description}</Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>{method.hint}</Text>
                   </div>
                 </Space>
               </Radio>

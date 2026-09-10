@@ -149,6 +149,17 @@ class PaymentViewSet(viewsets.ModelViewSet):
         )
 
 
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def payment_methods(request):
+    """Способы оплаты, доступные прямо сейчас.
+
+    Список собирается по настроенным эквайерам, поэтому интерфейс не
+    предлагает то, что заведомо не проведётся.
+    """
+    return Response(PaymentService.available_methods())
+
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def tbank_callback(request):

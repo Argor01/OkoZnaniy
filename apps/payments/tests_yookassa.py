@@ -498,3 +498,102 @@ class TestShopIsClosedForRealClientsTests(TestCase):
             with self.assertRaises(ValueError) as ctx:
                 PaymentService.get_payment_link(payment)
         self.assertIn('тестовый магазин', str(ctx.exception))
+
+
+class DirectorAndAdminCanUseTestShopTests(TestCase):
+    """Права на площадке размечены полем role, is_staff не проставлен никому.
+
+    Проверка только на is_staff отсекала бы тех, ради кого запрет и
+    делался проходимым: директора и администратора.
+    """
+
+    def _payment_for(self, user):
+        return Payment.objects.create(
+            user=user, amount=Decimal('500.00'),
+            payment_method='yookassa', status=PaymentStatus.PENDING,
+            purpose=Payment.Purpose.TOPUP,
+            payment_id='yk-role-%s' % user.pk,
+        )
+
+    def _link_for(self, user):
+        payment = self._payment_for(user)
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', YK_SETTINGS), \
+             patch('apps.payments.providers.yookassa.requests.request',
+                   lambda *a, **kw: _FakeResponse(_payment_body(value='500.00'))):
+            return PaymentService.get_payment_link(payment)
+
+    def test_director_and_admin_are_allowed(self):
+        for role in ('director', 'admin'):
+            user = User.objects.create_user(
+                username='role-%s' % role, email='%s@okoznaniy.ru' % role,
+                password='pwd', role=role,
+            )
+            self.assertFalse(user.is_staff, 'is_staff в проекте не используется')
+            self.assertEqual(self._link_for(user), 'https://yoomoney.ru/checkout/x', role)
+
+    def test_expert_and_client_are_not(self):
+        for role in ('expert', 'client', 'partner'):
+            user = User.objects.create_user(
+                username='role-%s' % role, email='%s@example.com' % role,
+                password='pwd', role=role,
+            )
+            with self.assertRaises(ValueError, msg=role):
+                self._link_for(user)
+
+
+class AvailablePaymentMethodsTests(TestCase):
+    """В интерфейс попадают только настроенные эквайеры.
+
+    Иначе клиент выбирает способ, жмёт «Оплатить» и упирается в
+    «временно недоступно» — уже после того, как решил заплатить.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='methods-client', email='methods@example.com',
+            password='pwd', role='client',
+        )
+        self.url = '/api/payments/methods/'
+
+    def test_only_configured_acquirers_are_offered(self):
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', YK_SETTINGS), \
+             patch.dict('apps.payments.config.TBANK_SETTINGS', {'TERMINAL_KEY': ''}), \
+             patch.dict('apps.payments.config.SBP_SETTINGS', {'MERCHANT_ID': ''}):
+            methods = PaymentService.available_methods()
+
+        self.assertEqual([m['value'] for m in methods], ['yookassa'])
+
+    def test_configured_acquirer_shows_up_on_its_own(self):
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', YK_SETTINGS), \
+             patch.dict('apps.payments.config.TBANK_SETTINGS', {'TERMINAL_KEY': 'terminal-1'}), \
+             patch.dict('apps.payments.config.SBP_SETTINGS', {'MERCHANT_ID': ''}):
+            methods = PaymentService.available_methods()
+
+        self.assertEqual([m['value'] for m in methods], ['yookassa', 'tbank'])
+
+    def test_unconfigured_shop_offers_nothing(self):
+        empty = {**YK_SETTINGS, 'SHOP_ID': '', 'SECRET_KEY': ''}
+        with patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', empty), \
+             patch.dict('apps.payments.config.TBANK_SETTINGS', {'TERMINAL_KEY': ''}), \
+             patch.dict('apps.payments.config.SBP_SETTINGS', {'MERCHANT_ID': ''}):
+            self.assertEqual(PaymentService.available_methods(), [])
+
+    def test_card_is_not_duplicated_when_yookassa_serves_it(self):
+        """CARD_ACQUIRER=yookassa — это тот же шлюз, второй кнопки не нужно."""
+        with self.settings(CARD_ACQUIRER='yookassa'), \
+             patch('apps.payments.providers.yookassa.YooKassaClient.SETTINGS', YK_SETTINGS), \
+             patch.dict('apps.payments.config.TBANK_SETTINGS', {'TERMINAL_KEY': ''}), \
+             patch.dict('apps.payments.config.SBP_SETTINGS', {'MERCHANT_ID': ''}):
+            methods = PaymentService.available_methods()
+
+        self.assertEqual([m['value'] for m in methods], ['yookassa'])
+
+    def test_endpoint_requires_login(self):
+        self.assertIn(self.client.get(self.url).status_code, (401, 403))
+
+    def test_endpoint_returns_the_list(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        for item in response.json():
+            self.assertEqual(set(item), {'value', 'label', 'hint'})
