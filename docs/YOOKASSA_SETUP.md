@@ -82,7 +82,7 @@ https://okoznaniy.ru/api/payments/yookassa/callback/
 
 ## Что проверяется тестами
 
-`apps/payments/tests_yookassa.py` (20 тестов):
+`apps/payments/tests_yookassa.py` (25 тестов):
 
 - создание платежа уходит с Basic-авторизацией и `Idempotence-Key`,
   сумма — строкой с двумя знаками, а не копейками, как в RBS;
@@ -95,7 +95,9 @@ https://okoznaniy.ru/api/payments/yookassa/callback/
 - сбой шлюза отдаёт 500, чтобы ЮKassa повторила доставку;
 - `X-Forwarded-For` от клиента не подменяет отправителя;
 - `CARD_ACQUIRER=yookassa` уводит карточную рельсу в ЮKassa, а
-  RBS-эндпоинт при этом перестаёт обслуживать карточные платежи.
+  RBS-эндпоинт при этом перестаёт обслуживать карточные платежи;
+- статус платежа отдаётся только владельцу: по чужому `payment_id`
+  страница возврата получает 404.
 
 Запуск:
 

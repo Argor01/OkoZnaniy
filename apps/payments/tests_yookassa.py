@@ -350,3 +350,54 @@ class CardAcquirerSwitchTests(TestCase):
     def test_rbs_callback_handler_ignores_yookassa_acquirer(self):
         """RBS-эндпоинт не должен обслуживать платежи ЮKassa."""
         self.assertIsNone(PaymentService._card_rbs_client())
+
+
+@override_settings(SECURE_SSL_REDIRECT=False)
+class PaymentStatusEndpointTests(TestCase):
+    """Статус платежа для страницы возврата с формы.
+
+    Адрес обслуживает list-роут, а не detail: важно, чтобы `status` не
+    был принят за первичный ключ. И важно, что выборка идёт через
+    get_queryset — иначе по чужому payment_id можно было бы подсмотреть
+    чужие платежи.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='yk_owner', email='yk_owner@example.com',
+            password='pwd', role='client',
+        )
+        self.stranger = User.objects.create_user(
+            username='yk_stranger', email='yk_stranger@example.com',
+            password='pwd', role='client',
+        )
+        self.payment = Payment.objects.create(
+            user=self.user, amount=Decimal('1000.00'),
+            payment_method='yookassa', status=PaymentStatus.COMPLETED,
+            purpose=Payment.Purpose.TOPUP, payment_id='yk-status-1',
+        )
+        self.url = reverse('payment-payment-status')
+
+    def test_url_is_a_list_route_not_a_primary_key(self):
+        self.assertEqual(self.url, '/api/payments/payments/status/')
+
+    def test_owner_sees_the_payment_status(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.url, {'payment': 'yk-status-1'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['status'], PaymentStatus.COMPLETED)
+        self.assertEqual(response.json()['amount'], '1000.00')
+        self.assertEqual(response.json()['purpose'], Payment.Purpose.TOPUP)
+
+    def test_stranger_cannot_look_up_someone_elses_payment(self):
+        self.client.force_login(self.stranger)
+        response = self.client.get(self.url, {'payment': 'yk-status-1'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_anonymous_is_rejected(self):
+        response = self.client.get(self.url, {'payment': 'yk-status-1'})
+        self.assertIn(response.status_code, (401, 403))
+
+    def test_missing_parameter_is_a_bad_request(self):
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(self.url).status_code, 400)
