@@ -291,7 +291,7 @@ class WalletService:
     @transaction.atomic
     def withdraw(user, amount, *, description: str = 'Вывод средств', return_details: bool = False):
         """Debit gross requested amount and return transparent fee breakdown."""
-        quote = withdrawal_quote(amount, getattr(user, 'role', 'client'))
+        quote = withdrawal_quote(amount, getattr(user, 'role', 'client'), user=user)
         u = _lock_user(user.pk)
         available = (u.balance or ZERO) - (u.frozen_balance or ZERO)
         if available < quote['gross']:

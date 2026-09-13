@@ -61,10 +61,22 @@ def order_quote(base_amount, client=None) -> dict:
     }
 
 
-def withdrawal_quote(amount, role) -> dict:
+def withdrawal_fee_percent(role, user=None) -> Decimal:
+    """Процент удержания при выводе: персональный, иначе общий по роли.
+
+    Считаем в одном месте — как и сервисный сбор с клиента, чтобы расчёт
+    в кошельке и в интерфейсе не разошёлся.
+    """
+    override = getattr(user, 'withdrawal_fee_percent', None) if user is not None else None
+    if override is not None:
+        return Decimal(str(override))
+    return EXPERT_WITHDRAWAL_FEE_PERCENT if role == 'expert' else CLIENT_WITHDRAWAL_FEE_PERCENT
+
+
+def withdrawal_quote(amount, role, user=None) -> dict:
     """Amount is what the user requests; fees are retained from that amount."""
     gross = money(amount)
-    platform_rate = EXPERT_WITHDRAWAL_FEE_PERCENT if role == 'expert' else CLIENT_WITHDRAWAL_FEE_PERCENT
+    platform_rate = withdrawal_fee_percent(role, user)
     platform_fee = percent(gross, platform_rate)
     # Вывод — это перевод на карту, у него свой тариф, не равный ставке
     # приёма платежей.

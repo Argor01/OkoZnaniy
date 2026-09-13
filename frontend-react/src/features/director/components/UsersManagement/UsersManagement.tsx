@@ -32,6 +32,7 @@ interface PlatformUser {
   is_verified?: boolean;
   service_fee_percent?: string | null;
   partner_commission_rate?: string | number | null;
+  withdrawal_fee_percent?: string | number | null;
   average_rating?: number | string | null;
   date_joined?: string;
 }
@@ -84,6 +85,10 @@ const UsersManagement: React.FC = () => {
   const [search, setSearch] = useState<string>('');
   const [editing, setEditing] = useState<PlatformUser | null>(null);
   const [feeMode, setFeeMode] = useState<'platform' | 'zero' | 'custom'>('platform');
+  // Одна и та же модалка правит два процента: сервисный сбор с клиента и
+  // удержание с эксперта при выводе.
+  const [editingField, setEditingField] =
+    useState<'service_fee_percent' | 'withdrawal_fee_percent'>('service_fee_percent');
   const [customPercent, setCustomPercent] = useState<number>(15);
 
   const { data, isLoading } = useQuery({
@@ -100,7 +105,7 @@ const UsersManagement: React.FC = () => {
   const saveMutation = useMutation({
     mutationFn: async ({ id, value }: { id: number; value: number | null }) => {
       await apiClient.patch(`/users/${id}/admin_update_partner/`, {
-        service_fee_percent: value,
+        [editingField]: value,
       });
     },
     onSuccess: () => {
@@ -115,8 +120,12 @@ const UsersManagement: React.FC = () => {
     },
   });
 
-  const openEdit = (user: PlatformUser) => {
-    const raw = user.service_fee_percent;
+  const openEdit = (
+    user: PlatformUser,
+    field: 'service_fee_percent' | 'withdrawal_fee_percent' = 'service_fee_percent',
+  ) => {
+    setEditingField(field);
+    const raw = field === 'service_fee_percent' ? user.service_fee_percent : user.withdrawal_fee_percent;
     if (raw === null || raw === undefined || raw === '') {
       setFeeMode('platform');
     } else {
@@ -208,7 +217,33 @@ const UsersManagement: React.FC = () => {
       render: (_: unknown, u: PlatformUser) => {
         const v = displayPercent(u.service_fee_percent);
         const color = v === 'Без комиссии' ? 'green' : v === 'Общий' ? 'default' : 'blue';
-        return <Tag color={color}>{v}</Tag>;
+        return (
+          <Tag
+            color={color}
+            style={{ cursor: 'pointer' }}
+            onClick={() => openEdit(u, 'service_fee_percent')}
+          >
+            {v}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: 'Удержание при выводе',
+      key: 'withdrawal_fee_percent',
+      width: 170,
+      render: (_: unknown, u: PlatformUser) => {
+        const v = displayPercent(u.withdrawal_fee_percent);
+        const color = v === 'Без комиссии' ? 'green' : v === 'Общий' ? 'default' : 'blue';
+        return (
+          <Tag
+            color={color}
+            style={{ cursor: 'pointer' }}
+            onClick={() => openEdit(u, 'withdrawal_fee_percent')}
+          >
+            {v}
+          </Tag>
+        );
       },
     },
     {
@@ -267,7 +302,7 @@ const UsersManagement: React.FC = () => {
       </Card>
 
       <Modal
-        title={`Сервисный сбор — ${editing ? displayName(editing) : ''}`}
+        title={`${editingField === 'service_fee_percent' ? 'Сервисный сбор' : 'Удержание при выводе'} — ${editing ? displayName(editing) : ''}`}
         open={!!editing}
         onOk={handleSave}
         confirmLoading={saveMutation.isPending}
@@ -284,11 +319,17 @@ const UsersManagement: React.FC = () => {
           <Space direction="vertical" size={12}>
             <Radio value="platform">
               Общий процент платформы
-              <Text type="secondary" className={styles.hint}>как у всех клиентов</Text>
+              <Text type="secondary" className={styles.hint}>
+                {editingField === 'service_fee_percent' ? 'как у всех клиентов' : 'как у всех по роли'}
+              </Text>
             </Radio>
             <Radio value="zero">
               Без комиссии (0%)
-              <Text type="secondary" className={styles.hint}>клиент платит только работу</Text>
+              <Text type="secondary" className={styles.hint}>
+                {editingField === 'service_fee_percent'
+                  ? 'клиент платит только работу'
+                  : 'автор выводит всю сумму'}
+              </Text>
             </Radio>
             <Radio value="custom">
               Свой процент

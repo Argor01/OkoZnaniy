@@ -86,6 +86,13 @@ class User(AbstractUser):
     partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Процент партнера (%)")
     # Индивидуальный сервисный сбор с клиента. Пусто — общий процент площадки
     # (CLIENT_SERVICE_FEE_PERCENT), 0 — заказы без комиссии.
+    # Индивидуальное удержание при выводе средств. Пусто — общий процент
+    # по роли, 0 — вывод без удержания.
+    withdrawal_fee_percent = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        verbose_name="Индивидуальное удержание при выводе (%)",
+        help_text="Пусто — общий процент по роли. 0 — без удержания.",
+    )
     service_fee_percent = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True,
         verbose_name="Индивидуальный сервисный сбор (%)",
