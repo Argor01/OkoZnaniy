@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Avatar, Empty, Pagination, Skeleton, Tag } from 'antd';
+import { SyncOutlined } from '@ant-design/icons';
 import { CalendarOutlined, ClockCircleOutlined, RightOutlined, UserOutlined } from '@ant-design/icons';
 import type { Order } from '@/features/orders/api/orders';
 import styles from './MyWorks.module.css';
@@ -14,13 +15,15 @@ type Props = {
   formatRemaining: (value: unknown, status?: unknown) => string;
   formatBudget: (value: unknown) => string;
   isOverdue: (order: Order) => boolean;
+  /** Переопубликовать заказ, ушедший в неактивные. */
+  onReactivate?: (id: number) => void;
 };
 
 const PAGE_SIZE = 10;
 
 const OrdersList: React.FC<Props> = ({
   orders, loading, isClient, onOpen, getStatusLabel,
-  formatOrderDate, formatRemaining, formatBudget, isOverdue,
+  formatOrderDate, formatRemaining, formatBudget, isOverdue, onReactivate,
 }) => {
   const [page, setPage] = useState(1);
   useEffect(() => setPage(1), [orders]);
@@ -71,6 +74,25 @@ const OrdersList: React.FC<Props> = ({
                 <div className={styles.orderListFact}><CalendarOutlined /><span><small>Создан</small><strong>{formatOrderDate(order.created_at)}</strong></span></div>
                 <div className={`${styles.orderListFact} ${overdue ? styles.orderListFactDanger : ''}`}><ClockCircleOutlined /><span><small>Осталось</small><strong>{overdue ? 'Просрочено' : formatRemaining(order.deadline, order.status)}</strong></span></div>
                 <div className={styles.orderListPrice}>{formatBudget(order.budget)}</div>
+                {onReactivate && order.available_actions?.can_reactivate ? (
+                  // Карточка сама по себе кнопка, поэтому вложенную кнопку не
+                  // ставим: иначе получится недопустимая вложенность.
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    className={styles.orderListReactivate}
+                    onClick={(e) => { e.stopPropagation(); onReactivate(order.id); }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onReactivate(order.id);
+                      }
+                    }}
+                  >
+                    <SyncOutlined /> Опубликовать снова
+                  </span>
+                ) : null}
                 <RightOutlined className={styles.orderListArrow} />
               </div>
             </button>

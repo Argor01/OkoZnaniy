@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Typography } from 'antd';
+import { Typography, message } from 'antd';
 import { SearchOutlined, StarFilled, FilterOutlined } from '@ant-design/icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppInput, AppSelect, AppButton, BudgetRangeInput } from '@/components/ui';
 import { ordersApi, Order } from '@/features/orders/api/orders';
@@ -295,6 +295,21 @@ const MyWorks: React.FC = () => {
   };
 
 
+  const queryClientForOrders = useQueryClient();
+  const handleReactivate = async (id: number) => {
+    try {
+      await ordersApi.reactivateOrder(id);
+      message.success('Заказ снова опубликован в ленте');
+      await Promise.all([
+        queryClientForOrders.invalidateQueries({ queryKey: ['client-orders-overview-inactive'] }),
+        queryClientForOrders.invalidateQueries({ queryKey: ['user-orders'] }),
+        queryClientForOrders.invalidateQueries({ queryKey: ['orders-feed'] }),
+      ]);
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось опубликовать заказ');
+    }
+  };
+
   return (
     <div className={styles.contentContainer}>
       <div className={styles.pageHeader}>
@@ -480,6 +495,7 @@ const MyWorks: React.FC = () => {
         formatRemaining={formatRemaining}
         formatBudget={formatBudget}
         isOverdue={isOverdueOrder}
+        onReactivate={handleReactivate}
       />
     </div>
   );

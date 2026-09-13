@@ -505,6 +505,24 @@ def get_or_create_order_chat(order: Order, *, client_user=None, expert_user=None
     return chat
 
 
+def _order_prepayment_percent(order: Order) -> int:
+    """Процент предоплаты берём из принятой ставки.
+
+    Раньше в карточке предложения стояла жёсткая 50: что бы клиент ни выбрал,
+    после принятия заказа показывалось 50%. При нулевой предоплате это прямо
+    вводило в заблуждение.
+    """
+    from apps.orders.models import Bid, BidStatus
+
+    bids = Bid.objects.filter(order=order)
+    bid = bids.filter(status=BidStatus.ACCEPTED).order_by("-id").first()
+    if bid is None and order.expert_id:
+        bid = bids.filter(expert_id=order.expert_id).order_by("-id").first()
+    if bid is not None and bid.prepayment_percent is not None:
+        return int(bid.prepayment_percent)
+    return 50
+
+
 def build_order_offer_data(order: Order) -> dict:
     return {
         "status": "accepted",
@@ -517,7 +535,7 @@ def build_order_offer_data(order: Order) -> dict:
         "subject": order.custom_subject or (order.subject.name if order.subject else None),
         "work_type_id": order.work_type_id,
         "work_type": order.custom_work_type or (order.work_type.name if order.work_type else None),
-        "prepayment_percent": 50,
+        "prepayment_percent": _order_prepayment_percent(order),
         "expert_id": order.expert_id,
         "expert_username": order.expert.username if order.expert else None,
         "client_id": order.client_id,

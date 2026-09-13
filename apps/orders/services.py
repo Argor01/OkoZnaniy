@@ -1,5 +1,7 @@
 from django.db.models import Sum
 from django.db import models
+from datetime import timedelta
+
 from django.utils import timezone
 from apps.catalog.models import DiscountRule
 from .models import Bid, BidStatus, Order
@@ -7,6 +9,10 @@ from .models import Bid, BidStatus, Order
 
 class OrderActionService:
     """Single place for per-user order action availability."""
+
+    # Через столько дней без исполнителя заказ считается неактивным и
+    # уходит из ленты. Значение общее с фильтром в OrderViewSet.
+    INACTIVE_UNASSIGNED_DAYS = 14
 
     CLIENT_REVIEW_STATUSES = {'review'}
     EXPERT_WORK_STATUSES = {'in_progress', 'revision'}
@@ -53,6 +59,15 @@ class OrderActionService:
         is_invited_expert = bool(is_expert and user_bid and user_bid.status == BidStatus.INVITED)
         deadline_is_overdue = bool(order.deadline and order.deadline <= timezone.now())
 
+        # Заказ мог уйти в неактивные двумя путями: истёк срок или просто
+        # провисел без откликов. Переопубликовать можно оба, поэтому флаг
+        # считаем здесь, а не по одному статусу на фронте.
+        is_stale_unassigned = (
+            order.status == 'new'
+            and not order.expert_id
+            and bool(order.created_at)
+            and order.created_at <= timezone.now() - timedelta(days=cls.INACTIVE_UNASSIGNED_DAYS)
+        )
         return {
             'can_view': is_authenticated and (is_staff or is_client or is_expert or is_available_order or role == 'client'),
             'can_edit': is_client and order.status == 'new' and not order.expert_id and not is_contact_banned,
@@ -73,6 +88,12 @@ class OrderActionService:
             'can_open_dispute': (is_client or is_expert) and order.status in ('completed', 'review', 'cancelled', 'canceled') and not hasattr(order, 'dispute') and not is_contact_banned,
             'can_create_review': is_client and order.status == 'completed' and bool(order.expert_id) and not is_contact_banned,
             'can_open_order_chat': bool(order.expert_id) and (is_client or is_expert or is_staff) and not is_contact_banned,
+            'can_reactivate': (
+                is_client
+                and not order.expert_id
+                and (order.status == 'expired' or is_stale_unassigned)
+                and not is_contact_banned
+            ),
         }
 
 class DiscountService:

@@ -242,7 +242,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         return models.Q(
             status='new',
             expert__isnull=True,
-            created_at__lte=timezone.now() - timedelta(days=14),
+            created_at__lte=timezone.now() - timedelta(days=OrderActionService.INACTIVE_UNASSIGNED_DAYS),
         )
 
     def retrieve(self, request, *args, **kwargs):

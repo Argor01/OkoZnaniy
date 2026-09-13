@@ -177,6 +177,8 @@
   font-size: 18px;
   width: 36px;
   height: 36px;
+  /* На узком экране flex сжимал кнопку, и круг превращался в овал. */
+  flex: 0 0 auto;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -369,6 +371,8 @@
   font-size: 18px;
   width: 36px;
   height: 36px;
+  /* Та же защита от сжатия, что и у остальных круглых кнопок хэдера. */
+  flex: 0 0 auto;
   border-radius: 50%;
   display: flex;
   align-items: center;

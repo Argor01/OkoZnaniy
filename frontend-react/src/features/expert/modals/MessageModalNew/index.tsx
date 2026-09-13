@@ -3369,7 +3369,10 @@ const workDeliveryStatus = isWorkOffer
                   if (isSystemMessage || isRevisionSystemMessage) {
                     if (isRevisionSystemMessage) {
                       const revisionRowClass = `${styles.messageRow} ${msg.is_mine ? styles.messageRowMine : styles.messageRowOther}`;
-                      const revisionBubbleClass = `${styles.messageBubble} ${styles.messageBubbleCard} ${msg.is_mine ? styles.messageBubbleMine : styles.messageBubbleOther}`;
+                      // Карточкам цветной пузырь не наносится (см. messageBubbleClass
+                      // ниже): из-за него у доработки получалась фиолетовая рамка со
+                      // скруглением, отличным от самой карточки.
+                      const revisionBubbleClass = `${styles.messageBubble} ${styles.messageBubbleCard}`;
                       return (
                         <div
                           key={msg.id}

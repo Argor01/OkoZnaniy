@@ -58,6 +58,9 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
   const canEditOrder = (availableActions?.can_edit ?? (!(!!order.expert && order.status !== 'new'))) && order.status !== 'expired';
   const canCancelOrder = (availableActions?.can_delete ?? order.status === 'new') && order.status === 'new';
   const isExpired = order.status === 'expired';
+  // Заказ мог уйти в неактивные и без статуса «истёк» — просто провисев без
+  // откликов. Бэкенд считает оба случая, поэтому доверяем флагу.
+  const canReactivate = availableActions?.can_reactivate ?? isExpired;
 
   return (
     <>
@@ -181,7 +184,7 @@ const OrderHeader: React.FC<OrderHeaderProps> = ({
       {isOrderOwner && (
         <div className={`${styles.orderActionsSection} ${styles.sectionBlock}`}>
           <Space wrap size={isMobile ? 8 : 16} className={styles.orderActionsRow}>
-            {isExpired ? (
+            {canReactivate ? (
               <AppButton
                 icon={<SyncOutlined />}
                 size={isMobile ? 'middle' : 'large'}

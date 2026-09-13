@@ -114,6 +114,19 @@ class NotificationService:
             )
 
     @staticmethod
+    def _bid_amount_for_client(order, bid):
+        """Сумма ставки так, как её видит клиент — с сервисным сбором.
+
+        В карточке заказа клиенту показывается итоговая сумма, а в уведомление
+        уходила «чистая» ставка эксперта. Клиент видел два разных числа по
+        одному и тому же отклику.
+        """
+        from apps.wallet.policy import order_quote
+
+        quote = order_quote(bid.amount, client=order.client)
+        return quote['base_amount'] + quote['service_fee']
+
+    @staticmethod
     def notify_new_bid(order, bid, expert, is_updated=False):
         NotificationService.create_notification(
             recipient=order.client,
@@ -126,7 +139,7 @@ class NotificationService:
             message=(
                 f"Эксперт {expert.get_full_name() or expert.username} "
                 f"{'обновил отклик' if is_updated else 'откликнулся на ваш заказ'}. "
-                f"Ставка: {bid.amount} ₽"
+                f"Ставка: {NotificationService._bid_amount_for_client(order, bid)} ₽"
             ),
             related_object_id=order.id,
             related_object_type='order'

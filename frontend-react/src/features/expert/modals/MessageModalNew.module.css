@@ -4256,6 +4256,8 @@
 }
 
 .messageRow {
+  /* место под вынесенную кнопку закрепа, чтобы она не наезжала на соседа */
+  padding-bottom: 20px;
   min-width: 0;
   max-width: 100%;
 }
@@ -4491,6 +4493,7 @@
 
 /* Message bubbles: subtle depth + smooth state changes */
 .messageBubble {
+  position: relative;
   transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 .messageBubbleMine,
@@ -4597,13 +4600,19 @@
   box-shadow: 0 6px 18px rgba(68, 43, 102, .12);
   cursor: pointer;
 }
+/* Раньше блок с закрепом стоял внутри пузыря сверху и задавал ему
+   минимальную ширину и высоту: короткое сообщение растягивалось под кнопку.
+   Теперь он вынесен под пузырь и на его размеры не влияет. */
 .messagePinControls {
+  position: absolute;
+  right: 2px;
+  bottom: -20px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 6px;
-  min-height: 24px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  z-index: 1;
 }
 .messagePinnedBadge { display: inline-flex; align-items: center; gap: 5px; color: #6435a5; font-size: 11px; font-weight: 650; }
 .messagePinButton { min-width: 30px !important; width: 30px; height: 30px; padding: 0 !important; color: var(--text-secondary, #6b7280); }
