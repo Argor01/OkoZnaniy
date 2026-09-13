@@ -98,9 +98,8 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
         <div className={styles.columnsGrid}>
           <div className={styles.columnItem}>
             <h3 className={styles.heading}>Служба поддержки</h3>
-            <a href="tel:88005007857" className={styles.contactPhone}>8 (800) 500-78-57</a>
             <a href="tel:+79314674689" className={styles.contactPhone}>+7 931 467-46-89</a>
-            <a href="mailto:support@okoznaniy.ru" className={styles.contactEmail}>support@okoznaniy.ru</a>
+            <a href="mailto:znaniy.oko@mail.ru" className={styles.contactEmail}>znaniy.oko@mail.ru</a>
             <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
             {!hideContactAndExpert && (
               <a href="/support" className={styles.contactButton}>Написать нам</a>
@@ -158,6 +157,16 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
               >
                 Стать партнёром
               </button>
+              <a
+                href="mailto:partners.okoznaniy@mail.ru"
+                className={styles.contactEmail}
+                style={{ marginTop: 10 }}
+              >
+                partners.okoznaniy@mail.ru
+              </a>
+              <a href="tel:+79314674652" className={styles.contactPhone}>
+                +7 931 467-46-52
+              </a>
             </div>
           )}
         </div>
