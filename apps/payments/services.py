@@ -265,6 +265,11 @@ class PaymentService:
                 return
             if getattr(payer, 'role', '') in PaymentService.TEST_SHOP_ROLES:
                 return
+            # Аккаунт, которому явно разрешили тестовую оплату: так можно
+            # пройти весь сценарий обычным пользователем, не открывая
+            # тестовый магазин всей площадке.
+            if getattr(payer, 'test_payments_allowed', False):
+                return
             email = (getattr(payer, 'email', '') or '').lower()
             if email.endswith('@okoznaniy.test'):
                 return

@@ -914,6 +914,7 @@ class UserViewSet(viewsets.ModelViewSet):
             # Индивидуальный сервисный сбор: пусто — общий процент, 0 — без комиссии.
             'service_fee_percent',
             'withdrawal_fee_percent',
+            'test_payments_allowed',
         ]
         for field in allowed_fields:
             if field in request.data:

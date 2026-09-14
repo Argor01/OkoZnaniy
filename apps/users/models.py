@@ -86,6 +86,14 @@ class User(AbstractUser):
     partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Процент партнера (%)")
     # Индивидуальный сервисный сбор с клиента. Пусто — общий процент площадки
     # (CLIENT_SERVICE_FEE_PERCENT), 0 — заказы без комиссии.
+    # Доступ к оплате через тестовый магазин ЮKassa. Тестовый ключ создаёт
+    # платежи, которые ничего не списывают, но зачисляются на кошелёк, —
+    # поэтому флаг выдаётся точечно и только на время тестирования.
+    test_payments_allowed = models.BooleanField(
+        default=False,
+        verbose_name="Может платить через тестовый магазин",
+        help_text="Только для тестовых аккаунтов: оплата не списывает реальных денег.",
+    )
     # Индивидуальное удержание при выводе средств. Пусто — общий процент
     # по роли, 0 — вывод без удержания.
     withdrawal_fee_percent = models.DecimalField(

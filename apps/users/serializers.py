@@ -143,6 +143,7 @@ class UserSerializer(serializers.ModelSerializer):
             'referral_code', 'partner_commission_rate',
             'service_fee_percent',
             'withdrawal_fee_percent',
+            'test_payments_allowed',
             'average_rating',
             'total_referrals', 'active_referrals', 'total_earnings',
             'city', 'email_verified', 'is_active', 'is_blocked',

@@ -11,8 +11,7 @@ import {
   Radio,
   InputNumber,
   Space,
-  Tooltip,
-} from 'antd';
+  Tooltip,, Switch } from 'antd';
 import { SearchOutlined, EditOutlined, TeamOutlined, StarFilled } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
@@ -33,6 +32,7 @@ interface PlatformUser {
   service_fee_percent?: string | null;
   partner_commission_rate?: string | number | null;
   withdrawal_fee_percent?: string | number | null;
+  test_payments_allowed?: boolean;
   average_rating?: number | string | null;
   date_joined?: string;
 }
@@ -100,6 +100,20 @@ const UsersManagement: React.FC = () => {
       const response = await apiClient.get(API_ENDPOINTS.users.adminAllUsers, { params });
       return normalizeUsers(response.data);
     },
+  });
+
+  // Отдельная мутация: переключатель сохраняется сразу, без модалки.
+  const testPayMutation = useMutation({
+    mutationFn: async ({ id, value }: { id: number; value: boolean }) => {
+      await apiClient.patch(`/users/${id}/admin_update_partner/`, {
+        test_payments_allowed: value,
+      });
+    },
+    onSuccess: () => {
+      message.success('Доступ к тестовой оплате обновлён');
+      queryClient.invalidateQueries({ queryKey: ['director-users'] });
+    },
+    onError: () => message.error('Не удалось изменить доступ'),
   });
 
   const saveMutation = useMutation({
@@ -227,6 +241,19 @@ const UsersManagement: React.FC = () => {
           </Tag>
         );
       },
+    },
+    {
+      title: 'Тестовая оплата',
+      key: 'test_payments_allowed',
+      width: 140,
+      render: (_: unknown, u: PlatformUser) => (
+        <Switch
+          size="small"
+          checked={!!u.test_payments_allowed}
+          loading={testPayMutation.isPending}
+          onChange={(checked) => testPayMutation.mutate({ id: u.id, value: checked })}
+        />
+      ),
     },
     {
       title: 'Удержание при выводе',
