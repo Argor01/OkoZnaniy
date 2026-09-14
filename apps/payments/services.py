@@ -256,6 +256,10 @@ class PaymentService:
         """
         if not client.test_mode:
             return
+        # Режим тестирования площадки: магазин открыт всем. Небезопасно для
+        # боевой эксплуатации — см. комментарий у настройки в settings.py.
+        if getattr(settings, 'YOOKASSA_TEST_SHOP_OPEN_TO_ALL', False):
+            return
         payer = PaymentService._payer(payment)
         if payer is not None:
             # Права на площадке размечены полем role: is_staff здесь не

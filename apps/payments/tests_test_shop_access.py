@@ -27,7 +27,9 @@ class _TestShopClient(YooKassaClient):
         return True
 
 
-@override_settings(SECURE_SSL_REDIRECT=False)
+# Тесты проверяют саму защиту, поэтому режим «открыто всем» здесь всегда
+# выключен — иначе они зависели бы от настройки конкретного стенда.
+@override_settings(SECURE_SSL_REDIRECT=False, YOOKASSA_TEST_SHOP_OPEN_TO_ALL=False)
 class TestShopAccessTests(TestCase):
     def setUp(self):
         self.client_user = User.objects.create_user(
@@ -92,3 +94,14 @@ class TestShopAccessTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.content)
         self.client_user.refresh_from_db()
         self.assertTrue(self.client_user.test_payments_allowed)
+
+    @override_settings(YOOKASSA_TEST_SHOP_OPEN_TO_ALL=True)
+    def test_open_to_all_lets_any_account_pay(self):
+        """Режим тестирования площадки: магазин открыт всем без флагов."""
+        self.assertFalse(self.client_user.test_payments_allowed)
+        self._check()  # не должно бросить
+
+    @override_settings(YOOKASSA_TEST_SHOP_OPEN_TO_ALL=False)
+    def test_switch_off_restores_protection(self):
+        with self.assertRaises(ValueError):
+            self._check()

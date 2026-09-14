@@ -418,6 +418,8 @@ LIVE_SETTINGS = {**YK_SETTINGS, 'SECRET_KEY': 'live_real_key'}
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
+# Проверяется сама защита, поэтому режим «открыто всем» выключен явно.
+@override_settings(YOOKASSA_TEST_SHOP_OPEN_TO_ALL=False)
 class TestShopIsClosedForRealClientsTests(TestCase):
     """Тестовый ключ создаёт платежи, которые ничего не списывают.
 
@@ -500,6 +502,8 @@ class TestShopIsClosedForRealClientsTests(TestCase):
         self.assertIn('тестовый магазин', str(ctx.exception))
 
 
+# Проверяется сама защита, поэтому режим «открыто всем» выключен явно.
+@override_settings(YOOKASSA_TEST_SHOP_OPEN_TO_ALL=False)
 class DirectorAndAdminCanUseTestShopTests(TestCase):
     """Права на площадке размечены полем role, is_staff не проставлен никому.
 

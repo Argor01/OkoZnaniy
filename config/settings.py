@@ -622,6 +622,14 @@ YOOKASSA_SECRET_KEY = os.getenv("YOOKASSA_SECRET_KEY", "")
 YOOKASSA_RETURN_URL = os.getenv("YOOKASSA_RETURN_URL", f"{FRONTEND_URL}/payment/result")
 YOOKASSA_CURRENCY = os.getenv("YOOKASSA_CURRENCY", "RUB")
 
+# ВНИМАНИЕ. Открывает оплату через ТЕСТОВЫЙ магазин ЮKassa всем подряд.
+# Тестовый ключ создаёт платежи, которые ничего не списывают, но зачисляются
+# на кошелёк, — то есть любой пользователь может пополнить баланс
+# несуществующими деньгами. Включать только на время тестирования площадки
+# и обязательно выключить перед боевым запуском.
+# На боевом ключе (live_*) настройка ни на что не влияет.
+YOOKASSA_TEST_SHOP_OPEN_TO_ALL = os.getenv("YOOKASSA_TEST_SHOP_OPEN_TO_ALL", "False") == "True"
+
 # Какой эквайер обслуживает оплату картой: uralsib, sberbank,
 # yookassa или alfabank.
 CARD_ACQUIRER = os.getenv("CARD_ACQUIRER", "uralsib")
