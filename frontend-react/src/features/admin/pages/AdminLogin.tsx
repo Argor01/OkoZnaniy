@@ -9,6 +9,7 @@ import {
   BankOutlined 
 } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { authApi, type LoginRequest, type User } from '@/features/auth/api/auth';
 import { DEV_ACCOUNTS, type DevAccount } from '@/config/devAccounts';
 import { redirectByRole } from '@/utils/roleRedirect';
@@ -124,10 +125,15 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     }
   };
 
+  const queryClient = useQueryClient();
+
   const handleLogin = async (values: LoginRequest) => {
     setLoading(true);
     try {
       const auth = await authApi.login(values);
+      // Иначе после повторного входа гейт роли читает прежнего
+      // пользователя из кэша и показывает «Доступ запрещён».
+      queryClient.clear();
       message.success('Успешный вход!');
       
       const role = auth?.user?.role || '';
@@ -245,7 +251,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
             Вход в админ-панель
           </Title>
           <Paragraph className={styles.adminLoginSubtitle}>
-            Введите email и пароль для доступа к админ-панели
+            Введите логин или email и пароль для доступа к админ-панели
           </Paragraph>
         </div>
 
@@ -257,33 +263,29 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
         >
           <Form.Item
             name="username"
-            label={<span className={styles.adminLoginLabel}>Email</span>}
+            label={<span className={styles.adminLoginLabel}>Логин или email</span>}
             rules={[
               { 
                 required: true, 
-                message: 'Пожалуйста, введите email' 
-              },
-              { 
-                type: 'email', 
-                message: 'Введите корректный email адрес' 
+                message: 'Пожалуйста, введите логин или email' 
               },
               {
                 whitespace: true,
-                message: 'Email не может быть пустым'
+                message: 'Поле не может быть пустым'
               },
               {
                 max: 254,
-                message: 'Email слишком длинный (максимум 254 символа)'
+                message: 'Слишком длинное значение (максимум 254 символа)'
               }
             ]}
             validateTrigger="onBlur"
           >
             <Input
               prefix={<MailOutlined className={styles.adminLoginInputIcon} />}
-              placeholder="Введите ваш email"
+              placeholder="Введите логин или email"
               size="large"
               disabled={loading}
-              autoComplete="email"
+              autoComplete="username"
               className={styles.adminLoginInput}
               onPressEnter={() => {
                 form.submit();

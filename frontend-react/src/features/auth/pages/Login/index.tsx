@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { authApi, type LoginRequest, type RegisterRequest } from '@/features/auth/api/auth';
 import EmailVerificationModal from '../../components/EmailVerificationModal';
 import PasswordResetModal from '../../components/PasswordResetModal';
@@ -107,10 +108,17 @@ const Login: React.FC = () => {
     return 'Не удалось войти. Проверьте данные и попробуйте ещё раз.';
   };
 
+  const queryClient = useQueryClient();
+
   const onLogin = async (values: LoginRequest) => {
     setLoading(true);
     try {
       const auth = await authApi.login(values);
+      // Кэш запросов держит данные прежнего пользователя (профиль живёт 5
+      // минут), поэтому без очистки после входа открывался чужой кабинет, а
+      // у админа срабатывал гейт «Доступ запрещён». Чистим до перехода.
+      queryClient.clear();
+
       message.success('Успешный вход!');
       setVerificationModalVisible(false);
       const role = auth?.user?.role;

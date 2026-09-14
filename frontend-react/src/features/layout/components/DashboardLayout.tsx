@@ -406,8 +406,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const isExpert = userProfile?.role === 'expert';
   const isClient = userProfile?.role === 'client';
-  const shouldShowHeader = isExpert || isClient;
-  const shouldPollMessages = Boolean(userProfile && shouldShowHeader);
+  // Шапка нужна всем, кто работает в этом макете: у арбитра её не было, а
+  // вместе с ней не было и кнопки выхода. Опрос сообщений оставляем тем, у
+  // кого есть переписка по заказам.
+  const shouldShowHeader = Boolean(userProfile);
+  const shouldPollMessages = Boolean(userProfile && (isExpert || isClient));
   const isMessagesPage = location.pathname.startsWith(ROUTES.messages);
 
   React.useEffect(() => {
