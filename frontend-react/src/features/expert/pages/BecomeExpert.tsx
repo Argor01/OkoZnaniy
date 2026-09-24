@@ -5,7 +5,8 @@ import {
   SafetyOutlined, TeamOutlined, CheckCircleOutlined, StarFilled, ThunderboltOutlined,
 } from '@ant-design/icons';
 import { SEO } from '@/features/common';
-import { TopBar, BecomeLeadForm, FooterDark } from '@/features/landing-v2/components/LandingChrome';
+import { TopBar, FooterDark } from '@/features/landing-v2/components/LandingChrome';
+import InquiryForm from '@/features/landing-v2/components/InquiryForm';
 import styles from '@/features/landing-v2/LandingV2.module.css';
 
 const useReveal = () => {
@@ -31,6 +32,7 @@ const advantages = [
 
 const BecomeExpert: React.FC = () => {
   const navigate = useNavigate();
+  const [vacancy, setVacancy] = useState('Автор студенческих работ');
   const adv = useReveal();
   useEffect(() => { document.title = 'Стать экспертом — Око Знаний | Зарабатывай от 100 000 ₽ в месяц'; }, []);
 
@@ -112,12 +114,7 @@ const BecomeExpert: React.FC = () => {
         </div>
       </section>
 
-      <BecomeLeadForm
-        type="registration"
-        buttonText="Стать экспертом"
-        title={<>Готов начать <em>зарабатывать</em>?</>}
-        subtitle="Оставь email — пришлём инструкцию по регистрации и первые доступные заказы."
-      />
+      <InquiryForm kind="vacancy" vacancy={vacancy} onVacancyChange={setVacancy} />
 
       <FooterDark />
     </div>
