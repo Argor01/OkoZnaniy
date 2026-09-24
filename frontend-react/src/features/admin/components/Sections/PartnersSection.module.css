@@ -154,3 +154,18 @@
     font-size: 11px;
   }
 }
+.reportToolbar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 16px; }
+.periodControl { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.periodControl > label { width: 100%; font-size: 16px; font-weight: 600; }
+.periodControl :global(.ant-picker) { min-height: 44px; max-width: 100%; }
+.periodControl :global(.ant-btn) { min-height: 44px; }
+.turnoverSummary { display: flex; flex-direction: column; gap: 4px; }
+.turnoverSummary strong { font-size: 24px; line-height: 1.3; font-variant-numeric: tabular-nums; color: oklch(38% .14 302); }
+.periodNote { max-width: 75ch; margin: 0 0 24px; font-size: 14px; color: oklch(45% .025 302); }
+.managerSelect { width: 100%; min-width: 220px; }
+.amount { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600; }
+@media (max-width: 600px) {
+  .periodControl { width: 100%; }
+  .periodControl :global(.ant-picker) { width: 100%; }
+  .turnoverSummary { width: 100%; }
+}

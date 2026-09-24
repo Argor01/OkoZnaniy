@@ -29,6 +29,7 @@ class User(AbstractUser):
     
     role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CLIENT)
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Телефон")
+    registration_source = models.CharField(max_length=32, default='unknown', editable=False, verbose_name='Способ регистрации')
     telegram_id = models.BigIntegerField(null=True, blank=True)
     max_id = models.BigIntegerField(null=True, blank=True)
     vk_id = models.BigIntegerField(
@@ -82,6 +83,11 @@ class User(AbstractUser):
     application_notes = models.TextField(blank=True, null=True, verbose_name="Заметки по анкете")
     
     # Поля партнерской системы
+    partner_manager = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='managed_partners', limit_choices_to={'role': 'admin'},
+        verbose_name='Менеджер партнера',
+    )
     referral_code = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="Реферальный код")
     partner_commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=25.00, verbose_name="Процент партнера (%)")
     # Индивидуальный сервисный сбор с клиента. Пусто — общий процент площадки
@@ -136,6 +142,13 @@ class User(AbstractUser):
         return f'user{stable_number}'
     
     def save(self, *args, **kwargs):
+        if self._state.adding and self.registration_source == 'unknown':
+            if self.telegram_id:
+                self.registration_source = 'telegram'
+            elif self.max_id:
+                self.registration_source = 'max'
+            elif self.vk_id:
+                self.registration_source = 'vk'
         # Генерируем реферальный код для партнеров
         if self.role == 'partner' and not self.referral_code:
             import uuid

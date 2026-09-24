@@ -714,10 +714,21 @@ class UserViewSet(viewsets.ModelViewSet):
         monthly_rows = earnings.annotate(month=TruncMonth('created_at')).values('month').annotate(total=models.Sum('amount')).order_by('-month')
         monthly_history = [{'month': row['month'], 'total': row['total']} for row in monthly_rows]
         
-        # Обновляем статистику
+        from apps.wallet.models import Settlement
+        reserved_settlements = list(Settlement.objects.filter(
+            fee_recipient=user, is_released=False, funded_service_fee__gt=0,
+        ).select_related('order', 'client').order_by('-created_at'))
+        reserved_rows = [{
+            'id': -st.pk, 'amount': st.funded_service_fee,
+            'referral': st.client.display_username, 'earning_type': 'order',
+            'created_at': st.created_at, 'is_paid': False, 'is_frozen': True,
+            'order_id': st.order_id, 'order_number': f'#{st.order_id}' if st.order_id else None,
+            'order_title': st.order.title if st.order_id else None,
+        } for st in reserved_settlements]
+        # Read-only dashboard: never overwrite concurrent wallet movements.
         user.active_referrals = active_referrals.count()
+        user.total_referrals = referrals.count()
         user.total_earnings = total_earnings
-        user.save()
         
         return Response({
             'partner_info': {
@@ -742,7 +753,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 for ref in referrals
             ],
             'monthly_history': monthly_history,
-            'recent_earnings': [
+            'recent_earnings': reserved_rows + [
                 {
                     'id': earning.id,
                     'amount': earning.amount,
@@ -833,12 +844,16 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        partners = User.objects.filter(role='partner').order_by('-date_joined')
-        data = list(self.get_serializer(partners, many=True).data)
-        for row, partner in zip(data, partners):
-            row['paid_earnings'] = PartnerEarning.objects.filter(partner=partner, is_paid=True).aggregate(total=models.Sum('amount'))['total'] or 0
-            row['unpaid_earnings'] = PartnerEarning.objects.filter(partner=partner, is_paid=False).aggregate(total=models.Sum('amount'))['total'] or 0
-        return Response(data)
+        from .partner_admin import partner_rows
+        return Response(partner_rows(self, request))
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def admin_partner_managers(self, request):
+        if request.user.role not in ('admin', 'director'):
+            return Response({'error': 'Доступно только администраторам и директорам'}, status=status.HTTP_403_FORBIDDEN)
+        from .partner_admin import manager_data
+        managers = User.objects.filter(role='admin', is_active=True).order_by('first_name', 'last_name', 'username')
+        return Response([manager_data(manager) for manager in managers])
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def admin_earnings(self, request):
@@ -908,6 +923,10 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+        if 'partner_manager_id' in request.data:
+            from .partner_admin import validate_manager
+            partner.partner_manager = validate_manager(partner, request.data['partner_manager_id'])
+
         # Обновляем только разрешенные поля
         allowed_fields = [
             'first_name', 'last_name', 'partner_commission_rate', 'is_verified',
@@ -922,7 +941,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
         partner.save()
         serializer = self.get_serializer(partner)
-        return Response(serializer.data)
+        data = dict(serializer.data)
+        from .partner_admin import manager_data
+        data['manager'] = manager_data(partner.partner_manager)
+        return Response(data)
 
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def admin_mark_earning_paid(self, request):
@@ -1696,9 +1718,14 @@ def vk_callback(request):
 def max_auth_status(request, auth_id):
     """Check MAX bot authorization status (analogous to telegram_auth_status)."""
     clean_auth_id = auth_id.replace('auth_', '', 1) if auth_id.startswith('auth_') else auth_id
-    auth_data = cache.get(f'max_auth_{clean_auth_id}')
+    auth_data = cache.get(f'max_auth_{auth_id}') or cache.get(f'max_auth_{clean_auth_id}')
     if auth_data:
-        return Response(auth_data, status=status.HTTP_200_OK)
+        user_id = (auth_data.get('user') or {}).get('id')
+        if not User.objects.filter(pk=user_id, is_active=True).exists():
+            return Response({'authenticated': False, 'detail': 'Аккаунт недоступен'}, status=403)
+        response = Response(dict(auth_data), status=status.HTTP_200_OK)
+        response['Cache-Control'] = 'no-store'
+        return response
     return Response({'authenticated': False}, status=status.HTTP_200_OK)
 
 

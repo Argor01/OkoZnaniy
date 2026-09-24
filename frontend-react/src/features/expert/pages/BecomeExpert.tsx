@@ -8,6 +8,7 @@ import { SEO } from '@/features/common';
 import { TopBar, FooterDark } from '@/features/landing-v2/components/LandingChrome';
 import InquiryForm from '@/features/landing-v2/components/InquiryForm';
 import styles from '@/features/landing-v2/LandingV2.module.css';
+import opportunityStyles from '@/features/landing-v2/Opportunity.module.css';
 
 const useReveal = () => {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -114,7 +115,11 @@ const BecomeExpert: React.FC = () => {
         </div>
       </section>
 
-      <InquiryForm kind="vacancy" vacancy={vacancy} onVacancyChange={setVacancy} />
+      <div className={opportunityStyles.page}>
+        <div className={opportunityStyles.content}>
+          <InquiryForm kind="vacancy" vacancy={vacancy} onVacancyChange={setVacancy} />
+        </div>
+      </div>
 
       <FooterDark />
     </div>
