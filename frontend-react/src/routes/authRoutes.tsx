@@ -8,12 +8,16 @@ const GoogleCallback = lazy(() => import('@/features/auth/pages/GoogleCallback')
 const ReferralRedirect = lazy(() => import('@/features/auth/pages/ReferralRedirect'));
 const RegisterWithEmailVerification = lazy(() => import('@/features/auth/pages/RegisterWithEmailVerification'));
 const BecomeExpert = lazy(() => import('@/features/expert/pages/BecomeExpert'));
+const Vacancies = lazy(() => import('@/features/expert/pages/Vacancies'));
+const Agencies = lazy(() => import('@/features/partner/pages/Agencies'));
 const BecomePartner = lazy(() => import('@/features/partner/pages/BecomePartner'));
 const PartnersMap = lazy(() => import('@/features/partner/pages/PartnersMap'));
 const LandingV2 = lazy(() => import('@/features/landing-v2/pages/LandingV2'));
 
 export const authRoutes = (
   <>
+    <Route path="/vacancies" element={<Vacancies />} />
+    <Route path="/agencies" element={<Agencies />} />
     <Route path={ROUTES.home} element={<LandingV2 />} />
     <Route path="/len_v1" element={<Home />} />
     <Route path="/len_v2" element={<LandingV2 />} />
