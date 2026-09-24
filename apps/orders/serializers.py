@@ -29,7 +29,7 @@ class OrderFileSerializer(serializers.ModelSerializer):
             'id', 'file', 'file_type', 'file_type_display', 'uploaded_by',
             'created_at', 'expert_viewed_at', 'client_downloaded_at', 'description', 'file_url', 'view_url', 'download_url', 'filename', 'file_size'
         ]
-        read_only_fields = ['uploaded_by', 'created_at', 'expert_viewed_at']
+        read_only_fields = ['uploaded_by', 'created_at', 'expert_viewed_at', 'client_downloaded_at']
 
     def get_file_url(self, obj):
         if obj.file:
@@ -160,6 +160,12 @@ class AvailableOrderSerializer(serializers.ModelSerializer):
         return OrderActionService.for_user(obj, user)
 
 class OrderSerializer(serializers.ModelSerializer):
+    current_delivery_file_ids = serializers.SerializerMethodField()
+
+    def get_current_delivery_file_ids(self, obj):
+        from .services import current_delivery_files
+        return [f.pk for f in current_delivery_files(obj)]
+
     client = PublicUserProfileSerializer(read_only=True)
     expert = PublicUserProfileSerializer(read_only=True)
     subject = SubjectSerializer(read_only=True)
@@ -175,6 +181,10 @@ class OrderSerializer(serializers.ModelSerializer):
     is_overdue = serializers.SerializerMethodField()
     payment_status = serializers.SerializerMethodField()
     available_actions = serializers.SerializerMethodField()
+    remaining_payment = serializers.SerializerMethodField()
+    paid_amount = serializers.SerializerMethodField()
+    expert_reserved = serializers.SerializerMethodField()
+    expert_payout_after = serializers.SerializerMethodField()
     client_review = serializers.SerializerMethodField(read_only=True)
     
     # Явно указываем budget как FloatField для корректной сериализации
@@ -209,7 +219,9 @@ class OrderSerializer(serializers.ModelSerializer):
             'custom_topic', 'custom_subject', 'custom_work_type', 
             'additional_requirements', 'price_breakdown', 'rating',
             'user_has_bid', 'is_overdue', 'is_frozen', 'frozen_reason', 'frozen_at',
-            'client_note', 'payment_status', 'available_actions', 'client_review',
+            'client_note', 'payment_status', 'remaining_payment', 'paid_amount', 'expert_reserved',
+            'expert_payout_after',
+            'available_actions', 'client_review', 'current_delivery_file_ids',
         ]
         read_only_fields = [
             'client', 'expert', 'status', 'created_at',
@@ -305,6 +317,42 @@ class OrderSerializer(serializers.ModelSerializer):
             return obj.deadline <= timezone.now()
         except Exception:
             return False
+
+    def get_expert_reserved(self, obj):
+        """Сколько по заказу уже зарезервировано за автором.
+
+        Деньги переведены ему и заморожены: тратить нельзя, но они его.
+        Размораживаются при приёмке работы.
+        """
+        try:
+            from apps.wallet.models import Settlement
+
+            settlement = Settlement.objects.filter(order=obj, is_released=False).first()
+            return str(settlement.funded_base) if settlement else '0.00'
+        except Exception:  # noqa: BLE001
+            return '0.00'
+
+    def get_expert_payout_after(self, obj):
+        """Когда деньги автора выйдут из выдержки. None — уже выплачены."""
+        try:
+            from apps.wallet.models import Settlement
+
+            settlement = Settlement.objects.filter(order=obj, is_released=False).first()
+            return settlement.release_after if settlement else None
+        except Exception:  # noqa: BLE001
+            return None
+
+    def get_paid_amount(self, obj):
+        from apps.wallet.policy import order_paid_amount
+        return str(order_paid_amount(obj))
+
+    def get_remaining_payment(self, obj):
+        """Сколько заказчику осталось довнести, чтобы принять работу."""
+        try:
+            from apps.wallet.policy import order_remaining_payment
+            return str(order_remaining_payment(obj))
+        except Exception:  # noqa: BLE001
+            return '0.00'
 
     def get_payment_status(self, obj):
         """Expose whether the order has already been funded."""

@@ -1,5 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
+
+from apps.core.protected_media import (
+    protected_chat_media,
+    protected_order_media,
+)
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -48,6 +53,11 @@ urlpatterns = [
     path('api/wallet/', include('apps.wallet.urls')),
     path('api/verification/', include('apps.verification.urls')),
     path("api/accounts/", include("allauth.urls")),
+
+    # Файлы заказов и переписки отдаёт бэкенд с проверкой прав: nginx
+    # раздавал их с диска всем подряд, включая готовые работы.
+    re_path(r'^media/orders/(?P<path>.+)$', protected_order_media, name='protected-order-media'),
+    re_path(r'^media/chat/(?P<path>.+)$', protected_chat_media, name='protected-chat-media'),
 ]
 
 if settings.DEBUG:

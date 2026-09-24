@@ -7,6 +7,7 @@ export interface PartnerEarning {
   earning_type: PartnerEarningType;
   created_at: string;
   is_paid: boolean;
+  is_frozen?: boolean;
   partner?: string;
   order_id?: number;
   is_cancelled?: boolean;

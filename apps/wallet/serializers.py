@@ -8,6 +8,9 @@ class WalletBalanceSerializer(serializers.Serializer):
     pending_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     debt_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
     available_balance = serializers.DecimalField(max_digits=12, decimal_places=2)
+    # Сколько заказчик держит в резерве по незавершённым заказам.
+    reserved_on_orders = serializers.DecimalField(
+        max_digits=12, decimal_places=2, required=False)
 
 
 class WalletStatsSerializer(serializers.Serializer):
@@ -29,7 +32,7 @@ class WalletTransactionSerializer(serializers.ModelSerializer):
         ]
 
     def get_direction(self, obj) -> str:
-        income = {'topup', 'payout', 'refund', 'partner_payout'}
+        income = {'topup', 'payout', 'refund', 'partner_payout', 'commission', 'escrow_credit'}
         return 'in' if obj.type in income else 'out'
 
 
@@ -39,6 +42,9 @@ class TopupRequestSerializer(serializers.Serializer):
         choices=['tbank', 'sberpay_qr', 'sberbank', 'card', 'sbp', 'yookassa'],
         default='sberpay_qr',
     )
+    # Нужна только тем, у кого в профиле нет ни почты, ни телефона:
+    # без контакта чек по 54-ФЗ не сформировать.
+    receipt_email = serializers.EmailField(required=False, allow_blank=True)
 
 
 import re

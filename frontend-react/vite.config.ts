@@ -33,7 +33,7 @@ export default defineConfig({
         manualChunks: vendorChunk,
       },
       onwarn(warning, warn) {
-        // РРіРЅРѕСЂРёСЂСѓРµРј РїСЂРµРґСѓРїСЂРµР¶РґРµРЅРёСЏ
+        // Игнорируем предупреждения
         if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
         warn(warning);
       }

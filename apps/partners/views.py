@@ -44,7 +44,7 @@ class PartnerChatRoomViewSet(viewsets.ModelViewSet):
             )
             room = PartnerChatRoom.objects.create(
                 name=room_name,
-                description='Р”РёСЂРµРєС‚РѕСЂ',
+                description='Директор',
                 room_type='private',
                 created_by=user,
             )

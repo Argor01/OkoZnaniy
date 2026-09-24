@@ -169,6 +169,9 @@ class NotificationConsumer(AuthenticatedConsumer):
             }
         )
 
+    async def chat_message_broadcast(self, event):
+        await self.send_json({'type': 'new_message', 'data': event['data']})
+
     async def notification_batch(self, event):
         """Отправка пакета уведомлений."""
         await self.send_json(

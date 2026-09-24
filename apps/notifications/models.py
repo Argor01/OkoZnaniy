@@ -106,3 +106,39 @@ class Notification(models.Model):
         if self.expires_at:
             return timezone.now() > self.expires_at
         return False 
+
+
+class ExternalDelivery(models.Model):
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    event_key = models.CharField(max_length=160, unique=True)
+    channel = models.CharField(max_length=32)
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    path = models.CharField(max_length=255, default='/notifications')
+    state = models.CharField(max_length=20, default='pending', db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    last_error = models.CharField(max_length=120, blank=True)
+    next_attempt = models.DateTimeField(default=timezone.now, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class LandingInquiry(models.Model):
+    kind = models.CharField(max_length=20, choices=[('vacancy', 'Вакансия'), ('agency', 'Агентство')])
+    vacancy = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=120)
+    phone = models.CharField(max_length=40, blank=True)
+    email = models.EmailField(blank=True)
+    message = models.TextField(blank=True)
+    consent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    emailed_at = models.DateTimeField(null=True, blank=True)
+    processed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Заявка с сайта'
+        verbose_name_plural = 'Заявки с сайта'
+
+    def __str__(self):
+        return f'{self.get_kind_display()} #{self.pk}: {self.name}'

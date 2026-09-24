@@ -134,6 +134,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     // We therefore connect for cookie-session users too instead of bailing out.
 
     if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onopen = null;
       wsRef.current.close();
     }
 
@@ -191,6 +194,9 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
       reconnectTimeoutRef.current = null;
     }
     if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onopen = null;
       wsRef.current.close();
       wsRef.current = null;
     }

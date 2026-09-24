@@ -21,6 +21,7 @@ export interface MenuItem {
 }
 
 export const menuItems: MenuItem[] = [
+  {key: 'reviews', icon: MessageOutlined, label: 'Отзывы'},
   {
     key: 'partners',
     icon: TeamOutlined,
@@ -112,6 +113,7 @@ export const titleMap: Record<MenuKey, string> = {
   pending_approval: 'Ожидают подтверждения',
   user_conversations: 'Переписки пользователей',
   knowledge_base: 'База знаний',
+  reviews: 'Отзывы',
   audit_log: 'Аудит действий',
   faq: 'FAQ по ЛК',
 };

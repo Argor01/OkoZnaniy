@@ -1,0 +1,87 @@
+"""Сверка отложенных платежей со шлюзом.
+
+Уведомление от эквайера — не гарантия. Оно теряется, если наш бэкенд в
+этот момент перезапускался, если адрес уведомлений в кабинете указан
+неверно или если у шлюза сбой. Платёж при этом проходит: деньги у
+человека списаны, а на площадке он так и висит «в ожидании».
+
+Так и случилось на боевом запуске: оплата прошла, уведомление не пришло
+ни разу, баланс остался нулевым. Поэтому уведомление — только повод
+свериться раньше, а источник правды — регулярный опрос шлюза.
+
+Проводим платёж тем же кодом, что и уведомление: состояние всё равно
+перепроверяется запросом к API, а зачисление идемпотентно.
+"""
+import logging
+from datetime import timedelta
+
+from celery import shared_task
+from django.db import transaction
+from django.utils import timezone
+
+logger = logging.getLogger("oko.payments")
+
+# Способы оплаты, которые обслуживает ЮKassa.
+YOOKASSA_METHODS = ("yookassa", "yookassa_sbp", "yookassa_card", "yookassa_yoomoney")
+
+
+@shared_task(name="apps.payments.tasks.reconcile_pending_payments")
+def reconcile_pending_payments(max_age_hours: int = 72, min_age_seconds: int = 120) -> dict:
+    """Спрашивает шлюз о судьбе платежей, оставшихся в ожидании.
+
+    min_age_seconds — не трогаем совсем свежие: человек ещё стоит на
+    платёжной форме, и уведомление придёт своим чередом.
+    max_age_hours — дальше смысла нет: ЮKassa отменяет неоплаченный
+    платёж сама, а повторять запросы по мёртвым записям незачем.
+    """
+    from .models import Payment, PaymentStatus
+    from .providers.yookassa import YooKassaClient
+    from .services import PaymentService
+
+    now = timezone.now()
+    pending = (
+        Payment.objects.filter(
+            status=PaymentStatus.PENDING,
+            payment_method__in=YOOKASSA_METHODS,
+            created_at__lte=now - timedelta(seconds=min_age_seconds),
+            created_at__gte=now - timedelta(hours=max_age_hours),
+        )
+        .exclude(metadata__yookassa_payment_id__isnull=True)
+        .order_by("created_at")
+    )
+
+    client = YooKassaClient()
+    if not client.configured:
+        logger.warning("Сверка платежей пропущена: ЮKassa не настроена")
+        return {"checked": 0, "settled": 0, "errors": 0, "skipped": "not_configured"}
+
+    checked = settled = errors = 0
+    for payment in pending.iterator():
+        remote_id = (payment.metadata or {}).get("yookassa_payment_id")
+        if not remote_id:
+            continue
+        checked += 1
+        data = {"event": "payment.succeeded", "object": {"id": remote_id}}
+        try:
+            confirmed = client.process_callback(data)
+            if confirmed is None:
+                # Ещё не оплачен, отменён или уже проведён — трогать нечего.
+                continue
+            with transaction.atomic():
+                PaymentService.process_payment_callback(confirmed.payment_id, data)
+            settled += 1
+            logger.info(
+                "Сверка: платёж %s проведён без уведомления от шлюза",
+                payment.payment_id,
+            )
+        except Exception:  # noqa: BLE001
+            # Один битый платёж не должен останавливать сверку остальных.
+            errors += 1
+            logger.exception("Сверка: не удалось обработать платёж %s", payment.payment_id)
+
+    if settled or errors:
+        logger.warning(
+            "Сверка платежей: проверено %s, проведено %s, ошибок %s",
+            checked, settled, errors,
+        )
+    return {"checked": checked, "settled": settled, "errors": errors}

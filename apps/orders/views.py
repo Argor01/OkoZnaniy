@@ -67,6 +67,13 @@ def _order_action_unavailable():
 
 
 def _active_order_hold(order):
+    # Расчёт живёт в apps.wallet.policy, чтобы интерфейс и приёмка
+    # не разошлись в том, сколько ещё нужно доплатить.
+    from apps.wallet.policy import order_active_hold
+    return order_active_hold(order)
+
+
+def _active_order_hold_legacy(order):
     rows = Transaction.objects.filter(
         order=order,
         user=order.client,
@@ -103,8 +110,9 @@ def _approve_review_order_atomically(order, user):
         if not _is_order_action_allowed(locked_order, user, 'can_approve_work'):
             raise ValueError('Действие недоступно для текущего состояния заказа.')
 
-        delivered_files = locked_order.files.filter(file_type__in=['solution', 'revision'])
-        if not delivered_files.exists() or delivered_files.filter(client_downloaded_at__isnull=True).exists():
+        from .services import current_delivery_files
+        delivered_files = current_delivery_files(locked_order)
+        if not delivered_files or any(f.client_downloaded_at is None for f in delivered_files):
             raise ValueError('Сначала скачайте все файлы готовой работы.')
 
         payment_amount = _order_payment_amount(locked_order)
@@ -174,6 +182,19 @@ def _reserve_order_hold_if_needed(order, amount=None, prepayment_percent=100):
     return WalletService.fund_distributed_escrow(client=order.client, expert=order.expert, base_amount=quote['base_amount'], service_fee=quote['service_fee'], fund_amount=target_hold - active_hold, order=order, description=f'Резерв {percent_value}% по заказу #{order.id}')
 
 
+def _payout_hold_until(base_amount):
+    """До какого момента держать выплату автора. None — платить сразу."""
+    from django.conf import settings as dj_settings
+
+    days = int(getattr(dj_settings, 'EXPERT_PAYOUT_HOLD_DAYS', 0) or 0)
+    if days <= 0:
+        return None
+    threshold = getattr(dj_settings, 'EXPERT_PAYOUT_HOLD_MIN_AMOUNT', None)
+    if threshold is not None and money(base_amount) < money(threshold):
+        return None
+    return timezone.now() + timedelta(days=days)
+
+
 def _release_order_hold_if_any(order):
     active_hold = money(_active_order_hold(order))
     if active_hold <= 0 or not order.expert_id:
@@ -184,6 +205,13 @@ def _release_order_hold_if_any(order):
         raise InsufficientFunds('Заказ оплачен не полностью.')
     settlement = getattr(order, 'wallet_settlement', None)
     if settlement is not None:
+        hold_until = _payout_hold_until(quote['base_amount'])
+        if hold_until is not None:
+            # Заказ крупный: деньги остаются у автора замороженными, пока
+            # не выйдет срок. Разморозит их задача по расписанию.
+            settlement.release_after = hold_until
+            settlement.save(update_fields=['release_after'])
+            return {'settlement': settlement, 'release_after': hold_until}
         return WalletService.release_distributed_escrow(settlement, description=f'Распределение оплаты по заказу #{order.id}')
     return WalletService.release_order_payment(client=order.client, expert=order.expert, base_amount=quote['base_amount'], service_fee=quote['service_fee'], order=order, description=f'Распределение оплаты по заказу #{order.id}')
 
@@ -1372,13 +1400,14 @@ class OrderFileViewSet(viewsets.ModelViewSet):
         # Клиент или эксперт заказа, staff - полный доступ
         order = get_object_or_404(Order, pk=order_pk)
         is_participant = user.is_staff or order.client_id == user.id or order.expert_id == user.id
-        # Клиенты могут просматривать файлы любых заказов (для ознакомления)
-        is_client_viewing = getattr(user, 'role', None) == 'client'
-        # Эксперты могут просматривать файлы доступных заказов
+        # Эксперты могут просматривать файлы доступных заказов: без задания
+        # не понять, браться ли за работу.
         is_public_expert = (
             getattr(user, 'role', None) == 'expert' and order.status == 'new' and order.expert_id is None
         )
-        if not (is_participant or is_client_viewing or is_public_expert):
+        # Раньше здесь любому клиенту открывались файлы ЛЮБОГО заказа
+        # «для ознакомления» — вместе с чужими готовыми работами.
+        if not (is_participant or is_public_expert):
             return OrderFile.objects.none()
         return OrderFile.objects.filter(
             order_id=order_pk
@@ -1460,6 +1489,52 @@ class OrderFileViewSet(viewsets.ModelViewSet):
                 order.status = 'in_progress'
                 order.save(update_fields=['status', 'updated_at'])
 
+    def _ensure_work_is_paid(self, request, order_file):
+        """Готовую работу заказчик получает только после полной оплаты.
+
+        До этого момента в резерве лежит лишь предоплата: открыв файл,
+        можно было забрать работу и остаток не вносить. Автора и эксперта
+        это не касается — они работу и создали.
+        """
+        if order_file.file_type not in ('solution', 'revision'):
+            return None
+        user = request.user
+        order = order_file.order
+        if user.is_staff or order.client_id != user.id:
+            return None
+        from apps.wallet.policy import order_remaining_payment
+
+        try:
+            remaining = order_remaining_payment(order)
+        except Exception:  # noqa: BLE001
+            logger.exception('Payment verification failed for order file')
+            return Response({'detail': 'Не удалось проверить оплату. Повторите попытку позже.'}, status=503)
+        if remaining > 0:
+            # Браузер пришёл сам (прямой переход по ссылке на файл) —
+            # служебная страница с JSON ему не объяснит ничего. Возвращаем
+            # человека на заказ, где есть кнопка доплаты.
+            if 'text/html' in (request.META.get('HTTP_ACCEPT') or ''):
+                from django.conf import settings as dj_settings
+                from django.shortcuts import redirect
+
+                base = (getattr(dj_settings, 'FRONTEND_URL', '') or '').rstrip('/')
+                return redirect(
+                    f'{base}/orders/{order.id}'
+                    f'?payment_required=1&remaining={remaining}'
+                )
+            return Response(
+                {
+                    'detail': (
+                        'Работа доступна после полной оплаты заказа. '
+                        f'Осталось внести {remaining} ₽.'
+                    ),
+                    'code': 'payment_required',
+                    'remaining_payment': str(remaining),
+                },
+                status=status.HTTP_402_PAYMENT_REQUIRED,
+            )
+        return None
+
     def _mark_expert_view(self, request, order_file):
         user = request.user
         if (
@@ -1473,15 +1548,13 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def download(self, request, order_pk=None, pk=None):
         order_file = self.get_object()
+        denied = self._ensure_work_is_paid(request, order_file)
+        if denied is not None:
+            return denied
         self._mark_expert_view(request, order_file)
-        if (
-            request.user.id == order_file.order.client_id
-            and order_file.file_type in ['solution', 'revision']
-            and order_file.client_downloaded_at is None
-        ):
-            order_file.client_downloaded_at = timezone.now()
-            order_file.save(update_fields=['client_downloaded_at'])
         file_handle = order_file.file.open()
+        from apps.core.protected_media import _mark_received
+        _mark_received(order_file, request.user)
         
         # Получаем MIME-тип файла
         content_type, _ = mimetypes.guess_type(order_file.file.name)
@@ -1498,8 +1571,13 @@ class OrderFileViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def view(self, request, order_pk=None, pk=None):
         order_file = self.get_object()
+        denied = self._ensure_work_is_paid(request, order_file)
+        if denied is not None:
+            return denied
         self._mark_expert_view(request, order_file)
         file_handle = order_file.file.open()
+        from apps.core.protected_media import _mark_received
+        _mark_received(order_file, request.user)
 
         # Получаем MIME-тип файла
         content_type, _ = mimetypes.guess_type(order_file.file.name)

@@ -49,6 +49,19 @@ def notify_chat_message(chat_id: int, message_data: dict):
         "chat_message_broadcast",
         message_data,
     )
+    # The chat room socket only reaches users currently viewing that room.
+    # Notify participant sockets too so other pages update immediately.
+    from .models import Chat
+    chat = Chat.objects.filter(pk=chat_id).first()
+    if chat is not None:
+        sender = message_data.get('sender') or {}
+        sender_id = sender.get('id') if isinstance(sender, dict) else sender
+        recipients = set(chat.participants.values_list('id', flat=True))
+        recipients.update([chat.client_id, chat.expert_id])
+        recipients.discard(None)
+        recipients.discard(sender_id)
+        for user_id in recipients:
+            notify_user(user_id, 'chat_message_broadcast', {**message_data, 'chat_id': chat_id})
 
 
 def notify_typing(chat_id: int, user_id: int, username: str):

@@ -141,6 +141,9 @@ class PartnerReferralFinanceTests(TestCase):
 
 
 @override_settings(SECURE_SSL_REDIRECT=False)
+# Выдержка выплаты проверяется отдельно (apps/wallet/tests_payout_hold.py):
+# здесь важно, кто сколько получил, а не когда деньги разморозятся.
+@override_settings(EXPERT_PAYOUT_HOLD_DAYS=0)
 class WalletOrderLedgerTests(TestCase):
     @classmethod
     def setUpTestData(cls):

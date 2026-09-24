@@ -13,13 +13,13 @@ class Migration(migrations.Migration):
             name='payment_method',
             field=models.CharField(
                 choices=[
-                    ('sbp', 'РЎРёСЃС‚РµРјР° Р±С‹СЃС‚СЂС‹С… РїР»Р°С‚РµР¶РµР№'),
-                    ('card', 'Р‘Р°РЅРєРѕРІСЃРєР°СЏ РєР°СЂС‚Р°'),
+                    ('sbp', 'Система быстрых платежей'),
+                    ('card', 'Банковская карта'),
                     ('sberbank', 'Sberbank'),
                     ('sberpay_qr', 'SberPay QR'),
                 ],
                 max_length=20,
-                verbose_name='РЎРїРѕСЃРѕР± РѕРїР»Р°С‚С‹',
+                verbose_name='Способ оплаты',
             ),
         ),
     ]

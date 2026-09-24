@@ -15,8 +15,8 @@ export const COMPANY = {
   legalAddress: '622049, Свердловская область, г. Нижний Тагил, Черноисточинское шоссе, д. 61, кв. 91',
   postalAddress: '622049, Свердловская область, г. Нижний Тагил, Черноисточинское шоссе, д. 61, кв. 91',
   okved: '63.99.1 — Деятельность по оказанию консультационных и информационных услуг',
-  phone: '8 800 500-78-57',
-  phoneHref: 'tel:88005007857',
+  phone: '+7 931 467-46-89',
+  phoneHref: 'tel:+79314674689',
   email: 'b-oko.znaniy@mail.ru',
   supportEmail: 'support@okoznaniy.ru',
   workingHours: 'Ежедневно с 10:00 до 19:00 (UTC+5, Екатеринбург)',
@@ -31,8 +31,8 @@ export const COMPANY = {
 export const CARDHOLDER_CONTACT = {
   role: 'Служба поддержки по вопросам оплаты и возвратов',
   email: 'support@okoznaniy.ru',
-  phone: '8 800 500-78-57',
-  phoneHref: 'tel:88005007857',
+  phone: '+7 931 467-46-89',
+  phoneHref: 'tel:+79314674689',
   hours: 'Ежедневно с 10:00 до 19:00 (UTC+5)',
 } as const;
 

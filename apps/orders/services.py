@@ -161,3 +161,21 @@ class DiscountService:
         if best_discount:
             return order.apply_discount(best_discount)
         return False 
+
+
+def current_delivery_files(order):
+    """Use the same current delivery set for display and acceptance validation."""
+    import re
+    from datetime import timedelta
+    files = list(order.files.filter(file_type__in=['solution', 'revision']).order_by('-created_at', '-id'))
+    if not files:
+        return []
+    latest = files[0]
+    def batch(file):
+        match = re.search(r'chat_delivery_batch_id:([^\s;]+)', file.description or '')
+        return match.group(1) if match else None
+    latest_batch = batch(latest)
+    if latest_batch:
+        return [f for f in files if batch(f) == latest_batch]
+    cutoff = latest.created_at - timedelta(minutes=2)
+    return [f for f in files if f.created_at >= cutoff]

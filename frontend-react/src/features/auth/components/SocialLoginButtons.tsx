@@ -26,7 +26,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
   
   
   const generateAuthId = () => {
-    return `auth_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    return crypto.randomUUID();
   };
 
   const handleMaxAuth = (e: React.MouseEvent) => {
@@ -68,7 +68,7 @@ const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = () => {
     e.preventDefault();
     const authId = generateAuthId();
 
-    window.open(`https://t.me/okoznaniybot?start=${authId}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://t.me/okoznaniybot?start=auth_${authId}`, '_blank', 'noopener,noreferrer');
     checkAuthStatus(authId);
   };
 

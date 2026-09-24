@@ -1,0 +1,217 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Button, Empty, Input, Modal, Space, Table, Tag, Typography, message } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
+import { directorApi, type WithdrawalRequestItem } from '@/features/director/api/directorApi';
+
+const { Text } = Typography;
+
+const STATUS_LABEL: Record<string, { text: string; color: string }> = {
+  pending: { text: 'Ожидает', color: 'orange' },
+  paid: { text: 'Выплачено', color: 'green' },
+  rejected: { text: 'Отклонено', color: 'red' },
+};
+
+const formatMoney = (value: string) =>
+  `${Number(value).toLocaleString('ru-RU', { minimumFractionDigits: 2 })} ₽`;
+
+const formatDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' }) : '—';
+
+const Withdrawals: React.FC = () => {
+  const [items, setItems] = useState<WithdrawalRequestItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<number | null>(null);
+  const [rejecting, setRejecting] = useState<WithdrawalRequestItem | null>(null);
+  const [reason, setReason] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setItems(await directorApi.getWithdrawals());
+    } catch {
+      message.error('Не удалось загрузить заявки на вывод');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const markPaid = async (item: WithdrawalRequestItem) => {
+    // Отметка ничего не переводит. Без подтверждения её нажимали в
+    // уверенности, что деньги уйдут сами, и человек оставался без денег.
+    const confirmed = await new Promise<boolean>((resolve) => {
+      Modal.confirm({
+        title: 'Перевод уже сделан?',
+        content: (
+          <div>
+            <p>
+              Площадка не переводит деньги. Отметка только фиксирует, что вы
+              перевели {formatMoney(item.amount)} на карту {item.card_number}
+              вручную — со счёта компании или из банка.
+            </p>
+            <p>Если перевод ещё не сделан, сначала переведите деньги.</p>
+          </div>
+        ),
+        okText: 'Да, перевод сделан',
+        cancelText: 'Отмена',
+        onOk: () => resolve(true),
+        onCancel: () => resolve(false),
+      });
+    });
+    if (!confirmed) return;
+    setBusyId(item.id);
+    try {
+      await directorApi.markWithdrawalPaid(item.id);
+      message.success('Заявка отмечена как выплаченная');
+      await load();
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось обработать заявку');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!rejecting) return;
+    setBusyId(rejecting.id);
+    try {
+      await directorApi.rejectWithdrawal(rejecting.id, reason.trim());
+      message.success('Заявка отклонена, средства возвращены на баланс');
+      setRejecting(null);
+      setReason('');
+      await load();
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось отклонить заявку');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const columns = [
+    {
+      title: 'Заявка',
+      dataIndex: 'id',
+      render: (id: number) => <Text strong>#{id}</Text>,
+      width: 90,
+    },
+    {
+      title: 'Получатель',
+      dataIndex: 'display_username',
+      render: (name: string, row: WithdrawalRequestItem) => (
+        <div>
+          <div>{name || row.username}</div>
+          {row.email ? <Text type="secondary">{row.email}</Text> : null}
+        </div>
+      ),
+    },
+    {
+      title: 'Сумма',
+      dataIndex: 'amount',
+      render: (amount: string) => <Text strong>{formatMoney(amount)}</Text>,
+    },
+    { title: 'Карта', dataIndex: 'card_number' },
+    {
+      title: 'Подана',
+      dataIndex: 'created_at',
+      render: (iso: string) => formatDate(iso),
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status',
+      render: (statusValue: string, row: WithdrawalRequestItem) => {
+        const label = STATUS_LABEL[statusValue] || { text: statusValue, color: 'default' };
+        return (
+          <Space direction="vertical" size={2}>
+            <Tag color={label.color}>{label.text}</Tag>
+            {row.processed_at ? (
+              <Text type="secondary">{formatDate(row.processed_at)}</Text>
+            ) : null}
+          </Space>
+        );
+      },
+    },
+    {
+      title: 'Решение',
+      render: (_: unknown, row: WithdrawalRequestItem) =>
+        row.status === 'pending' ? (
+          <Space wrap>
+            <Button
+              type="primary"
+              loading={busyId === row.id}
+              onClick={() => markPaid(row)}
+            >
+              Отметить выплаченной
+            </Button>
+            <Button
+              danger
+              loading={busyId === row.id}
+              onClick={() => { setRejecting(row); setReason(''); }}
+            >
+              Отклонить
+            </Button>
+          </Space>
+        ) : (
+          <Text type="secondary">Обработана</Text>
+        ),
+    },
+  ];
+
+  return (
+    <div>
+      <Space style={{ marginBottom: 16 }}>
+        <Button icon={<ReloadOutlined />} onClick={load} loading={loading}>
+          Обновить
+        </Button>
+      </Space>
+
+      <Alert
+        type="warning"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message="Площадка не переводит деньги на карты"
+        description={
+          'Перевод делается вручную — со счёта компании или из банка. Кнопка '
+          + '«Отметить выплаченной» только фиксирует, что перевод уже сделан. '
+          + 'Деньги списываются с баланса в момент подачи заявки, отклонение '
+          + 'возвращает их обратно.'
+        }
+      />
+
+      <Table
+        rowKey="id"
+        dataSource={items}
+        columns={columns}
+        loading={loading}
+        pagination={{ pageSize: 20, hideOnSinglePage: true }}
+        scroll={{ x: 900 }}
+        locale={{ emptyText: <Empty description="Заявок на вывод нет" /> }}
+      />
+
+      <Modal
+        open={Boolean(rejecting)}
+        title={`Отклонить заявку #${rejecting?.id ?? ''}`}
+        okText="Отклонить и вернуть деньги"
+        cancelText="Отмена"
+        okButtonProps={{ danger: true, loading: busyId === rejecting?.id }}
+        onOk={confirmReject}
+        onCancel={() => setRejecting(null)}
+      >
+        <Text style={{ display: 'block', marginBottom: 12 }}>
+          {rejecting ? formatMoney(rejecting.amount) : ''} вернутся на баланс
+          пользователя {rejecting?.display_username || rejecting?.username}.
+        </Text>
+        <Input.TextArea
+          rows={3}
+          placeholder="Причина отказа (попадёт в описание возврата)"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+        />
+      </Modal>
+    </div>
+  );
+};
+
+export default Withdrawals;

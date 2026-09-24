@@ -14,6 +14,8 @@ export interface PaymentCreateRequest {
   order_id: number;
   amount: number;
   payment_method: PaymentMethod;
+  /** Почта для чека. Нужна, только если её нет в профиле плательщика. */
+  receipt_email?: string;
 }
 
 export interface PaymentResponse {

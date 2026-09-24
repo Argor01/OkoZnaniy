@@ -5,6 +5,7 @@ import type {
   SupportActivityResponse,
   SupportConversation,
   SupportConversationType,
+  SupportFeedItem,
 } from '@/features/support/types/requests';
 
 const normalizeSupportRequest = (item: any): SupportConversation => ({
@@ -20,6 +21,30 @@ const normalizeSupportRequest = (item: any): SupportConversation => ({
   completed_at: item.completed_at,
   unread_count: item.unread_count ?? 0,
   order: null,
+});
+
+const COMPLAINT_REASONS: Record<string, string> = {
+  poor_quality: 'Низкое качество работы',
+  deadline_violation: 'Нарушение сроков',
+  no_contact: 'Исполнитель не выходит на связь',
+  not_matching: 'Работа не соответствует заданию',
+  other: 'Другое',
+};
+
+const normalizeComplaint = (item: any): SupportConversation => ({
+  id: item.id,
+  ticket_number: `П-${item.id}`,
+  type: 'complaint',
+  subject: COMPLAINT_REASONS[item.complaint_type] || 'Претензия по заказу',
+  description: item.description,
+  status: item.status === 'resolved' ? 'completed' : item.status,
+  priority: 'high',
+  created_at: item.created_at,
+  updated_at: item.updated_at || item.created_at,
+  completed_at: item.resolved_at ?? null,
+  order: item.order
+    ? { id: item.order.id ?? item.order, title: item.order.title }
+    : null,
 });
 
 const normalizeClaim = (item: any): SupportConversation => ({
@@ -83,11 +108,23 @@ const extractItems = <T,>(payload: unknown): T[] => {
 };
 
 export const supportRequestsApi = {
+  async reopenCase(id: number, reason: string) {
+    const response = await apiClient.post(`/arbitration/cases/${id}/reopen/`, { reason });
+    return response.data;
+  },
   async listAll(): Promise<SupportConversation[]> {
-    const [supportRequestsResponse, claimsResponse, arbitrationCasesResponse] = await Promise.allSettled([
+    const [
+      supportRequestsResponse,
+      claimsResponse,
+      arbitrationCasesResponse,
+      complaintsResponse,
+    ] = await Promise.allSettled([
       apiClient.get('/admin-panel/support-requests/'),
       apiClient.get('/admin-panel/claims/'),
       apiClient.get('/arbitration/cases/my-cases/'),
+      // Претензии по заказам — четвёртый источник: без него поданная
+      // претензия нигде не показывалась.
+      apiClient.get('/arbitration/complaints/'),
     ]);
 
     const supportRequests = supportRequestsResponse.status === 'fulfilled'
@@ -99,13 +136,30 @@ export const supportRequestsApi = {
     const arbitrationCases = arbitrationCasesResponse.status === 'fulfilled'
       ? extractItems<any>(arbitrationCasesResponse.value.data).map(normalizeArbitrationCase)
       : [];
+    const complaints = complaintsResponse.status === 'fulfilled'
+      ? extractItems<any>(complaintsResponse.value.data).map(normalizeComplaint)
+      : [];
 
-    return [...supportRequests, ...claims, ...arbitrationCases].sort(
+    return [...supportRequests, ...claims, ...arbitrationCases, ...complaints].sort(
       (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
     );
   },
 
   async getActivity(type: SupportConversationType, id: number): Promise<SupportActivityResponse> {
+    if (type === 'complaint') {
+      // У претензии нет своей ленты: показываем её текст, а обсуждение
+      // идёт в чате по заказу.
+      const { data } = await apiClient.get(`/arbitration/complaints/${id}/`);
+      const item: SupportFeedItem = {
+        kind: 'message',
+        id: `complaint-${id}`,
+        created_at: data.created_at,
+        text: data.description || '',
+        source: 'ticket',
+      };
+      return { messages: [item], activities: [], feed: [item] };
+    }
+
     if (type === 'arbitration_case') {
       const response = await apiClient.get(`/arbitration/cases/${id}/activity-feed/`);
       return response.data;
@@ -116,6 +170,11 @@ export const supportRequestsApi = {
   },
 
   async sendMessage(type: SupportConversationType, id: number, message: string, files: File[] = []) {
+    if (type === 'complaint') {
+      // Переписка по претензии идёт в чате заказа, своей ленты у неё нет.
+      throw new Error('Обсуждение претензии ведётся в чате по заказу');
+    }
+
     if (type === 'arbitration_case') {
       const response = await apiClient.post(`/arbitration/cases/${id}/send-message/`, { message });
       return response.data;

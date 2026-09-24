@@ -218,3 +218,16 @@
 .footerDocumentsLink:hover {
   color: #ffb34a;
 }
+
+
+/* Подпись над группой контактов: без неё было неясно, какой номер
+   для поддержки, а какой — для тех, кто хочет к нам работать. */
+.footerContactsTitle {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.footerContactsTitle:not(:first-child) {
+  margin-top: 14px;
+}

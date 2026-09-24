@@ -3,6 +3,7 @@ import {
   Badge,
   Avatar,
   Button,
+  Alert,
   Card,
   Col,
   Descriptions,
@@ -147,6 +148,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
   const [refundProcessing, setRefundProcessing] = useState(false);
   const [approveRefundProcessing, setApproveRefundProcessing] = useState(false);
   const [rejectRefundProcessing, setRejectRefundProcessing] = useState(false);
+  const [reopenProcessing, setReopenProcessing] = useState(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
 
   useEffect(() => {
@@ -319,12 +321,24 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       setStatusUpdating(true);
       await arbitrationApi.updateStatus(detailData.id, status);
       await refreshSelectedCase();
-      message.success('Статус обновлен');
+      message.success('Арбитраж возобновлён');
     } catch {
       message.error('Не удалось обновить статус');
     } finally {
       setStatusUpdating(false);
     }
+  };
+
+  const handleReopen = async () => {
+    if (!detailData?.id) return;
+    try {
+      setReopenProcessing(true);
+      await arbitrationApi.reopen(detailData.id);
+      await refreshSelectedCase();
+      message.success('Арбитраж возобновлён');
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось возобновить арбитраж');
+    } finally { setReopenProcessing(false); }
   };
 
   const handleTakeInWork = async () => {
@@ -333,7 +347,7 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       setStatusUpdating(true);
       await arbitrationApi.takeInWork(detailData.id);
       await refreshSelectedCase();
-      message.success('Дело принято в работу');
+      message.success('Арбитраж возобновлён');
     } catch {
       message.error('Не удалось принять дело в работу');
     } finally {
@@ -348,8 +362,11 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
       await arbitrationApi.sendMessage(detailData.id, messageText);
       setMessageText('');
       await refreshSelectedCase();
-    } catch {
-      message.error('Не удалось отправить сообщение');
+    } catch (e: any) {
+      // Сервер объясняет отказ полем error (не detail) — без этого
+      // причина терялась и отказ выглядел поломкой.
+      const data = e?.response?.data;
+      message.error(data?.error || data?.detail || 'Не удалось отправить сообщение');
     } finally {
       setSending(false);
     }
@@ -670,6 +687,11 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
             <Card size="small" title="Действия">
               <Space wrap>
+                {['decision_made', 'closed', 'rejected'].includes(detailData.status) && (
+                  <Button type="primary" onClick={handleReopen} loading={reopenProcessing}>
+                    Возобновить арбитраж
+                  </Button>
+                )}
                 {detailData.status === 'pending_approval' ? (
                   <>
                     <Button type="primary" onClick={handleApproveRefund} loading={approveRefundProcessing}>Согласовать возврат</Button>
@@ -865,6 +887,14 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
 
             <Card size="small" title="Сообщение по делу">
               <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                {detailData?.status === 'submitted' && (
+                  <Alert
+                    type="info"
+                    showIcon
+                    message="Сначала возьмите дело в работу"
+                    description="Пока дело не взято в работу, писать по нему могут только стороны спора."
+                  />
+                )}
                 <Input.TextArea
                   value={messageText}
                   onChange={(event) => setMessageText(event.target.value)}
@@ -878,7 +908,12 @@ export const ArbitrationSection: React.FC<ArbitrationSectionProps> = ({
                     icon={<SendOutlined />}
                     onClick={handleSendMessage}
                     loading={sending}
-                    disabled={!messageText.trim() || (detailData ? ['decision_made', 'closed', 'rejected'].includes(detailData.status) : false)}
+                    disabled={
+                      !messageText.trim()
+                      || (detailData ? ['decision_made', 'closed', 'rejected'].includes(detailData.status) : false)
+                      // Пока дело не взято в работу, писать могут только стороны.
+                      || detailData?.status === 'submitted'
+                    }
                   >
                     Отправить
                   </Button>

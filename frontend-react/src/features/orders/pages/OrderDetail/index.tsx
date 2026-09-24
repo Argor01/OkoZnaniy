@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Typography, Space, Tag, Spin, Modal, Input, Button, message } from 'antd';
+import { Typography, Space, Tag, Spin, Modal, Input, Button, Upload, message } from 'antd';
 import {
   ArrowLeftOutlined,
   StarFilled,
@@ -52,11 +52,15 @@ const OrderDetail: React.FC = () => {
     handleConfirmReviewAndApprove,
     handleApproveWithoutReview,
     handleConfirmRevisionFromCard,
+    revisionFiles,
+    setRevisionFiles,
     handleRejectFromCard,
     handleAssignExpert,
     handleAcceptAssignment,
     handleDeclineAssignment,
     handleDownloadFile,
+    handlePayRemaining,
+    payRemainingLoading,
     handleDeleteOrderFile,
     handleDrag,
     handleDrop,
@@ -98,6 +102,27 @@ const OrderDetail: React.FC = () => {
       next.add(id);
       return next;
     });
+  }, []);
+
+  // Сервер возвращает сюда, если работу открыли до полной оплаты.
+  // Без пояснения это выглядит как самопроизвольный переход.
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment_required') !== '1') return;
+    const owed = Number(params.get('remaining') || 0);
+    message.warning(
+      owed > 0
+        ? 'Работа станет доступна после полной оплаты. Осталось внести '
+          + owed.toLocaleString('ru-RU') + ' \u20bd.'
+        : 'Работа станет доступна после полной оплаты заказа.',
+      6,
+    );
+    params.delete('payment_required');
+    params.delete('remaining');
+    const rest = params.toString();
+    window.history.replaceState(
+      {}, '', window.location.pathname + (rest ? `?${rest}` : ''),
+    );
   }, []);
 
   if (isLoading) {
@@ -142,7 +167,8 @@ const OrderDetail: React.FC = () => {
   );
   const deliveredWorkReviewed = deliveredFilesResolved
     && deliveredFileIds.length > 0
-    && deliveredFileIds.every((id) => viewedDeliveredIds.has(id));
+    && deliveredFileIds.every((id) => viewedDeliveredIds.has(id)
+      || order.files?.some((file: any) => Number(file.id) === id && file.client_downloaded_at));
 
   const expertReview = (() => {
     const raw = (order as any)?.rating ?? (order as any)?.expert_rating;
@@ -233,11 +259,17 @@ const OrderDetail: React.FC = () => {
               <div className={styles.sectionBlock}>
                 <OrderTimeline order={order} onReviewClick={() => {
                   if (!deliveredWorkReviewed) {
-                    Modal.warning({ title: 'Сначала скачайте работу', content: 'Скачайте все файлы готовой работы, затем нажмите итоговую кнопку «Принять».' });
+                    Modal.warning({ title: 'Сначала скачайте работу', content: 'Скачайте все файлы готовой работы, затем нажмите итоговую кнопку «Подтвердить выполнение».' });
                     return;
                   }
                   setReviewModalOpen(true);
                 }} />
+              </div>
+            )}
+
+            {isOrderOwner && order.paid_amount != null && (
+              <div className={styles.sectionBlock}>
+                <Text>Внесено по заказу: <Text strong>{Number(order.paid_amount).toLocaleString('ru-RU')} ₽</Text></Text>
               </div>
             )}
 
@@ -260,21 +292,57 @@ const OrderDetail: React.FC = () => {
               onDeliveredFileViewed={handleDeliveredFileViewed}
             />
 
+            {isOrderExpert && Number(order.expert_reserved || 0) > 0 && (
+              <div className={styles.sectionBlock}>
+                <Text type="success">
+                  По заказу за вами зарезервировано{' '}
+                  <Text strong>
+                    {Number(order.expert_reserved).toLocaleString('ru-RU')} ₽
+                  </Text>
+                  {order.expert_payout_after
+                    ? `. Заказчик работу принял — деньги станут доступны к выводу `
+                      + new Date(order.expert_payout_after).toLocaleDateString('ru-RU')
+                      + '.'
+                    : '. Деньги уже переведены вам и заморожены — они станут '
+                      + 'доступны к выводу, когда заказчик примет работу.'}
+                </Text>
+              </div>
+            )}
+
             {(canReviewWork || canRequestRevision || canRejectWork) ? (
               <div className={styles.sectionBlock}>
+                {Number(order.remaining_payment || 0) > 0 && (
+                  <div style={{ marginBottom: 12 }}>
+                    <Text type="warning" style={{ display: 'block', marginBottom: 8 }}>
+                      По заказу внесена предоплата. Чтобы принять работу, нужно
+                      доплатить остаток — {Number(order.remaining_payment).toLocaleString('ru-RU')} ₽.
+                    </Text>
+                    <AppButton
+                      variant="primary"
+                      loading={payRemainingLoading}
+                      onClick={handlePayRemaining}
+                    >
+                      Доплатить {Number(order.remaining_payment).toLocaleString('ru-RU')} ₽
+                    </AppButton>
+                  </div>
+                )}
                 {!deliveredWorkReviewed && (
                   <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-                    Скачайте работу и проверьте результат — после этого станут доступны «Принять» и «Отклонить». Отправить на доработку можно сразу, не скачивая: например, если файл не открывается или прислали не то.
+                    Скачайте работу и проверьте результат — после этого станут доступны «Подтвердить выполнение» и «Отклонить». Отправить на доработку можно сразу, не скачивая: например, если файл не открывается или прислали не то.
                   </Text>
                 )}
                 <Space className={styles.reviewActionsRow} wrap>
                   <AppButton
                     variant="success"
                     loading={reviewActionLoading === 'approve'}
-                    disabled={!canReviewWork || !deliveredWorkReviewed}
+                    disabled={
+                      !canReviewWork
+                      || !deliveredWorkReviewed
+                      || Number(order.remaining_payment || 0) > 0
+                    }
                     onClick={() => setReviewModalOpen(true)}
                   >
-                    Принять
+                    Подтвердить выполнение
                   </AppButton>
                   <AppButton
                     variant="secondary"
@@ -405,6 +473,7 @@ const OrderDetail: React.FC = () => {
           if (revisionSubmitting) return;
           setRevisionModalOpen(false);
           setRevisionComment('');
+          setRevisionFiles([]);
         }}
         title="Отправить на доработку"
         okText="Отправить"
@@ -419,6 +488,26 @@ const OrderDetail: React.FC = () => {
           onChange={(e) => setRevisionComment(e.target.value)}
           maxLength={2000}
         />
+        <Upload
+          multiple
+          beforeUpload={(file) => {
+            // Загружаем сами при отправке, а не по выбору файла.
+            setRevisionFiles((prev) => [...prev, file]);
+            return false;
+          }}
+          onRemove={(file) => {
+            setRevisionFiles((prev) => prev.filter((f) => f !== (file as unknown as File)));
+          }}
+          fileList={revisionFiles.map((f, i) => ({
+            uid: String(i),
+            name: f.name,
+            status: 'done' as const,
+          }))}
+        >
+          <AppButton variant="secondary" style={{ marginTop: 12 }}>
+            Прикрепить файлы
+          </AppButton>
+        </Upload>
       </Modal>
 
       <Modal
@@ -430,7 +519,7 @@ const OrderDetail: React.FC = () => {
           setReviewRating(5);
           setReviewComment('');
         }}
-        title="Принять работу и оставить отзыв"
+        title="Подтвердить выполнение заказа"
         footer={null}
       >
         <Space direction="vertical" size={16} className={styles.fullWidth}>
@@ -457,12 +546,12 @@ const OrderDetail: React.FC = () => {
               maxLength={2000}
             />
           </div>
-          <Space>
+          <Space wrap>
             <AppButton variant="primary" onClick={handleConfirmReviewAndApprove} loading={reviewSubmitting}>
-              Принять и оставить отзыв
+              Подтвердить и оставить отзыв
             </AppButton>
             <AppButton variant="secondary" onClick={handleApproveWithoutReview} loading={reviewSubmitting}>
-              Принять без отзыва
+              Подтвердить без отзыва
             </AppButton>
           </Space>
         </Space>

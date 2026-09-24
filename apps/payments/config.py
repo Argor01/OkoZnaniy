@@ -68,4 +68,7 @@ YOOKASSA_SETTINGS = {
     'RETURN_URL': getattr(settings, 'YOOKASSA_RETURN_URL', ''),
     'CURRENCY': getattr(settings, 'YOOKASSA_CURRENCY', 'RUB'),
     'TIMEOUT': getattr(settings, 'YOOKASSA_TIMEOUT', 20),
+    'SEND_RECEIPT': getattr(settings, 'YOOKASSA_SEND_RECEIPT', True),
+    'VAT_CODE': getattr(settings, 'YOOKASSA_VAT_CODE', 1),
+    'TAX_SYSTEM_CODE': getattr(settings, 'YOOKASSA_TAX_SYSTEM_CODE', ''),
 }

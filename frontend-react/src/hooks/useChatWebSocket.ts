@@ -34,6 +34,9 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
     if (!chatId) return;
 
     if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onopen = null;
       wsRef.current.close();
     }
 
@@ -101,6 +104,9 @@ export function useChatWebSocket(chatId: number | null, onNewMessage?: (message:
       heartbeatRef.current = null;
     }
     if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onopen = null;
       wsRef.current.close();
       wsRef.current = null;
     }

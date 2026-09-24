@@ -173,12 +173,14 @@ const ProfileV2: React.FC = () => {
   const [aboutDraft, setAboutDraft] = useState('');
   const [aboutSaving, setAboutSaving] = useState(false);
 
-  useEffect(() => { if (me?.about_me !== undefined) setAboutDraft(me.about_me || ''); }, [me?.about_me]);
+  // Поле называется bio. Раньше читали и писали about_me, которого в
+  // модели нет: запрос отвечал 200, а текст не сохранялся.
+  useEffect(() => { if (me?.bio !== undefined) setAboutDraft(me.bio || ''); }, [me?.bio]);
 
   const saveAbout = async () => {
     setAboutSaving(true);
     try {
-      await apiClient.patch('/users/update_me/', { about_me: aboutDraft });
+      await apiClient.patch('/users/update_me/', { bio: aboutDraft });
       msg.success('Сохранено');
     } catch { msg.error('Не удалось сохранить'); }
     finally { setAboutSaving(false); }
@@ -553,7 +555,7 @@ const ProfileV2: React.FC = () => {
                 onClick={async () => {
                   try {
                     setAboutSaving(true);
-                    await apiClient.patch('/users/update_me/', { about_me: aboutDraft });
+                    await apiClient.patch('/users/update_me/', { bio: aboutDraft });
                     message.success('Сохранено');
                   } catch { message.error('Не удалось сохранить'); }
                   finally { setAboutSaving(false); }

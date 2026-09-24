@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Q
 from apps.orders.models import Order
-from .models import Notification
+from .models import Notification, NotificationType
 from .services import NotificationService
 
 logger = logging.getLogger(__name__)
@@ -26,17 +26,17 @@ def check_deadlines():
     ]
     
     notifications_sent = 0
-    for hours, label in intervals:
+    for hours, label in reversed(intervals):
         deadline_threshold = now + timedelta(hours=hours)
+        recent = Notification.objects.filter(
+            type=NotificationType.DEADLINE_SOON, related_object_type='order',
+            created_at__gte=now-timedelta(hours=hours),
+        ).exclude(related_object_id=None).values_list('related_object_id', flat=True)
         orders = Order.objects.filter(
-            status__in=['in_progress', 'revision'],
-            deadline__gt=now,
-            deadline__lte=deadline_threshold
-        ).exclude(
-            # Исключаем заказы, для которых уже есть активные уведомления о дедлайне
-            Q(notifications__type=NotificationType.DEADLINE_SOON) &
-            Q(notifications__created_at__gte=now - timedelta(hours=hours))
-        )
+            status__in=['in_progress', 'revision'], deadline__gt=now,
+            deadline__lte=deadline_threshold,
+        ).exclude(pk__in=recent)
+
 
         for order in orders:
             try:
@@ -99,3 +99,13 @@ def cleanup_old_notifications():
         f"(по типам: {total_deleted - deleted_expired}, истекших: {deleted_expired})"
     )
     return f"Удалено {total_deleted} старых уведомлений" 
+
+@shared_task
+def deliver_external_notification(delivery_id):
+    from .delivery import deliver
+    return deliver(delivery_id)
+
+@shared_task
+def dispatch_external_notifications():
+    from .delivery import dispatch_pending
+    return dispatch_pending()

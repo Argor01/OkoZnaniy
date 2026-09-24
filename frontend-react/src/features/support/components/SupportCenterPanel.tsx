@@ -75,6 +75,9 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
   const [activityLoading, setActivityLoading] = React.useState(false);
   const [reply, setReply] = React.useState('');
   const [sending, setSending] = React.useState(false);
+  const [appealOpen, setAppealOpen] = React.useState(false);
+  const [appealReason, setAppealReason] = React.useState('');
+  const [appealing, setAppealing] = React.useState(false);
 
   const loadItems = React.useCallback(async () => {
     try {
@@ -113,6 +116,8 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     }
 
     void loadItems();
+    const timer = window.setInterval(() => { if (!document.hidden) void loadItems(); }, 10000);
+    return () => window.clearInterval(timer);
   }, [active, loadItems]);
 
   React.useEffect(() => {
@@ -186,6 +191,19 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
     } finally {
       setSending(false);
     }
+  };
+
+  const handleAppeal = async () => {
+    if (!selectedItem || !appealReason.trim()) return;
+    setAppealing(true);
+    try {
+      await supportRequestsApi.reopenCase(selectedItem.id, appealReason.trim());
+      setAppealOpen(false); setAppealReason('');
+      await loadItems(); await loadActivity(selectedItem);
+      message.success('Арбитраж снова открыт. История и финансовое решение сохранены.');
+    } catch (error: any) {
+      message.error(error?.response?.data?.detail || 'Не удалось обжаловать решение');
+    } finally { setAppealing(false); }
   };
 
   const renderFeed = () => {
@@ -433,7 +451,12 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
                   showIcon
                   icon={<LockOutlined />}
                   message="Обращение закрыто"
-                  description="Отправка сообщений по закрытому обращению недоступна."
+                  description={<Space direction="vertical">
+                    <Text>История сохранена. Если вы не согласны с решением, обжалуйте его.</Text>
+                    {['client', 'expert'].includes(currentUser?.role || '') && (
+                      <Button onClick={() => setAppealOpen(true)}>Обжаловать решение</Button>
+                    )}
+                  </Space>}
                 />
               ) : (
                 <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -460,6 +483,13 @@ export const SupportCenterPanel: React.FC<SupportCenterPanelProps> = ({
             </Card>
           </Space>
         ) : null}
+      </Modal>
+      <Modal title="Обжаловать решение арбитража" open={appealOpen}
+        onCancel={() => { setAppealOpen(false); setAppealReason(''); }}
+        onOk={handleAppeal} okText="Возобновить обращение" cancelText="Отмена"
+        confirmLoading={appealing} okButtonProps={{ disabled: !appealReason.trim() }}>
+        <Input.TextArea value={appealReason} onChange={(e) => setAppealReason(e.target.value)}
+          maxLength={4000} rows={4} placeholder="Почему вы не согласны с решением?" />
       </Modal>
     </>
   );

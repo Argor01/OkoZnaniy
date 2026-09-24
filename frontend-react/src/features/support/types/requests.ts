@@ -1,4 +1,10 @@
-export type SupportConversationType = 'support_request' | 'claim' | 'arbitration_case';
+export type SupportConversationType =
+  | 'support_request'
+  | 'claim'
+  | 'arbitration_case'
+  // Претензия по заказу: подаётся из карточки заказа и живёт отдельно
+  // от жалоб админ-панели.
+  | 'complaint';
 export type SupportConversationStatus =
   | 'open'
   | 'in_progress'

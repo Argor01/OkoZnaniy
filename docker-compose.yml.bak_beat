@@ -1,0 +1,240 @@
+services:
+  backend:
+    build: &backend_build
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment: &backend_env
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG:-False}
+      DJANGO_ENV: ${DJANGO_ENV:-production}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      LOGIN_REDIRECT_URL: ${FRONTEND_URL:-http://localhost:5173}/expert
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      VK_CLIENT_ID: ${VK_CLIENT_ID}
+      VK_CLIENT_SECRET: ${VK_CLIENT_SECRET}
+      VK_SERVICE_KEY: ${VK_SERVICE_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
+      VK_BOT_TOKEN: ${VK_BOT_TOKEN}
+      VK_GROUP_ID: ${VK_GROUP_ID}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.yandex.ru}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+      PAYMENTS_SANDBOX: ${PAYMENTS_SANDBOX:-False}
+      URALSIB_API_URL: ${URALSIB_API_URL:-https://uralsib.rbsuat.com/payment/rest}
+      URALSIB_USERNAME: ${URALSIB_USERNAME:-}
+      URALSIB_PASSWORD: ${URALSIB_PASSWORD:-}
+      URALSIB_CALLBACK_SECRET: ${URALSIB_CALLBACK_SECRET:-}
+      URALSIB_SUCCESS_URL: ${URALSIB_SUCCESS_URL:-}
+      URALSIB_FAIL_URL: ${URALSIB_FAIL_URL:-}
+      CARD_ACQUIRER: ${CARD_ACQUIRER:-uralsib}
+      TBANK_TERMINAL_KEY: ${TBANK_TERMINAL_KEY:-}
+      TBANK_PASSWORD: ${TBANK_PASSWORD:-}
+      TBANK_TEST_MODE: ${TBANK_TEST_MODE:-False}
+      TBANK_NOTIFICATION_URL: ${TBANK_NOTIFICATION_URL:-}
+      TBANK_SUCCESS_URL: ${TBANK_SUCCESS_URL:-}
+      TBANK_FAIL_URL: ${TBANK_FAIL_URL:-}
+      ACQUIRING_FEE_PERCENT: ${ACQUIRING_FEE_PERCENT:-3.5}
+      PAYOUT_ACQUIRING_FEE_PERCENT: ${PAYOUT_ACQUIRING_FEE_PERCENT:-1.5}
+      YOOKASSA_SHOP_ID: ${YOOKASSA_SHOP_ID:-}
+      YOOKASSA_SECRET_KEY: ${YOOKASSA_SECRET_KEY:-}
+      YOOKASSA_RETURN_URL: ${YOOKASSA_RETURN_URL:-}
+      YOOKASSA_API_URL: ${YOOKASSA_API_URL:-https://api.yookassa.ru/v3}
+      # Только на время тестирования площадки, см. settings.py
+      YOOKASSA_TEST_SHOP_OPEN_TO_ALL: ${YOOKASSA_TEST_SHOP_OPEN_TO_ALL:-False}
+    healthcheck: &backend_health
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.create_connection(('127.0.0.1',8000),5); s.close()\""]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 45s
+    volumes:
+      - static_files:/app/static
+      - media_files:/app/media
+    expose:
+      - "8000"
+    networks:
+      - app_network
+
+  frontend-build:
+    image: node:20-bookworm-slim
+    working_dir: /app
+    volumes:
+      - ./frontend-react:/app
+    command: sh -c "npm ci && npm run build"
+    profiles:
+      - build
+
+  frontend:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    expose:
+      - "80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1/ || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oko_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-password.sh:/usr/local/bin/init-password.sh:ro
+    command: ["/bin/sh", "/usr/local/bin/init-password.sh"]
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d oko_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD} --bind 0.0.0.0
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    networks:
+      - app_network
+
+  celery:
+    build: *backend_build
+    command: celery -A config worker -l INFO
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      <<: *backend_env
+    networks:
+      - app_network
+
+  vk-bot:
+    # Optional community-notification bot. Enable explicitly after VK_GROUP_ID/token are configured.
+    profiles: ["vk-bot"]
+    build:
+      context: .
+      dockerfile: Dockerfile.vkbot
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      VK_BOT_TOKEN: ${VK_BOT_TOKEN}
+      VK_GROUP_ID: ${VK_GROUP_ID}
+      VK_SERVICE_KEY: ${VK_SERVICE_KEY}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: config.settings
+    networks:
+      - app_network
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q --header='Host: okoznaniy.ru' http://127.0.0.1/health || exit 1"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 15s
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+      - static_files:/var/www/static
+      - media_files:/var/www/media
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+    networks:
+      - app_network
+
+  max-bot:
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"assert b'max_bot/bot.py' in open('/proc/1/cmdline','rb').read()\""]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    build:
+      context: .
+      dockerfile: Dockerfile.maxbot
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/oko_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      MAX_BOT_TOKEN: ${MAX_BOT_TOKEN}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      DEBUG: ${DEBUG:-False}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,nginx}
+      PYTHONPATH: /app
+      DJANGO_SETTINGS_MODULE: config.settings
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_files:
+  media_files:
+
+networks:
+  app_network:
+    driver: bridge

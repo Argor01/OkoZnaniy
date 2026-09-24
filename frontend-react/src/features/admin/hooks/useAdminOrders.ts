@@ -11,7 +11,8 @@ export const useOrders = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getOrders,
     enabled,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
     select: (data: any) => {
       let ordersArray: any[] = [];
       if (Array.isArray(data)) ordersArray = data;
@@ -38,7 +39,8 @@ export const useProblemOrders = (enabled: boolean = true) => {
     queryFn: adminPanelApi.getProblemOrders,
     enabled,
     refetchOnMount: 'always',
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
     select: (data: any) => {
       if (Array.isArray(data)) return data;
       if (data && typeof data === 'object' && Array.isArray(data.results)) return data.results;

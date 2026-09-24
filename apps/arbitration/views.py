@@ -3,8 +3,10 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
+import logging
+
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 
@@ -36,6 +38,8 @@ from decimal import Decimal
 
 User = get_user_model()
 
+
+logger = logging.getLogger('oko.arbitration')
 
 class IsAdminUser(IsAuthenticated):
     """Проверка прав администратора"""
@@ -100,6 +104,39 @@ def _process_arbitration_refund(case, refund_percentage):
 
     Возвращает None при успехе или Response с ошибкой.
     """
+
+    # Distributed escrow is already debited from the client.
+    target = case.purchase if case.purchase_id else case.order
+    settlement = getattr(target, 'wallet_settlement', None) if target else None
+    if settlement is not None:
+        from apps.wallet.models import Settlement
+        try:
+            with transaction.atomic():
+                st = Settlement.objects.select_for_update().get(pk=settlement.pk)
+                pct = Decimal(str(refund_percentage))
+                if not pct.is_finite() or not Decimal('0') <= pct <= Decimal('100'):
+                    raise ValueError('Invalid refund percentage')
+                description = f'Арбитраж {case.case_number}: возврат {pct}%'
+                if st.is_released:
+                    actual_refund = WalletService.clawback_settlement(st, pct, description=description)['refund']
+                else:
+                    funded = money(st.funded_base + st.funded_service_fee)
+                    actual_refund = money(funded * pct / Decimal('100'))
+                    if actual_refund:
+                        WalletService.refund_distributed_escrow(st, actual_refund, description=description)
+                    st.refresh_from_db()
+                    if st.funded_base + st.funded_service_fee:
+                        WalletService.release_distributed_escrow(st, description=f'Арбитраж {case.case_number}: остаток после возврата')
+                    else:
+                        st.is_released = True
+                        st.save(update_fields=['is_released'])
+                case.approved_refund_amount = actual_refund
+                case.save(update_fields=['approved_refund_amount', 'updated_at'])
+                target.status = ('refunded' if pct >= 100 else 'completed') if case.purchase_id else 'cancelled'
+                target.save(update_fields=['status'])
+            return None
+        except Exception as exc:
+            return Response({'detail': f'Возврат не выполнен: {exc}'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Ветка для покупки готовой работы
     if case.purchase:
@@ -260,7 +297,7 @@ def unfreeze_case_context(case):
 
     has_active_cases = ArbitrationCase.objects.filter(order_id=case.order_id).exclude(
         id=case.id
-    ).exclude(status__in=['closed', 'rejected']).exists()
+    ).exclude(status__in=ARBITRATION_CLOSED_STATUSES).exists()
 
     if has_active_cases:
         return
@@ -365,7 +402,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         - list, retrieve: пользователь видит свои дела или админы видят все
         - update, partial_update, destroy, admin actions: только администраторы
         """
-        if self.action in ['create', 'submit_claim', 'send_message', 'activity_feed']:
+        if self.action in ['create', 'submit_claim', 'send_message', 'activity_feed', 'reopen']:
             return [IsAuthenticated()]
         elif self.action in ['list', 'retrieve', 'my_cases']:
             return [IsAuthenticated()]
@@ -825,6 +862,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=True, methods=['post'], url_path='process-refund')
+    @transaction.atomic
     def process_refund(self, request, pk=None):
         """Оформить возврат средств (только для админов).
 
@@ -836,6 +874,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
            повторный процесс-рефанд запрещён.
         """
         case = self.get_object()
+        case = ArbitrationCase.objects.select_for_update().get(pk=case.pk)
 
         taken_resp = ensure_case_taken_into_work(case)
         if taken_resp is not None:
@@ -922,6 +961,10 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             case.save()
             return wallet_error
 
+        unfreeze_case_context(case)
+        if case.order_id:
+            Complaint.objects.filter(order_id=case.order_id, plaintiff_id=case.plaintiff_id,
+                                     defendant_id=case.defendant_id).update(status='resolved', resolved_at=timezone.now())
         log_activity(
             case,
             request.user,
@@ -952,9 +995,11 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=True, methods=['post'], url_path='approve-refund')
+    @transaction.atomic
     def approve_refund(self, request, pk=None):
         """Согласовать возврат (директор). Дело должно быть в pending_approval."""
         case = self.get_object()
+        case = ArbitrationCase.objects.select_for_update().get(pk=case.pk)
 
         if case.status != 'pending_approval':
             return Response(
@@ -977,6 +1022,10 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             case.save()
             return wallet_error
 
+        unfreeze_case_context(case)
+        if case.order_id:
+            Complaint.objects.filter(order_id=case.order_id, plaintiff_id=case.plaintiff_id,
+                                     defendant_id=case.defendant_id).update(status='resolved', resolved_at=timezone.now())
         log_activity(
             case,
             request.user,
@@ -1082,9 +1131,11 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=True, methods=['post'], url_path='close-case')
+    @transaction.atomic
     def close_case(self, request, pk=None):
         """Закрыть дело (только для админов)"""
         case = self.get_object()
+        case = ArbitrationCase.objects.select_for_update().get(pk=case.pk)
 
         if case.status in ('closed', 'rejected'):
             return Response({'detail': 'Дело уже завершено.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1128,6 +1179,38 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
             'case': ArbitrationCaseSerializer(case).data
         })
     
+    @action(detail=True, methods=['post'], url_path='reopen')
+    @transaction.atomic
+    def reopen(self, request, pk=None):
+        case = self.get_object()
+        case = ArbitrationCase.objects.select_for_update().get(pk=case.pk)
+        if request.user.role != 'admin' and request.user.pk not in (case.plaintiff_id, case.defendant_id):
+            return Response({'detail': 'Обжаловать решение могут только стороны спора.'}, status=403)
+        if case.status not in ARBITRATION_CLOSED_STATUSES:
+            return Response({'detail': 'Дело уже открыто.'}, status=400)
+        reason = request.data.get('reason')
+        if not isinstance(reason, str) or not reason.strip() or len(reason) > 4000:
+            return Response({'detail': 'Укажите причину обжалования (до 4000 символов).'}, status=400)
+        previous_status = case.status
+        case.status = 'in_arbitration'
+        case.closed_at = None
+        case.save(update_fields=['status', 'closed_at', 'updated_at'])
+        # Preserve financial decisions and ledger: reopening never pays twice.
+        log_activity(case, request.user, 'status_changed', 'Решение обжаловано: ' + reason.strip(),
+                     {'old_status': previous_status, 'new_status': case.status})
+        ArbitrationMessage.objects.create(case=case, sender=request.user,
+                                          message_type='admin' if request.user.role == 'admin' else ('plaintiff' if request.user.pk == case.plaintiff_id else 'defendant'),
+                                          text='Обжалование решения: ' + reason.strip(), is_internal=False)
+        if case.order_id:
+            Complaint.objects.filter(order_id=case.order_id, plaintiff_id=case.plaintiff_id,
+                                     defendant_id=case.defendant_id).update(status='in_progress', resolved_at=None)
+        freeze_case_context(case)
+        transaction.on_commit(lambda: safe_call(notify_case_participants, case,
+            title=f'Арбитраж {case.case_number}: обжалование',
+            message_text='Одна из сторон обжаловала решение. Дело снова в работе.',
+            exclude_user_ids=[request.user.pk], notification_type=NotificationType.STATUS_CHANGED))
+        return Response(ArbitrationCaseSerializer(case, context={'request': request}).data)
+
     @action(detail=True, methods=['post'], url_path='assign-users')
     def assign_users(self, request, pk=None):
         """Назначить наблюдателей на дело (только для админов)"""
@@ -1201,7 +1284,7 @@ class ArbitrationCaseViewSet(viewsets.ModelViewSet):
 
         # Чат заказа — показываем только админу, как переписку сторон по сделке
         order_chat_messages = []
-        if request.user.role == 'admin' and case.order_id:
+        if case.order_id and (request.user.role == 'admin' or request.user.id in (case.plaintiff_id, case.defendant_id)):
             order_chat_messages = build_order_chat_feed(case)
 
         # Объединяем и сортируем по времени
@@ -1338,6 +1421,39 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         
         return queryset
     
+    def _open_case_for_complaint(self, complaint):
+        """Заводит дело арбитража по претензии.
+
+        Без него претензия оставалась невидимой для арбитров: кабинет
+        арбитража показывает только дела. Повторная претензия по тому же
+        заказу нового дела не создаёт.
+        """
+        from .models import ArbitrationCase
+
+        order = complaint.order
+        if order is None:
+            return None
+        existing = ArbitrationCase.objects.filter(order=order).exclude(status='closed').first()
+        if existing is not None:
+            return existing
+
+        reason_titles = dict(getattr(complaint.__class__, 'COMPLAINT_TYPES', ()) or ())
+        subject = reason_titles.get(complaint.complaint_type) or 'Претензия по заказу'
+        case = ArbitrationCase.objects.create(
+            plaintiff=complaint.plaintiff,
+            defendant=complaint.defendant,
+            order=order,
+            reason=complaint.complaint_type or 'other',
+            subject=f'{subject}: {order.title}'[:255],
+            description=complaint.description or '',
+            status='submitted',
+            submitted_at=timezone.now(),
+        )
+        logger.info(
+            'Арбитраж: по претензии #%s заведено дело #%s', complaint.id, case.id,
+        )
+        return case
+
     def perform_create(self, serializer):
         """При создании претензии автоматически замораживаем заказ и чат"""
         complaint = serializer.save()
@@ -1351,6 +1467,13 @@ class ComplaintViewSet(viewsets.ModelViewSet):
         for chat in Chat.objects.filter(order=complaint.order):
             chat.freeze(f'Открыта претензия #{complaint.id}')
     
+        # Претензию должен кто-то разобрать: заводим дело арбитража.
+        try:
+            self._open_case_for_complaint(serializer.instance)
+        except Exception:  # noqa: BLE001
+            # Претензия уже сохранена — не теряем её из-за сбоя арбитража.
+            logger.exception('Арбитраж: не удалось завести дело по претензии')
+
     @action(detail=True, methods=['patch'], url_path='close')
     def close_complaint(self, request, pk=None):
         """Закрыть претензию (доступно истцу, ответчику или админу)"""

@@ -88,6 +88,12 @@ const OrderContent: React.FC<OrderContentProps> = ({
       return false;
     });
 
+    const currentIds = (order as any).current_delivery_file_ids;
+    if (Array.isArray(currentIds)) {
+      const ids = new Set(currentIds.map(Number));
+      return deliveredCandidates.filter((file: any) => ids.has(Number(file.id)));
+    }
+
     const extractDeliveryBatchId = (descriptionRaw: unknown): string => {
       const description = String(descriptionRaw || '');
       const match = description.match(/chat_delivery_batch_id:([^\s;]+)/);

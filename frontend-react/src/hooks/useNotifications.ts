@@ -1,10 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { App } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import { notificationsApi, Notification as ApiNotification } from '@/features/common/api/notifications';
 import { Notification } from '@/features/notifications';
 import { logger } from '@/utils/logger';
 import { useWebSocket, type WSEvent } from '@/hooks/useWebSocket';
 
-export const useNotifications = () => {
+export const useNotifications = (showPopups = false) => {
+  const { notification: toast } = App.useApp();
+  const queryClient = useQueryClient();
+  const seenIds = useRef<Set<number> | null>(null);
+  const liveRefreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingRef = useRef(false);
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
+  const popupRef = useRef(showPopups);
+  popupRef.current = showPopups;
+  const refreshLiveData = useCallback(() => {
+    if (liveRefreshTimer.current) return;
+    liveRefreshTimer.current = setTimeout(() => {
+      liveRefreshTimer.current = null;
+      void queryClient.invalidateQueries({ refetchType: 'active' });
+    }, 300);
+  }, [queryClient]);
+  useEffect(() => () => {
+    if (liveRefreshTimer.current) clearTimeout(liveRefreshTimer.current);
+  }, []);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -57,9 +78,25 @@ export const useNotifications = () => {
   }, [formatTimestamp, getOrderIdFromNotification]);
 
   const loadNotifications = useCallback(async () => {
+    if (loadingRef.current || document.visibilityState === "hidden") return;
+    loadingRef.current = true;
     setLoading(true);
     try {
       const apiNotifications = await notificationsApi.getAll();
+      const fresh = seenIds.current
+        ? apiNotifications.filter(n => !n.is_read && !seenIds.current!.has(n.id)) : [];
+      seenIds.current = new Set(apiNotifications.map(n => n.id));
+      if (popupRef.current && fresh.length) {
+        // Only newly arrived notifications, never an old unread backlog.
+        for (const n of fresh.slice(0, 3)) {
+          toastRef.current.info({
+            key: `live-notification-${n.id}`,
+            message: n.title || 'Новое уведомление',
+            description: n.message,
+            placement: 'topRight', duration: 6, role: 'status',
+          });
+        }
+      }
       const formatted = apiNotifications
         .map(formatNotification);
       setNotifications(formatted);
@@ -67,6 +104,7 @@ export const useNotifications = () => {
     } catch (error) {
       logger.error('Ошибка загрузки уведомлений:', error);
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
   }, [formatNotification]);
@@ -95,11 +133,32 @@ export const useNotifications = () => {
 
   const handleLiveNotification = useCallback((_event: WSEvent) => {
     void loadNotifications();
-  }, [loadNotifications]);
+    refreshLiveData();
+  }, [loadNotifications, refreshLiveData]);
+
+  const seenMessageIds = useRef(new Set<string>());
+  const handleLiveMessage = useCallback((event: WSEvent) => {
+    const data = event.data || {};
+    const key = `${data.chat_id || data.chat}:${data.id}`;
+    if (seenMessageIds.current.has(key)) return;
+    seenMessageIds.current.add(key);
+    if (seenMessageIds.current.size > 200) seenMessageIds.current.delete(seenMessageIds.current.values().next().value!);
+    if (popupRef.current) {
+      toastRef.current.info({
+        key: `live-message-${key}`, message: 'Новое сообщение',
+        description: data.text || data.file_name || 'Прикреплён файл',
+        placement: 'topRight', duration: 6, role: 'status',
+      });
+    }
+    refreshLiveData();
+  }, [refreshLiveData]);
 
   useWebSocket({
     onNotification: handleLiveNotification,
-    onConnect: (): void => { void loadNotifications(); },
+    onMessage: handleLiveMessage,
+    onOrderUpdate: refreshLiveData,
+    onArbitrationUpdate: refreshLiveData,
+    onConnect: (): void => { void loadNotifications(); refreshLiveData(); },
   });
 
   useEffect(() => {

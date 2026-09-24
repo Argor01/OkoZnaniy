@@ -243,6 +243,12 @@ export const ordersApi = {
     return response.data;
   },
 
+  /** Доплатить остаток по заказу: резерв доводится до 100%. */
+  payRemaining: async (orderId: number): Promise<{ detail: string }> => {
+    const { data } = await apiClient.post(`/orders/orders/${orderId}/pay-remaining/`);
+    return data;
+  },
+
   downloadOrderFile: async (orderId: number, fileId: number): Promise<Blob> => {
     const response = await apiClient.get(API_ENDPOINTS.orders.downloadFile(orderId, fileId), {
       responseType: 'blob',

@@ -813,6 +813,9 @@ class PaymentViewSetTopupVisibilityTests(TestCase):
 # ──────────────────────────────────────────────────────────────────
 
 @override_settings(PAYMENTS_SANDBOX=True, SECURE_SSL_REDIRECT=False)
+# Выдержка выплаты проверяется отдельно (apps/wallet/tests_payout_hold.py):
+# здесь важно, кто сколько получил, а не когда деньги разморозятся.
+@override_settings(EXPERT_PAYOUT_HOLD_DAYS=0)
 class FullE2EFlowTests(TestCase):
 
     def test_complete_order_flow(self):

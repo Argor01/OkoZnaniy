@@ -5,6 +5,7 @@ import {
   DollarOutlined,
   UserAddOutlined,
   BarChartOutlined,
+  PieChartOutlined,
   LogoutOutlined,
   BankOutlined,
   MessageOutlined,
@@ -12,6 +13,7 @@ import {
   StopOutlined,
   QuestionCircleOutlined,
   BulbOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '@/features/auth/api/auth';
@@ -19,7 +21,9 @@ import PersonnelManagement from '../components/PersonnelManagement/PersonnelMana
 import FinancialStatistics from '../components/FinancialStatistics/FinancialStatistics';
 import PartnerPanel from '../components/PartnerPanel/PartnerPanel';
 import PartnerApplications from '../components/PartnerApplications/PartnerApplications';
+import RequestsInbox from '../components/RequestsInbox/RequestsInbox';
 import GeneralStatistics from '../components/GeneralStatistics/GeneralStatistics';
+import ClientStatistics from '../components/ClientStatistics/ClientStatistics';
 import { DirectorChatsSection } from '../components/InternalCommunication';
 import ContactBannedUsers from '../components/ContactBannedUsers';
 import ImprovementRecommendations from '../components/ImprovementRecommendations/ImprovementRecommendations';
@@ -151,14 +155,20 @@ const DirectorDashboard: React.FC = () => {
     {
       key: 'partner-applications',
       icon: <UserAddOutlined />,
-      label: 'Заявки партнёров',
-      component: <ErrorBoundary><PartnerApplications /></ErrorBoundary>,
+      label: 'Заявки',
+      component: <ErrorBoundary><RequestsInbox /></ErrorBoundary>,
     },
     {
       key: 'statistics',
       icon: <BarChartOutlined />,
       label: 'Общая статистика',
       component: <ErrorBoundary><GeneralStatistics /></ErrorBoundary>,
+    },
+    {
+      key: 'client-statistics',
+      icon: <PieChartOutlined />,
+      label: 'Статистика клиентов',
+      component: <ErrorBoundary><ClientStatistics /></ErrorBoundary>,
     },
     {
       key: 'internal-communication',

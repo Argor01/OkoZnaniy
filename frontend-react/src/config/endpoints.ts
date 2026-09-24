@@ -165,6 +165,7 @@ export const API_ENDPOINTS = {
         approveRefund: (id: number) => `/arbitration/cases/${id}/approve-refund/`,
         rejectRefund: (id: number) => `/arbitration/cases/${id}/reject-refund/`,
         closeCase: (id: number) => `/arbitration/cases/${id}/close-case/`,
+        reopenArbitration: (id: number) => `/arbitration/cases/${id}/reopen/`,
         assignUsers: (id: number) => `/arbitration/cases/${id}/assign-users/`,
         activityFeed: (id: number) => `/arbitration/cases/${id}/activity-feed/`,
       },

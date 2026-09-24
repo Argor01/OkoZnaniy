@@ -18,10 +18,14 @@ import styles from './Wallet.module.css';
 
 const { Title, Text, Paragraph } = Typography;
 
+// Чек по 54-ФЗ уходит на почту, поэтому опечатка стоит дорого:
+// человек оплатит, а документ не получит.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 const FILTERS = [
   { value: '', label: 'Все' },
   { value: 'topup', label: 'Пополнения' },
-  { value: 'hold,release,refund', label: 'По заказам' },
+  { value: 'hold,release,refund,escrow_credit,payout,partner_payout,clawback', label: 'По заказам' },
   { value: 'payout', label: 'Выплаты' },
   { value: 'withdrawal', label: 'Выводы' },
   { value: 'purchase', label: 'Покупки' },
@@ -73,7 +77,31 @@ export default function Wallet() {
     }
   };
 
-  useEffect(() => { reload(); /* eslint-disable-line */ }, [filter]);
+  useEffect(() => {
+    let disposed = false;
+    let inFlight = false;
+    const refresh = async () => {
+      if (disposed || document.hidden || inFlight) return;
+      inFlight = true;
+      try {
+        const [b, s, t] = await Promise.all([
+          walletApi.me(), walletApi.stats(),
+          walletApi.transactions({ type: filter ? filter.split(',') : undefined }),
+        ]);
+        if (!disposed) { setBalance(b); setStats(s); setTx(t); setLoading(false); }
+      } catch { if (!disposed) setLoading(false); }
+      finally { inFlight = false; }
+    };
+    void refresh();
+    const timer = window.setInterval(refresh, 10000);
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      disposed = true; window.clearInterval(timer);
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [filter]);
 
   const filteredTx = tx || [];
 
@@ -132,7 +160,16 @@ export default function Wallet() {
               <div className={styles.balanceCardSmall}>
                 <div className={styles.balanceSmallIcon}><LockOutlined /></div>
                 <Text className={styles.balanceSmallLabel}>В резерве по заказам</Text>
-                <div className={styles.balanceSmallValue}>{formatMoney(balance?.frozen_balance)} ₽</div>
+                {/* У автора резерв — это его заморозка, у заказчика — то, что
+                    он внёс по незавершённым заказам: своей заморозки у него
+                    нет, и раньше он видел ноль при оплаченном заказе. */}
+                <div className={styles.balanceSmallValue}>
+                  {formatMoney(
+                    Number(balance?.frozen_balance || 0) > 0
+                      ? balance?.frozen_balance
+                      : balance?.reserved_on_orders,
+                  )} ₽
+                </div>
               </div>
               {Number(balance?.pending_balance || 0) > 0 && (
                 <div className={`${styles.balanceCardSmall} ${styles.pendingCard}`}>
@@ -231,9 +268,16 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
   const [busy, setBusy] = useState(false);
   const [quote, setQuote] = useState<PaymentQuote | null>(null);
   const [methods, setMethods] = useState<AvailablePaymentMethod[]>([]);
+  // Поле показываем только после отказа сервера: у большинства почта есть.
+  const [needEmail, setNeedEmail] = useState(false);
+  const [receiptEmail, setReceiptEmail] = useState('');
+  // QR для СБП приходит картинкой в data:-ссылке. Перейти на неё нельзя,
+  // поэтому показываем код прямо здесь.
+  const [qrImage, setQrImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
+      setQrImage(null);
       return;
     }
     paymentsApi
@@ -276,17 +320,37 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
       message.warning('Минимальная сумма пополнения — 100 ₽');
       return;
     }
+    const email = receiptEmail.trim();
+    if (needEmail && !EMAIL_RE.test(email)) {
+      message.warning('Укажите почту, на неё придёт чек');
+      return;
+    }
     setBusy(true);
     try {
-      const res = await walletApi.topup({ amount, payment_method: method });
-      message.success('Создан платёж — переходим к оплате');
-      if (res.payment_url) {
-        // For SberPay QR the link may be a `data:` URI with the QR image —
-        // open in a new tab so the user can scan with their phone.
-        window.open(res.payment_url, '_blank', 'noopener');
+      const res = await walletApi.topup({
+        amount,
+        payment_method: method,
+        ...(email ? { receipt_email: email } : {}),
+      });
+      if (!res.payment_url) {
+        message.success('Платёж создан');
+        onDone();
+        return;
       }
-      onDone();
+      if (res.payment_url.startsWith('data:')) {
+        setQrImage(res.payment_url);
+        return;
+      }
+      message.success('Создан платёж — переходим к оплате');
+      // Именно переход, а не новое окно: открыть его после ответа сервера
+      // браузер не даёт, и человек оставался на пустом месте.
+      window.location.assign(res.payment_url);
     } catch (e: any) {
+      if (e?.response?.data?.code === 'receipt_email_required') {
+        setNeedEmail(true);
+        message.info('Укажите почту для чека — и повторите оплату');
+        return;
+      }
       message.error(e?.response?.data?.detail || 'Не удалось создать платёж');
     } finally {
       setBusy(false);
@@ -336,6 +400,36 @@ function TopupModal({ open, onClose, onDone }: { open: boolean; onClose: () => v
           {formatMoney(quote.acquiring_fee)} ₽. На баланс поступит{' '}
           {formatMoney(amount)} ₽.
         </Paragraph>
+      )}
+
+      {qrImage && (
+        <div className={styles.topupQr}>
+          <Text strong className={styles.topupSectionLabel}>
+            Отсканируйте код в приложении банка
+          </Text>
+          <img src={qrImage} alt="QR-код для оплаты через СБП" />
+          <Paragraph type="secondary" className={styles.topupHint}>
+            После оплаты деньги поступят на баланс автоматически.
+          </Paragraph>
+        </div>
+      )}
+
+      {needEmail && (
+        <>
+          <Text strong className={styles.topupSectionLabel}>Почта для чека</Text>
+          <Input
+            type="email"
+            size="large"
+            placeholder="example@mail.ru"
+            value={receiptEmail}
+            onChange={(e) => setReceiptEmail(e.target.value)}
+            className={styles.topupInput}
+          />
+          <Paragraph type="secondary" className={styles.topupHint}>
+            В профиле не указана почта, а без неё не выдать чек. Мы сохраним
+            её в профиле, чтобы не спрашивать снова.
+          </Paragraph>
+        </>
       )}
 
       <Text strong className={styles.topupSectionLabel}>Способ оплаты</Text>

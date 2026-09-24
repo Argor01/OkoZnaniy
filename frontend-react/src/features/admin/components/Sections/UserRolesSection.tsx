@@ -253,6 +253,12 @@ export const UserRolesSection: React.FC<UserRolesSectionProps> = ({
       ),
     },
     {
+      title: 'Способ регистрации',
+      dataIndex: 'registration_source',
+      key: 'registration_source',
+      render: (source?: string) => ({ email: 'Email', telegram: 'Telegram', max: 'MAX', vk: 'VK', google: 'Google', admin: 'Администратор' } as Record<string, string>)[source || ''] || 'Не зафиксировано',
+    },
+    {
       title: 'Дата регистрации',
       dataIndex: 'date_joined',
       key: 'date_joined',

@@ -59,7 +59,7 @@ class SubjectCategoryViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         name = (request.data.get('name') or '').strip()
         if not name:
-            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'name': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
 
         existing = SubjectCategory.objects.filter(name__iexact=name).first()
         if existing:
@@ -94,7 +94,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         name = (request.data.get('name') or '').strip()
         if not name:
-            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'name': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
 
         existing = Subject.objects.filter(name__iexact=name).first()
         if existing:
@@ -363,7 +363,7 @@ class WorkTypeViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         name = (request.data.get('name') or '').strip()
         if not name:
-            return Response({'name': ['Р­С‚Рѕ РїРѕР»Рµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ.']}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'name': ['Это поле обязательно.']}, status=status.HTTP_400_BAD_REQUEST)
 
         existing = WorkType.objects.filter(name__iexact=name).first()
         if existing:

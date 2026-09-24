@@ -19,6 +19,7 @@ import type { MenuKey } from '@/features/admin/types';
 import styles from './AdminDashboard.module.css';
 import '@/styles/modal-overrides.css';
 
+const ReviewsSection = lazy(() => import('@/features/admin/pages/ReviewsPage').then(m => ({default: m.ReviewsSection})));
 const OverviewSection = lazy(() => import('@/features/admin/components/Sections/OverviewSection').then(m => ({ default: m.OverviewSection })));
 const PartnersSection = lazy(() => import('@/features/admin/components/Sections/PartnersSection').then(m => ({ default: m.PartnersSection })));
 const EarningsSection = lazy(() => import('@/features/admin/components/Sections/EarningsSection').then(m => ({ default: m.EarningsSection })));
@@ -277,6 +278,9 @@ const AdminDashboardContent: React.FC<{ user: User; onLogout: () => void }> = ({
         return (
           <KnowledgeBaseSection />
         );
+
+      case 'reviews':
+        return <ReviewsSection />;
 
       case 'audit_log':
         return (

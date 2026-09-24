@@ -7,17 +7,14 @@ import { ROUTES } from '@/utils/constants';
 import { QUERY_KEYS } from '@/config/queryKeys';
 
 export const DashboardRedirect: React.FC = () => {
-  const token = localStorage.getItem('access_token');
-
+  // Про сессию спрашиваем сервер: токен лежит в HttpOnly-куке, а метка в
+  // localStorage расходится с ней и уводила на вход при рабочей сессии.
   const { data: userProfile, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.user.profile,
     queryFn: () => authApi.getCurrentUser(),
-    enabled: !!token,
     retry: 2,
     staleTime: 0,
   });
-
-  if (!token) return <Navigate to={ROUTES.login} replace />;
 
   if (isLoading) {
     return (

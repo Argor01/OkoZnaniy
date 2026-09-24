@@ -16,6 +16,7 @@ import dj_database_url
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
+from decimal import Decimal
 from cryptography.fernet import Fernet
 
 load_dotenv()
@@ -375,7 +376,10 @@ REST_FRAMEWORK = {
 # JWT settings
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # Сутки — это ежедневный принудительный вход для всех. Ротация
+    # выключена намеренно: с ней две вкладки, обновляющие токен разом,
+    # выбрасывают друг друга.
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
@@ -622,6 +626,28 @@ YOOKASSA_SECRET_KEY = os.getenv("YOOKASSA_SECRET_KEY", "")
 YOOKASSA_RETURN_URL = os.getenv("YOOKASSA_RETURN_URL", f"{FRONTEND_URL}/payment/result")
 YOOKASSA_CURRENCY = os.getenv("YOOKASSA_CURRENCY", "RUB")
 
+# --- Выдержка выплаты автору ------------------------------------------
+# После приёмки деньги автора остаются замороженными ещё столько дней:
+# запас на претензии, которые подают уже после приёмки.
+EXPERT_PAYOUT_HOLD_DAYS = int(os.getenv("EXPERT_PAYOUT_HOLD_DAYS", "10"))
+# Заказы дешевле этой суммы выплачиваются сразу: держать мелочь десять
+# дней — только раздражать автора, риск по такой сумме несопоставим.
+EXPERT_PAYOUT_HOLD_MIN_AMOUNT = Decimal(
+    os.getenv("EXPERT_PAYOUT_HOLD_MIN_AMOUNT", "1000")
+)
+
+# Чек 54-ФЗ. Магазин с включённой фискализацией отклоняет платежи без
+# объекта receipt, поэтому по умолчанию чек отправляется всегда.
+# Выключать только для магазина без фискализации.
+YOOKASSA_SEND_RECEIPT = os.getenv("YOOKASSA_SEND_RECEIPT", "True") == "True"
+# Ставка НДС в чеке: 1 — без НДС, 2 — 0%, 3 — 10%, 4 — 20%,
+# 5 — 10/110, 6 — 20/120. Значение зависит от системы налогообложения
+# продавца, менять только по согласованию с бухгалтерией.
+YOOKASSA_VAT_CODE = int(os.getenv("YOOKASSA_VAT_CODE", "1"))
+# Система налогообложения. Нужна, только если у магазина их несколько;
+# пустое значение — шлюз подставит единственную сам.
+YOOKASSA_TAX_SYSTEM_CODE = os.getenv("YOOKASSA_TAX_SYSTEM_CODE", "")
+
 # ВНИМАНИЕ. Открывает оплату через ТЕСТОВЫЙ магазин ЮKassa всем подряд.
 # Тестовый ключ создаёт платежи, которые ничего не списывают, но зачисляются
 # на кошелёк, — то есть любой пользователь может пополнить баланс
@@ -633,3 +659,7 @@ YOOKASSA_TEST_SHOP_OPEN_TO_ALL = os.getenv("YOOKASSA_TEST_SHOP_OPEN_TO_ALL", "Fa
 # Какой эквайер обслуживает оплату картой: uralsib, sberbank,
 # yookassa или alfabank.
 CARD_ACQUIRER = os.getenv("CARD_ACQUIRER", "uralsib")
+
+# VK/Telegram deferred until their credentials are replaced.
+EXTERNAL_NOTIFICATION_CHANNELS = ('email', 'max')
+MAX_BOT_TOKEN = os.getenv('MAX_BOT_TOKEN', '')

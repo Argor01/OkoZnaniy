@@ -96,7 +96,7 @@ class CustomRegisterSerializer(serializers.ModelSerializer):
                 # Если код не найден, просто игнорируем
                 pass
         
-        user = User.objects.create_user(password=password, **validated_data)
+        user = User.objects.create_user(password=password, registration_source='email', **validated_data)
         return user
     
     def custom_signup(self, request, user):
@@ -132,10 +132,12 @@ class UserSerializer(serializers.ModelSerializer):
     is_blocked = serializers.SerializerMethodField()
     email = serializers.SerializerMethodField()
     display_username = serializers.CharField(read_only=True)
+    registration_source = serializers.CharField(read_only=True)
     
     class Meta:
         model = User
         fields = [
+            'registration_source',
             'id', 'username', 'display_username', 'email', 'first_name', 'last_name',
             'role', 'phone', 'balance', 'frozen_balance',
             'avatar', 'bio', 'experience_years', 'hourly_rate',
@@ -196,7 +198,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password')
         validated_data['has_custom_username'] = bool(validated_data.get('username'))
-        user = User.objects.create_user(**validated_data)
+        user = User.objects.create_user(registration_source='admin', **validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -204,44 +206,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """Serializer для обновления пользователя"""
-    username = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        allow_null=True,
-        max_length=150,
-        trim_whitespace=False  # Не обрезаем пробелы по краям
-    )
-    
-    class Meta:
-        model = User
-        fields = [
-            'username', 'first_name', 'last_name', 'phone', 'avatar', 'bio',
-            'experience_years', 'hourly_rate', 'education', 'skills',
-            'portfolio_url', 'city'
-        ]
-    
-    def validate_username(self, value):
-        """Разрешаем пробелы в никнейме"""
-        if value is not None and not value.strip():
-            raise serializers.ValidationError("Никнейм не может состоять только из пробелов")
-        # Проверяем на уникальность, исключая текущего пользователя
-        if value and value.strip():
-            user = self.context.get('request').user if self.context.get('request') else None
-            if user:
-                existing = User.objects.filter(username=value).exclude(id=user.id).first()
-                if existing:
-                    raise serializers.ValidationError("Этот никнейм уже занят")
-        return value
-
-    def update(self, instance, validated_data):
-        username = validated_data.get('username')
-        if username is not None and username.strip() and username != instance.username:
-            validated_data['has_custom_username'] = True
-        return super().update(instance, validated_data)
-
-
-class UserUpdateSerializer(serializers.ModelSerializer):
-    """Serializer РґР»СЏ РѕР±РЅРѕРІР»РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ"""
     username = serializers.CharField(
         required=False,
         allow_blank=True,
@@ -259,9 +223,9 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def validate_username(self, value):
-        """Р Р°Р·СЂРµС€Р°РµРј РїСЂРѕР±РµР»С‹ РІ РЅРёРєРЅРµР№РјРµ"""
+        """Разрешаем пробелы в никнейме"""
         if value is not None and not value.strip():
-            raise serializers.ValidationError("РќРёРєРЅРµР№Рј РЅРµ РјРѕР¶РµС‚ СЃРѕСЃС‚РѕСЏС‚СЊ С‚РѕР»СЊРєРѕ РёР· РїСЂРѕР±РµР»РѕРІ")
+            raise serializers.ValidationError("Никнейм не может состоять только из пробелов")
 
         normalized_value = value.strip() if isinstance(value, str) else value
         if normalized_value:
@@ -269,7 +233,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             if user:
                 existing = User.objects.filter(username=normalized_value).exclude(id=user.id).first()
                 if existing:
-                    raise serializers.ValidationError("Р­С‚РѕС‚ РЅРёРєРЅРµР№Рј СѓР¶Рµ Р·Р°РЅСЏС‚")
+                    raise serializers.ValidationError("Этот никнейм уже занят")
         return normalized_value
 
     def update(self, instance, validated_data):
@@ -311,23 +275,45 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
     
     def validate(self, attrs):
-        username = attrs.get('username', '')
+        from rest_framework.exceptions import AuthenticationFailed
+
+        identifier = attrs.get('username', '')
         password = attrs.get('password', '')
 
-        if username and password:
-            if '@' in username:
-                user_exists = User.objects.filter(email=username).exists()
-            else:
-                user_exists = User.objects.filter(username=username).exists()
-
+        if identifier and password:
+            user_exists = (
+                User.objects.filter(username=identifier).exists()
+                or User.objects.filter(email__iexact=identifier).exists()
+            )
             if not user_exists:
-                from rest_framework.exceptions import AuthenticationFailed
                 raise AuthenticationFailed(
                     'Аккаунт не найден',
                     code='no_active_account',
                 )
 
-        data = super().validate(attrs)
+        # Вход по почте: authenticate() ищет строго по логину, поэтому
+        # подставляем настоящий логин. Почта не уникальна, так что
+        # перебираем кандидатов — активные первыми.
+        candidates = [identifier]
+        if identifier and '@' in identifier:
+            by_email = list(
+                User.objects.filter(email__iexact=identifier)
+                .order_by('-is_active', 'id')
+                .values_list('username', flat=True)[:5]
+            )
+            if by_email:
+                candidates = by_email
+
+        data = None
+        failure = None
+        for candidate in candidates:
+            try:
+                data = super().validate({**attrs, 'username': candidate})
+                break
+            except Exception as exc:  # noqa: BLE001
+                failure = exc
+        if data is None:
+            raise failure
 
         # Если super().validate() прошёл — пароль верный, добавляем данные пользователя
         data['user'] = {

@@ -19,6 +19,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import styles from './UsersManagement.module.css';
+import type { ColumnsType } from 'antd/es/table';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -37,6 +38,7 @@ interface PlatformUser {
   test_payments_allowed?: boolean;
   average_rating?: number | string | null;
   date_joined?: string;
+  registration_source?: string;
 }
 
 interface UsersResponse {
@@ -169,7 +171,7 @@ const UsersManagement: React.FC = () => {
 
   const rows = useMemo(() => data ?? [], [data]);
 
-  const columns = [
+  const columns: ColumnsType<PlatformUser> = [
     {
       title: 'Пользователь',
       key: 'name',
@@ -202,7 +204,7 @@ const UsersManagement: React.FC = () => {
       title: 'Контакты',
       key: 'contacts',
       width: 220,
-      responsive: ['md'] as const,
+      responsive: ['md'],
       render: (_: unknown, u: PlatformUser) => (
         <div className={styles.nameCell}>
           <Text>{u.email || '—'}</Text>
@@ -210,11 +212,22 @@ const UsersManagement: React.FC = () => {
       ),
     },
     {
+      title: 'Регистрация',
+      dataIndex: 'registration_source',
+      key: 'registration_source',
+      width: 150,
+      responsive: ['md'],
+      render: (source?: string) => {
+        const label = ({ email: 'Email', telegram: 'Telegram', max: 'MAX', vk: 'VK', google: 'Google', admin: 'Администратор' } as Record<string, string>)[source || ''] || 'Не зафиксировано';
+        return <Text type={source ? undefined : 'secondary'} ellipsis={{ tooltip: label }}>{label}</Text>;
+      },
+    },
+    {
       title: 'Рейтинг',
       dataIndex: 'average_rating',
       key: 'average_rating',
       width: 110,
-      responsive: ['lg'] as const,
+      responsive: ['lg'],
       render: (rating: number | string | null | undefined, u: PlatformUser) =>
         u.role === 'client' ? (
           <Text type="secondary">—</Text>
@@ -324,7 +337,8 @@ const UsersManagement: React.FC = () => {
           loading={isLoading}
           dataSource={rows}
           columns={columns}
-          scroll={{ x: 900 }}
+          className={styles.usersTable}
+          scroll={{ x: 1180 }}
           pagination={{ pageSize: 20, showSizeChanger: false, hideOnSinglePage: true }}
           size="middle"
         />

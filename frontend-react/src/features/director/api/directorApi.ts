@@ -12,6 +12,7 @@ import type {
   Partner,
   PartnerTurnoverResponse,
   KPI,
+  ClientStatistics,
   StatisticsSummary,
   InternalMessage,
   GetMessagesParams,
@@ -394,6 +395,23 @@ export const getKPI = async (startDate: string, endDate: string): Promise<KPI> =
   }
 };
 
+export const getClientStatistics = async (
+  period?: { date_from?: string; date_to?: string },
+): Promise<ClientStatistics> => {
+  try {
+    const response = await apiClient.get('/director/statistics/client-statistics/', {
+      params: {
+        ...(period?.date_from ? { date_from: period.date_from } : {}),
+        ...(period?.date_to ? { date_to: period.date_to } : {}),
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching client statistics:', error);
+    throw error;
+  }
+};
+
 export const getStatisticsSummary = async (
   startDate: string,
   endDate: string
@@ -519,7 +537,39 @@ export const deleteMessage = async (id: number): Promise<void> => {
   }
 };
 
+export interface WithdrawalRequestItem {
+  id: number;
+  user_id: number;
+  username: string;
+  display_username: string;
+  email: string;
+  amount: string;
+  card_number: string;
+  status: 'pending' | 'paid' | 'rejected';
+  created_at: string;
+  processed_at: string | null;
+}
+
 export const directorApi = {
+  /** Заявки на вывод средств. Обрабатываются директором, не в служебной админке. */
+  getWithdrawals: async (): Promise<WithdrawalRequestItem[]> => {
+    const response = await apiClient.get('/director/finance/withdrawals/');
+    return response.data;
+  },
+
+  markWithdrawalPaid: async (id: number) => {
+    const response = await apiClient.post(`/director/finance/withdrawals/${id}/mark-paid/`);
+    return response.data;
+  },
+
+  rejectWithdrawal: async (id: number, reason?: string) => {
+    const response = await apiClient.post(
+      `/director/finance/withdrawals/${id}/reject/`,
+      { reason: reason || '' },
+    );
+    return response.data;
+  },
+
 
   getPersonnel,
   registerEmployee,
@@ -549,6 +599,7 @@ export const directorApi = {
 
   getKPI,
   getStatisticsSummary,
+  getClientStatistics,
   exportStatisticsReport,
 
   getMessages,

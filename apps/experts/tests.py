@@ -12,12 +12,12 @@ User = get_user_model()
 
 
 class ExpertRatingAPITest(TestCase):
-    """РўРµСЃС‚С‹ РґР»СЏ API СЂРµР№С‚РёРЅРіРѕРІ СЌРєСЃРїРµСЂС‚РѕРІ"""
+    """Тесты для API рейтингов экспертов"""
     
     def setUp(self):
         self.client = APIClient()
         
-        # РЎРѕР·РґР°РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+        # Создаем пользователей
         self.client_user = User.objects.create_user(
             username='client_test',
             email='client@test.com',
@@ -32,31 +32,31 @@ class ExpertRatingAPITest(TestCase):
             role='expert'
         )
         
-        # РЎРѕР·РґР°РµРј РїСЂРµРґРјРµС‚ Рё С‚РёРї СЂР°Р±РѕС‚С‹
-        self.subject, _ = Subject.objects.get_or_create(name='РњР°С‚РµРјР°С‚РёРєР°')
-        self.work_type, _ = WorkType.objects.get_or_create(name='РљРѕРЅС‚СЂРѕР»СЊРЅР°СЏ')
+        # Создаем предмет и тип работы
+        self.subject, _ = Subject.objects.get_or_create(name='Математика')
+        self.work_type, _ = WorkType.objects.get_or_create(name='Контрольная')
         
-        # РЎРѕР·РґР°РµРј Р·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·
+        # Создаем завершенный заказ
         self.order = Order.objects.create(
             client=self.client_user,
             expert=self.expert_user,
             subject=self.subject,
             work_type=self.work_type,
-            title='РўРµСЃС‚РѕРІС‹Р№ Р·Р°РєР°Р·',
-            description='РћРїРёСЃР°РЅРёРµ',
+            title='Тестовый заказ',
+            description='Описание',
             budget=1000,
             deadline=timezone.now() + timedelta(days=30),
             status='completed'
         )
     
     def test_create_rating_success(self):
-        """РўРµСЃС‚ СѓСЃРїРµС€РЅРѕРіРѕ СЃРѕР·РґР°РЅРёСЏ СЂРµР№С‚РёРЅРіР°"""
+        """Тест успешного создания рейтинга"""
         self.client.force_authenticate(user=self.client_user)
         
         data = {
             'order': self.order.id,
             'rating': 5,
-            'comment': 'РћС‚Р»РёС‡РЅР°СЏ СЂР°Р±РѕС‚Р°, РІСЃРµ РІС‹РїРѕР»РЅРµРЅРѕ РІ СЃСЂРѕРє!'
+            'comment': 'Отличная работа, все выполнено в срок!'
         }
         
         response = self.client.post('/api/experts/ratings/', data)
@@ -70,14 +70,14 @@ class ExpertRatingAPITest(TestCase):
         self.assertEqual(rating.client, self.client_user)
     
     def test_create_rating_duplicate(self):
-        """РўРµСЃС‚ СЃРѕР·РґР°РЅРёСЏ РґСѓР±Р»РёРєР°С‚Р° СЂРµР№С‚РёРЅРіР°"""
-        # РЎРѕР·РґР°РµРј РїРµСЂРІС‹Р№ СЂРµР№С‚РёРЅРі
+        """Тест создания дубликата рейтинга"""
+        # Создаем первый рейтинг
         ExpertRating.objects.create(
             order=self.order,
             expert=self.expert_user,
             client=self.client_user,
             rating=5,
-            comment='РџРµСЂРІС‹Р№ РѕС‚Р·С‹РІ'
+            comment='Первый отзыв'
         )
         
         self.client.force_authenticate(user=self.client_user)
@@ -85,7 +85,7 @@ class ExpertRatingAPITest(TestCase):
         data = {
             'order': self.order.id,
             'rating': 4,
-            'comment': 'Р’С‚РѕСЂРѕР№ РѕС‚Р·С‹РІ'
+            'comment': 'Второй отзыв'
         }
         
         response = self.client.post('/api/experts/ratings/', data)
@@ -94,14 +94,14 @@ class ExpertRatingAPITest(TestCase):
         self.assertEqual(ExpertRating.objects.count(), 1)
     
     def test_get_expert_ratings(self):
-        """РўРµСЃС‚ РїРѕР»СѓС‡РµРЅРёСЏ СЂРµР№С‚РёРЅРіРѕРІ СЌРєСЃРїРµСЂС‚Р°"""
-        # РЎРѕР·РґР°РµРј СЂРµР№С‚РёРЅРі
+        """Тест получения рейтингов эксперта"""
+        # Создаем рейтинг
         ExpertRating.objects.create(
             order=self.order,
             expert=self.expert_user,
             client=self.client_user,
             rating=5,
-            comment='РћС‚Р»РёС‡РЅР°СЏ СЂР°Р±РѕС‚Р°!'
+            comment='Отличная работа!'
         )
         
         self.client.force_authenticate(user=self.client_user)
@@ -112,20 +112,20 @@ class ExpertRatingAPITest(TestCase):
         self.assertGreaterEqual(len(response.data), 1)
     
     def test_rating_updates_statistics(self):
-        """РўРµСЃС‚ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РѕР±РЅРѕРІР»РµРЅРёСЏ СЃС‚Р°С‚РёСЃС‚РёРєРё"""
+        """Тест автоматического обновления статистики"""
         self.client.force_authenticate(user=self.client_user)
         
         data = {
             'order': self.order.id,
             'rating': 5,
-            'comment': 'РћС‚Р»РёС‡РЅРѕ! Р Р°Р±РѕС‚Р° РІС‹РїРѕР»РЅРµРЅР° РєР°С‡РµСЃС‚РІРµРЅРЅРѕ Рё РІ СЃСЂРѕРє.'
+            'comment': 'Отлично! Работа выполнена качественно и в срок.'
         }
         
         response = self.client.post('/api/experts/ratings/', data)
         
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-        # РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ СЃС‚Р°С‚РёСЃС‚РёРєР° РѕР±РЅРѕРІРёР»Р°СЃСЊ
+        # Проверяем, что статистика обновилась
         stats = ExpertStatistics.objects.get(expert=self.expert_user)
         self.assertEqual(float(stats.average_rating), 5.0)
         self.assertEqual(stats.total_ratings, 1)
@@ -133,12 +133,12 @@ class ExpertRatingAPITest(TestCase):
 
 
 class ExpertRatingPermissionsTest(TestCase):
-    """РўРµСЃС‚С‹ РїСЂР°РІ РґРѕСЃС‚СѓРїР° РґР»СЏ СЂРµР№С‚РёРЅРіРѕРІ"""
+    """Тесты прав доступа для рейтингов"""
     
     def setUp(self):
         self.client = APIClient()
         
-        # РЎРѕР·РґР°РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
+        # Создаем пользователей
         self.client_user = User.objects.create_user(
             username='client_perm',
             email='client_perm@test.com',
@@ -160,43 +160,43 @@ class ExpertRatingPermissionsTest(TestCase):
             role='client'
         )
         
-        # РЎРѕР·РґР°РµРј РїСЂРµРґРјРµС‚ Рё С‚РёРї СЂР°Р±РѕС‚С‹
-        self.subject, _ = Subject.objects.get_or_create(name='Р¤РёР·РёРєР°')
-        self.work_type, _ = WorkType.objects.get_or_create(name='Р›Р°Р±РѕСЂР°С‚РѕСЂРЅР°СЏ')
+        # Создаем предмет и тип работы
+        self.subject, _ = Subject.objects.get_or_create(name='Физика')
+        self.work_type, _ = WorkType.objects.get_or_create(name='Лабораторная')
         
-        # РЎРѕР·РґР°РµРј Р·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·
+        # Создаем завершенный заказ
         self.order = Order.objects.create(
             client=self.client_user,
             expert=self.expert_user,
             subject=self.subject,
             work_type=self.work_type,
-            title='РўРµСЃС‚РѕРІС‹Р№ Р·Р°РєР°Р· РґР»СЏ РїСЂР°РІ',
-            description='РћРїРёСЃР°РЅРёРµ',
+            title='Тестовый заказ для прав',
+            description='Описание',
             budget=1500,
             deadline=timezone.now() + timedelta(days=30),
             status='completed'
         )
         
-        # РЎРѕР·РґР°РµРј СЂРµР№С‚РёРЅРі
+        # Создаем рейтинг
         self.rating = ExpertRating.objects.create(
             order=self.order,
             expert=self.expert_user,
             client=self.client_user,
             rating=4,
-            comment='РҐРѕСЂРѕС€Р°СЏ СЂР°Р±РѕС‚Р°, РЅРѕ Р±С‹Р»Рё РЅРµР±РѕР»СЊС€РёРµ Р·Р°РјРµС‡Р°РЅРёСЏ.'
+            comment='Хорошая работа, но были небольшие замечания.'
         )
     
     def test_only_client_can_create_rating(self):
-        """РўРѕР»СЊРєРѕ РєР»РёРµРЅС‚ Р·Р°РєР°Р·Р° РјРѕР¶РµС‚ СЃРѕР·РґР°С‚СЊ СЂРµР№С‚РёРЅРі"""
+        """Только клиент заказа может создать рейтинг"""
         self.client.force_authenticate(user=self.other_user)
         
-        # РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ Р·Р°РєР°Р· РґР»СЏ С‚РµСЃС‚Р°
+        # Создаем новый заказ для теста
         order2 = Order.objects.create(
             client=self.client_user,
             expert=self.expert_user,
             subject=self.subject,
             work_type=self.work_type,
-            title='Р—Р°РєР°Р· 2',
+            title='Заказ 2',
             budget=1000,
             deadline=timezone.now() + timedelta(days=30),
             status='completed'
@@ -205,66 +205,66 @@ class ExpertRatingPermissionsTest(TestCase):
         data = {
             'order': order2.id,
             'rating': 5,
-            'comment': 'РћС‚Р»РёС‡РЅРѕ! Р’СЃРµ СЃРґРµР»Р°РЅРѕ РєР°С‡РµСЃС‚РІРµРЅРЅРѕ.'
+            'comment': 'Отлично! Все сделано качественно.'
         }
         
         response = self.client.post('/api/experts/ratings/', data)
         
-        # Р”СЂСѓРіРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РјРѕР¶РµС‚ СЃРѕР·РґР°С‚СЊ СЂРµР№С‚РёРЅРі
+        # Другой пользователь не может создать рейтинг
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
     def test_only_owner_can_update_rating(self):
-        """РўРѕР»СЊРєРѕ Р°РІС‚РѕСЂ РјРѕР¶РµС‚ РѕР±РЅРѕРІРёС‚СЊ СЃРІРѕР№ СЂРµР№С‚РёРЅРі"""
+        """Только автор может обновить свой рейтинг"""
         self.client.force_authenticate(user=self.other_user)
         
         data = {
             'rating': 5,
-            'comment': 'РР·РјРµРЅРёР» РјРЅРµРЅРёРµ, РѕС‚Р»РёС‡РЅРѕ!'
+            'comment': 'Изменил мнение, отлично!'
         }
         
         response = self.client.patch(f'/api/experts/ratings/{self.rating.id}/', data)
         
-        # Р”СЂСѓРіРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РјРѕР¶РµС‚ РІРёРґРµС‚СЊ С‡СѓР¶РѕР№ СЂРµР№С‚РёРЅРі (404 РёР·-Р·Р° С„РёР»СЊС‚СЂР°С†РёРё queryset)
+        # Другой пользователь не может видеть чужой рейтинг (404 из-за фильтрации queryset)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
     
     def test_owner_can_update_rating(self):
-        """РђРІС‚РѕСЂ РјРѕР¶РµС‚ РѕР±РЅРѕРІРёС‚СЊ СЃРІРѕР№ СЂРµР№С‚РёРЅРі"""
+        """Автор может обновить свой рейтинг"""
         self.client.force_authenticate(user=self.client_user)
         
         data = {
-            'order': self.order.id,  # РќСѓР¶РЅРѕ РїРµСЂРµРґР°С‚СЊ order
+            'order': self.order.id,  # Нужно передать order
             'rating': 5,
-            'comment': 'РћР±РЅРѕРІР»РµРЅРЅС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№ - СЂР°Р±РѕС‚Р° РІС‹РїРѕР»РЅРµРЅР° РѕС‚Р»РёС‡РЅРѕ!'
+            'comment': 'Обновленный комментарий - работа выполнена отлично!'
         }
         
         response = self.client.patch(f'/api/experts/ratings/{self.rating.id}/', data)
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-        # РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ РѕР±РЅРѕРІРёР»РёСЃСЊ
+        # Проверяем, что данные обновились
         self.rating.refresh_from_db()
         self.assertEqual(self.rating.rating, 5)
-        self.assertIn('РћР±РЅРѕРІР»РµРЅРЅС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№', self.rating.comment)
+        self.assertIn('Обновленный комментарий', self.rating.comment)
     
     def test_only_owner_can_delete_rating(self):
-        """РўРѕР»СЊРєРѕ Р°РІС‚РѕСЂ РјРѕР¶РµС‚ СѓРґР°Р»РёС‚СЊ СЃРІРѕР№ СЂРµР№С‚РёРЅРі"""
+        """Только автор может удалить свой рейтинг"""
         self.client.force_authenticate(user=self.other_user)
         
         response = self.client.delete(f'/api/experts/ratings/{self.rating.id}/')
         
-        # Р”СЂСѓРіРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РјРѕР¶РµС‚ РІРёРґРµС‚СЊ С‡СѓР¶РѕР№ СЂРµР№С‚РёРЅРі (404 РёР·-Р·Р° С„РёР»СЊС‚СЂР°С†РёРё queryset)
+        # Другой пользователь не может видеть чужой рейтинг (404 из-за фильтрации queryset)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(ExpertRating.objects.filter(id=self.rating.id).exists())
     
     def test_cannot_rate_incomplete_order(self):
-        """РќРµР»СЊР·СЏ РѕС†РµРЅРёС‚СЊ РЅРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·"""
-        # РЎРѕР·РґР°РµРј РЅРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·
+        """Нельзя оценить незавершенный заказ"""
+        # Создаем незавершенный заказ
         order_new = Order.objects.create(
             client=self.client_user,
             expert=self.expert_user,
             subject=self.subject,
             work_type=self.work_type,
-            title='РќРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·',
+            title='Незавершенный заказ',
             budget=1000,
             deadline=timezone.now() + timedelta(days=30),
             status='in_progress'
@@ -275,7 +275,7 @@ class ExpertRatingPermissionsTest(TestCase):
         data = {
             'order': order_new.id,
             'rating': 5,
-            'comment': 'РџРѕРїС‹С‚РєР° РѕС†РµРЅРёС‚СЊ РЅРµР·Р°РІРµСЂС€РµРЅРЅС‹Р№ Р·Р°РєР°Р·'
+            'comment': 'Попытка оценить незавершенный заказ'
         }
         
         response = self.client.post('/api/experts/ratings/', data)
@@ -283,7 +283,7 @@ class ExpertRatingPermissionsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
     
     def test_expert_can_view_own_ratings(self):
-        """Р­РєСЃРїРµСЂС‚ РјРѕР¶РµС‚ РїСЂРѕСЃРјР°С‚СЂРёРІР°С‚СЊ СЃРІРѕРё СЂРµР№С‚РёРЅРіРё"""
+        """Эксперт может просматривать свои рейтинги"""
         self.client.force_authenticate(user=self.expert_user)
         
         response = self.client.get(f'/api/experts/ratings/?expert={self.expert_user.id}')
@@ -305,7 +305,7 @@ class ExpertApplicationSubmissionRegressionTests(TestCase):
     def setUp(self):
         self.api_client = APIClient()
         self.specialization = Subject.objects.create(
-            name='Р РµРіСЂРµСЃСЃРёСЏ вЂ” РђРЅРєРµС‚Р°',
+            name='Регрессия — Анкета',
             is_active=True,
         )
         self.expert_user = User.objects.create_user(
@@ -331,18 +331,18 @@ class ExpertApplicationSubmissionRegressionTests(TestCase):
     def test_post_application_returns_201_and_creates_notification(self):
         self.api_client.force_authenticate(user=self.expert_user)
         payload = {
-            'full_name': 'РРІР°РЅ РРІР°РЅРѕРІ',
+            'full_name': 'Иван Иванов',
             'work_experience_years': 5,
             'phone': '+79991112233',
-            'biography': 'РћРїС‹С‚ СЂР°Р±РѕС‚С‹ РІ РЅР°СѓРєРµ',
+            'biography': 'Опыт работы в науке',
             'portfolio_url': '',
             'specialization_ids': [self.specialization.id],
             'educations': [
                 {
-                    'university': 'РњР“РЈ',
+                    'university': 'МГУ',
                     'start_year': 2010,
                     'end_year': 2015,
-                    'degree': 'РњР°РіРёСЃС‚СЂ',
+                    'degree': 'Магистр',
                 }
             ],
         }
@@ -355,7 +355,7 @@ class ExpertApplicationSubmissionRegressionTests(TestCase):
             f'unexpected status={response.status_code} body={response.content[:300]!r}',
         )
         body = response.json()
-        self.assertEqual(body['full_name'], 'РРІР°РЅ РРІР°РЅРѕРІ')
+        self.assertEqual(body['full_name'], 'Иван Иванов')
         self.assertEqual(len(body['educations']), 1)
 
         # A confirmation notification should have been sent to the expert.

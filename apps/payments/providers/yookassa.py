@@ -26,6 +26,7 @@ from __future__ import annotations
 import ipaddress
 import logging
 import uuid
+from urllib.parse import urlencode
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
@@ -100,6 +101,14 @@ def _description(payment: Payment) -> str:
     return "Пополнение кошелька на okoznaniy.ru"
 
 
+class ReceiptContactRequired(ValueError):
+    """Нет контакта, на который отправить чек.
+
+    Отдельный тип нужен, чтобы интерфейс отличил эту ситуацию от прочих
+    отказов шлюза и показал поле для почты, а не общее сообщение.
+    """
+
+
 class YooKassaError(Exception):
     """Шлюз вернул ошибку."""
 
@@ -124,6 +133,9 @@ class YooKassaClient:
         self.currency = self.SETTINGS.get("CURRENCY", "RUB")
         self.timeout = float(self.SETTINGS.get("TIMEOUT") or 20)
         self.return_url = self.SETTINGS.get("RETURN_URL") or ""
+        self.send_receipt = bool(self.SETTINGS.get("SEND_RECEIPT", True))
+        self.vat_code = int(self.SETTINGS.get("VAT_CODE") or 1)
+        self.tax_system_code = self.SETTINGS.get("TAX_SYSTEM_CODE") or ""
 
     @property
     def configured(self) -> bool:
@@ -196,6 +208,69 @@ class YooKassaClient:
     # Операции
     # ------------------------------------------------------------------
 
+    # ------------------------------------------------------------------
+    # Чек 54-ФЗ
+    # ------------------------------------------------------------------
+
+    def _payer(self, payment: Payment):
+        """Кто платит: сам плательщик, иначе заказчик по заказу."""
+        user = getattr(payment, "user", None)
+        if user is None:
+            order = getattr(payment, "order", None)
+            user = getattr(order, "client", None)
+        return user
+
+    @staticmethod
+    def _phone(raw: str) -> str:
+        """Телефон для чека: только цифры с кодом страны, как ждёт ЮKassa."""
+        digits = "".join(ch for ch in raw if ch.isdigit())
+        if len(digits) == 11 and digits.startswith("8"):
+            digits = "7" + digits[1:]
+        return digits if len(digits) == 11 else ""
+
+    def _customer(self, payment: Payment) -> Dict[str, str]:
+        """Контакт для отправки чека. Нужен хотя бы один из двух."""
+        contact = {}
+        # Почта, указанная в момент оплаты, важнее профиля: её вводят
+        # именно ради чека по этому платежу.
+        stated = ((payment.metadata or {}).get("receipt_email") or "").strip()
+        if stated:
+            contact["email"] = stated
+        user = self._payer(payment)
+        if not contact.get("email"):
+            email = (getattr(user, "email", "") or "").strip()
+            if email:
+                contact["email"] = email
+        phone = self._phone(getattr(user, "phone", "") or "")
+        if phone:
+            contact["phone"] = phone
+        if not contact:
+            raise ReceiptContactRequired(
+                "Укажите почту — на неё придёт чек об оплате"
+            )
+        return contact
+
+    def _receipt(self, payment: Payment, amount=None) -> Dict[str, Any]:
+        """Чек из одной позиции на всю сумму платежа.
+
+        Пополнение кошелька — аванс: услуга ещё не выбрана. Оплата
+        конкретного заказа — предоплата за услугу.
+        """
+        value = payment.amount if amount is None else amount
+        is_order = bool(getattr(payment, "order_id", None))
+        item = {
+            "description": _description(payment)[:128],
+            "quantity": "1",
+            "amount": {**self._amount(value), "currency": self.currency},
+            "vat_code": self.vat_code,
+            "payment_subject": "service" if is_order else "payment",
+            "payment_mode": "full_prepayment" if is_order else "advance",
+        }
+        receipt = {"customer": self._customer(payment), "items": [item]}
+        if self.tax_system_code:
+            receipt["tax_system_code"] = int(self.tax_system_code)
+        return receipt
+
     def register_payment(self, payment: Payment) -> Dict[str, str]:
         """Создаёт платёж и возвращает ссылку на платёжную форму.
 
@@ -222,6 +297,8 @@ class YooKassaClient:
                     "payment_id": payment.payment_id,
                     "order_id": str(payment.order_id or ""),
                 },
+                # Магазин с фискализацией без чека платёж не примет.
+                **({"receipt": self._receipt(payment)} if self.send_receipt else {}),
             },
             idempotence_key=self._idempotence_key(f"payment:{payment.payment_id}"),
         )
@@ -254,6 +331,15 @@ class YooKassaClient:
             raise ValueError(f"Платёж не зарегистрирован в {self.LABEL}")
         return remote_id
 
+    def list_payments(self, **params) -> Dict[str, Any]:
+        """Список платежей магазина.
+
+        Нужен для сверки со стороны шлюза: по нему находятся оплаты,
+        про которые наша запись ничего не знает.
+        """
+        query = urlencode({k: v for k, v in params.items() if v not in (None, "")})
+        return self._request("GET", f"payments?{query}" if query else "payments")
+
     def get_payment_status(self, payment: Payment) -> Dict[str, Any]:
         """Спрашивает шлюз о текущем состоянии платежа."""
         return self._request("GET", f"payments/{self._remote_id(payment)}")
@@ -275,6 +361,8 @@ class YooKassaClient:
             {
                 "payment_id": remote_id,
                 "amount": {**self._amount(value), "currency": self.currency},
+                # Возврат без чека шлюз отклонит так же, как и оплату.
+                **({"receipt": self._receipt(payment, value)} if self.send_receipt else {}),
             },
             idempotence_key=self._idempotence_key(f"refund:{payment.payment_id}:{value:.2f}"),
         )

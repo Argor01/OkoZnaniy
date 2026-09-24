@@ -218,6 +218,7 @@ def vkid_callback(request):
                 last_name=last_name,
                 role="client",
                 email_verified=bool(email),
+                registration_source="vk",
             )
         SocialAccount.objects.update_or_create(
             provider="vk",

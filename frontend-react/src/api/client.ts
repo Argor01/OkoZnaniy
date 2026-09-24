@@ -54,7 +54,7 @@ const performTokenRefresh = (): Promise<void> => {
   if (!refreshInFlight) {
     refreshInFlight = axios
       .post(`${API_URL}${API_ENDPOINTS.auth.refreshToken}`, {}, { withCredentials: true })
-      .then(() => undefined)
+      .then((): void => undefined)
       .finally(() => {
         refreshInFlight = null;
       });

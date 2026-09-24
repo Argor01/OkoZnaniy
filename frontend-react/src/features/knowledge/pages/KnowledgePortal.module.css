@@ -404,7 +404,7 @@
   color: var(--color-text-secondary) !important;
 }
 
-/* РџР»Р°РЅС€РµС‚РЅР°СЏ Р°РґР°РїС‚Р°С†РёСЏ */
+/* Планшетная адаптация */
 @media (max-width: 1024px) and (min-width: 769px) {
   .container {
     padding: 20px;
@@ -415,7 +415,7 @@
   }
 }
 
-/* РњРѕР±РёР»СЊРЅР°СЏ Р°РґР°РїС‚Р°С†РёСЏ */
+/* Мобильная адаптация */
 @media (max-width: 768px) {
   .container {
     padding: 16px;
@@ -494,7 +494,7 @@
   }
 }
 
-/* РћС‡РµРЅСЊ РјР°Р»РµРЅСЊРєРёРµ СЌРєСЂР°РЅС‹ */
+/* Очень маленькие экраны */
 @media (max-width: 480px) {
   .container {
     padding: 12px;

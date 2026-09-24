@@ -131,7 +131,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                         {chat.last_message?.text || 'Нет сообщений'}
                       </Text>
                       {chat.unread_count > 0 && (
-                        <Badge dot className={styles.chatBadge} />
+                        <Badge count={chat.unread_count} className={`${styles.chatBadge} oko-unread-indicator`} />
                       )}
                     </div>
                   </div>

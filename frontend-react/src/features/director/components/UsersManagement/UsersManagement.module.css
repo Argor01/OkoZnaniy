@@ -78,3 +78,32 @@
     margin-left: 0;
   }
 }
+
+
+/* Email and registration values stay on one line instead of collapsing into a letter column. */
+.container :global(.ant-table-cell) {
+  vertical-align: middle;
+}
+.container :global(.ant-table-cell .ant-typography) {
+  max-width: 100%;
+}
+.container :global(.ant-table-tbody > tr > td) {
+  white-space: nowrap;
+}
+
+
+.usersTable :global(.ant-table-thead > tr > th) {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.usersTable :global(.ant-table-tbody > tr > td) {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.usersTable :global(.ant-table-cell) {
+  overflow: hidden;
+}

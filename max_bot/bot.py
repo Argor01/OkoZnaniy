@@ -43,15 +43,16 @@ def _api_get(path, params=None):
 def send_message(user_id, text):
     """Send a plain text message to a MAX user."""
     try:
-        requests.post(
+        response = requests.post(
             f"{BASE_URL}/messages",
             headers=HEADERS,
             params={"user_id": user_id},
             json={"text": text},
             timeout=30,
         )
-    except requests.RequestException as e:
-        logger.error(f"send_message failed: {e}")
+        response.raise_for_status()
+    except requests.RequestException:
+        logger.error("MAX send_message failed")
 
 
 def _make_username(first_name, last_name, max_id):
@@ -95,6 +96,8 @@ def get_or_create_user(max_id, first_name, last_name):
 
 def save_auth_data(auth_id, user):
     """Persist issued JWT for the frontend poller."""
+    if not user.is_active:
+        raise ValueError('Inactive account')
     refresh = RefreshToken.for_user(user)
     data = {
         "authenticated": True,
@@ -127,8 +130,20 @@ def _extract_auth_id(raw):
 
 
 def handle_registration(user_id, first_name, last_name, auth_id):
-    user, created = get_or_create_user(user_id, first_name, last_name)
-    save_auth_data(auth_id, user)
+    try:
+        user, created = get_or_create_user(user_id, first_name, last_name)
+        save_auth_data(auth_id, user)
+    except Exception:
+        # Без этого ответа человек видит только бесконечное ожидание входа
+        # на сайте и не понимает, нужно ли ждать дальше.
+        logger.exception("MAX registration failed for max_id=%s", user_id)
+        send_message(
+            user_id,
+            "\u26a0\ufe0f Не удалось завершить вход.\n\n"
+            "Мы уже знаем о проблеме. Попробуйте ещё раз через пару минут "
+            "или войдите на сайте по логину и паролю.",
+        )
+        return
     role_display = user.get_role_display() if hasattr(user, "get_role_display") else user.role
     send_message(
         user_id,

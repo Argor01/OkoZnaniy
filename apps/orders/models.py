@@ -392,6 +392,7 @@ class OrderComment(models.Model):
         return f"Комментарий от {self.author} к заказу {self.order.id}"
 
 class TransactionType(models.TextChoices):
+    ESCROW_CREDIT = "escrow_credit", "Поступление в резерв"
     HOLD = "hold", "Заморозка"
     RELEASE = "release", "Разморозка"
     PAYOUT = "payout", "Выплата"

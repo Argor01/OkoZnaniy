@@ -21,14 +21,17 @@ const WalletBadge: React.FC<Props> = ({ compact = false }) => {
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const navigate = useNavigate();
 
-
+  // Раньше запрос и сам бейдж были закрыты проверкой метки в localStorage.
+  // Метка живёт отдельно от настоящей сессии (токен в HttpOnly-куке), и
+  // стоило браузеру её вычистить — кошелёк пропадал из шапки совсем, хотя
+  // человек был авторизован. Шапка и так показывается только вошедшим,
+  // поэтому спрашиваем баланс прямо у сервера.
   const fetchBalance = useCallback(async () => {
-    if (!localStorage.getItem("access_token")) return;
     try {
       const data = await walletApi.me();
       setBalance(data);
     } catch {
-      /* network or 401 — ignore silently to avoid noisy header */
+      /* сеть или 401 — молча, шапка не место для ошибок */
     }
   }, []);
 
@@ -50,19 +53,16 @@ const WalletBadge: React.FC<Props> = ({ compact = false }) => {
     };
   }, [fetchBalance]);
 
-  if (!localStorage.getItem('access_token')) return null;
-
-  const display = balance ? formatMoney(balance.available_balance) : '...';
+  const display = balance ? formatMoney(balance.available_balance) : '…';
   const title = balance
     ? `Доступно: ${formatMoney(balance.available_balance)} · Заморожено: ${formatMoney(balance.frozen_balance)}`
-    : 'Загрузка баланса...';
+    : 'Загрузка баланса…';
 
   return (
     <Tooltip title={title} placement="bottom">
       <button
-        style={{marginTop: '16px'}}
         type="button"
-        className={`${styles.badge} ${compact ? styles.badgeCompact : ''}`}
+        className={`${styles.badge} ${compact ? styles.compact : ''}`}
         onClick={() => navigate('/wallet')}
         aria-label="Кошелёк"
       >

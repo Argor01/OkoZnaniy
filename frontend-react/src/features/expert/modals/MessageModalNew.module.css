@@ -1025,7 +1025,7 @@
 }
 
 .chatMessagesDragOver::after {
-  content: "РћС‚РїСѓСЃС‚РёС‚Рµ С„Р°Р№Р» РґР»СЏ РїСЂРёРєСЂРµРїР»РµРЅРёСЏ";
+  content: "Отпустите файл для прикрепления";
   position: absolute;
   left: 16px;
   right: 16px;

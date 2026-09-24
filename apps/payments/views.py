@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from .models import Payment, PaymentMethod
 from .serializers import PaymentSerializer
 from .services import PaymentService
+from .providers.yookassa import ReceiptContactRequired
 try:
     from .utils import generate_qr_code
 except ImportError:
@@ -58,10 +59,26 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        receipt_email = (request.data.get('receipt_email') or '').strip()
         try:
             with transaction.atomic():
                 payment = PaymentService.create_payment(order, payment_method)
+                if receipt_email:
+                    # См. пополнение кошелька: чек сейчас, профиль — на будущее.
+                    payment.metadata = {
+                        **(payment.metadata or {}), 'receipt_email': receipt_email,
+                    }
+                    payment.save(update_fields=['metadata'])
+                    if not (request.user.email or '').strip():
+                        request.user.email = receipt_email
+                        request.user.save(update_fields=['email'])
             payment_link = PaymentService.get_payment_link(payment)
+        except ReceiptContactRequired as e:
+            # Интерфейс по этому коду покажет поле почты и повторит оплату.
+            return Response(
+                {'error': str(e), 'detail': str(e), 'code': 'receipt_email_required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
             logger.error("Payment creation failed for order %s: %s", order_id, e, exc_info=True)
             return Response(

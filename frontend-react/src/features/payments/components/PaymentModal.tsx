@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Radio, Typography, message, Space } from 'antd';
+import { Modal, Radio, Typography, message, Space, Input } from 'antd';
 import { CreditCardOutlined, BankOutlined, WalletOutlined, QrcodeOutlined } from '@ant-design/icons';
 import {
   paymentsApi, type AvailablePaymentMethod, type PaymentMethod,
@@ -7,6 +7,10 @@ import {
 import { walletApi, type PaymentQuote } from '@/features/wallet/api/wallet';
 
 const { Text } = Typography;
+
+// Чек по 54-ФЗ уходит на почту, поэтому опечатка стоит дорого:
+// человек оплатит, а документ не получит.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 interface PaymentModalProps {
   visible: boolean;
@@ -37,6 +41,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [quote, setQuote] = useState<PaymentQuote | null>(null);
   const [methods, setMethods] = useState<AvailablePaymentMethod[]>([]);
+  // Поле показываем только после отказа сервера: у большинства почта есть.
+  const [needEmail, setNeedEmail] = useState(false);
+  const [receiptEmail, setReceiptEmail] = useState('');
 
   useEffect(() => {
     if (!visible) {
@@ -70,12 +77,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   }, [visible, amount]);
 
   const handlePay = async () => {
+    const email = receiptEmail.trim();
+    if (needEmail && !EMAIL_RE.test(email)) {
+      message.warning('Укажите почту, на неё придёт чек');
+      return;
+    }
     try {
       setLoading(true);
       const response = await paymentsApi.createPayment({
         order_id: orderId,
         amount,
         payment_method: selectedMethod,
+        ...(email ? { receipt_email: email } : {}),
       });
 
       if (response.payment_link) {
@@ -86,9 +99,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         onClose();
       }
     } catch (e: unknown) {
-      const errorDetail =
-        (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      message.error(errorDetail || 'Ошибка создания платежа');
+      const data = (e as {
+        response?: { data?: { detail?: string; error?: string; code?: string } };
+      })?.response?.data;
+      if (data?.code === 'receipt_email_required') {
+        setNeedEmail(true);
+        message.info('Укажите почту для чека — и повторите оплату');
+        return;
+      }
+      message.error(data?.detail || data?.error || 'Ошибка создания платежа');
     } finally {
       setLoading(false);
     }
@@ -122,6 +141,25 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
             <Text type="secondary">Считаем итоговую сумму…</Text>
           )}
         </Text>
+        {needEmail && (
+          <div style={{ marginBottom: 16 }}>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>
+              Почта для чека
+            </Text>
+            <Input
+              type="email"
+              size="large"
+              placeholder="example@mail.ru"
+              value={receiptEmail}
+              onChange={(e) => setReceiptEmail(e.target.value)}
+            />
+            <Text type="secondary" style={{ display: 'block', marginTop: 8 }}>
+              В профиле не указана почта, а без неё не выдать чек. Мы сохраним
+              её в профиле, чтобы не спрашивать снова.
+            </Text>
+          </div>
+        )}
+
         <Radio.Group
           value={selectedMethod}
           onChange={(e) => setSelectedMethod(e.target.value)}

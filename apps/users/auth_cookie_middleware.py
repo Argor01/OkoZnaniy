@@ -20,7 +20,11 @@ class AuthCookieMiddleware:
         common = {
             "secure": secure,
             "httponly": True,
-            "samesite": "Strict",
+            # Lax, а не Strict: со Strict браузер не отдаёт куку при переходе
+            # с чужого сайта — а именно так человек возвращается с платёжной
+            # формы эквайера. От подделки запросов Lax защищает так же: на
+            # межсайтовый POST куку он по-прежнему не отдаёт.
+            "samesite": "Lax",
         }
         if access:
             response.set_cookie(
@@ -31,7 +35,8 @@ class AuthCookieMiddleware:
             )
         if refresh:
             response.set_cookie(
-                REFRESH_COOKIE, refresh, max_age=24 * 60 * 60,
+                # Сутки означали, что раз в день вход слетал у всех.
+                REFRESH_COOKIE, refresh, max_age=30 * 24 * 60 * 60,
                 path="/api/users/", **common,
             )
         return response

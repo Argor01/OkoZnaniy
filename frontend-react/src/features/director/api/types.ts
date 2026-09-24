@@ -312,6 +312,18 @@ export interface PartnerTurnoverResponse {
   partners: PartnerTurnover[];
 }
 
+export interface ClientStatistics {
+  registered_clients: number;
+  clients_with_orders: number;
+  clients_without_orders: number;
+  conversion_rate: number;
+  total_orders: number;
+  completed_orders: number;
+  cancelled_orders: number;
+  average_order_value: number;
+  average_completed_order_value: number;
+}
+
 export interface KPI {
   totalTurnover?: number;
   total_turnover?: number;

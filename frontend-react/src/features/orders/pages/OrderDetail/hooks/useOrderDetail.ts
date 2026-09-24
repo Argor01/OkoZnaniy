@@ -1,4 +1,6 @@
-﻿import React, { useState, useCallback, useMemo } from 'react';
+import { API_URL } from '@/config/api';
+import { API_ENDPOINTS } from '@/config/endpoints';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { message, Modal } from 'antd';
@@ -56,6 +58,8 @@ export function useOrderDetail(orderId?: string) {
 
   const { data: order, isLoading, error: orderError, refetch: refetchOrder } = useQuery<Order, Error>({
     queryKey: ['order', orderId],
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
     queryFn: () => ordersApi.getById(Number(orderId)),
     enabled: !!orderId,
     retry: (failureCount: number, error: any) => {
@@ -206,6 +210,8 @@ export function useOrderDetail(orderId?: string) {
     }
   }, [orderId, refreshOrderWithLists, userProfile?.id]);
 
+  const [revisionFiles, setRevisionFiles] = useState<File[]>([]);
+
   const handleConfirmRevisionFromCard = useCallback(async () => {
     if (!orderId) return;
     const comment = revisionComment.trim();
@@ -216,18 +222,27 @@ export function useOrderDetail(orderId?: string) {
     try {
       setRevisionSubmitting(true);
       setReviewActionLoading('revision');
+      // Файлы отправляем до запроса: иначе автор получит доработку
+      // раньше материалов, которые её объясняют.
+      for (const file of revisionFiles) {
+        await ordersApi.uploadOrderFile(Number(orderId), file, {
+          file_type: 'task',
+          description: 'Материалы к доработке',
+        });
+      }
       await ordersApi.requestRevision(Number(orderId), comment);
       await refreshOrderWithLists();
       setRevisionModalOpen(false);
       setRevisionComment('');
-      message.success('\u0417\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d');
+      setRevisionFiles([]);
+      message.success('Запрос на доработку отправлен');
     } catch (e: any) {
       message.error(e?.response?.data?.detail || '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0437\u0430\u043f\u0440\u043e\u0441 \u043d\u0430 \u0434\u043e\u0440\u0430\u0431\u043e\u0442\u043a\u0443');
     } finally {
       setRevisionSubmitting(false);
       setReviewActionLoading(null);
     }
-  }, [orderId, refreshOrderWithLists, revisionComment]);
+  }, [orderId, refreshOrderWithLists, revisionComment, revisionFiles]);
 
   const handleRejectFromCard = useCallback(async () => {
     if (!orderId) return;
@@ -333,34 +348,50 @@ export function useOrderDetail(orderId?: string) {
   }, [orderId, refreshOrderWithLists]);
 
   const handleDownloadFile = useCallback(async (file: any): Promise<boolean> => {
-    try {
-      const orderIdNum = Number(orderId);
-      const fileIdNum = Number(file?.id);
-      const filename = file?.filename || file?.file_name || 'file';
-      if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
-        message.error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043a\u0430\u0447\u0430\u0442\u044c \u0444\u0430\u0439\u043b');
-        return false;
-      }
-      const blob = await ordersApi.downloadOrderFile(orderIdNum, fileIdNum);
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(blobUrl);
-      return true;
-    } catch (e: any) {
-      const status = e?.response?.status;
-      if (status === 401) {
-        message.error('\u041d\u0435\u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u043f\u0440\u0430\u0432 \u0434\u043b\u044f \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u044f \u0444\u0430\u0439\u043b\u0430');
-      } else {
-        message.error('\u041e\u0448\u0438\u0431\u043a\u0430 \u043f\u0440\u0438 \u0441\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u0438 \u0444\u0430\u0439\u043b\u0430');
-      }
+    const orderIdNum = Number(orderId);
+    const fileIdNum = Number(file?.id);
+    if (!orderIdNum || Number.isNaN(orderIdNum) || !fileIdNum || Number.isNaN(fileIdNum)) {
+      message.error('Не удалось скачать файл');
       return false;
     }
-  }, [orderId]);
+    // Работу отдаём только после полной оплаты. Проверяем здесь же:
+    // иначе прямой переход открыл бы служебную страницу с отказом
+    // сервера вместо понятного объяснения.
+    const owed = Number(order?.remaining_payment || 0);
+    const isWorkFile = file?.file_type === 'solution' || file?.file_type === 'revision';
+    if (isWorkFile && owed > 0 && Number(order?.client?.id) === Number(userProfile?.id)) {
+      message.warning(
+        'Работа станет доступна после полной оплаты. Осталось внести '
+        + owed.toLocaleString('ru-RU') + ' \u20bd.',
+      );
+      return false;
+    }
+    // Прямой переход вместо blob: ссылка с download и blob-адресом на
+    // телефонах молча не срабатывает — файл не сохраняется, и сервер не
+    // узнаёт, что работу получили. Из-за этого приёмка заказа упиралась
+    // в требование скачать все файлы и не проходила никогда.
+    // Сервер отдаёт файл с Content-Disposition: attachment, поэтому
+    // страница остаётся на месте, а скачивание засчитывается.
+    window.location.href = `${API_URL}${API_ENDPOINTS.orders.downloadFile(orderIdNum, fileIdNum)}`;
+    return true;
+  }, [orderId, order, userProfile?.id]);
+
+  const [payRemainingLoading, setPayRemainingLoading] = useState(false);
+
+  const handlePayRemaining = useCallback(async () => {
+    const orderIdNum = Number(orderId);
+    if (!orderIdNum || Number.isNaN(orderIdNum)) return;
+    setPayRemainingLoading(true);
+    try {
+      await ordersApi.payRemaining(orderIdNum);
+      message.success('Заказ оплачен полностью — теперь работу можно принять');
+      await refetchOrder();
+    } catch (e: any) {
+      message.error(e?.response?.data?.detail || 'Не удалось провести доплату');
+    } finally {
+      setPayRemainingLoading(false);
+    }
+  }, [orderId, order?.remaining_payment]);
 
   const handleDeleteOrderFile = useCallback((file: any) => {
     if (!orderId || !file?.id) return;
@@ -450,12 +481,16 @@ export function useOrderDetail(orderId?: string) {
     handleConfirmReviewAndApprove,
     handleApproveWithoutReview,
     handleConfirmRevisionFromCard,
+    revisionFiles,
+    setRevisionFiles,
     handleRejectFromCard,
     handleAssignExpert,
     handleAcceptAssignment,
     handleDeclineAssignment,
     handleFileUpload,
     handleDownloadFile,
+    handlePayRemaining,
+    payRemainingLoading,
     handleDeleteOrderFile,
     handleDrag,
     handleDrop,

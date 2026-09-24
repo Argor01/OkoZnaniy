@@ -1,0 +1,682 @@
+import { apiClient } from '@/api/client';
+import dayjs from 'dayjs';
+import { logger } from '@/utils/logger';
+import type {
+  Employee,
+  ExpertApplication,
+  RegisterEmployeeRequest,
+  MonthlyTurnover,
+  NetProfit,
+  IncomeDetail,
+  ExpenseDetail,
+  Partner,
+  PartnerTurnoverResponse,
+  KPI,
+  StatisticsSummary,
+  InternalMessage,
+  GetMessagesParams,
+  PaginatedResponse,
+  SendMessageRequest,
+  Claim,
+} from './types';
+
+
+export const getPersonnel = async (): Promise<Employee[]> => {
+  try {
+    
+    let allEmployees: Employee[] = [];
+    let nextUrl: string | null = '/director/personnel/';
+    
+    while (nextUrl) {
+      const response = await apiClient.get(nextUrl);
+      const data = response.data;
+      const results = data?.results || data || [];
+      if (Array.isArray(results)) {
+        allEmployees = [...allEmployees, ...results];
+      }
+      
+      if (data?.next) {
+        const url = new URL(data.next);
+        
+        nextUrl = url.pathname.replace(/^\/api/, '') + url.search;
+      } else {
+        nextUrl = null;
+      }
+    }
+    
+    return allEmployees;
+  } catch (error) {
+    logger.error('Error fetching personnel:', error);
+    throw error;
+  }
+};
+
+export const registerEmployee = async (data: RegisterEmployeeRequest): Promise<Employee> => {
+  try {
+    const requestData: any = {
+      email: data.email,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      phone: data.phone || '',
+      role: data.role,
+      password: data.password,
+      username: data.username || data.email,
+    };
+    
+    // Добавляем город если он указан
+    if (data.city) {
+      requestData.city = data.city;
+    }
+    
+    const response = await apiClient.post('/director/personnel/register/', requestData);
+    return response.data;
+  } catch (error) {
+    logger.error('Error registering employee:', error);
+    throw error;
+  }
+};
+
+export const getExpertApplications = async (): Promise<ExpertApplication[]> => {
+  try {
+    const response = await apiClient.get('/director/personnel/expert-applications/');
+    const raw = response.data?.results || response.data || [];
+    return (raw as any[]).map((app: any) => {
+      const specs = typeof app.specializations === 'string'
+        ? app.specializations.split(/[\n,]+/).map((s: string) => s.trim()).filter((s: string) => !!s)
+        : Array.isArray(app.specializations) ? app.specializations : [];
+      const educationStr = Array.isArray(app.educations)
+        ? app.educations.map((e: any) => {
+            const period = e.end_year ? `${e.start_year}-${e.end_year}` : `${e.start_year}-н.в.`;
+            const degree = e.degree ? `, ${e.degree}` : '';
+            return `${e.university} (${period})${degree}`;
+          }).join('; ')
+        : (app.education || '');
+      const statusMap = app.status === 'pending' ? 'under_review' : app.status;
+      return {
+        id: app.id,
+        expert: app.expert || app.user,
+        full_name: app.full_name,
+        phone: app.phone || app.expert?.phone || app.user?.phone,
+        experience_years: app.work_experience_years ?? app.experience_years,
+        education: educationStr,
+        skills: app.skills,
+        portfolio_url: app.portfolio_url,
+        bio: app.bio,
+        biography: app.biography,
+        specializations: specs,
+        status: statusMap,
+        submitted_at: app.created_at,
+        reviewed_at: app.reviewed_at,
+        application_submitted_at: app.created_at,
+        application_reviewed_at: app.reviewed_at,
+        application_approved: app.status === 'approved',
+        rejection_reason: app.rejection_reason,
+        comment: app.comment,
+      } as ExpertApplication;
+    });
+  } catch (error) {
+    logger.error('Error fetching expert applications:', error);
+    throw error;
+  }
+};
+
+export const approveApplication = async (id: number): Promise<ExpertApplication> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/expert-applications/${id}/approve/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error approving application:', error);
+    throw error;
+  }
+};
+
+export const rejectApplication = async (id: number, reason: string): Promise<ExpertApplication> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/expert-applications/${id}/reject/`, { reason });
+    return response.data;
+  } catch (error) {
+    logger.error('Error rejecting application:', error);
+    throw error;
+  }
+};
+
+export const sendForRework = async (id: number, comment: string): Promise<ExpertApplication> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/expert-applications/${id}/rework/`, { comment });
+    return response.data;
+  } catch (error) {
+    logger.error('Error sending application for rework:', error);
+    throw error;
+  }
+};
+
+export const deactivateEmployee = async (id: number): Promise<Employee> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/${id}/deactivate/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error deactivating employee:', error);
+    throw error;
+  }
+};
+
+export const activateEmployee = async (id: number): Promise<Employee> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/${id}/activate/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error activating employee:', error);
+    throw error;
+  }
+};
+
+export const archiveEmployee = async (id: number): Promise<Employee> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/${id}/archive/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error archiving employee:', error);
+    throw error;
+  }
+};
+
+export const getArchivedEmployees = async (): Promise<Employee[]> => {
+  try {
+    const response = await apiClient.get('/director/personnel/archive/');
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching archived employees:', error);
+    throw error;
+  }
+};
+
+export const restoreEmployee = async (id: number): Promise<Employee> => {
+  try {
+    const response = await apiClient.post(`/director/personnel/${id}/restore/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error restoring employee:', error);
+    throw error;
+  }
+};
+
+export const deleteEmployee = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/director/personnel/${id}/`);
+  } catch (error) {
+    logger.error('Error deleting employee:', error);
+    throw error;
+  }
+};
+
+
+export const getMonthlyTurnover = async (period?: string): Promise<MonthlyTurnover> => {
+  try {
+    const params = period ? { period } : {};
+    const response = await apiClient.get('/director/finance/turnover/', { params });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching monthly turnover:', error);
+    throw error;
+  }
+};
+
+export const getNetProfit = async (startDate: string, endDate: string): Promise<NetProfit> => {
+  try {
+    const response = await apiClient.get('/director/finance/net-profit/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching net profit:', error);
+    throw error;
+  }
+};
+
+export const getIncomeDetail = async (startDate: string, endDate: string): Promise<IncomeDetail[]> => {
+  try {
+    const response = await apiClient.get('/director/finance/income/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching income detail:', error);
+    throw error;
+  }
+};
+
+export const getExpenseDetail = async (startDate: string, endDate: string): Promise<ExpenseDetail[]> => {
+  try {
+    const response = await apiClient.get('/director/finance/expense/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching expense detail:', error);
+    throw error;
+  }
+};
+
+export const getFinanceSummary = async (startDate: string, endDate: string) => {
+  try {
+    const response = await apiClient.get('/director/finance/finance-summary/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching finance summary:', error);
+    throw error;
+  }
+};
+
+export const addIncome = async (data: { date: string; description: string; amount: number }): Promise<IncomeDetail> => {
+  try {
+    const response = await apiClient.post('/director/finance/income/', data);
+    return response.data;
+  } catch (error) {
+    logger.error('Error adding income:', error);
+    throw error;
+  }
+};
+
+export const addExpense = async (data: { date: string; description: string; amount: number }): Promise<ExpenseDetail> => {
+  try {
+    const response = await apiClient.post('/director/finance/expense/', data);
+    return response.data;
+  } catch (error) {
+    logger.error('Error adding expense:', error);
+    throw error;
+  }
+};
+
+export const exportFinancialData = async (
+  startDate: string,
+  endDate: string,
+  format: 'excel' | 'csv' | 'pdf'
+): Promise<Blob> => {
+  try {
+    const response = await apiClient.get('/director/finance/export/', {
+      params: { start_date: startDate, end_date: endDate, format },
+      responseType: 'blob',
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error exporting financial data:', error);
+    throw error;
+  }
+};
+
+
+export const getPartners = async (): Promise<Partner[]> => {
+  try {
+    const response = await apiClient.get('/director/partners/');
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching partners:', error);
+    throw error;
+  }
+};
+
+export const getPartnerTurnover = async (
+  partnerId: number,
+  startDate: string,
+  endDate: string
+): Promise<PartnerTurnoverResponse> => {
+  try {
+    const response = await apiClient.get(`/director/partners/${partnerId}/turnover/`, {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching partner turnover:', error);
+    throw error;
+  }
+};
+
+export const getAllPartnersTurnover = async (
+  period: string | [string, string]
+): Promise<PartnerTurnoverResponse> => {
+  try {
+    let params: any = {};
+    if (typeof period === 'string') {
+      
+      const startDate = dayjs(period).startOf('month').format('YYYY-MM-DD');
+      const endDate = dayjs(period).endOf('month').format('YYYY-MM-DD');
+      params = { start_date: startDate, end_date: endDate };
+    } else {
+      params = { start_date: period[0], end_date: period[1] };
+    }
+    const response = await apiClient.get('/director/partners/turnover/', {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching all partners turnover:', error);
+    throw error;
+  }
+};
+
+export const updatePartnerCommission = async (
+  partnerId: number,
+  commission: number
+): Promise<Partner> => {
+  try {
+    const response = await apiClient.patch(`/director/partners/${partnerId}/commission/`, {
+      commission_percent: commission,
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error updating partner commission:', error);
+    throw error;
+  }
+};
+
+export const togglePartnerStatus = async (partnerId: number): Promise<Partner> => {
+  try {
+    const response = await apiClient.post(`/director/partners/${partnerId}/toggle-status/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error toggling partner status:', error);
+    throw error;
+  }
+};
+
+
+export const getKPI = async (startDate: string, endDate: string): Promise<KPI> => {
+  try {
+    const response = await apiClient.get('/director/statistics/kpi/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching KPI:', error);
+    throw error;
+  }
+};
+
+export const getStatisticsSummary = async (
+  startDate: string,
+  endDate: string
+): Promise<StatisticsSummary> => {
+  try {
+    const response = await apiClient.get('/director/statistics/summary/', {
+      params: { start_date: startDate, end_date: endDate },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching statistics summary:', error);
+    throw error;
+  }
+};
+
+export const exportStatisticsReport = async (
+  startDate: string,
+  endDate: string,
+  format: 'excel' | 'pdf'
+): Promise<void> => {
+  try {
+    const response = await apiClient.get('/director/statistics/export/', {
+      params: { start_date: startDate, end_date: endDate, format },
+      responseType: 'blob',
+    });
+    
+    
+    const blob = new Blob([response.data]);
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `statistics_${startDate}_${endDate}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    logger.error('Error exporting statistics report:', error);
+    throw error;
+  }
+};
+
+export const getMessages = async (params?: GetMessagesParams): Promise<PaginatedResponse<InternalMessage>> => {
+  try {
+    const queryParams = new URLSearchParams();
+    
+    if (params?.page) {
+      queryParams.append('page', params.page.toString());
+    }
+    
+    if (params?.page_size) {
+      queryParams.append('page_size', params.page_size.toString());
+    }
+    
+    if (params?.claim_id) {
+      queryParams.append('claim_id', params.claim_id.toString());
+    }
+    
+    if (params?.unread_only) {
+      queryParams.append('unread_only', params.unread_only.toString());
+    }
+    
+    const response = await apiClient.get(`/director/messages/?${queryParams.toString()}`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching messages:', error);
+    throw error;
+  }
+};
+
+export const sendMessage = async (data: SendMessageRequest): Promise<InternalMessage> => {
+  try {
+    const formData = new FormData();
+    formData.append('text', data.text);
+    
+    if (data.claim_id) {
+      formData.append('claim_id', data.claim_id.toString());
+    }
+    
+    if (data.priority) {
+      formData.append('priority', data.priority);
+    }
+    
+    if (data.attachments && data.attachments.length > 0) {
+      data.attachments.forEach((file) => {
+        formData.append('attachments', file);
+      });
+    }
+    
+    const response = await apiClient.post('/director/messages/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+export const getPendingApprovalClaims = async (): Promise<Claim[]> => {
+
+  return [];
+};
+
+export const markMessageAsRead = async (id: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/messages/${id}/mark_as_read/`);
+  } catch (error) {
+    logger.error('Error marking message as read:', error);
+    throw error;
+  }
+};
+
+export const deleteMessage = async (id: number): Promise<void> => {
+  try {
+    await apiClient.delete(`/director/messages/${id}/`);
+  } catch (error) {
+    logger.error('Error deleting message:', error);
+    throw error;
+  }
+};
+
+export const directorApi = {
+
+  getPersonnel,
+  registerEmployee,
+  getExpertApplications,
+  approveApplication,
+  rejectApplication,
+  sendForRework,
+  deactivateEmployee,
+  activateEmployee,
+  archiveEmployee,
+  getArchivedEmployees,
+  restoreEmployee,
+  deleteEmployee,
+
+  getMonthlyTurnover,
+  getNetProfit,
+  getFinanceSummary,
+  getIncomeDetail,
+  getExpenseDetail,
+  exportFinancialData,
+
+  getPartners,
+  getPartnerTurnover,
+  getAllPartnersTurnover,
+  updatePartnerCommission,
+  togglePartnerStatus,
+
+  getKPI,
+  getStatisticsSummary,
+  exportStatisticsReport,
+
+  getMessages,
+  sendMessage,
+  getPendingApprovalClaims,
+  markMessageAsRead,
+  deleteMessage,
+};
+
+
+// Chat Rooms API
+export const getChatRooms = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/director/chat-rooms/');
+    // API возвращает объект с пагинацией, берем results
+    const data = response.data;
+    return data.results || data || [];
+  } catch (error) {
+    logger.error('Error fetching chat rooms:', error);
+    throw error;
+  }
+};
+
+export const createChatRoom = async (data: { name: string; description?: string; type: string }): Promise<any> => {
+  try {
+    const response = await apiClient.post('/director/chat-rooms/', {
+      name: data.name,
+      description: data.description || '',
+      type: data.type,  // Используем type, который сериализатор преобразует в room_type
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error creating chat room:', error);
+    throw error;
+  }
+};
+
+export const getChatRoomMessages = async (roomId: number): Promise<any[]> => {
+  try {
+    const response = await apiClient.get(`/director/chat-rooms/${roomId}/messages/`);
+    return response.data;
+  } catch (error) {
+    logger.error('Error fetching chat room messages:', error);
+    throw error;
+  }
+};
+
+export const sendChatRoomMessage = async (roomId: number, message: string): Promise<any> => {
+  try {
+    const response = await apiClient.post(`/director/chat-rooms/${roomId}/send_message/`, {
+      message,
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error sending message:', error);
+    throw error;
+  }
+};
+
+export const joinChatRoom = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/join_room/`);
+  } catch (error) {
+    logger.error('Error joining chat room:', error);
+    throw error;
+  }
+};
+
+export const leaveChatRoom = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/leave_room/`);
+  } catch (error) {
+    logger.error('Error leaving chat room:', error);
+    throw error;
+  }
+};
+
+export const inviteToChatRoom = async (roomId: number, userId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/invite_user/`, {
+      user_id: userId,
+    });
+  } catch (error) {
+    logger.error('Error inviting user:', error);
+    throw error;
+  }
+};
+
+export const updateChatRoom = async (roomId: number, data: { name?: string; description?: string }): Promise<any> => {
+  try {
+    const response = await apiClient.patch(`/director/chat-rooms/${roomId}/`, data);
+    return response.data;
+  } catch (error) {
+    logger.error('Error updating chat room:', error);
+    throw error;
+  }
+};
+
+export const getDirectorUsers = async (): Promise<any[]> => {
+  try {
+    const response = await apiClient.get('/director/chat-rooms/chat_users/');
+    return response.data || [];
+  } catch (error) {
+    logger.error('Error fetching users:', error);
+    return [];
+  }
+};
+
+export const uploadChatRoomFile = async (roomId: number, file: File): Promise<any> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post(`/director/chat-rooms/${roomId}/upload_file/`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Error uploading file:', error);
+    throw error;
+  }
+};
+
+export const markChatRoomAsRead = async (roomId: number): Promise<void> => {
+  try {
+    await apiClient.post(`/director/chat-rooms/${roomId}/mark_read/`);
+  } catch (error) {
+    logger.error('Error marking chat room as read:', error);
+  }
+};

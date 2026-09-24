@@ -47,7 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   
   const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
 
-  const { unreadCount: unreadNotifications, loadNotifications: refreshNotifications } = useNotifications();
+  const { unreadCount: unreadNotifications, loadNotifications: refreshNotifications } = useNotifications(true);
   const handleNotificationsOpen = () => {
     setNotificationsModalVisible(true);
     refreshNotifications();

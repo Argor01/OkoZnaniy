@@ -368,9 +368,9 @@ const EarningsHistory: React.FC<{ data: PartnerDashboardData }> = ({ data }) => 
       title: 'Статус',
       dataIndex: 'is_paid',
       key: 'is_paid',
-      render: (isPaid: boolean) => (
-        <Tag color={isPaid ? 'green' : 'orange'}>
-          {isPaid ? 'Выплачено' : 'Ожидает'}
+      render: (isPaid: boolean, row: PartnerEarning) => (
+        <Tag color={row.is_frozen ? 'blue' : isPaid ? 'green' : 'orange'}>
+          {row.is_frozen ? 'В резерве' : isPaid ? 'Выплачено' : 'Ожидает'}
         </Tag>
       ),
     },
@@ -572,6 +572,8 @@ const PartnerDashboard: React.FC = () => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['partner-dashboard'],
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
     queryFn: () => partnersApi.getDashboard(),
     retry: false,
     retryOnMount: false,

@@ -6,6 +6,8 @@ export type WalletBalance = {
   pending_balance: string;
   debt_balance: string;
   available_balance: string;
+  /** Внесено по незавершённым заказам — резерв со стороны заказчика. */
+  reserved_on_orders?: string;
 };
 
 export type WalletStats = {
@@ -19,7 +21,7 @@ export type WalletTransaction = {
   amount: string;
   type:
     | 'hold' | 'release' | 'payout' | 'commission' | 'refund'
-    | 'topup' | 'withdrawal' | 'purchase' | 'partner_payout' | 'clawback';
+    | 'topup' | 'withdrawal' | 'purchase' | 'partner_payout' | 'clawback' | 'escrow_credit';
   type_display: string;
   direction: 'in' | 'out';
   description: string;
@@ -80,7 +82,9 @@ export const walletApi = {
     });
     return data;
   },
-  topup: async (body: { amount: number; payment_method: string }): Promise<TopupResponse> => {
+  topup: async (
+    body: { amount: number; payment_method: string; receipt_email?: string },
+  ): Promise<TopupResponse> => {
     const { data } = await apiClient.post('/wallet/topup/', body);
     return data;
   },

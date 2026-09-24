@@ -100,6 +100,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ userRole }) => {
             <h3 className={styles.heading}>Служба поддержки</h3>
             <a href="tel:+79314674689" className={styles.contactPhone}>+7 931 467-46-89</a>
             <a href="mailto:znaniy.oko@mail.ru" className={styles.contactEmail}>znaniy.oko@mail.ru</a>
+            <a href="tel:+79314674689" className={styles.contactPhone}>+7 931 467-46-89</a>
             <span className={styles.workHoursValue}>Пн – Пт: 07:00 – 16:00 (МСК)</span>
             {!hideContactAndExpert && (
               <a href="/support" className={styles.contactButton}>Написать нам</a>

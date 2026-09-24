@@ -17,6 +17,10 @@ app.conf.imports = tuple(app.conf.imports or ()) + ('vk_bot.tasks',)
 
 # Настройка периодических задач
 app.conf.beat_schedule = {
+    'dispatch-external-notifications': {
+        'task': 'apps.notifications.tasks.dispatch_external_notifications',
+        'schedule': 60.0,
+    },
     'update-expert-statistics': {
         'task': 'apps.experts.tasks.update_all_experts_statistics',
         'schedule': crontab(hour='*/6'),  # Каждые 6 часов
@@ -36,6 +40,23 @@ app.conf.beat_schedule = {
     'release-ready-work-holds': {
         'task': 'apps.shop.tasks.release_ready_work_holds',
         'schedule': crontab(minute='*/15'),
+    },
+    # Уведомление от эквайера может не дойти, а деньги у человека уже
+    # списаны. Поэтому раз в пять минут спрашиваем шлюз сами.
+    'reconcile-pending-payments': {
+        'task': 'apps.payments.tasks.reconcile_pending_payments',
+        'schedule': crontab(minute='*/5'),
+    },
+    # Взгляд с другой стороны: вдруг шлюз принял оплату по платежу,
+    # ссылку на который наша запись потеряла.
+    # Выдержка выплат авторам: когда срок вышел, деньги размораживаются.
+    'release-due-payouts': {
+        'task': 'apps.wallet.tasks.release_due_payouts',
+        'schedule': crontab(minute='*/20'),
+    },
+    'reconcile-gateway-payments': {
+        'task': 'apps.payments.tasks.reconcile_gateway_payments',
+        'schedule': crontab(minute='*/30'),
     },
 }
 

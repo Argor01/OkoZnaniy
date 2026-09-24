@@ -121,6 +121,8 @@ const [showCloseModal, setShowCloseModal] = useState(false);
       }
     },
     enabled: !!complaintId,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 
@@ -128,6 +130,8 @@ const [showCloseModal, setShowCloseModal] = useState(false);
     queryKey: ['complaint-chat', complaintId],
     queryFn: () => complaintsApi.getChat(Number(complaintId)),
     enabled: !!complaintId,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
     retry: 1,
   });
 

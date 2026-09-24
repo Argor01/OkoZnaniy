@@ -3,7 +3,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -308,9 +308,34 @@ def change_user_role(request, user_id):
 @permission_classes([IsAdminUser])
 def get_all_orders(request):
     """Получить все заказы"""
-    orders = Order.objects.all().select_related('client', 'expert').order_by('-created_at')
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data)
+    from apps.orders.models import Transaction, TransactionType
+    from apps.wallet.models import Settlement
+    orders = Order.objects.all().select_related('client', 'expert', 'client__partner').order_by('-created_at')
+    search = (request.query_params.get('search') or '').strip().lstrip('#№').strip()
+    if search:
+        if search.isdigit():
+            orders = orders.filter(pk=int(search))
+        else:
+            orders = orders.filter(Q(title__icontains=search) | Q(client__username__icontains=search))
+    orders = list(orders)
+    refunded = set(Transaction.objects.filter(
+        order_id__in=[o.pk for o in orders], type=TransactionType.REFUND,
+    ).values_list('order_id', flat=True))
+    data = OrderSerializer(orders, many=True, context={'request': request}).data
+    author_amounts = {row['order_id']: row['funded_base'] for row in Settlement.objects.filter(
+        order_id__in=[o.pk for o in orders], is_released=False
+    ).values('order_id', 'funded_base')}
+    released_author_amounts = dict(Transaction.objects.filter(
+        order_id__in=[o.pk for o in orders], type=TransactionType.PAYOUT
+    ).values('order_id').annotate(amount_sum=Sum('amount')).values_list('order_id', 'amount_sum'))
+    for order, row in zip(orders, data):
+        partner = order.client.partner
+        row['partner'] = ({'id': partner.pk, 'username': partner.username,
+            'first_name': partner.first_name, 'last_name': partner.last_name} if partner else None)
+        row['order_amount'] = str(order.final_price if order.final_price is not None else order.budget or 0)
+        row['author_amount'] = str(author_amounts.get(order.pk) or released_author_amounts.get(order.pk) or 0)
+        row['admin_status'] = 'refund' if order.status == 'cancelled' and order.pk in refunded else order.status
+    return Response(data)
 
 
 @api_view(['GET'])

@@ -1,0 +1,93 @@
+import { apiClient } from '@/api/client';
+
+export type WalletBalance = {
+  balance: string;
+  frozen_balance: string;
+  pending_balance: string;
+  debt_balance: string;
+  available_balance: string;
+};
+
+export type WalletStats = {
+  total_topup: string;
+  total_spent: string;
+  total_earned: string;
+};
+
+export type WalletTransaction = {
+  id: number;
+  amount: string;
+  type:
+    | 'hold' | 'release' | 'payout' | 'commission' | 'refund'
+    | 'topup' | 'withdrawal' | 'purchase' | 'partner_payout' | 'clawback';
+  type_display: string;
+  direction: 'in' | 'out';
+  description: string;
+  order_id: number | null;
+  balance_after: string | null;
+  timestamp: string;
+};
+
+export type TopupResponse = {
+  payment_id: string;
+  amount: string;
+  method: string;
+  wallet_credit?: string;
+  acquiring_fee?: string;
+  payment_url: string;
+};
+
+export type PaymentQuote = {
+  kind: 'topup' | 'order';
+  total: string;
+  acquiring_fee: string;
+  acquiring_fee_percent: string;
+  wallet_credit?: string;
+  base_amount?: string;
+  service_fee?: string;
+  service_fee_percent?: string;
+};
+
+export type WithdrawResponse = {
+  withdrawal_id: number;
+  status: string;
+  amount: string;
+  gross_amount: string;
+  platform_fee: string;
+  acquiring_fee: string;
+  card: string;
+  balance: WalletBalance;
+};
+
+export const walletApi = {
+  // Разбивку считает сервер: у клиента может быть индивидуальная ставка
+  // сервисного сбора, а ставка эквайринга зависит от договора.
+  quote: async (amount: number, kind: 'topup' | 'order' = 'topup'): Promise<PaymentQuote> => {
+    const { data } = await apiClient.get('/wallet/quote/', { params: { amount, kind } });
+    return data;
+  },
+  me: async (): Promise<WalletBalance> => {
+    const { data } = await apiClient.get('/wallet/me/');
+    return data;
+  },
+  stats: async (): Promise<WalletStats> => {
+    const { data } = await apiClient.get('/wallet/stats/');
+    return data;
+  },
+  transactions: async (params?: { type?: string[]; limit?: number }): Promise<WalletTransaction[]> => {
+    const { data } = await apiClient.get('/wallet/transactions/', {
+      params: { type: params?.type, limit: params?.limit ?? 50 },
+    });
+    return data;
+  },
+  topup: async (
+    body: { amount: number; payment_method: string; receipt_email?: string },
+  ): Promise<TopupResponse> => {
+    const { data } = await apiClient.post('/wallet/topup/', body);
+    return data;
+  },
+  withdraw: async (body: { amount: number; card_number: string }): Promise<WithdrawResponse> => {
+    const { data } = await apiClient.post('/wallet/withdraw/', body);
+    return data;
+  },
+};

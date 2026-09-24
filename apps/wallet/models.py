@@ -58,6 +58,8 @@ class Settlement(models.Model):
     funded_base = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     funded_service_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     is_released = models.BooleanField(default=False)
+    # Когда деньги автора выйдут из заморозки. Пусто — выплата сразу.
+    release_after = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

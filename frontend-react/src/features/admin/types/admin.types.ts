@@ -91,6 +91,7 @@ export type MenuKey =
   | 'pending_approval'
   | 'user_conversations'
   | 'knowledge_base'
+  | 'reviews'
   | 'audit_log'
   | 'faq';
 

@@ -73,6 +73,58 @@ def withdrawal_fee_percent(role, user=None) -> Decimal:
     return EXPERT_WITHDRAWAL_FEE_PERCENT if role == 'expert' else CLIENT_WITHDRAWAL_FEE_PERCENT
 
 
+def order_payment_amount(order):
+    """Сумма заказа: согласованная цена, иначе бюджет."""
+    amount = order.final_price if order.final_price is not None else order.budget
+    if amount in (None, ''):
+        return Decimal('0.00')
+    return money(amount)
+
+
+def order_active_hold(order):
+    """Сколько заказчик сейчас держит в резерве по заказу."""
+    from django.db import models as dj_models
+    from apps.orders.models import Transaction, TransactionType
+
+    rows = Transaction.objects.filter(
+        order=order,
+        user=order.client,
+        type__in=[TransactionType.HOLD, TransactionType.RELEASE, TransactionType.REFUND],
+    ).values('type').annotate(total=dj_models.Sum('amount'))
+    totals = {row['type']: row['total'] for row in rows}
+    return money(
+        (totals.get(TransactionType.HOLD) or 0)
+        - (totals.get(TransactionType.RELEASE) or 0)
+        - (totals.get(TransactionType.REFUND) or 0)
+    )
+
+
+def order_remaining_payment(order):
+    """Остаток до полной оплаты заказа.
+
+    Ровно та величина, которой не хватает для приёмки работы: пока она
+    больше нуля, заказ принять нельзя.
+    """
+    if not getattr(order, 'expert_id', None):
+        return Decimal('0.00')
+    amount = order_payment_amount(order)
+    if amount <= 0:
+        return Decimal('0.00')
+    quote = order_quote(amount, client=order.client)
+    required = money(quote['base_amount'] + quote['service_fee'])
+    # Releasing escrow pays the author; it does not make the client unpaid again.
+    from django.db.models import Sum
+    from apps.orders.models import Transaction, TransactionType
+    rows = Transaction.objects.filter(order=order, user=order.client,
+        type__in=[TransactionType.HOLD, TransactionType.PURCHASE, TransactionType.REFUND],
+    ).values('type').annotate(total=Sum('amount'))
+    totals = {row['type']: row['total'] for row in rows}
+    paid = money((totals.get(TransactionType.HOLD) or 0)
+                 + (totals.get(TransactionType.PURCHASE) or 0)
+                 - (totals.get(TransactionType.REFUND) or 0))
+    return max(Decimal('0.00'), money(required - paid))
+
+
 def withdrawal_quote(amount, role, user=None) -> dict:
     """Amount is what the user requests; fees are retained from that amount."""
     gross = money(amount)
@@ -85,3 +137,14 @@ def withdrawal_quote(amount, role, user=None) -> dict:
     if net <= 0:
         raise ValueError('Сумма вывода после комиссий должна быть положительной')
     return {'gross': gross, 'platform_fee': platform_fee, 'acquiring_fee': acquiring_fee, 'net': net}
+
+
+def order_paid_amount(order):
+    from django.db.models import Sum
+    from apps.orders.models import Transaction, TransactionType
+    rows = Transaction.objects.filter(order=order, user_id=order.client_id,
+        type__in=[TransactionType.HOLD, TransactionType.PURCHASE, TransactionType.REFUND],
+    ).values('type').annotate(total=Sum('amount'))
+    totals = {r['type']: r['total'] for r in rows}
+    return max(Decimal('0.00'), money((totals.get(TransactionType.HOLD) or 0)
+        + (totals.get(TransactionType.PURCHASE) or 0) - (totals.get(TransactionType.REFUND) or 0)))

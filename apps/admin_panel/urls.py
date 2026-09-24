@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views
+from . import views, review_views
 
 router = DefaultRouter()
 router.register(r'support-requests', views.SupportRequestViewSet, basename='support-request')
@@ -8,6 +8,8 @@ router.register(r'claims', views.ClaimViewSet, basename='claim')
 router.register(r'chat-rooms', views.AdminChatRoomViewSet, basename='admin-chat-room')
 
 urlpatterns = [
+    path('reviews/', review_views.list_reviews, name='admin-reviews'),
+    path('reviews/<str:kind>/<int:review_id>/', review_views.delete_review, name='admin-delete-review'),
     # Router URLs
     path('', include(router.urls)),
     

@@ -46,6 +46,6 @@ class CookieLogoutView(APIView):
 
     def post(self, request):
         response = Response(status=status.HTTP_204_NO_CONTENT)
-        response.delete_cookie(ACCESS_COOKIE, path="/", samesite="Strict")
-        response.delete_cookie(REFRESH_COOKIE, path="/api/users/", samesite="Strict")
+        response.delete_cookie(ACCESS_COOKIE, path="/", samesite="Lax")
+        response.delete_cookie(REFRESH_COOKIE, path="/api/users/", samesite="Lax")
         return response

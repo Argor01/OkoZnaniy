@@ -223,6 +223,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
   ]);
 
   const isExpert = userProfile?.role === 'expert';
+  const isClient = userProfile?.role === 'client';
 
   const menuItems = useMemo(() => [
     {
@@ -242,13 +243,15 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       icon: <FileDoneOutlined />,
       label: 'Заказы в работе',
     } : null,
-    (isMobile && isExpert) ? {
+    // Готовые работы покупает клиент, поэтому магазин нужен и ему.
+    // Выкладывать работы может только автор.
+    (isMobile && (isExpert || isClient)) ? {
       key: 'shop-menu',
       icon: <ShopOutlined />,
       label: 'Магазин',
       children: [
         { key: 'shop-ready-works', label: 'Магазин готовых работ' },
-        { key: 'shop-add-work', label: 'Добавить работу' },
+        ...(isExpert ? [{ key: 'shop-add-work', label: 'Добавить работу' }] : []),
         { key: 'shop-purchased', label: 'Купленные работы' },
       ],
     } : null,

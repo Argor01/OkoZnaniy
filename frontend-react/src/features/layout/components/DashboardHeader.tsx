@@ -204,13 +204,13 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
               className={styles.supportRow}
               onClick={(e) => {
                 e.stopPropagation();
-                navigator.clipboard.writeText('88005007857');
+                navigator.clipboard.writeText('+79314674689');
                 message.success('Телефон скопирован!');
               }}
             >
               <PhoneOutlined className={styles.supportPhoneIcon} />
               <Text className={styles.supportRowText}>
-                8 (800) 500-78-57
+                +7 931 467-46-89
               </Text>
               <CopyOutlined className={styles.supportCopyIcon} />
             </div>
@@ -291,7 +291,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
         <Space size={isMobile ? 8 : 16}>
           {!isMobile && (
             <>
-              <Badge count={unreadMessages} offset={[-5, 5]}>
+              <Badge count={unreadMessages} className={unreadMessages > 0 ? "oko-unread-indicator" : undefined} offset={[-5, 5]}>
                 <Button
                   type="text"
                   icon={<MessageOutlined />}
@@ -301,7 +301,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
               </Badge>
 
               
-              <Badge count={unreadNotifications} offset={[-5, 5]}>
+              <Badge count={unreadNotifications} className={unreadNotifications > 0 ? "oko-unread-indicator" : undefined} offset={[-5, 5]}>
                 <Button
                   type="text"
                   icon={<BellOutlined />}
@@ -375,7 +375,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
             <>
               <Button
                 type="text"
-                className={styles.themeToggle}
+                /* На узком экране кнопка растягивалась в овал: размеры и
+                   скругление задаёт отдельный класс для телефонов. */
+                className={`${styles.themeToggle} ${styles.mobileThemeToggle}`}
                 icon={isDark ? <SunOutlined /> : <MoonOutlined />}
                 onClick={toggleTheme}
                 title={isDark ? 'Светлая тема' : 'Тёмная тема'}

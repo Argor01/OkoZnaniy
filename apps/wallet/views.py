@@ -12,6 +12,7 @@ from rest_framework.response import Response
 
 from apps.payments.models import Payment, PaymentMethod, PaymentStatus
 from apps.payments.services import PaymentService
+from apps.payments.providers.yookassa import ReceiptContactRequired
 
 from .serializers import (
     TopupRequestSerializer, WalletBalanceSerializer,
@@ -147,6 +148,16 @@ class WalletViewSet(viewsets.ViewSet):
                 payment_id=f'topup-{request.user.pk}-{uuid.uuid4().hex}',
                 metadata={'wallet_credit': str(amount), 'acquiring_fee': str(acquiring_fee)},
             )
+        # Почту сохраняем и в платёж, и в профиль: чек нужен сейчас,
+        # а профиль избавляет от повторного вопроса при следующей оплате.
+        receipt_email = (ser.validated_data.get('receipt_email') or '').strip()
+        if receipt_email:
+            payment.metadata = {**(payment.metadata or {}), 'receipt_email': receipt_email}
+            payment.save(update_fields=['metadata'])
+            if not (request.user.email or '').strip():
+                request.user.email = receipt_email
+                request.user.save(update_fields=['email'])
+
         if _sandbox_topup_allowed(request.user):
             if payment.status != PaymentStatus.COMPLETED:
                 payment.status = PaymentStatus.COMPLETED
@@ -166,6 +177,14 @@ class WalletViewSet(viewsets.ViewSet):
             })
         try:
             link = PaymentService.get_payment_link(payment)
+        except ReceiptContactRequired as e:
+            # Интерфейс по этому коду покажет поле почты и повторит оплату.
+            payment.status = PaymentStatus.FAILED
+            payment.save(update_fields=['status'])
+            return Response(
+                {'detail': str(e), 'code': 'receipt_email_required'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:  # noqa: BLE001
             payment.status = PaymentStatus.FAILED
             payment.save(update_fields=['status'])

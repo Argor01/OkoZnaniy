@@ -7,6 +7,12 @@ export interface OrderFile {
   file_url: string | null;
   view_url?: string | null;
   download_url?: string | null;
+  /** Остаток до полной оплаты: пока больше нуля, работу принять нельзя. */
+  remaining_payment?: string | null;
+  /** Сколько по заказу зарезервировано за автором до приёмки. */
+  expert_reserved?: string | null;
+  /** Когда деньги автора выйдут из выдержки после приёмки. */
+  expert_payout_after?: string | null;
   filename: string;
   file_type: string;
   file_type_display: string;
@@ -14,6 +20,7 @@ export interface OrderFile {
   description?: string | null;
   created_at: string;
   expert_viewed_at?: string | null;
+  client_downloaded_at?: string | null;
   file_size?: string;
 }
 
@@ -58,6 +65,7 @@ export interface Bid {
 }
 
 export interface OrderAvailableActions {
+  can_reactivate?: boolean;
   can_view?: boolean;
   can_edit?: boolean;
   can_delete?: boolean;
@@ -80,6 +88,11 @@ export interface OrderAvailableActions {
 }
 
 export interface Order {
+  paid_amount?: string | null;
+  remaining_payment?: string | null;
+  expert_reserved?: string | null;
+  expert_payout_after?: string | null;
+  current_delivery_file_ids?: number[];
   id: number;
   title: string;
   description: string;
@@ -146,6 +159,11 @@ export interface OrderComment {
 type NamedEntity = { name: string };
 
 export interface AdminOrder {
+  author_amount?: string | number;
+  paid_amount?: string | null;
+  partner?: { id: number; username: string; first_name: string; last_name: string } | null;
+  order_amount?: string | number;
+  admin_status?: string;
   id: number;
   title: string;
   description: string;

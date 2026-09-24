@@ -108,8 +108,8 @@ export const ChatListItemComponent: React.FC<ChatListItemProps> = ({
             </Text>
             {chat.unread_count > 0 && (
               <Badge
-                dot
-                className={styles.chatBadge}
+                count={chat.unread_count}
+                className={`${styles.chatBadge} oko-unread-indicator`}
               />
             )}
           </div>

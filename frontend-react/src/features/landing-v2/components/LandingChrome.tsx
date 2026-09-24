@@ -28,8 +28,8 @@ export const TopBar: React.FC<{ links?: NavLink[] }> = ({ links }) => {
           {nav.map((n) => (<a key={n.href} href={n.href}>{n.label}</a>))}
         </nav>
         <div className={styles.topActions}>
-          <Link to="/become-expert" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Стать экспертом</Link>
-          <Link to="/become-partner" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Стать партнёром</Link>
+          <Link to="/vacancies" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Вакансии</Link>
+          <Link to="/agencies" className={`${styles.btnGhost} ${styles.topbarBecome}`}>Агентствам</Link>
           <Link to="/login" className={styles.btnGhost}>Войти</Link>
           <Link to="/login?tab=register" className={styles.btnPrimary}>Регистрация</Link>
         </div>
@@ -104,8 +104,13 @@ export const FooterDark: React.FC = () => (
           </p>
         </div>
         <div className={styles.footerCol}>
-          <div className={styles.footerColTitle}>Техподдержка</div>
+          <div className={styles.footerColTitle}>Напишите, поможем разместить задание</div>
+          <a href="tel:+79314674689">+7 931 467-46-89</a>
           <a href="mailto:znaniy.oko@mail.ru">znaniy.oko@mail.ru</a>
+          <a href="https://vk.ru/oko.znania" target="_blank" rel="noopener noreferrer">ВКонтакте: Око Знаний ↗</a>
+          <a href="https://t.me/okoznaNIY2018" target="_blank" rel="noopener noreferrer">Telegram: @okoznaNIY2018 ↗</a>
+          <Link to="/vacancies">Вакансии для студентов</Link>
+          <Link to="/agencies">Агентствам</Link>
           <div className={`${styles.footerColTitle} ${styles.footerColTitleNext}`}>
             Стать партнёром и экспертом
           </div>

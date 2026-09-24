@@ -177,15 +177,17 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
 
   const filteredData = dataSource.filter(order => {
-    const searchLower = searchText.toLowerCase();
+    const searchLower = searchText.trim().toLowerCase();
+    const orderNumber = searchLower.replace(/^[#№]\s*/, '');
     const matchesSearch =
+      String(order.id) === orderNumber ||
       (order.title || '').toLowerCase().includes(searchLower) ||
       (order.description || '').toLowerCase().includes(searchLower) ||
       (order.client?.username || '').toLowerCase().includes(searchLower) ||
       (order.client?.first_name || '').toLowerCase().includes(searchLower) ||
       (order.client?.last_name || '').toLowerCase().includes(searchLower);
 
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || (order.admin_status || order.status) === statusFilter;
     const matchesSubject = subjectFilter === 'all' || getEntityLabel(order.subject) === subjectFilter;
 
     let matchesDate = true;
@@ -203,7 +205,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
   };
 
   const getStatusLabel = (status: string) => {
-    return ORDER_STATUS_LABELS[status] || status;
+    return ({ completed: 'Выполнен', refund: 'Возврат' } as Record<string, string>)[status] || ORDER_STATUS_LABELS[status] || status;
   };
 
   const getStatusColor = (status: string) => {
@@ -226,7 +228,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
     completed: filteredData.filter(o => o.status === ORDER_STATUSES.COMPLETED).length,
     cancelled: filteredData.filter(o => o.status === ORDER_STATUSES.CANCELLED).length,
     totalBudget: filteredData.reduce((sum, o) => {
-      const budget = Number(o.budget) || 0;
+      const budget = Number(o.order_amount ?? o.budget) || 0;
       if (isNaN(budget)) {
         logger.warn('Invalid budget value:', o.budget, 'for order:', o.id);
         return sum;
@@ -237,142 +239,65 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
   const columns = [
     {
-      title: 'Заказ',
-      key: 'order',
-      width: 300,
-      render: (record: Order) => (
-        <div>
-          <div className={styles.allOrdersHeaderRow}>
-            <strong>#{record.id}</strong>
-            {record.is_urgent && <Tag color="red">Срочно</Tag>}
-          </div>
-          <div className={styles.allOrdersTitle}>
-            {record.title}
-          </div>
-          <Text type="secondary" className={styles.allOrdersMetaText}>
-            {getEntityLabel(record.subject)} • {getEntityLabel(record.work_type)}
-          </Text>
-        </div>
-      ),
+      title: '№ заказа', key: 'order', width: 120,
+      render: (record: Order) => <strong>#{record.id}</strong>,
     },
     {
-      title: 'Клиент',
-      key: 'client',
-      width: 180,
-      render: (record: Order) => (
-        <div>
-          <div className={styles.allOrdersPersonName}>
-            {truncateDisplayName(`${record.client.first_name || ''} ${record.client.last_name || ''}`.trim())}
-          </div>
-          <Text type="secondary" className={styles.allOrdersPersonHandle}>
-            {truncateDisplayName(record.client.username)}
-          </Text>
-        </div>
-      ),
+      title: 'Сумма заказа', key: 'order_amount', width: 150,
+      render: (record: Order) => <Text strong>{Number(record.order_amount ?? record.budget ?? 0).toLocaleString('ru-RU')} ₽</Text>,
     },
     {
-      title: 'Эксперт',
-      key: 'expert',
-      width: 180,
-      render: (record: Order) => (
-        record.expert ? (
-          <div>
-            <div className={styles.allOrdersPersonName}>
-              {truncateDisplayName(`${record.expert.first_name || ''} ${record.expert.last_name || ''}`.trim())}
-            </div>
-            <Text type="secondary" className={styles.allOrdersPersonHandle}>
-              {truncateDisplayName(record.expert.username)}
-            </Text>
-          </div>
-        ) : (
-          <Text type="secondary">Не назначен</Text>
-        )
-      ),
+      title: 'Партнёр', key: 'partner', width: 170,
+      render: (record: Order) => record.partner
+        ? truncateDisplayName([record.partner.first_name, record.partner.last_name].filter(Boolean).join(' ') || record.partner.username)
+        : <Text type="secondary">Нет партнёра</Text>,
     },
     {
-      title: 'Статус',
-      dataIndex: 'status',
-      key: 'status',
-      width: 120,
-      render: (status: string) => (
-        <Tag color={getStatusColor(status)}>
-          {getStatusLabel(status)}
-        </Tag>
-      ),
-    },
-
-    {
-      title: 'Бюджет',
-      dataIndex: 'budget',
-      key: 'budget',
-      width: 100,
-      render: (budget: number) => {
-        const budgetNum = Number(budget) || 0;
-        return <Text strong>{budgetNum.toLocaleString()} ₽</Text>;
-      },
+      title: 'Автор', key: 'author', width: 190,
+      render: (record: Order) => record.expert
+        ? <div><div className={styles.allOrdersPersonName}>{truncateDisplayName(`${record.expert.first_name || ''} ${record.expert.last_name || ''}`.trim())}</div><Text type="secondary">{truncateDisplayName(record.expert.username)}</Text></div>
+        : <Text type="secondary">Не назначен</Text>,
     },
     {
-      title: 'Дедлайн',
-      dataIndex: 'deadline',
-      key: 'deadline',
-      width: 120,
-      render: (deadline: string) => {
-        const deadlineDate = dayjs(deadline);
-        const isOverdue = deadlineDate.isBefore(dayjs());
-        const isNearDeadline = deadlineDate.diff(dayjs(), 'days') <= 3;
-
-        return (
-          <div className={isOverdue ? styles.allOrdersDeadlineOverdue : isNearDeadline ? styles.allOrdersDeadlineNear : styles.allOrdersDeadline}>
-            <div className={styles.allOrdersDeadlineDate}>
-              {deadlineDate.format('DD.MM.YYYY')}
-            </div>
-            <div className={styles.allOrdersDeadlineTime}>
-              {deadlineDate.format('HH:mm')}
-            </div>
-          </div>
-        );
-      },
+      title: 'Сумма автора', key: 'author_amount', width: 150,
+      render: (record: Order) => <Text>{record.author_amount == null ? '0 ₽' : `${Number(record.author_amount).toLocaleString('ru-RU')} ₽`}</Text>,
     },
-
-
     {
-      title: 'Действия',
-      key: 'actions',
-      width: 80,
-      render: (record: Order) => (
-        <Tooltip title="Подробно">
-          <Button
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewOrder(record)}
-          />
-        </Tooltip>
-      ),
+      title: 'Статус', dataIndex: 'status', key: 'status', width: 140,
+      render: (status: string, record: Order) => <Tag color={getStatusColor(record.admin_status || status)}>{getStatusLabel(record.admin_status || status)}</Tag>,
+    },
+    {
+      title: 'Сколько внесено', key: 'paid_amount', width: 160,
+      render: (record: Order) => <Text>{record.paid_amount == null ? '0 ₽' : `${Number(record.paid_amount).toLocaleString('ru-RU')} ₽`}</Text>,
+    },
+    {
+      title: 'Действия', key: 'actions', width: 80,
+      render: (record: Order) => <Tooltip title="Подробно"><Button size="small" icon={<EyeOutlined />} onClick={() => handleViewOrder(record)} /></Tooltip>,
     },
   ];
 
   return (
     <div>
       <Card>
-        <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={4}>
+        <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic title="Всего заказов" value={stats.total} />
           </Col>
-          <Col span={4}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic title="Новые" value={stats.new} />
           </Col>
-          <Col span={4}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic title="В работе" value={stats.inProgress} />
           </Col>
-          <Col span={4}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic title="Завершены" value={stats.completed} />
           </Col>
-          <Col span={4}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic title="Отменены" value={stats.cancelled} />
           </Col>
-          <Col span={4}>
+          <Col xs={12} sm={8} xl={4}>
             <Statistic
-              title="Общий бюджет"
+              title="Общая сумма заказов"
               value={stats.totalBudget}
               suffix="₽"
               formatter={(value) => `${Number(value).toLocaleString()}`}
@@ -382,7 +307,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
 
         <div className={styles.allOrdersFiltersRow}>
           <Search
-            placeholder="Поиск по названию, описанию или клиенту"
+            placeholder="Номер заказа, название или клиент"
             allowClear
             className={styles.allOrdersSearch}
             value={searchText}
@@ -399,7 +324,9 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
             <Option value={ORDER_STATUSES.NEW}>{ORDER_STATUS_LABELS[ORDER_STATUSES.NEW]}</Option>
             <Option value={ORDER_STATUSES.IN_PROGRESS}>{ORDER_STATUS_LABELS[ORDER_STATUSES.IN_PROGRESS]}</Option>
             <Option value={ORDER_STATUSES.REVIEW}>{ORDER_STATUS_LABELS[ORDER_STATUSES.REVIEW]}</Option>
-            <Option value={ORDER_STATUSES.COMPLETED}>{ORDER_STATUS_LABELS[ORDER_STATUSES.COMPLETED]}</Option>
+            <Option value={ORDER_STATUSES.COMPLETED}>Выполнен</Option>
+            <Option value={ORDER_STATUSES.REVISION}>На доработке</Option>
+            <Option value="refund">Возврат</Option>
             <Option value={ORDER_STATUSES.CANCELLED}>{ORDER_STATUS_LABELS[ORDER_STATUSES.CANCELLED]}</Option>
             <Option value={ORDER_STATUSES.DISPUTE}>{ORDER_STATUS_LABELS[ORDER_STATUSES.DISPUTE]}</Option>
           </Select>
@@ -440,7 +367,7 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
               `${range[0]}-${range[1]} из ${total} заказов`
           }}
           locale={{ emptyText: 'Заказы не найдены' }}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1100 }}
           size="small"
         />
       </Card>
@@ -487,8 +414,14 @@ const AllOrdersTable: React.FC<AllOrdersTableProps> = ({
                         {getStatusLabel(selectedOrder.status)}
                       </Tag>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Бюджет">
-                      <strong>{(Number(selectedOrder.budget) || 0).toLocaleString()} ₽</strong>
+                    <Descriptions.Item label="Сумма заказа">
+                      <strong>{(Number(selectedOrder.order_amount ?? selectedOrder.budget) || 0).toLocaleString()} ₽</strong>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Сумма автора">
+                      {selectedOrder.author_amount == null ? '0 ₽' : `${Number(selectedOrder.author_amount).toLocaleString('ru-RU')} ₽`}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Сколько внесено">
+                      {selectedOrder.paid_amount == null ? '0 ₽' : `${Number(selectedOrder.paid_amount).toLocaleString('ru-RU')} ₽`}
                     </Descriptions.Item>
                     <Descriptions.Item label="Дедлайн">
                       {dayjs(selectedOrder.deadline).format('DD.MM.YYYY HH:mm')}

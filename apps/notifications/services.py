@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import transaction
 from datetime import timedelta
 import logging
 
@@ -16,6 +17,7 @@ class NotificationService:
         return f"№{order.id}"
 
     @staticmethod
+    @transaction.atomic
     def create_notification(recipient, type, title, message, related_object_id=None, related_object_type=None, expires_in=None, data=None):
         payload = data or {}
         now = timezone.now()
@@ -78,18 +80,8 @@ class NotificationService:
         except Exception:
             pass
 
-        # VK уведомление
-        try:
-            from vk_bot.tasks import send_vk_notification
-            send_vk_notification.delay(
-                user_id=recipient.id,
-                notification_type=type,
-                title=title,
-                message=message,
-                data=data,
-            )
-        except Exception:
-            pass
+        from .delivery import enqueue_notification
+        enqueue_notification(notification)
 
         return notification
 

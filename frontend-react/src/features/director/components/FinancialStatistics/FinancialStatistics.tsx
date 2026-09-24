@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, Tabs } from 'antd';
-import { LineChartOutlined, FileTextOutlined } from '@ant-design/icons';
+import { LineChartOutlined, FileTextOutlined, WalletOutlined } from '@ant-design/icons';
 import NetProfit from './NetProfit';
 import IncomeExpenseDetail from './IncomeExpenseDetail';
+import Withdrawals from './Withdrawals';
 import styles from '@/features/director/DirectorDashboard.module.css';
 
 const FinancialStatistics: React.FC = () => {
@@ -26,6 +27,16 @@ const FinancialStatistics: React.FC = () => {
         </span>
       ),
       children: <IncomeExpenseDetail />,
+    },
+    {
+      key: 'withdrawals',
+      label: (
+        <span>
+          <WalletOutlined className={styles.financialStatisticsTabIcon} />
+          Выводы средств
+        </span>
+      ),
+      children: <Withdrawals />,
     },
   ];
 

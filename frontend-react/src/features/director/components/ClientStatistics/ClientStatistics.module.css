@@ -1,0 +1,128 @@
+.container {
+  width: 100%;
+}
+
+.hint {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+}
+
+.statsRow {
+  margin-bottom: 8px;
+}
+
+.secondaryRow {
+  margin-top: 16px;
+}
+
+.statCard {
+  border-radius: 12px;
+  background: var(--color-bg-container, #fff);
+  border: 1px solid var(--color-border, transparent);
+}
+
+.statCardHighlight {
+  background: #f8f0ff;
+  border: 2px solid #6435a5;
+}
+
+.statCard :global(.ant-statistic) {
+  text-align: center;
+}
+
+.statCard :global(.ant-statistic-title) {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.statisticClients :global(.ant-statistic-content-value) {
+  color: #6435a5;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.statisticWithOrders :global(.ant-statistic-content-value) {
+  color: #722ed1;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.statisticOrders :global(.ant-statistic-content-value) {
+  color: #1890ff;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.statisticAverage :global(.ant-statistic-content-value) {
+  color: #13c2c2;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.statisticNeutral :global(.ant-statistic-content-value) {
+  color: #595959;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticSuccess :global(.ant-statistic-content-value) {
+  color: #3f8600;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.statisticDanger :global(.ant-statistic-content-value) {
+  color: #cf1322;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.conversion {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.conversionCaption {
+  text-align: center;
+  font-size: 13px;
+}
+
+.legendRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.legendIcon {
+  color: #6435a5;
+  font-size: 16px;
+}
+
+@media screen and (max-width: 840px) {
+  .statisticClients :global(.ant-statistic-content-value),
+  .statisticWithOrders :global(.ant-statistic-content-value),
+  .statisticOrders :global(.ant-statistic-content-value),
+  .statisticAverage :global(.ant-statistic-content-value) {
+    font-size: 22px;
+  }
+
+  .statCard {
+    border-radius: 8px;
+  }
+}

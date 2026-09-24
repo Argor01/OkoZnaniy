@@ -88,7 +88,7 @@ export function useChatMessages({ visible, selectedUserId, chatContextTitle }: U
       })
     );
     setClosedOrderIdsByChatId((prev) => ({ ...prev, [chatId]: closedIds }));
-    setOrderIdsByChatId((prev) => ({ ...prev, [chatId]: openIds }));
+    setOrderIdsByChatId((prev) => ({ ...prev, [chatId]: orderIds }));
   }, [extractOrderIdsFromChat]);
 
   const loadChats = useCallback(async (silent: boolean = false) => {

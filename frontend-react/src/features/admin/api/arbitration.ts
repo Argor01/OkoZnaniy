@@ -138,6 +138,11 @@ export const arbitrationApi = {
     return response.data;
   },
 
+  reopen: async (caseId: number, reason = 'Возобновлено администратором') => {
+    const response = await apiClient.post(API_ENDPOINTS.admin.arbitration.cases.reopenArbitration(caseId), { reason });
+    return response.data;
+  },
+
   assignUsers: async (caseId: number, userIds: number[]) => {
     const response = await apiClient.post(API_ENDPOINTS.admin.arbitration.cases.assignUsers(caseId), {
       user_ids: userIds,

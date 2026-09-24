@@ -378,7 +378,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
     const closedIds = results
       .filter((r) => typeof r.status === 'string' && closedStatuses.has(r.status))
       .map((r) => r.id);
-    const openIds = closedIds.length === 0 ? orderIds : orderIds.filter((id) => !closedIds.includes(id));
+    const openIds = orderIds; // Keep completed/cancelled tabs for reading history.
 
     setOrderStatusById((prev) => {
       const next = { ...prev };
@@ -391,7 +391,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
       }
       return changed ? next : prev;
     });
-    setClosedOrderIdsByChatId((prev) => ({ ...prev, [chatId]: closedIds }));
+    setClosedOrderIdsByChatId((prev) => ({ ...prev, [chatId]: [] }));
     setOrderIdsByChatId((prev) => ({ ...prev, [chatId]: openIds }));
   }, [extractOrderIdsFromChat]);
 
@@ -637,6 +637,8 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
   useWebSocket({
     enabled: visible,
     onNotification: handleNotificationEvent,
+    onMessage: handleNotificationEvent,
+    onConnect: () => { void loadChats(true); },
   });
 
   const syncChatListItemFromDetail = useCallback((detail: ChatDetail) => {
@@ -925,12 +927,7 @@ const MessageModalNew: React.FC<MessageModalProps> = ({
         try {
           const orderData = await ordersApi.getById(selectedOrderId);
           const orderStatus = String((orderData as { status?: unknown } | undefined)?.status || '').toLowerCase();
-          if (['cancelled', 'canceled'].includes(orderStatus)) {
-            setSelectedChat(null);
-            setActiveOrderId(selectedOrderId);
-            antMessage.info('Заказ отменён, чат недоступен');
-            return;
-          }
+          // Cancelled orders retain their original chat and message history.
 
           if (selectedUserId) {
             await loadOrCreateChatByOrderAndUser(selectedOrderId, selectedUserId);
@@ -2455,6 +2452,9 @@ const handleOverdueComplaint = async () => {
           return new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime();
         });
         const representative = sortedChats[0] || group.chats[0];
+        const latestMessageChat = group.chats.filter(chat => chat.last_message).sort((a, b) =>
+          new Date(b.last_message!.created_at).getTime() - new Date(a.last_message!.created_at).getTime()
+        )[0];
         const mainChat = group.mainChat || sortedChats.find((chat) => !(chat.order_id ?? chat.order)) || null;
         const orderChats = [...group.orderChats].sort(
           (a, b) => new Date(b.last_message_time || 0).getTime() - new Date(a.last_message_time || 0).getTime()
@@ -2468,10 +2468,10 @@ const handleOverdueComplaint = async () => {
           other_user: group.otherUser,
           unreadCount: group.chats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0),
           unread_count: group.chats.reduce((sum, chat) => sum + (chat.unread_count || 0), 0),
-          lastMessage: representative?.last_message ?? null,
-          last_message: representative?.last_message ?? null,
-          lastMessageTime: representative?.last_message_time ?? '',
-          last_message_time: representative?.last_message_time ?? '',
+          lastMessage: latestMessageChat?.last_message ?? null,
+          last_message: latestMessageChat?.last_message ?? null,
+          lastMessageTime: latestMessageChat?.last_message?.created_at ?? '',
+          last_message_time: latestMessageChat?.last_message?.created_at ?? '',
           isPinned: group.chats.some((chat) => Boolean(chat.is_pinned)),
           is_pinned: group.chats.some((chat) => Boolean(chat.is_pinned)),
         };
@@ -2504,14 +2504,8 @@ const handleOverdueComplaint = async () => {
     });
   }, [selectedConversationGroup, toPositiveNumber]);
 
-  const activeConversationOrderChats = useMemo(() => {
-    return selectedConversationOrderChats.filter((chat) => {
-      const orderId = toPositiveNumber(chat.order_id ?? chat.order);
-      if (!orderId) return false;
-      const knownStatus = orderStatusById[orderId] ?? chat.order_status;
-      return !knownStatus || !closedOrderStatuses.has(knownStatus);
-    });
-  }, [closedOrderStatuses, orderStatusById, selectedConversationOrderChats, toPositiveNumber]);
+  // History remains reachable after completion, cancellation and arbitration.
+  const activeConversationOrderChats = selectedConversationOrderChats;
 
   const tabsOrderIds = useMemo(() => {
     if (!selectedConversationGroup) return [];
@@ -2521,7 +2515,7 @@ const handleOverdueComplaint = async () => {
       const id = toPositiveNumber(raw);
       if (!id || ids.includes(id)) return;
       const knownStatus = orderStatusById[id] ?? fallbackStatus;
-      if (knownStatus && closedOrderStatuses.has(knownStatus)) return;
+      // Closed orders are read-only history, not missing conversations.
       ids.push(id);
     };
 
@@ -2846,7 +2840,7 @@ const handleOverdueComplaint = async () => {
                       <Badge
                         dot={chat.unread_count > 0}
                         offset={useCompactSidebar ? [-8, 38] : [-4, 30]}
-                        className={`${styles.chatBadge} ${useCompactSidebar ? styles.chatBadgeCompact : ''}`}
+                        className={`${styles.chatBadge} oko-unread-indicator ${useCompactSidebar ? styles.chatBadgeCompact : ''}`}
                       >
                         <Avatar
                           size={isMobile ? 36 : useCompactSidebar ? 46 : 40}
@@ -2877,8 +2871,8 @@ const handleOverdueComplaint = async () => {
                           </Text>
                           {chat.unread_count > 0 && !useCompactSidebar && (
                             <Badge
-                              dot
-                              className={styles.chatBadge}
+                              count={chat.unread_count}
+                              className={`${styles.chatBadge} oko-unread-indicator`}
                             />
                           )}
                         </div>

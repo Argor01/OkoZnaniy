@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, Avg
 from django.db.models.functions import TruncMonth
@@ -537,6 +538,85 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
 class DirectorFinanceViewSet(viewsets.ViewSet):
     """ViewSet для финансовой статистики директора"""
     permission_classes = [permissions.IsAuthenticated, IsDirector]
+
+    # ------------------------------------------------------------------
+    # Заявки на вывод средств
+    # ------------------------------------------------------------------
+
+    @action(detail=False, methods=['get'], url_path='withdrawals')
+    def withdrawals(self, request):
+        """Заявки на вывод. По умолчанию — ожидающие решения."""
+        from apps.wallet.models import WithdrawalRequest
+
+        queryset = WithdrawalRequest.objects.select_related('user').order_by('-created_at')
+        state = request.query_params.get('status')
+        if state:
+            queryset = queryset.filter(status=state)
+
+        return Response([
+            {
+                'id': w.id,
+                'user_id': w.user_id,
+                'username': w.user.username,
+                'display_username': getattr(w.user, 'display_username', w.user.username),
+                'email': w.user.email or '',
+                'amount': str(w.amount),
+                'card_number': w.card_number,
+                'status': w.status,
+                'created_at': w.created_at,
+                'processed_at': w.processed_at,
+            }
+            for w in queryset[:200]
+        ])
+
+    @action(detail=False, methods=['post'], url_path=r'withdrawals/(?P<pk>[^/.]+)/mark-paid')
+    def withdrawal_mark_paid(self, request, pk=None):
+        """Деньги отправлены — помечаем заявку выплаченной."""
+        from apps.wallet.models import WithdrawalRequest
+
+        withdrawal = WithdrawalRequest.objects.filter(pk=pk).first()
+        if withdrawal is None:
+            return Response({'detail': 'Заявка не найдена.'}, status=status.HTTP_404_NOT_FOUND)
+        if withdrawal.status != WithdrawalRequest.Status.PENDING:
+            return Response(
+                {'detail': 'Заявка уже обработана.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        withdrawal.status = WithdrawalRequest.Status.PAID
+        withdrawal.processed_at = timezone.now()
+        withdrawal.save(update_fields=['status', 'processed_at'])
+        return Response({'detail': 'Заявка отмечена как выплаченная.', 'status': withdrawal.status})
+
+    @action(detail=False, methods=['post'], url_path=r'withdrawals/(?P<pk>[^/.]+)/reject')
+    def withdrawal_reject(self, request, pk=None):
+        """Отказ: деньги возвращаются на баланс, иначе они пропадут."""
+        from apps.wallet.models import WithdrawalRequest
+        from apps.wallet.services import WalletService
+
+        withdrawal = WithdrawalRequest.objects.filter(pk=pk).first()
+        if withdrawal is None:
+            return Response({'detail': 'Заявка не найдена.'}, status=status.HTTP_404_NOT_FOUND)
+        if withdrawal.status != WithdrawalRequest.Status.PENDING:
+            return Response(
+                {'detail': 'Заявка уже обработана.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reason = (request.data.get('reason') or '').strip()
+        with transaction.atomic():
+            WalletService.topup(
+                withdrawal.user,
+                withdrawal.amount,
+                description=(
+                    f'Возврат по отклонённому выводу #{withdrawal.id}'
+                    + (f': {reason}' if reason else '')
+                ),
+            )
+            withdrawal.status = WithdrawalRequest.Status.REJECTED
+            withdrawal.processed_at = timezone.now()
+            withdrawal.save(update_fields=['status', 'processed_at'])
+
+        return Response({'detail': 'Заявка отклонена, средства возвращены.', 'status': withdrawal.status})
 
     @action(detail=False, methods=['get'])
     def turnover(self, request):
@@ -1360,6 +1440,85 @@ class DirectorStatisticsViewSet(viewsets.ViewSet):
 
 
 
+    @staticmethod
+    def _client_stats_period(request):
+        """Границы периода из запроса. Пусто — считаем за всё время.
+
+        Дата конца включительно: человек выбирает «по 30 сентября» и ждёт,
+        что тот день войдёт в отчёт.
+        """
+        from datetime import datetime, time
+
+        from django.utils import timezone as dj_timezone
+
+        def parse(name):
+            raw = (request.query_params.get(name) or '').strip()
+            if not raw:
+                return None
+            try:
+                return datetime.strptime(raw[:10], '%Y-%m-%d').date()
+            except ValueError:
+                return None
+
+        date_from, date_to = parse('date_from'), parse('date_to')
+        tz = dj_timezone.get_current_timezone()
+        start = (
+            dj_timezone.make_aware(datetime.combine(date_from, time.min), tz)
+            if date_from else None
+        )
+        end = (
+            dj_timezone.make_aware(datetime.combine(date_to, time.max), tz)
+            if date_to else None
+        )
+        return start, end
+
+    @action(detail=False, methods=['get'], url_path='client-statistics')
+    def client_statistics(self, request):
+        """Статистика клиентов и их заказов для ЛК директора."""
+        start, end = self._client_stats_period(request)
+
+        clients = User.objects.filter(role='client')
+        orders = Order.objects.filter(client__role='client')
+        if start:
+            clients = clients.filter(date_joined__gte=start)
+            orders = orders.filter(created_at__gte=start)
+        if end:
+            clients = clients.filter(date_joined__lte=end)
+            orders = orders.filter(created_at__lte=end)
+
+        registered_clients = clients.count()
+        clients_with_orders = orders.values('client_id').distinct().count()
+        total_orders = orders.count()
+        completed_orders = orders.filter(status='completed').count()
+        cancelled_orders = orders.filter(status__in=['cancelled', 'expired']).count()
+
+        average_order_value = orders.aggregate(avg=Avg('final_price'))['avg'] or Decimal('0')
+        average_completed_order_value = (
+            orders.filter(status='completed').aggregate(avg=Avg('final_price'))['avg'] or Decimal('0')
+        )
+
+        clients_without_orders = max(registered_clients - clients_with_orders, 0)
+        conversion_rate = (
+            round((clients_with_orders / registered_clients) * 100, 2)
+            if registered_clients
+            else 0.0
+        )
+
+        return Response({
+            'registered_clients': registered_clients,
+            'clients_with_orders': clients_with_orders,
+            'clients_without_orders': clients_without_orders,
+            'conversion_rate': conversion_rate,
+            'total_orders': total_orders,
+            'completed_orders': completed_orders,
+            'cancelled_orders': cancelled_orders,
+            'average_order_value': round(float(average_order_value), 2),
+            'average_completed_order_value': round(float(average_completed_order_value), 2),
+            'date_from': start.date().isoformat() if start else None,
+            'date_to': end.date().isoformat() if end else None,
+        })
+
+
 class InternalMessagePagination(PageNumberPagination):
     """Пагинация для внутренних сообщений"""
     page_size = 20
@@ -1808,7 +1967,7 @@ class DirectorChatRoomViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         if not self._can_access_director_chats(request.user):
             return Response(
-                {'error': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРѕРІ Рё РґРёСЂРµРєС‚РѕСЂРѕРІ'},
+                {'error': 'Доступно только для админов и директоров'},
                 status=status.HTTP_403_FORBIDDEN
             )
         return super().create(request, *args, **kwargs)

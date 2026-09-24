@@ -142,6 +142,22 @@ services:
     networks:
       - app_network
 
+  # Планировщик периодических задач. Без него расписание в
+  # config/celery.py существует, но выполнять его некому.
+  celery-beat:
+    build: *backend_build
+    command: celery -A config beat -l INFO --schedule /tmp/celerybeat-schedule
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      <<: *backend_env
+    networks:
+      - app_network
+
   vk-bot:
     # Optional community-notification bot. Enable explicitly after VK_GROUP_ID/token are configured.
     profiles: ["vk-bot"]

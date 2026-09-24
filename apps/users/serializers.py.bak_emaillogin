@@ -1,0 +1,406 @@
+from django.utils import timezone
+from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+# from dj_rest_auth.registration.serializers import RegisterSerializer
+from .models import User, ImprovementSuggestion
+
+
+class CustomRegisterSerializer(serializers.ModelSerializer):
+    """Кастомный serializer для регистрации с поддержкой реферального кода"""
+    referral_code = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    role = serializers.ChoiceField(choices=['client', 'expert', 'partner'], required=False, default='client')
+    password = serializers.CharField(write_only=True, required=True, min_length=6)
+    password2 = serializers.CharField(write_only=True, required=True, min_length=6)
+    email = serializers.EmailField(required=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'password2', 'role', 'referral_code']
+        extra_kwargs = {
+            'username': {'required': False, 'allow_blank': True, 'allow_null': True}
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Принудительно делаем username необязательным
+        self.fields['username'].required = False
+        self.fields['username'].allow_blank = True
+        self.fields['username'].allow_null = True
+    
+    def to_internal_value(self, data):
+        """Переопределяем для обработки отсутствующего username"""
+        # Если username не передан или пустой, добавляем временное значение
+        if 'username' not in data or not data.get('username', '').strip():
+            data = data.copy() if hasattr(data, 'copy') else dict(data)
+            data['username'] = ''  # Временное значение, будет заменено в create
+        return super().to_internal_value(data)
+    
+    def validate_username(self, value):
+        """Разрешаем пустой username - он будет сгенерирован автоматически"""
+        return value
+    
+    def validate(self, attrs):
+        """Проверяем, что пароли совпадают"""
+        if attrs.get('password') != attrs.get('password2'):
+            raise serializers.ValidationError({"password2": "Пароли не совпадают"})
+        
+        # Если username пустой или None, удаляем его из attrs
+        # Он будет сгенерирован в методе create
+        username = attrs.get('username', '').strip() if attrs.get('username') else ''
+        if not username:
+            attrs.pop('username', None)
+        
+        return attrs
+    
+    def create(self, validated_data):
+        referral_code = validated_data.pop('referral_code', None)
+        password = validated_data.pop('password')
+        validated_data.pop('password2', None)  # Удаляем password2, он нам больше не нужен
+        role = validated_data.pop('role', 'client')
+        username_provided = bool(validated_data.get('username'))
+        
+        # Генерируем username если его нет
+        if not username_provided:
+            email = validated_data.get('email', '')
+            if email:
+                # Берем часть до @ и добавляем случайные цифры если нужно
+                base_username = email.split('@')[0]
+                username = base_username
+                counter = 1
+                # Глобальная уникальность — архивированные пользователи держат username
+                # на уровне БД, поэтому суффикс прибавляем пока есть ЛЮБОЕ совпадение.
+                while User.objects.filter(username=username).exists():
+                    username = f"{base_username}{counter}"
+                    counter += 1
+                validated_data['username'] = username
+            else:
+                # Если нет email, генерируем случайный username
+                import uuid
+                validated_data['username'] = f"user_{uuid.uuid4().hex[:8]}"
+
+        validated_data['has_custom_username'] = username_provided
+        
+        # Создаем пользователя
+        validated_data['role'] = role
+        
+        # Если указан реферальный код, находим партнера
+        if referral_code:
+            try:
+                partner = User.objects.get(
+                    referral_code=referral_code,
+                    role='partner'
+                )
+                validated_data['partner'] = partner
+                
+            except User.DoesNotExist:
+                # Если код не найден, просто игнорируем
+                pass
+        
+        user = User.objects.create_user(password=password, **validated_data)
+        return user
+    
+    def custom_signup(self, request, user):
+        """Обработка дополнительных полей при регистрации"""
+        referral_code = self.validated_data.get('referral_code', '').strip()
+        role = self.validated_data.get('role', 'client')
+        
+        # Устанавливаем роль
+        user.role = role
+        
+        # Если указан реферальный код, находим партнера
+        if referral_code:
+            try:
+                partner = User.objects.get(
+                    referral_code=referral_code,
+                    role='partner'
+                )
+                user.partner = partner
+                
+                # Увеличиваем счетчик рефералов у партнера
+                partner.total_referrals += 1
+                partner.save(update_fields=['total_referrals'])
+                
+            except User.DoesNotExist:
+                # Если код не найден, просто игнорируем
+                pass
+        
+        user.save()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer для модели User"""
+    is_blocked = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    display_username = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'display_username', 'email', 'first_name', 'last_name',
+            'role', 'phone', 'balance', 'frozen_balance',
+            'avatar', 'bio', 'experience_years', 'hourly_rate',
+            'education', 'skills', 'portfolio_url', 'is_verified',
+            'referral_code', 'partner_commission_rate',
+            'service_fee_percent',
+            'withdrawal_fee_percent',
+            'test_payments_allowed',
+            'average_rating',
+            'total_referrals', 'active_referrals', 'total_earnings',
+            'city', 'email_verified', 'is_active', 'is_blocked',
+            'date_joined', 'last_login', 'blocked_at', 'block_reason',
+            'unblock_date', 'contact_violations_count'
+        ]
+        read_only_fields = [
+            'id', 'balance', 'frozen_balance', 'is_verified',
+            'referral_code', 'total_referrals', 'active_referrals',
+            'total_earnings', 'email_verified', 'is_blocked',
+            'date_joined', 'last_login', 'blocked_at', 'block_reason',
+            'unblock_date', 'contact_violations_count'
+        ]
+
+    def get_is_blocked(self, obj):
+        return not obj.is_active
+    
+    average_rating = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        from django.db.models import Avg
+        if getattr(obj, 'role', None) == 'client':
+            return float(obj.client_reviews_received.aggregate(avg=Avg('rating'))['avg'] or 0)
+        try:
+            return float(obj.statistics.average_rating)
+        except Exception:
+            return 0.0
+
+    def get_email(self, obj):
+        """Email показывается только владельцу аккаунта или админам"""
+        request = self.context.get('request')
+        if not request or not request.user:
+            return None
+        
+        # Показываем email только владельцу или админам/директорам
+        if request.user.id == obj.id or request.user.is_staff or getattr(request.user, 'role', None) in ['admin', 'director']:
+            return obj.email
+        
+        return None
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    """Serializer для создания пользователя"""
+    password = serializers.CharField(write_only=True, required=True)
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password', 'role', 'first_name', 'last_name', 'phone']
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        validated_data['has_custom_username'] = bool(validated_data.get('username'))
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Serializer для обновления пользователя"""
+    username = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=150,
+        trim_whitespace=False
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username', 'first_name', 'last_name', 'phone', 'avatar', 'bio',
+            'experience_years', 'hourly_rate', 'education', 'skills',
+            'portfolio_url', 'city'
+        ]
+
+    def validate_username(self, value):
+        """Разрешаем пробелы в никнейме"""
+        if value is not None and not value.strip():
+            raise serializers.ValidationError("Никнейм не может состоять только из пробелов")
+
+        normalized_value = value.strip() if isinstance(value, str) else value
+        if normalized_value:
+            user = self.context.get('request').user if self.context.get('request') else None
+            if user:
+                existing = User.objects.filter(username=normalized_value).exclude(id=user.id).first()
+                if existing:
+                    raise serializers.ValidationError("Этот никнейм уже занят")
+        return normalized_value
+
+    def update(self, instance, validated_data):
+        username = validated_data.get('username')
+        if isinstance(username, str):
+            validated_data['username'] = username.strip()
+            username = validated_data['username']
+        # Любой явно переданный непустой никнейм считаем пользовательским,
+        # иначе display_username продолжает отдавать сгенерированное имя
+        # и правка ника "не сохраняется" с точки зрения пользователя.
+        if username:
+            validated_data['has_custom_username'] = True
+        return super().update(instance, validated_data)
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    """Serializer для запроса сброса пароля"""
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer для подтверждения сброса пароля"""
+    code = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Кастомный serializer для получения токена с дополнительными данными пользователя"""
+    
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # Добавляем дополнительные данные в токен
+        token['username'] = user.username
+        token['email'] = user.email
+        token['role'] = user.role
+        
+        return token
+    
+    def validate(self, attrs):
+        username = attrs.get('username', '')
+        password = attrs.get('password', '')
+
+        if username and password:
+            if '@' in username:
+                user_exists = User.objects.filter(email=username).exists()
+            else:
+                user_exists = User.objects.filter(username=username).exists()
+
+            if not user_exists:
+                from rest_framework.exceptions import AuthenticationFailed
+                raise AuthenticationFailed(
+                    'Аккаунт не найден',
+                    code='no_active_account',
+                )
+
+        data = super().validate(attrs)
+
+        # Если super().validate() прошёл — пароль верный, добавляем данные пользователя
+        data['user'] = {
+            'id': self.user.id,
+            'username': self.user.username,
+            'display_username': self.user.display_username,
+            'email': self.user.email,
+            'role': self.user.role,
+            'first_name': self.user.first_name,
+            'last_name': self.user.last_name,
+        }
+
+        return data
+
+
+class ExpertApplicationSerializer(serializers.Serializer):
+    """Serializer для заявки на эксперта"""
+    first_name = serializers.CharField(required=True, max_length=150)
+    last_name = serializers.CharField(required=True, max_length=150)
+    bio = serializers.CharField(required=True)
+    experience_years = serializers.IntegerField(required=True)
+    hourly_rate = serializers.DecimalField(max_digits=10, decimal_places=2, required=True)
+    education = serializers.CharField(required=False, allow_blank=True)
+    skills = serializers.CharField(required=False, allow_blank=True)
+    portfolio_url = serializers.URLField(required=False, allow_blank=True)
+
+
+class SimpleUserSerializer(serializers.ModelSerializer):
+    """Упрощенный serializer для пользователя (без email для приватности)"""
+    display_username = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'display_username', 'role', 'avatar']
+
+
+class PublicUserProfileSerializer(serializers.ModelSerializer):
+    """Serializer для публичного профиля пользователя"""
+    display_username = serializers.CharField(read_only=True)
+    average_rating = serializers.SerializerMethodField()
+
+    def get_average_rating(self, obj):
+        if getattr(obj, 'role', None) == 'client':
+            from django.db.models import Avg
+            return float(obj.client_reviews_received.aggregate(avg=Avg('rating'))['avg'] or 0)
+        try:
+            return float(obj.statistics.average_rating)
+        except Exception:
+            return 0.0
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'display_username', 'first_name', 'last_name', 'role',
+            'avatar', 'bio', 'experience_years', 'hourly_rate',
+            'education', 'skills', 'portfolio_url', 'is_verified', 'city',
+            'average_rating'
+        ]
+
+
+class ImprovementSuggestionCreateSerializer(serializers.ModelSerializer):
+    attachment = serializers.FileField(required=False, allow_null=True)
+
+    class Meta:
+        model = ImprovementSuggestion
+        fields = ['area', 'comment', 'attachment']
+
+
+class ImprovementSuggestionListSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+    display_username = serializers.CharField(source='user.display_username', read_only=True)
+    role = serializers.CharField(source='user.role', read_only=True)
+    avatar = serializers.ImageField(source='user.avatar', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    area_display = serializers.CharField(source='get_area_display', read_only=True)
+    attachment = serializers.FileField(read_only=True)
+    attachment_url = serializers.SerializerMethodField()
+    attachment_name = serializers.SerializerMethodField()
+
+    def get_attachment_url(self, obj):
+        attachment = getattr(obj, 'attachment', None)
+        if not attachment:
+            return None
+        try:
+            return attachment.url
+        except Exception:
+            return None
+
+    def get_attachment_name(self, obj):
+        attachment = getattr(obj, 'attachment', None)
+        if not attachment:
+            return None
+        name = getattr(attachment, 'name', '') or ''
+        return name.split('/')[-1] if name else None
+
+    class Meta:
+        model = ImprovementSuggestion
+        fields = [
+            'id',
+            'user_id',
+            'username',
+            'display_username',
+            'role',
+            'avatar',
+            'email',
+            'area',
+            'area_display',
+            'comment',
+            'attachment',
+            'attachment_url',
+            'attachment_name',
+            'created_at',
+        ]

@@ -6,6 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Max, Count, Sum, Prefetch
+import logging
+
 from django.db import transaction, IntegrityError
 from .models import Chat, Message, SupportChat, SupportMessage, ChatPin
 from .serializers import ChatListSerializer, ChatDetailSerializer, MessageSerializer, SupportChatSerializer, SupportMessageSerializer
@@ -125,17 +127,46 @@ def _contact_ban_other_response(user, action_detail='Действие'):
     )
 
 
+logger = logging.getLogger("oko.chat")
+
+
+def _chat_is_dispute_evidence(chat) -> bool:
+    """Была ли по заказу этого чата жалоба или арбитраж.
+
+    Такую переписку стирать нельзя: это доказательства по спору, а спор
+    можно возобновить и после решения.
+    """
+    order_ids = set()
+    if chat.order_id:
+        order_ids.add(chat.order_id)
+    for data in chat.messages.filter(message_type='offer').values_list('offer_data', flat=True):
+        if not isinstance(data, dict):
+            continue
+        try:
+            order_id = int(data.get('order_id', 0))
+        except (TypeError, ValueError):
+            continue
+        if order_id > 0:
+            order_ids.add(order_id)
+    if not order_ids:
+        return False
+    from apps.arbitration.models import ArbitrationCase, Complaint
+    return (ArbitrationCase.objects.filter(order_id__in=order_ids).exists()
+            or Complaint.objects.filter(order_id__in=order_ids).exists())
+
+
+
 class ChatViewSet(viewsets.ModelViewSet):
     """
-    ViewSet РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РѕР±С‹С‡РЅС‹РјРё С‡Р°С‚Р°РјРё РјРµР¶РґСѓ РєР»РёРµРЅС‚Р°РјРё Рё СЌРєСЃРїРµСЂС‚Р°РјРё.
+    ViewSet для управления обычными чатами между клиентами и экспертами.
     
-    Р’РђР–РќРћ: Р§Р°С‚С‹ СЃ С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРѕР№ РќР• РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РІ СЌС‚РѕРј СЃРїРёСЃРєРµ.
-    РћРЅРё СѓРїСЂР°РІР»СЏСЋС‚СЃСЏ С‡РµСЂРµР· РѕС‚РґРµР»СЊРЅС‹Р№ SupportChatViewSet Рё РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ
-    С‚РѕР»СЊРєРѕ РІ СЂР°Р·РґРµР»Рµ "Р§Р°С‚С‹ РїРѕРґРґРµСЂР¶РєРё" РІ Р°РґРјРёРЅ-РїР°РЅРµР»Рё.
+    ВАЖНО: Чаты с технической поддержкой НЕ отображаются в этом списке.
+    Они управляются через отдельный SupportChatViewSet и отображаются
+    только в разделе "Чаты поддержки" в админ-панели.
     
-    Р¤РёР»СЊС‚СЂР°С†РёСЏ С‡Р°С‚РѕРІ РїРѕРґРґРµСЂР¶РєРё РїСЂРѕРёСЃС…РѕРґРёС‚ РїРѕ:
-    1. SUPPORT_USER_ID - ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРё (РёР· РЅР°СЃС‚СЂРѕРµРє)
-    2. context_title - С‡Р°С‚С‹ СЃ РјР°СЂРєРµСЂР°РјРё "РїРѕРґРґРµСЂР¶РєР°", "support", "С‚РµС…РїРѕРґРґРµСЂР¶РєР°"
+    Фильтрация чатов поддержки происходит по:
+    1. SUPPORT_USER_ID - ID пользователя технической поддержки (из настроек)
+    2. context_title - чаты с маркерами "поддержка", "support", "техподдержка"
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -158,7 +189,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 continue
             if msg.created_at and now <= msg.created_at + datetime.timedelta(days=2):
                 return Response(
-                    {'detail': 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ С‡Р°С‚: РµСЃС‚СЊ Р°РєС‚РёРІРЅС‹Рµ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Рµ РїСЂРµРґР»РѕР¶РµРЅРёСЏ.'},
+                    {'detail': 'Нельзя удалить чат: есть активные индивидуальные предложения.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -182,7 +213,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             active_exists = Order.objects.filter(id__in=order_ids).exclude(status__in=closed_statuses).exists()
             if active_exists:
                 return Response(
-                    {'detail': 'РќРµР»СЊР·СЏ СѓРґР°Р»РёС‚СЊ С‡Р°С‚: РµСЃС‚СЊ Р·Р°РєР°Р· РІ СЂР°Р±РѕС‚Рµ.'},
+                    {'detail': 'Нельзя удалить чат: есть заказ в работе.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
@@ -192,7 +223,15 @@ class ChatViewSet(viewsets.ModelViewSet):
         participants_count = chat.participants.count()
         hidden_count = chat.hidden_for_users.count()
         if participants_count > 0 and hidden_count >= participants_count:
-            self.perform_destroy(chat)
+            # По спорному заказу переписка остаётся: её могут потребовать
+            # при возобновлении обращения. Из списков она уже убрана.
+            if _chat_is_dispute_evidence(chat):
+                logger.info(
+                    'Чат %s скрыт у всех, но сохранён: по заказу %s был спор',
+                    chat.id, chat.order_id,
+                )
+            else:
+                self.perform_destroy(chat)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -200,14 +239,14 @@ class ChatViewSet(viewsets.ModelViewSet):
         user = self.request.user
         from django.db.models import Exists, OuterRef
         
-            # РџРѕРґР·Р°РїСЂРѕСЃ РґР»СЏ РїСЂРѕРІРµСЂРєРё Р·Р°РєСЂРµРїР»С‘РЅРЅС‹С… С‡Р°С‚РѕРІ
+            # Подзапрос для проверки закреплённых чатов
         pinned_subquery = ChatPin.objects.filter(
                 user=OuterRef('participants'),
                 chat=OuterRef('pk')
             )
         
-            # РСЃРєР»СЋС‡Р°РµРј С‡Р°С‚С‹ СЃ С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРѕР№ РёР· СЃРїРёСЃРєР° РѕР±С‹С‡РЅС‹С… С‡Р°С‚РѕРІ
-            # Р§Р°С‚С‹ РїРѕРґРґРµСЂР¶РєРё РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ СЂР°Р·РґРµР»Рµ "Р§Р°С‚С‹ РїРѕРґРґРµСЂР¶РєРё" РІ Р°РґРјРёРЅ-РїР°РЅРµР»Рё
+            # Исключаем чаты с технической поддержкой из списка обычных чатов
+            # Чаты поддержки отображаются только в разделе "Чаты поддержки" в админ-панели
         queryset = Chat.objects.filter(
                 participants=user
             ).prefetch_related(
@@ -220,19 +259,19 @@ class ChatViewSet(viewsets.ModelViewSet):
             ).order_by('-is_pinned', '-last_message_time')
         queryset = queryset.exclude(hidden_for_users=user)
         
-            # РџРѕР»СѓС‡Р°РµРј ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїРѕРґРґРµСЂР¶РєРё РёР· РЅР°СЃС‚СЂРѕРµРє РёР»Рё РїРµСЂРµРјРµРЅРЅРѕР№ РѕРєСЂСѓР¶РµРЅРёСЏ
+            # Получаем ID пользователя поддержки из настроек или переменной окружения
         from django.conf import settings
         support_user_id = getattr(settings, 'SUPPORT_USER_ID', None)
         
-            # Р•СЃР»Рё ID РїРѕРґРґРµСЂР¶РєРё Р·Р°РґР°РЅ, РёСЃРєР»СЋС‡Р°РµРј С‡Р°С‚С‹ СЃ СЌС‚РёРј РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј
+            # Если ID поддержки задан, исключаем чаты с этим пользователем
         if support_user_id:
                 queryset = queryset.exclude(participants__id=support_user_id)
         
-            # РўР°РєР¶Рµ РёСЃРєР»СЋС‡Р°РµРј С‡Р°С‚С‹, РіРґРµ context_title СЃРѕРґРµСЂР¶РёС‚ РјР°СЂРєРµСЂС‹ РїРѕРґРґРµСЂР¶РєРё
+            # Также исключаем чаты, где context_title содержит маркеры поддержки
         queryset = queryset.exclude(
-                Q(context_title__icontains='РїРѕРґРґРµСЂР¶РєР°') |
+                Q(context_title__icontains='поддержка') |
                 Q(context_title__icontains='support') |
-                Q(context_title__icontains='С‚РµС…РїРѕРґРґРµСЂР¶РєР°')
+                Q(context_title__icontains='техподдержка')
         )
         
         return queryset
@@ -251,7 +290,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
-        """РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚ (С‚РµРєСЃС‚ Рё/РёР»Рё С„Р°Р№Р»). Р”Р»СЏ С„Р°Р№Р»Р° вЂ” multipart/form-data: text, file."""
+        """Отправка сообщения в чат (текст и/или файл). Для файла — multipart/form-data: text, file."""
         chat = self.get_object()
 
         if hasattr(request.user, 'role') and request.user.role not in ['admin', 'director']:
@@ -268,9 +307,9 @@ class ChatViewSet(viewsets.ModelViewSet):
             if getattr(request.user, 'is_banned_for_contacts', False):
                 return Response(
                     {
-                        'detail': 'РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёР№ РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°. РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°С…РѕРґРёС‚СЃСЏ РЅР° РїСЂРѕРІРµСЂРєРµ.',
+                        'detail': 'Отправка сообщений временно недоступна. Пользователь находится на проверке.',
                         'frozen': True,
-                        'frozen_reason': request.user.contact_ban_reason or 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°С…РѕРґРёС‚СЃСЏ РЅР° РїСЂРѕРІРµСЂРєРµ'
+                        'frozen_reason': request.user.contact_ban_reason or 'Пользователь находится на проверке'
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
@@ -280,20 +319,20 @@ class ChatViewSet(viewsets.ModelViewSet):
             if other_user and getattr(other_user, 'is_banned_for_contacts', False):
                 return Response(
                     {
-                        'detail': 'РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёР№ РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°. РЎРѕР±РµСЃРµРґРЅРёРє РЅР°С…РѕРґРёС‚СЃСЏ РЅР° РїСЂРѕРІРµСЂРєРµ.',
+                        'detail': 'Отправка сообщений временно недоступна. Собеседник находится на проверке.',
                         'frozen': True,
-                        'frozen_reason': other_user.contact_ban_reason or 'РЎРѕР±РµСЃРµРґРЅРёРє РЅР°С…РѕРґРёС‚СЃСЏ РЅР° РїСЂРѕРІРµСЂРєРµ'
+                        'frozen_reason': other_user.contact_ban_reason or 'Собеседник находится на проверке'
                     },
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
-        # РџСЂРѕРІРµСЂСЏРµРј, РЅРµ Р·Р°РјРѕСЂРѕР¶РµРЅ Р»Рё С‡Р°С‚
+        # Проверяем, не заморожен ли чат
         if chat.is_frozen:
-            # РђРґРјРёРЅС‹ РјРѕРіСѓС‚ РїРёСЃР°С‚СЊ РІ Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Рµ С‡Р°С‚С‹
+            # Админы могут писать в замороженные чаты
             if not (hasattr(request.user, 'role') and request.user.role in ['admin', 'director']):
                 return Response(
                     {
-                        'detail': 'Р§Р°С‚ Р·Р°РјРѕСЂРѕР¶РµРЅ РёР·-Р·Р° РЅР°СЂСѓС€РµРЅРёСЏ РїСЂР°РІРёР». РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёР№ РІСЂРµРјРµРЅРЅРѕ РЅРµРґРѕСЃС‚СѓРїРЅР°.',
+                        'detail': 'Чат заморожен из-за нарушения правил. Отправка сообщений временно недоступна.',
                         'frozen': True,
                         'frozen_reason': chat.frozen_reason
                     },
@@ -302,11 +341,11 @@ class ChatViewSet(viewsets.ModelViewSet):
         
         if request.user not in chat.participants.all():
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'},
+                {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # РџРѕРґРґРµСЂР¶РєР° JSON (С‚РѕР»СЊРєРѕ С‚РµРєСЃС‚) Рё multipart (С‚РµРєСЃС‚ + С„Р°Р№Р»)
+        # Поддержка JSON (только текст) и multipart (текст + файл)
         if request.content_type and 'multipart/form-data' in request.content_type:
             text = (request.POST.get('text') or '').strip()
             uploaded_file = request.FILES.get('file')
@@ -324,14 +363,14 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         if not text and not uploaded_file and not (message_type in ['offer', 'work_offer'] and offer_data):
             return Response(
-                {'detail': 'РЈРєР°Р¶РёС‚Рµ С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ, РїСЂРёРєСЂРµРїРёС‚Рµ С„Р°Р№Р» РёР»Рё СЃРѕР·РґР°Р№С‚Рµ РїСЂРµРґР»РѕР¶РµРЅРёРµ.'},
+                {'detail': 'Укажите текст сообщения, прикрепите файл или создайте предложение.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         if message_type == 'offer':
             if getattr(request.user, 'role', None) != 'expert' and not getattr(request.user, 'is_staff', False):
                 return Response(
-                    {'detail': 'РўРѕР»СЊРєРѕ СЌРєСЃРїРµСЂС‚ РјРѕР¶РµС‚ РѕС‚РїСЂР°РІР»СЏС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅС‹Рµ РїСЂРµРґР»РѕР¶РµРЅРёСЏ.'},
+                    {'detail': 'Только эксперт может отправлять индивидуальные предложения.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
 
@@ -372,17 +411,17 @@ class ChatViewSet(viewsets.ModelViewSet):
         if message_type == 'work_offer':
             if getattr(request.user, 'role', None) != 'expert' and not getattr(request.user, 'is_staff', False):
                 return Response(
-                    {'detail': 'РўРѕР»СЊРєРѕ СЌРєСЃРїРµСЂС‚ РјРѕР¶РµС‚ РѕС‚РїСЂР°РІР»СЏС‚СЊ РїСЂРµРґР»РѕР¶РµРЅРёРµ РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹.'},
+                    {'detail': 'Только эксперт может отправлять предложение готовой работы.'},
                     status=status.HTTP_403_FORBIDDEN
                 )
             if not getattr(chat, 'context_title', None):
                 return Response(
-                    {'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹ РґРѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РІ С‡Р°С‚Рµ РїРѕ СЂР°Р±РѕС‚Рµ.'},
+                    {'detail': 'Предложение готовой работы доступно только в чате по работе.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             if not isinstance(offer_data, dict):
                 return Response(
-                    {'detail': 'offer_data РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕР±СЉРµРєС‚РѕРј.'},
+                    {'detail': 'offer_data должен быть объектом.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             title = str(offer_data.get('title') or chat.context_title or '').strip()[:255]
@@ -408,12 +447,12 @@ class ChatViewSet(viewsets.ModelViewSet):
             ext = (uploaded_file.name.split('.')[-1].lower() if '.' in uploaded_file.name else '') or ''
             if ext not in allowed_extensions:
                 return Response(
-                    {'detail': f'РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С‚РёРї С„Р°Р№Р»Р°. Р Р°Р·СЂРµС€РµРЅС‹: {", ".join(allowed_extensions)}'},
+                    {'detail': f'Недопустимый тип файла. Разрешены: {", ".join(allowed_extensions)}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             if uploaded_file.size > max_size:
                 return Response(
-                    {'detail': f'Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° РЅРµ РґРѕР»Р¶РµРЅ РїСЂРµРІС‹С€Р°С‚СЊ {max_size // (1024*1024)} РњР‘.'},
+                    {'detail': f'Размер файла не должен превышать {max_size // (1024*1024)} МБ.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             file_name = uploaded_file.name[:255] if len(uploaded_file.name) > 255 else uploaded_file.name
@@ -507,21 +546,21 @@ class ChatViewSet(viewsets.ModelViewSet):
             return blocked
         message_id = request.data.get('message_id')
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         message = get_object_or_404(Message, id=message_id, chat=chat)
         if message.message_type != 'work_offer' or not message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Это сообщение не является предложением готовой работы'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
-            return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.user == message.sender:
-            return Response({'detail': 'РќРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЃРІРѕРµ СЃРѕР±СЃС‚РІРµРЅРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Нельзя принять свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
 
         offer_data = message.offer_data or {}
         if offer_data.get('status') != 'new':
-            return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
         offer_data['status'] = 'accepted'
@@ -539,21 +578,21 @@ class ChatViewSet(viewsets.ModelViewSet):
             return blocked
         message_id = request.data.get('message_id')
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         message = get_object_or_404(Message, id=message_id, chat=chat)
         if message.message_type != 'work_offer' or not message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Это сообщение не является предложением готовой работы'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
-            return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.user == message.sender:
-            return Response({'detail': 'РќРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЃРІРѕРµ СЃРѕР±СЃС‚РІРµРЅРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Нельзя отклонить свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
 
         offer_data = message.offer_data or {}
         if offer_data.get('status') != 'new':
-            return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
         offer_data['status'] = 'rejected'
@@ -569,7 +608,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         if blocked is not None:
             return blocked
         if request.user not in chat.participants.all():
-            return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.content_type and 'multipart/form-data' in request.content_type:
             message_id = request.POST.get('message_id')
@@ -581,21 +620,21 @@ class ChatViewSet(viewsets.ModelViewSet):
             text = (request.data.get('text') or '').strip()
 
         if not uploaded_file:
-            return Response({'detail': 'file РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'file обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         offer_message = None
         if message_id:
             # Классический флоу: есть предварительный work_offer
             offer_message = get_object_or_404(Message, id=message_id, chat=chat)
             if offer_message.message_type != 'work_offer' or not offer_message.offer_data:
-                return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј РіРѕС‚РѕРІРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Это сообщение не является предложением готовой работы'}, status=status.HTTP_400_BAD_REQUEST)
             if request.user != offer_message.sender and not getattr(request.user, 'is_staff', False):
-                return Response({'detail': 'РўРѕР»СЊРєРѕ Р°РІС‚РѕСЂ РїСЂРµРґР»РѕР¶РµРЅРёСЏ РјРѕР¶РµС‚ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'detail': 'Только автор предложения может отправить работу'}, status=status.HTTP_403_FORBIDDEN)
             offer_data = offer_message.offer_data or {}
             if offer_data.get('status') != 'accepted' or offer_data.get('delivery_status') != 'awaiting_upload':
-                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РїСЂР°РІРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Сейчас нельзя отправить работу по этому предложению'}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         allowed_extensions = getattr(settings, 'ALLOWED_EXTENSIONS', [
             'pdf', 'doc', 'docx', 'txt', 'rtf', 'odt',
@@ -607,17 +646,17 @@ class ChatViewSet(viewsets.ModelViewSet):
         ext = (uploaded_file.name.split('.')[-1].lower() if '.' in uploaded_file.name else '') or ''
         if ext not in allowed_extensions:
             return Response(
-                {'detail': f'РќРµРґРѕРїСѓСЃС‚РёРјС‹Р№ С‚РёРї С„Р°Р№Р»Р°. Р Р°Р·СЂРµС€РµРЅС‹: {", ".join(allowed_extensions)}'},
+                {'detail': f'Недопустимый тип файла. Разрешены: {", ".join(allowed_extensions)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         if uploaded_file.size > max_size:
             return Response(
-                {'detail': f'Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° РЅРµ РґРѕР»Р¶РµРЅ РїСЂРµРІС‹С€Р°С‚СЊ {max_size // (1024*1024)} РњР‘.'},
+                {'detail': f'Размер файла не должен превышать {max_size // (1024*1024)} МБ.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         file_name = uploaded_file.name[:255] if len(uploaded_file.name) > 255 else uploaded_file.name
-        delivery_text = text or 'Р Р°Р±РѕС‚Р° РѕС‚РїСЂР°РІР»РµРЅР°'
+        delivery_text = text or 'Работа отправлена'
 
         try:
             delivery_offer_data = None
@@ -706,20 +745,20 @@ class ChatViewSet(viewsets.ModelViewSet):
             return blocked
         message_id = request.data.get('message_id')
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязатен'}, status=status.HTTP_400_BAD_REQUEST)
 
         delivery_message = get_object_or_404(Message, id=message_id, chat=chat)
         is_direct_delivery = delivery_message.message_type == 'work_delivery'
         is_work_offer_delivery = delivery_message.message_type == 'work_offer'
 
         if not is_direct_delivery and not is_work_offer_delivery:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РґРѕСЃС‚Р°РІРєРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Это сообщение не является доставкой работы'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
-            return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.user == delivery_message.sender:
-            return Response({'detail': 'РќРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЃРІРѕСЋ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Нельзя принять свою собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
         rating = request.data.get('rating', None)
         # Оценка обычного заказа создаётся только при итоговой приёмке заказа.
@@ -730,9 +769,9 @@ class ChatViewSet(viewsets.ModelViewSet):
             try:
                 rating = int(rating)
             except (TypeError, ValueError):
-                return Response({'detail': 'rating РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'rating должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
             if rating < 1 or rating > 5:
-                return Response({'detail': 'rating РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІ РґРёР°РїР°Р·РѕРЅРµ 1..5'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'rating должен быть в диапазоне 1..5'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             rating = None
 
@@ -740,10 +779,10 @@ class ChatViewSet(viewsets.ModelViewSet):
 
         if is_work_offer_delivery:
             if delivery_data.get('status') != 'accepted' or delivery_data.get('delivery_status') != 'delivered':
-                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Сейчас нельзя принять работу по этому предложению'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if delivery_data.get('delivery_status') not in ('delivered', 'pending'):
-                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Сейчас нельзя принять работу'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
         delivery_data['delivery_status'] = 'accepted'
@@ -866,7 +905,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        # РЎРѕР·РґР°РµРј СЂРµР№С‚РёРЅРі СЌРєСЃРїРµСЂС‚Р° РґР»СЏ Р·Р°РєР°Р·Р°, РµСЃР»Рё СѓРєР°Р·Р°РЅ rating Рё РµСЃС‚СЊ СЃРІСЏР·СЊ СЃ Р·Р°РєР°Р·РѕРј
+        # Создаем рейтинг эксперта для заказа, если указан rating и есть связь с заказом
         if rating is not None and chat.order and chat.order.expert:
             try:
                 from apps.experts.models import ExpertReview
@@ -880,10 +919,10 @@ class ChatViewSet(viewsets.ModelViewSet):
                     }
                 )
             except Exception as e:
-                # Р›РѕРіРёСЂСѓРµРј РѕС€РёР±РєСѓ, РЅРѕ РЅРµ Р»РѕРјР°РµРј РѕСЃРЅРѕРІРЅРѕР№ РїСЂРѕС†РµСЃСЃ
+                # Логируем ошибку, но не ломаем основной процесс
                 import logging
                 logger = logging.getLogger(__name__)
-                logger.error(f"РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ ExpertReview: {str(e)}")
+                logger.error(f"Ошибка создания ExpertReview: {str(e)}")
 
         return Response({'status': 'success'})
 
@@ -895,28 +934,28 @@ class ChatViewSet(viewsets.ModelViewSet):
             return blocked
         message_id = request.data.get('message_id')
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
 
         delivery_message = get_object_or_404(Message, id=message_id, chat=chat)
         is_direct_delivery = delivery_message.message_type == 'work_delivery'
         is_work_offer_delivery = delivery_message.message_type == 'work_offer'
 
         if not is_direct_delivery and not is_work_offer_delivery:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РґРѕСЃС‚Р°РІРєРѕР№ СЂР°Р±РѕС‚С‹'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Это сообщение не является доставкой работы'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
-            return Response({'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Вы не являетесь участником этого чата'}, status=status.HTTP_403_FORBIDDEN)
 
         if request.user == delivery_message.sender:
-            return Response({'detail': 'РќРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЃРІРѕСЋ СЃРѕР±СЃС‚РІРµРЅРЅСѓСЋ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Нельзя отклонить свою собственную работу'}, status=status.HTTP_400_BAD_REQUEST)
 
         delivery_data = delivery_message.offer_data or {}
         if is_work_offer_delivery:
             if delivery_data.get('status') != 'accepted' or delivery_data.get('delivery_status') != 'delivered':
-                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ РїРѕ СЌС‚РѕРјСѓ РїСЂРµРґР»РѕР¶РµРЅРёСЋ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Сейчас нельзя отклонить работу по этому предложению'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             if delivery_data.get('delivery_status') not in ('delivered', 'pending'):
-                return Response({'detail': 'РЎРµР№С‡Р°СЃ РЅРµР»СЊР·СЏ РѕС‚РєР»РѕРЅРёС‚СЊ СЂР°Р±РѕС‚Сѓ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Сейчас нельзя отклонить работу'}, status=status.HTTP_400_BAD_REQUEST)
 
         from django.utils import timezone
         delivery_data['delivery_status'] = 'rejected'
@@ -927,7 +966,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def accept_offer(self, request, pk=None):
-        """РџСЂРёРЅСЏС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ"""
+        """Принять индивидуальное предложение"""
         chat = self.get_object()
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
@@ -935,52 +974,52 @@ class ChatViewSet(viewsets.ModelViewSet):
         message_id = request.data.get('message_id')
         
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
             
         message = get_object_or_404(Message, id=message_id, chat=chat)
         
         if message.message_type != 'offer' or not message.offer_data:
-            return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Это сообщение не является предложением'}, status=status.HTTP_400_BAD_REQUEST)
             
         if request.user == message.sender:
-            return Response({'detail': 'РќРµР»СЊР·СЏ РїСЂРёРЅСЏС‚СЊ СЃРІРѕРµ СЃРѕР±СЃС‚РІРµРЅРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Нельзя принять свое собственное предложение'}, status=status.HTTP_400_BAD_REQUEST)
 
         if request.user not in chat.participants.all():
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'},
+                {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # РџСЂРѕРІРµСЂРєР° СЃСЂРѕРєР° РґРµР№СЃС‚РІРёСЏ (2 РґРЅСЏ)
+        # Проверка срока действия (2 дня)
         from django.utils import timezone
         import datetime
         if timezone.now() > message.created_at + datetime.timedelta(days=2):
-            return Response({'detail': 'РЎСЂРѕРє РґРµР№СЃС‚РІРёСЏ РїСЂРµРґР»РѕР¶РµРЅРёСЏ РёСЃС‚РµРє'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Срок действия предложения истек'}, status=status.HTTP_400_BAD_REQUEST)
             
         offer_data = message.offer_data
         if not isinstance(offer_data, dict):
-            return Response({'detail': 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ РїСЂРµРґР»РѕР¶РµРЅРёСЏ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Некорректные данные предложения'}, status=status.HTTP_400_BAD_REQUEST)
         if offer_data.get('status', 'new') != 'new':
-            return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # РЎРѕР·РґР°РµРј Р·Р°РєР°Р·
+        # Создаем заказ
         try:
             if not getattr(message.sender, 'is_staff', False) and getattr(message.sender, 'role', None) != 'expert':
-                return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ РѕС‚ СЌРєСЃРїРµСЂС‚Р°'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Предложение может быть только от эксперта'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # РџР°СЂСЃРёРј РґРµРґР»Р°Р№РЅ. РџСЂРµРґРїРѕР»Р°РіР°РµРј, С‡С‚Рѕ С„СЂРѕРЅС‚ С€Р»РµС‚ ISO СЃС‚СЂРѕРєСѓ РёР»Рё С‡С‚Рѕ-С‚Рѕ РїРѕРЅСЏС‚РЅРѕРµ.
+            # Парсим дедлайн. Предполагаем, что фронт шлет ISO строку или что-то понятное.
             deadline_str = offer_data.get('deadline')
             deadline = None
             if deadline_str:
-                # Р•СЃР»Рё РїСЂРёС…РѕРґРёС‚ timestamp (С‡РёСЃР»Рѕ)
+                # Если приходит timestamp (число)
                 if isinstance(deadline_str, (int, float)):
                     deadline = timezone.datetime.fromtimestamp(deadline_str / 1000.0, tz=timezone.utc)
                 else:
-                    # РџРѕРїС‹С‚РєР° СЂР°СЃРїР°СЂСЃРёС‚СЊ СЃС‚СЂРѕРєСѓ
+                    # Попытка распарсить строку
                     try:
                         deadline = timezone.datetime.fromisoformat(deadline_str.replace('Z', '+00:00'))
                     except ValueError:
-                        return Response({'detail': 'РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ С„РѕСЂРјР°С‚ deadline'}, status=status.HTTP_400_BAD_REQUEST)
+                        return Response({'detail': 'Некорректный формат deadline'}, status=status.HTTP_400_BAD_REQUEST)
             
             if not deadline:
                 deadline = timezone.now() + datetime.timedelta(days=3)
@@ -990,7 +1029,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                 try:
                     subject_id = int(subject_id)
                 except (TypeError, ValueError):
-                    return Response({'detail': 'subject_id РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'detail': 'subject_id должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 subject_id = None
 
@@ -999,19 +1038,19 @@ class ChatViewSet(viewsets.ModelViewSet):
                 try:
                     work_type_id = int(work_type_id)
                 except (TypeError, ValueError):
-                    return Response({'detail': 'work_type_id РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј'}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({'detail': 'work_type_id должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 work_type_id = None
 
             cost_raw = offer_data.get('cost')
             if cost_raw is None or cost_raw == '':
-                return Response({'detail': 'cost РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'cost обязателен'}, status=status.HTTP_400_BAD_REQUEST)
             try:
                 cost = Decimal(str(cost_raw))
             except (InvalidOperation, ValueError, TypeError):
-                return Response({'detail': 'cost РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'cost должен быть числом'}, status=status.HTTP_400_BAD_REQUEST)
             if cost < 0:
-                return Response({'detail': 'cost РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рј'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'cost не может быть отрицательным'}, status=status.HTTP_400_BAD_REQUEST)
 
             client_user = chat.client or request.user
             expert_user = chat.expert or message.sender
@@ -1081,7 +1120,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     )
                 offer_data['prepayment_percent'] = prepayment_percent
             
-                # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РїСЂРµРґР»РѕР¶РµРЅРёСЏ
+                # Обновляем статус предложения
                 offer_data['status'] = 'accepted'
                 offer_data['order_id'] = order.id
                 message.offer_data = offer_data
@@ -1124,17 +1163,17 @@ class ChatViewSet(viewsets.ModelViewSet):
             from django.db import IntegrityError
             if isinstance(e, IntegrityError):
                 return Response(
-                    {'detail': 'РћС€РёР±РєР° РїСЂРё СЃРѕР·РґР°РЅРёРё Р·Р°РєР°Р·Р°. РџСЂРѕРІРµСЂСЊС‚Рµ РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚СЊ РґР°РЅРЅС‹С… РїСЂРµРґР»РѕР¶РµРЅРёСЏ.'},
+                    {'detail': 'Ошибка при создании заказа. Проверьте корректность данных предложения.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             return Response(
-                {'detail': f'РћС€РёР±РєР° РїСЂРё РїСЂРёРЅСЏС‚РёРё РїСЂРµРґР»РѕР¶РµРЅРёСЏ: {str(e)}'},
+                {'detail': f'Ошибка при принятии предложения: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
     @action(detail=True, methods=['post'])
     def reject_offer(self, request, pk=None):
-        """РћС‚РєР»РѕРЅРёС‚СЊ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРµ РїСЂРµРґР»РѕР¶РµРЅРёРµ"""
+        """Отклонить индивидуальное предложение"""
         chat = self.get_object()
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
@@ -1142,17 +1181,17 @@ class ChatViewSet(viewsets.ModelViewSet):
         message_id = request.data.get('message_id')
         
         if not message_id:
-            return Response({'detail': 'message_id РѕР±СЏР·Р°С‚РµР»РµРЅ'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'message_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
             
         with transaction.atomic():
             message = get_object_or_404(Message.objects.select_for_update(), id=message_id, chat=chat)
 
             if message.message_type != 'offer':
-                return Response({'detail': 'Р­С‚Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ СЏРІР»СЏРµС‚СЃСЏ РїСЂРµРґР»РѕР¶РµРЅРёРµРј'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Это сообщение не является предложением'}, status=status.HTTP_400_BAD_REQUEST)
 
             offer_data = message.offer_data or {}
             if offer_data.get('status', 'new') != 'new':
-                return Response({'detail': 'РџСЂРµРґР»РѕР¶РµРЅРёРµ СѓР¶Рµ РѕР±СЂР°Р±РѕС‚Р°РЅРѕ'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Предложение уже обработано'}, status=status.HTTP_400_BAD_REQUEST)
             offer_data['status'] = 'rejected'
             message.offer_data = offer_data
             message.save(update_fields=['offer_data'])
@@ -1205,15 +1244,15 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def mark_read(self, request, pk=None):
-        """РћС‚РјРµС‚РёС‚СЊ РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚Рµ РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ"""
+        """Отметить все сообщения в чате как прочитанные"""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'},
+                {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # РћС‚РјРµС‡Р°РµРј РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ, РєРѕС‚РѕСЂС‹Рµ РЅРµ РѕС‚ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+        # Отмечаем как прочитанные все сообщения, которые не от текущего пользователя
         related_chats = Chat.objects.filter(participants=request.user).exclude(hidden_for_users=request.user)
         if chat.client_id and chat.expert_id:
             related_chats = related_chats.filter(client_id=chat.client_id, expert_id=chat.expert_id)
@@ -1228,15 +1267,15 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def mark_as_unread(self, request, pk=None):
-        """РџРѕРјРµС‚РёС‚СЊ С‡Р°С‚ РєР°Рє РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Р№"""
+        """Пометить чат как непрочитанный"""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'},
+                {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # РћС‚РјРµС‡Р°РµРј РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ
+        # Отмечаем все сообщения как непрочитанные
         readable_messages_for_chat(chat).exclude(sender=request.user).exclude(message_type='system').update(is_read=False)
         
         return Response({'status': 'success'})
@@ -1258,29 +1297,29 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def toggle_pin(self, request, pk=None):
-        """Р—Р°РєСЂРµРїРёС‚СЊ/РѕС‚РєСЂРµРїРёС‚СЊ С‡Р°С‚"""
+        """Закрепить/открепить чат"""
         chat = self.get_object()
         if request.user not in chat.participants.all():
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ С‡Р°С‚Р°'},
+                {'detail': 'Вы не являетесь участником этого чата'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # РџСЂРѕРІРµСЂСЏРµРј, Р·Р°РєСЂРµРїР»С‘РЅ Р»Рё СѓР¶Рµ С‡Р°С‚
+        # Проверяем, закреплён ли уже чат
         pin = ChatPin.objects.filter(user=request.user, chat=chat).first()
         
         if pin:
-            # РћС‚РєСЂРµРїР»СЏРµРј С‡Р°С‚
+            # Открепляем чат
             pin.delete()
-            return Response({'status': 'unpinned', 'message': 'Р§Р°С‚ РѕС‚РєСЂРµРїР»С‘РЅ'})
+            return Response({'status': 'unpinned', 'message': 'Чат откреплён'})
         else:
-            # Р—Р°РєСЂРµРїР»СЏРµРј С‡Р°С‚
+            # Закрепляем чат
             ChatPin.objects.create(user=request.user, chat=chat)
-            return Response({'status': 'pinned', 'message': 'Р§Р°С‚ Р·Р°РєСЂРµРїР»С‘РЅ'})
+            return Response({'status': 'pinned', 'message': 'Чат закреплён'})
 
     @action(detail=False, methods=['get'])
     def unread_count(self, request):
-        """РџРѕР»СѓС‡РёС‚СЊ РѕР±С‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРµРїСЂРѕС‡РёС‚Р°РЅРЅС‹С… СЃРѕРѕР±С‰РµРЅРёР№"""
+        """Получить общее количество непрочитанных сообщений"""
         user = request.user
 
         visible_chats = Chat.objects.filter(participants=user).exclude(hidden_for_users=user)
@@ -1290,9 +1329,9 @@ class ChatViewSet(viewsets.ModelViewSet):
             visible_chats = visible_chats.exclude(participants__id=support_user_id)
 
         visible_chats = visible_chats.exclude(
-            Q(context_title__icontains='РїРѕРґРґРµСЂР¶РєР°') |
+            Q(context_title__icontains='поддержка') |
             Q(context_title__icontains='support') |
-            Q(context_title__icontains='С‚РµС…РїРѕРґРґРµСЂР¶РєР°')
+            Q(context_title__icontains='техподдержка')
         )
 
         count = sum(unread_messages_for_user(chat, user).count() for chat in visible_chats)
@@ -1301,14 +1340,14 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def get_or_create_by_order(self, request):
-        """РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СЃРѕР·РґР°С‚СЊ С‡Р°С‚ РїРѕ ID Р·Р°РєР°Р·Р°"""
+        """Получить или создать чат по ID заказа"""
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
         order_id = request.data.get('order_id')
         if not order_id:
             return Response(
-                {'detail': 'order_id РѕР±СЏР·Р°С‚РµР»РµРЅ'},
+                {'detail': 'order_id обязателен'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -1316,26 +1355,26 @@ class ChatViewSet(viewsets.ModelViewSet):
             order = Order.objects.get(id=order_id)
         except Order.DoesNotExist:
             return Response(
-                {'detail': 'Р—Р°РєР°Р· РЅРµ РЅР°Р№РґРµРЅ'},
+                {'detail': 'Заказ не найден'},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Р­С‚РѕС‚ endpoint РїРѕРґРґРµСЂР¶РёРІР°РµС‚ С‚РѕР»СЊРєРѕ С‡Р°С‚ РјРµР¶РґСѓ РєР»РёРµРЅС‚РѕРј Рё РЅР°Р·РЅР°С‡РµРЅРЅС‹Рј СЌРєСЃРїРµСЂС‚РѕРј.
-        # Р”Р»СЏ С‡Р°С‚РѕРІ РїРѕ РѕС‚РєР»РёРєР°Рј РёСЃРїРѕР»СЊР·СѓР№С‚Рµ get_or_create_by_order_and_user.
+        # Этот endpoint поддерживает только чат между клиентом и назначенным экспертом.
+        # Для чатов по откликам используйте get_or_create_by_order_and_user.
         if not order.expert_id:
             return Response(
-                {'detail': 'РЈ Р·Р°РєР°Р·Р° РµС‰Рµ РЅРµС‚ РЅР°Р·РЅР°С‡РµРЅРЅРѕРіРѕ СЌРєСЃРїРµСЂС‚Р°. РСЃРїРѕР»СЊР·СѓР№С‚Рµ get_or_create_by_order_and_user.'},
+                {'detail': 'У заказа еще нет назначенного эксперта. Используйте get_or_create_by_order_and_user.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # РџСЂРѕРІРµСЂСЏРµРј, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЏРІР»СЏРµС‚СЃСЏ СѓС‡Р°СЃС‚РЅРёРєРѕРј Р·Р°РєР°Р·Р°
+        # Проверяем, что пользователь является участником заказа
         if request.user not in [order.client, order.expert]:
             return Response(
-                {'detail': 'Р’С‹ РЅРµ СЏРІР»СЏРµС‚РµСЃСЊ СѓС‡Р°СЃС‚РЅРёРєРѕРј СЌС‚РѕРіРѕ Р·Р°РєР°Р·Р°'},
+                {'detail': 'Вы не являетесь участником этого заказа'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # РџРѕР»СѓС‡Р°РµРј РёР»Рё СЃРѕР·РґР°РµРј С‡Р°С‚
+        # Получаем или создаем чат
         chat = get_or_create_order_chat(order, client_user=order.client, expert_user=order.expert)
         
         serializer = ChatDetailSerializer(chat, context={'request': request})
@@ -1343,7 +1382,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def get_or_create_by_order_and_user(self, request):
-        """РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СЃРѕР·РґР°С‚СЊ С‡Р°С‚ РїРѕ ID Р·Р°РєР°Р·Р° Рё ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ (РєРѕРЅС‚РµРєСЃС‚ Р·Р°РєР°Р·Р° РёР· Р»РµРЅС‚С‹)."""
+        """Получить или создать чат по ID заказа и ID пользователя (контекст заказа из ленты)."""
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
@@ -1353,7 +1392,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         user_id = request.data.get('user_id')
         if not order_id or not user_id:
             return Response(
-                {'detail': 'order_id Рё user_id РѕР±СЏР·Р°С‚РµР»СЊРЅС‹'},
+                {'detail': 'order_id и user_id обязательны'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1371,23 +1410,23 @@ class ChatViewSet(viewsets.ModelViewSet):
                 serializer = ChatDetailSerializer(chat, context={'request': request})
                 return Response(serializer.data)
 
-        # РРЅРёС†РёР°С‚РѕСЂРѕРј РїРµСЂРµРїРёСЃРєРё РїРѕ РѕС‚РєР»РёРєСѓ РјРѕР¶РµС‚ Р±С‹С‚СЊ С‚РѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє
+        # Инициатором переписки по отклику может быть только заказчик
         if request.user.id != order.client_id and not request.user.is_staff:
             return Response(
-                {'detail': 'РўРѕР»СЊРєРѕ Р·Р°РєР°Р·С‡РёРє РјРѕР¶РµС‚ РёРЅРёС†РёРёСЂРѕРІР°С‚СЊ С‡Р°С‚ РїРѕ РѕС‚РєР»РёРєСѓ'},
+                {'detail': 'Только заказчик может инициировать чат по отклику'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # РќРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ С‡Р°С‚ СЃ СЃР°РјРёРј СЃРѕР±РѕР№
+        # Нельзя создать чат с самим собой
         if other_user.id == request.user.id:
             return Response(
-                {'detail': 'РќРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ С‡Р°С‚ СЃ СЃР°РјРёРј СЃРѕР±РѕР№'},
+                {'detail': 'Нельзя создать чат с самим собой'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if getattr(other_user, 'role', None) != 'expert' and not getattr(other_user, 'is_staff', False):
             return Response(
-                {'detail': 'Р§Р°С‚ РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ С‚РѕР»СЊРєРѕ СЃ СЌРєСЃРїРµСЂС‚РѕРј'},
+                {'detail': 'Чат можно создать только с экспертом'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1400,7 +1439,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         client = order.client
         expert = other_user
 
-        context_title = f"Р—Р°РєР°Р· РёР· Р»РµРЅС‚С‹ #{order.id}"
+        context_title = f"Заказ из ленты #{order.id}"
         chat = Chat.objects.filter(
             order__isnull=True,
             client=client,
@@ -1451,10 +1490,10 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def get_or_create_by_user(self, request):
-        """РџРѕР»СѓС‡РёС‚СЊ РёР»Рё СЃРѕР·РґР°С‚СЊ С‡Р°С‚ СЃ РєРѕРЅРєСЂРµС‚РЅС‹Рј РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј.
+        """Получить или создать чат с конкретным пользователем.
         
-        Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ С‡Р°С‚Р° РјРµР¶РґСѓ РїР°СЂРѕР№ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№:
-        СЃРЅР°С‡Р°Р»Р° РёС‰РµС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С‡Р°С‚, Рё С‚РѕР»СЊРєРѕ РµСЃР»Рё РЅРµ РЅР°С…РѕРґРёС‚ вЂ” СЃРѕР·РґР°С‘С‚ РЅРѕРІС‹Р№.
+        Гарантирует уникальность чата между парой пользователей:
+        сначала ищет существующий чат, и только если не находит — создаёт новый.
         """
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
@@ -1467,7 +1506,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             context_title = str(context_title).strip()[:255] or None
         if user_id in (None, '', 0, '0'):
             return Response(
-                {'detail': 'user_id РѕР±СЏР·Р°С‚РµР»РµРЅ'},
+                {'detail': 'user_id обязателен'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1475,13 +1514,13 @@ class ChatViewSet(viewsets.ModelViewSet):
             user_id_int = int(user_id)
         except (TypeError, ValueError):
             return Response(
-                {'detail': 'user_id РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј'},
+                {'detail': 'user_id должен быть числом'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         if user_id_int == request.user.id:
             return Response(
-                {'detail': 'РќРµР»СЊР·СЏ СЃРѕР·РґР°С‚СЊ С‡Р°С‚ СЃ СЃР°РјРёРј СЃРѕР±РѕР№'},
+                {'detail': 'Нельзя создать чат с самим собой'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -1489,11 +1528,11 @@ class ChatViewSet(viewsets.ModelViewSet):
             other_user = User.objects.get(id=user_id_int)
         except User.DoesNotExist:
             return Response(
-                {'detail': 'РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ'},
+                {'detail': 'Пользователь не найден'},
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # РћРїСЂРµРґРµР»СЏРµРј client/expert РїРѕ ID (РјРµРЅСЊС€РёР№ ID = client), С‡С‚РѕР±С‹ constraint СЂР°Р±РѕС‚Р°Р» РєРѕСЂСЂРµРєС‚РЅРѕ
+        # Определяем client/expert по ID (меньший ID = client), чтобы constraint работал корректно
         chat = get_or_create_direct_chat(request.user, other_user, context_title=context_title)
         chat.hidden_for_users.remove(request.user)
         serializer = ChatDetailSerializer(chat, context={'request': request})
@@ -1535,8 +1574,8 @@ class ChatViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
 
-        # РЎРЅР°С‡Р°Р»Р° РёС‰РµРј СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ С‡Р°С‚ РјРµР¶РґСѓ СЌС‚РёРјРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё
-        # РСЃРїРѕР»СЊР·СѓРµРј client_id/expert_id РґР»СЏ РЅР°РґС‘Р¶РЅРѕРіРѕ РїРѕРёСЃРєР°
+        # Сначала ищем существующий чат между этими пользователями
+        # Используем client_id/expert_id для надёжного поиска
         chat = Chat.objects.filter(
             order__isnull=True,
             client_id=resolved_client_id,
@@ -1544,7 +1583,7 @@ class ChatViewSet(viewsets.ModelViewSet):
         ).order_by('id').first()
 
         if not chat:
-            # РџСЂРѕР±СѓРµРј РЅР°Р№С‚Рё РІ РѕР±СЂР°С‚РЅРѕРј РїРѕСЂСЏРґРєРµ (РЅР° СЃР»СѓС‡Р°Р№ СЃС‚Р°СЂС‹С… РґР°РЅРЅС‹С…)
+            # Пробуем найти в обратном порядке (на случай старых данных)
             chat = Chat.objects.filter(
                 order__isnull=True,
                 client_id=resolved_expert_id,
@@ -1552,7 +1591,7 @@ class ChatViewSet(viewsets.ModelViewSet):
             ).order_by('id').first()
 
         if not chat:
-            # РС‰РµРј С‡РµСЂРµР· ManyToMany РєР°Рє Р·Р°РїР°СЃРЅРѕР№ РІР°СЂРёР°РЅС‚
+            # Ищем через ManyToMany как запасной вариант
             chat = Chat.objects.filter(
                 participants=request.user,
                 order__isnull=True,
@@ -1561,24 +1600,23 @@ class ChatViewSet(viewsets.ModelViewSet):
             ).order_by('id').first()
 
         if chat:
-            # Р§Р°С‚ РЅР°Р№РґРµРЅ вЂ” СѓРґР°Р»СЏРµРј РґСѓР±Р»РёРєР°С‚С‹ Рё РѕР±РЅРѕРІР»СЏРµРј РїРѕР»СЏ
+            # Чат найден — удаляем дубликаты и обновляем поля
             duplicates = Chat.objects.filter(
                 order__isnull=True,
             ).filter(
                 Q(client_id=resolved_client_id, expert_id=resolved_expert_id) |
                 Q(client_id=resolved_expert_id, expert_id=resolved_client_id),
             ).exclude(id=chat.id)
-            if duplicates.exists():
-                duplicates.delete()
+            # Opening a conversation must never delete duplicate message histories.
 
-            # РћР±РЅРѕРІР»СЏРµРј context_title РµСЃР»Рё РїРµСЂРµРґР°РЅ Рё С‡Р°С‚ РµРіРѕ РЅРµ РёРјРµРµС‚
+            # Обновляем context_title если передан и чат его не имеет
             if context_title and not chat.context_title:
                 chat.context_title = context_title
                 chat.save(update_fields=['context_title'])
 
             chat.participants.add(request.user, other_user)
         else:
-            # Р§Р°С‚ РЅРµ РЅР°Р№РґРµРЅ вЂ” СЃРѕР·РґР°С‘Рј РЅРѕРІС‹Р№
+            # Чат не найден — создаём новый
             with transaction.atomic():
                 try:
                     chat = Chat.objects.create(
@@ -1589,7 +1627,7 @@ class ChatViewSet(viewsets.ModelViewSet):
                     )
                     chat.participants.add(request.user, other_user)
                 except IntegrityError:
-                    # Constraint СЃСЂР°Р±РѕС‚Р°Р» вЂ” РёС‰РµРј СЃРѕР·РґР°РЅРЅС‹Р№ С‡Р°С‚
+                    # Constraint сработал — ищем созданный чат
                     chat = Chat.objects.filter(
                         order__isnull=True,
                         client_id=resolved_client_id,
@@ -1613,7 +1651,7 @@ class ChatViewSet(viewsets.ModelViewSet):
 
 
 
-# ViewSet РґР»СЏ С‡Р°С‚РѕРІ С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРё
+# ViewSet для чатов технической поддержки
 
 from .models import SupportChat, SupportMessage
 from rest_framework.pagination import PageNumberPagination
@@ -1621,14 +1659,14 @@ from rest_framework.pagination import PageNumberPagination
 
 class SupportChatViewSet(viewsets.ModelViewSet):
     """
-    ViewSet РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ С‡Р°С‚Р°РјРё С‚РµС…РЅРёС‡РµСЃРєРѕР№ РїРѕРґРґРµСЂР¶РєРё.
+    ViewSet для управления чатами технической поддержки.
     
-    Р­С‚Рё С‡Р°С‚С‹ РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РўРћР›Р¬РљРћ РІ СЂР°Р·РґРµР»Рµ "Р§Р°С‚С‹ РїРѕРґРґРµСЂР¶РєРё" РІ Р°РґРјРёРЅ-РїР°РЅРµР»Рё
-    Рё РќР• РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РЅР° СЃС‚СЂР°РЅРёС†Рµ РѕР±С‹С‡РЅС‹С… С‡Р°С‚РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№.
+    Эти чаты отображаются ТОЛЬКО в разделе "Чаты поддержки" в админ-панели
+    и НЕ отображаются на странице обычных чатов пользователей.
     
-    РџСЂР°РІР° РґРѕСЃС‚СѓРїР°:
-    - РђРґРјРёРЅС‹ РІРёРґСЏС‚ РІСЃРµ С‡Р°С‚С‹ РїРѕРґРґРµСЂР¶РєРё
-    - РљР»РёРµРЅС‚С‹ РІРёРґСЏС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРё С‡Р°С‚С‹ СЃ РїРѕРґРґРµСЂР¶РєРѕР№
+    Права доступа:
+    - Админы видят все чаты поддержки
+    - Клиенты видят только свои чаты с поддержкой
     """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SupportChatSerializer
@@ -1636,33 +1674,33 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        # РђРґРјРёРЅС‹ РІРёРґСЏС‚ РІСЃРµ С‡Р°С‚С‹
+        # Админы видят все чаты
         if user.role == 'admin':
             return SupportChat.objects.all().select_related(
                 'client', 'admin'
             ).prefetch_related('support_messages__sender')
         
-        # РљР»РёРµРЅС‚С‹ РІРёРґСЏС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРё С‡Р°С‚С‹
+        # Клиенты видят только свои чаты
         return SupportChat.objects.filter(
             client=user
         ).select_related('admin').prefetch_related('support_messages__sender')
     
     def create(self, request, *args, **kwargs):
-        """РЎРѕР·РґР°РЅРёРµ РЅРѕРІРѕРіРѕ С‡Р°С‚Р° РїРѕРґРґРµСЂР¶РєРё"""
+        """Создание нового чата поддержки"""
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
             return blocked
-        subject = request.data.get('subject', 'Р’РѕРїСЂРѕСЃ РїРѕ СЂР°Р±РѕС‚Рµ РїР»Р°С‚С„РѕСЂРјС‹')
+        subject = request.data.get('subject', 'Вопрос по работе платформы')
         priority = request.data.get('priority', 'medium')
         initial_message = request.data.get('message', '')
         
         if not initial_message:
             return Response(
-                {'detail': 'РЎРѕРѕР±С‰РµРЅРёРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ'},
+                {'detail': 'Сообщение обязательно'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # РЎРѕР·РґР°РµРј С‡Р°С‚
+        # Создаем чат
         chat = SupportChat.objects.create(
             client=request.user,
             subject=subject,
@@ -1670,7 +1708,7 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             status='open'
         )
         
-        # РЎРѕР·РґР°РµРј РїРµСЂРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+        # Создаем первое сообщение
         SupportMessage.objects.create(
             chat=chat,
             sender=request.user,
@@ -1687,7 +1725,7 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
-        """РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РІ С‡Р°С‚ РїРѕРґРґРµСЂР¶РєРё"""
+        """Отправка сообщения в чат поддержки"""
         chat = self.get_object()
         blocked = _contact_ban_response(request.user, '\u0414\u0435\u0439\u0441\u0442\u0432\u0438\u0435')
         if blocked is not None:
@@ -1697,11 +1735,11 @@ class SupportChatViewSet(viewsets.ModelViewSet):
         
         if not text and not uploaded_file:
             return Response(
-                {'detail': 'РЈРєР°Р¶РёС‚Рµ С‚РµРєСЃС‚ СЃРѕРѕР±С‰РµРЅРёСЏ РёР»Рё РїСЂРёРєСЂРµРїРёС‚Рµ С„Р°Р№Р»'},
+                {'detail': 'Укажите текст сообщения или прикрепите файл'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # РЎРѕР·РґР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ
+        # Создаем сообщение
         message = SupportMessage.objects.create(
             chat=chat,
             sender=request.user,
@@ -1710,7 +1748,7 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             message_type='file' if uploaded_file else 'text'
         )
         
-        # РћР±РЅРѕРІР»СЏРµРј РІСЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ РѕР±РЅРѕРІР»РµРЅРёСЏ С‡Р°С‚Р°
+        # Обновляем время последнего обновления чата
         chat.save(update_fields=['updated_at'])
         
         return Response({
@@ -1729,10 +1767,10 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def take_chat(self, request, pk=None):
-        """Р’Р·СЏС‚СЊ С‡Р°С‚ РІ СЂР°Р±РѕС‚Сѓ (С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРѕРІ)"""
+        """Взять чат в работу (только для админов)"""
         if request.user.role != 'admin':
             return Response(
-                {'detail': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ'},
+                {'detail': 'Доступно только для администраторов'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -1741,11 +1779,11 @@ class SupportChatViewSet(viewsets.ModelViewSet):
         chat.status = 'in_progress'
         chat.save()
         
-        # РЎРёСЃС‚РµРјРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+        # Системное сообщение
         SupportMessage.objects.create(
             chat=chat,
             sender=request.user,
-            text=f'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ {request.user.get_full_name() or request.user.username} РІР·СЏР» РѕР±СЂР°С‰РµРЅРёРµ РІ СЂР°Р±РѕС‚Сѓ',
+            text=f'Администратор {request.user.get_full_name() or request.user.username} взял обращение в работу',
             message_type='system'
         )
         
@@ -1753,24 +1791,24 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def close_chat(self, request, pk=None):
-        """Р—Р°РєСЂС‹С‚СЊ С‡Р°С‚"""
+        """Закрыть чат"""
         chat = self.get_object()
         
-        # РўРѕР»СЊРєРѕ Р°РґРјРёРЅ РёР»Рё РєР»РёРµРЅС‚ РјРѕРіСѓС‚ Р·Р°РєСЂС‹С‚СЊ С‡Р°С‚
+        # Только админ или клиент могут закрыть чат
         if request.user.role != 'admin' and request.user != chat.client:
             return Response(
-                {'detail': 'РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїСЂР°РІ'},
+                {'detail': 'Недостаточно прав'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         chat.status = 'resolved'
         chat.save()
         
-        # РЎРёСЃС‚РµРјРЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+        # Системное сообщение
         SupportMessage.objects.create(
             chat=chat,
             sender=request.user,
-            text=f'Р§Р°С‚ Р·Р°РєСЂС‹С‚ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј {request.user.get_full_name() or request.user.username}',
+            text=f'Чат закрыт пользователем {request.user.get_full_name() or request.user.username}',
             message_type='system'
         )
         
@@ -1778,11 +1816,11 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['get'])
     def messages(self, request, pk=None):
-        """РџРѕР»СѓС‡РёС‚СЊ СЃРѕРѕР±С‰РµРЅРёСЏ С‡Р°С‚Р°"""
+        """Получить сообщения чата"""
         chat = self.get_object()
         messages = chat.support_messages.all().select_related('sender')
         
-        # РћС‚РјРµС‡Р°РµРј СЃРѕРѕР±С‰РµРЅРёСЏ РєР°Рє РїСЂРѕС‡РёС‚Р°РЅРЅС‹Рµ
+        # Отмечаем сообщения как прочитанные
         if request.user == chat.client:
             messages.filter(sender__role='admin', is_read=False).update(is_read=True)
         elif request.user.role == 'admin':
@@ -1812,17 +1850,17 @@ class SupportChatViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def create_ticket(self, request, pk=None):
-        """РЎРѕР·РґР°С‚СЊ С‚РёРєРµС‚ РёР· С‡Р°С‚Р° РїРѕРґРґРµСЂР¶РєРё"""
+        """Создать тикет из чата поддержки"""
         chat = self.get_object()
         
-        # РџСЂРѕРІРµСЂСЏРµРј РїСЂР°РІР° РґРѕСЃС‚СѓРїР°
+        # Проверяем права доступа
         if request.user.role != 'admin' and request.user != chat.client:
             return Response(
-                {'detail': 'РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїСЂР°РІ'},
+                {'detail': 'Недостаточно прав'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # РџСЂРѕРІРµСЂСЏРµРј, РЅРµ СЃРѕР·РґР°РЅ Р»Рё СѓР¶Рµ С‚РёРєРµС‚
+        # Проверяем, не создан ли уже тикет
         from apps.admin_panel.models import SupportRequest
         existing_ticket = SupportRequest.objects.filter(support_chat=chat).first()
         
@@ -1831,14 +1869,14 @@ class SupportChatViewSet(viewsets.ModelViewSet):
                 'ticket_id': existing_ticket.id,
                 'created': False,
                 'status': 'already_exists',
-                'message': 'РўРёРєРµС‚ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚'
+                'message': 'Тикет уже существует'
             })
         
-        # РџРѕР»СѓС‡Р°РµРј РїРµСЂРІРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ РґР»СЏ РѕРїРёСЃР°РЅРёСЏ
+        # Получаем первое сообщение для описания
         first_message = chat.support_messages.first()
         description = first_message.text if first_message else chat.subject
         
-        # РЎРѕР·РґР°РµРј С‚РёРєРµС‚
+        # Создаем тикет
         ticket = SupportRequest.objects.create(
             user=chat.client,
             support_chat=chat,
@@ -1846,10 +1884,10 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             description=description,
             status='open',
             priority=chat.priority,
-            auto_created=False  # РЎРѕР·РґР°РЅ РІСЂСѓС‡РЅСѓСЋ С‡РµСЂРµР· action
+            auto_created=False  # Создан вручную через action
         )
         
-        # РљРѕРїРёСЂСѓРµРј РІСЃРµ СЃРѕРѕР±С‰РµРЅРёСЏ РёР· С‡Р°С‚Р° РІ С‚РёРєРµС‚
+        # Копируем все сообщения из чата в тикет
         from apps.admin_panel.models import SupportMessage as AdminSupportMessage
         for msg in chat.support_messages.all():
             if msg.message_type == 'text':
@@ -1864,12 +1902,12 @@ class SupportChatViewSet(viewsets.ModelViewSet):
             'ticket_id': ticket.id,
             'created': True,
             'status': 'success',
-            'message': 'РўРёРєРµС‚ СѓСЃРїРµС€РЅРѕ СЃРѕР·РґР°РЅ'
+            'message': 'Тикет успешно создан'
         })
 
 
 class ContactViolationViewSet(viewsets.ModelViewSet):
-    """ViewSet РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РЅР°СЂСѓС€РµРЅРёСЏРјРё РѕР±РјРµРЅР° РєРѕРЅС‚Р°РєС‚Р°РјРё"""
+    """ViewSet для управления нарушениями обмена контактами"""
     from .models import ContactViolationLog
     from .serializers import ContactViolationSerializer
     
@@ -1880,26 +1918,26 @@ class ContactViolationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        # РђРґРјРёРЅС‹ РІРёРґСЏС‚ РІСЃРµ РЅР°СЂСѓС€РµРЅРёСЏ
+        # Админы видят все нарушения
         if user.role == 'admin':
             return self.queryset.select_related('chat', 'user', 'message', 'reviewed_by')
         
-        # РћР±С‹С‡РЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»Рё РІРёРґСЏС‚ С‚РѕР»СЊРєРѕ СЃРІРѕРё РЅР°СЂСѓС€РµРЅРёСЏ
+        # Обычные пользователи видят только свои нарушения
         return self.queryset.filter(user=user).select_related('chat', 'message')
     
     @action(detail=True, methods=['post'])
     def approve_violation(self, request, pk=None):
-        """РћРґРѕР±СЂРёС‚СЊ РЅР°СЂСѓС€РµРЅРёРµ (СЂР°Р·РјРѕСЂРѕР·РёС‚СЊ С‡Р°С‚)"""
+        """Одобрить нарушение (разморозить чат)"""
         if request.user.role != 'admin':
             return Response(
-                {'detail': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ'},
+                {'detail': 'Доступно только для администраторов'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         violation = self.get_object()
-        decision = request.data.get('decision', 'РћРґРѕР±СЂРµРЅРѕ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј')
+        decision = request.data.get('decision', 'Одобрено администратором')
         
-        # Р Р°Р·РјРѕСЂР°Р¶РёРІР°РµРј С‡Р°С‚
+        # Размораживаем чат
         from .services import ChatModerationService
         ChatModerationService.unfreeze_chat(
             chat=violation.chat,
@@ -1907,43 +1945,43 @@ class ContactViolationViewSet(viewsets.ModelViewSet):
             decision=decision
         )
         
-        # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РЅР°СЂСѓС€РµРЅРёСЏ
+        # Обновляем статус нарушения
         violation.status = 'approved'
         violation.reviewed_by = request.user
         violation.reviewed_at = timezone.now()
         violation.admin_decision = decision
         violation.save()
         
-        return Response({'message': 'Р§Р°С‚ СЂР°Р·РјРѕСЂРѕР¶РµРЅ, РЅР°СЂСѓС€РµРЅРёРµ РѕРґРѕР±СЂРµРЅРѕ'})
+        return Response({'message': 'Чат разморожен, нарушение одобрено'})
     
     @action(detail=True, methods=['post'])
     def reject_violation(self, request, pk=None):
-        """РћС‚РєР»РѕРЅРёС‚СЊ РЅР°СЂСѓС€РµРЅРёРµ (РѕСЃС‚Р°РІРёС‚СЊ С‡Р°С‚ Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Рј)"""
+        """Отклонить нарушение (оставить чат замороженным)"""
         if request.user.role != 'admin':
             return Response(
-                {'detail': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ'},
+                {'detail': 'Доступно только для администраторов'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         violation = self.get_object()
-        decision = request.data.get('decision', 'РќР°СЂСѓС€РµРЅРёРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРѕ')
+        decision = request.data.get('decision', 'Нарушение подтверждено')
         
-        # РћР±РЅРѕРІР»СЏРµРј СЃС‚Р°С‚СѓСЃ РЅР°СЂСѓС€РµРЅРёСЏ
+        # Обновляем статус нарушения
         violation.status = 'rejected'
         violation.reviewed_by = request.user
         violation.reviewed_at = timezone.now()
         violation.admin_decision = decision
         violation.save()
         
-        # Р§Р°С‚ РѕСЃС‚Р°РµС‚СЃСЏ Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Рј
-        return Response({'message': 'РќР°СЂСѓС€РµРЅРёРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРѕ, С‡Р°С‚ РѕСЃС‚Р°РµС‚СЃСЏ Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Рј'})
+        # Чат остается замороженным
+        return Response({'message': 'Нарушение подтверждено, чат остается замороженным'})
     
     @action(detail=False, methods=['get'])
     def pending_violations(self, request):
-        """РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє РЅР°СЂСѓС€РµРЅРёР№, РѕР¶РёРґР°СЋС‰РёС… РїСЂРѕРІРµСЂРєРё"""
+        """Получить список нарушений, ожидающих проверки"""
         if request.user.role != 'admin':
             return Response(
-                {'detail': 'Р”РѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ'},
+                {'detail': 'Доступно только для администраторов'},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -1952,10 +1990,10 @@ class ContactViolationViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def list(self, request, *args, **kwargs):
-        """РЎРїРёСЃРѕРє С‡Р°С‚РѕРІ РїРѕРґРґРµСЂР¶РєРё"""
+        """Список чатов поддержки"""
         queryset = self.get_queryset()
         
-        # Р¤РёР»СЊС‚СЂР°С†РёСЏ РїРѕ СЃС‚Р°С‚СѓСЃСѓ
+        # Фильтрация по статусу
         status_filter = request.query_params.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -1979,7 +2017,7 @@ class ContactViolationViewSet(viewsets.ModelViewSet):
                     'id': chat.admin.id,
                     'first_name': chat.admin.first_name,
                     'last_name': chat.admin.last_name,
-                    'role': 'РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ РїРѕРґРґРµСЂР¶РєРё',
+                    'role': 'Администратор поддержки',
                 } if chat.admin else None,
                 'status': chat.status,
                 'priority': chat.priority,

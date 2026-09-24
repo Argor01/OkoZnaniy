@@ -111,6 +111,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 first_name=sociallogin.account.extra_data.get('given_name', ''),
                 last_name=sociallogin.account.extra_data.get('family_name', ''),
                 role='client',
+                registration_source=sociallogin.account.provider,
                 email_verified=True  # Email уже подтвержден через Google
             )
             logger.info(f"✅ New user created: {user.username}")
@@ -122,6 +123,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         Заполняем данные пользователя из социальной сети
         """
         user = super().populate_user(request, sociallogin, data)
+        if not user.pk:
+            user.registration_source = sociallogin.account.provider
         
         # Получаем дополнительные данные
         extra_data = sociallogin.account.extra_data
