@@ -5,7 +5,8 @@ import {
   CheckOutlined, CheckCircleOutlined, RiseOutlined, CrownFilled,
 } from '@ant-design/icons';
 import { SEO } from '@/features/common';
-import { TopBar, BecomeLeadForm, FooterDark } from '@/features/landing-v2/components/LandingChrome';
+import { TopBar, FooterDark } from '@/features/landing-v2/components/LandingChrome';
+import InquiryForm from '@/features/landing-v2/components/InquiryForm';
 import styles from '@/features/landing-v2/LandingV2.module.css';
 
 const useReveal = () => {
@@ -166,12 +167,7 @@ const BecomePartner: React.FC = () => {
         </div>
       </section>
 
-      <BecomeLeadForm
-        type="partner"
-        buttonText="Стать партнёром"
-        title={<>Готов запустить <em>своё агентство</em>?</>}
-        subtitle="Оставь email — свяжемся, обсудим детали и составим план запуска твоего бизнеса."
-      />
+      <InquiryForm kind="agency" />
 
       <FooterDark />
     </div>
