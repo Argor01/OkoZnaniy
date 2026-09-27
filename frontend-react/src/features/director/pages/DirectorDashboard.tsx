@@ -1,3 +1,4 @@
+import AccountSecurityLink from '@/features/auth/components/AccountSecurityLink';
 import React, { useState } from 'react';
 import { Layout, Menu, Button, Typography, message, Modal, Spin, Result } from 'antd';
 import {
@@ -360,6 +361,7 @@ const DirectorDashboard: React.FC = () => {
               : currentMenuItem?.label || 'Личный кабинет директора'}
           </Title>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AccountSecurityLink />
             <ThemeToggle size={isMobile ? 'small' : 'middle'} />
             <Button
               type="default"

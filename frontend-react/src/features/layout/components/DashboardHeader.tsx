@@ -1,3 +1,4 @@
+import AccountSecurityLink from '@/features/auth/components/AccountSecurityLink';
 import React, { memo, useMemo } from 'react';
 import { Badge, Button, Dropdown, Layout, Space, Typography, message } from 'antd';
 import {
@@ -289,6 +290,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = memo(({
 
       <div className={styles.headerRight}>
         <Space size={isMobile ? 8 : 16}>
+            <AccountSecurityLink />
           {!isMobile && (
             <>
               <Badge count={unreadMessages} className={unreadMessages > 0 ? "oko-unread-indicator" : undefined} offset={[-5, 5]}>

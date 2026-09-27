@@ -1,0 +1,10 @@
+.page { max-width: 680px; margin: 0 auto; padding: clamp(16px, 4vw, 40px); line-height: 1.5; }
+.page p { max-width: 65ch; }
+.back { padding-inline: 0; margin-bottom: 24px; }
+.feedback:not(:empty) { margin: 8px 0 24px; }
+.recovery { margin: 8px 0 32px; }
+.hint { margin-top: 16px; }
+.page :global(.ant-input), .page :global(.ant-input-affix-wrapper), .page :global(.ant-btn) { min-height: 44px; }
+.page :global(.ant-tabs-tab) { min-height: 44px; }
+.page :global(.ant-btn:focus-visible) { outline: 2px solid oklch(50% 0.16 300); outline-offset: 3px; }
+@media (max-width: 480px) { .page { padding: 16px 12px 32px; } .page :global(.ant-tabs-tab + .ant-tabs-tab) { margin-left: 16px; } .page :global(.ant-tabs-tab) { font-size: 14px; } }

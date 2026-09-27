@@ -1,5 +1,7 @@
+import apiClient from '@/api/client';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Card,
   Table,
   Button,
@@ -61,6 +63,21 @@ const PartnerList: React.FC = () => {
   const { data: partners = [], isLoading, error: partnersError } = useQuery<Partner[], unknown, Partner[]>({
     queryKey: ['director-partners'],
     queryFn: getPartners,
+  });
+
+  const managers = useQuery({
+    queryKey: ['director-partner-managers'],
+    queryFn: async () => (await apiClient.get<Array<NonNullable<Partner['manager']>>>('/users/admin_partner_managers/')).data,
+    staleTime: 60_000,
+  });
+  const assignment = useMutation({
+    mutationFn: ({ id, managerId }: { id: number; managerId: number | null }) =>
+      apiClient.patch(`/users/${id}/admin_update_partner/`, { partner_manager_id: managerId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['director-partners'] });
+      message.success('Администратор назначен');
+    },
+    onError: () => message.error('Назначение не сохранено. Обновите список и попробуйте снова.'),
   });
 
   useEffect(() => {
@@ -168,6 +185,23 @@ const PartnerList: React.FC = () => {
   };
 
   const columns: ColumnsType<Partner> = [
+    { title: 'Администратор', key: 'manager', width: 260,
+      render: (_, partner) => {
+        const options = (managers.data || []).map(manager => ({ value: manager.id, label: `${manager.name}${manager.email ? ' · ' + manager.email : ''}` }));
+        if (partner.manager && !options.some(item => item.value === partner.manager?.id)) {
+          options.push({ value: partner.manager.id, label: `${partner.manager.name} (недоступен для назначения)` });
+        }
+        return <Select<number> aria-label={`Администратор партнёра ${partner.email}`} style={{ width: '100%' }}
+          placeholder="Не назначен" allowClear showSearch optionFilterProp="label" options={options}
+          value={partner.manager?.id} loading={managers.isFetching || (assignment.isPending && assignment.variables?.id === partner.id)}
+          disabled={managers.isPending || managers.isError || assignment.isPending}
+          onChange={value => assignment.mutate({ id: partner.id, managerId: value ?? null })} />;
+      },
+    },
+    { title: 'Оборот за всё время', dataIndex: 'total_turnover', key: 'total_turnover', width: 180,
+      render: value => Number(value || 0).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' }),
+      sorter: (a, b) => Number(a.total_turnover || 0) - Number(b.total_turnover || 0),
+    },
     {
       title: 'Имя и фамилия',
       key: 'name',
@@ -342,6 +376,13 @@ const PartnerList: React.FC = () => {
 
   return (
     <div>
+
+      <Typography.Paragraph aria-live="polite">
+        Общий оборот всех партнёров за всё время: <strong>{partnersError ? 'Недоступен' : isLoading ? 'Загрузка…' :
+          (partners.reduce((sum, partner) => sum + Math.round(Number(partner.total_turnover || 0) * 100), 0) / 100).toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })}</strong>.
+        {' '}По исходным суммам начислений. Фильтры списка не меняют общий итог.
+      </Typography.Paragraph>
+      {managers.isError && <Alert type="warning" showIcon message="Список администраторов не загружен" action={<Button onClick={() => managers.refetch()}>Повторить</Button>} />}
 
       <Row gutter={[16, isMobile ? 12 : 16]} className={styles.statsRow}>
         <Col xs={24} sm={12} md={8}>

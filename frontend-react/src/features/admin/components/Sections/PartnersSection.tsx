@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, Button, Card, DatePicker, Select, Table, Tag, Tooltip, message } from 'antd';
+import { Alert, Button, Card, DatePicker, Table, Tag, Tooltip } from 'antd';
 import type { TableColumnsType } from 'antd';
 import ruRU from 'antd/es/date-picker/locale/ru_RU';
 import { EyeOutlined } from '@ant-design/icons';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import dayjs, { type Dayjs } from 'dayjs';
 import 'dayjs/locale/ru';
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/config/endpoints';
 import type { Partner } from '@/features/admin/types';
-import { TABLE_CONSTANTS, QUERY_KEYS } from '@/features/admin/constants';
+import { TABLE_CONSTANTS } from '@/features/admin/constants';
 import styles from './PartnersSection.module.css';
 
 interface Manager { id: number; name: string; email: string; is_active: boolean; role: string }
@@ -25,7 +25,6 @@ const reportKey = ['admin-partners-period'];
 export const PartnersSection: React.FC<PartnersSectionProps> = ({ onView }) => {
   const [period, setPeriod] = useState<[Dayjs, Dayjs] | null>(null);
   const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
   const start = period?.[0].format('YYYY-MM-DD');
   const end = period?.[1].format('YYYY-MM-DD');
   const report = useQuery({
@@ -38,27 +37,6 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ onView }) => {
       return response.data;
     },
   });
-  const managers = useQuery({
-    queryKey: ['admin-partner-managers'],
-    queryFn: async ({ signal }): Promise<Manager[]> => {
-      const response = await apiClient.get('/users/admin_partner_managers/', { signal });
-      if (!Array.isArray(response.data)) throw new Error('Некорректный ответ сервера');
-      return response.data;
-    },
-    staleTime: 60_000,
-  });
-  const assignment = useMutation({
-    mutationFn: ({ partnerId, managerId }: { partnerId: number; managerId: number | null }) =>
-      apiClient.patch(API_ENDPOINTS.admin.finance.updatePartner(partnerId), { partner_manager_id: managerId }),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: reportKey }),
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_PARTNERS }),
-      ]);
-      message.success('Менеджер сохранён');
-    },
-    onError: () => message.error('Не удалось сохранить менеджера. Обновите список и попробуйте ещё раз.'),
-  });
   const rows = report.isError ? [] : report.data || [];
   const totalTurnover = rows.reduce((total, partner) => total + Math.round(Number(partner.total_turnover || 0) * 100), 0) / 100;
   const columns: TableColumnsType<ReportPartner> = [
@@ -68,21 +46,8 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ onView }) => {
         <div className={styles.partnerEmail}>{partner.email}</div>
       </div>,
     },
-    { title: 'Менеджер (администратор)', key: 'manager', width: 270,
-      render: (_, partner) => {
-        const options = (managers.data || []).map(manager => ({ value: manager.id, label: `${manager.name}${manager.email ? ' · ' + manager.email : ''}` }));
-        if (partner.manager && !options.some(option => option.value === partner.manager!.id)) {
-          options.push({ value: partner.manager.id, label: `${partner.manager.name} (недоступен для назначения)` });
-        }
-        return <Select<number>
-          aria-label={`Менеджер партнёра ${partner.username}`}
-          className={styles.managerSelect} placeholder="Не назначен" allowClear showSearch
-          optionFilterProp="label" options={options} value={partner.manager?.id}
-          loading={managers.isFetching || (assignment.isPending && assignment.variables?.partnerId === partner.id)}
-          disabled={managers.isPending || managers.isError || assignment.isPending}
-          onChange={value => assignment.mutate({ partnerId: partner.id, managerId: value ?? null })}
-        />;
-      },
+    { title: 'Менеджер (администратор)', key: 'manager', width: 240,
+      render: (_, partner) => <span title="Назначение изменяет только директор">{partner.manager?.name || 'Не назначен'}</span>,
     },
     { title: 'Оборот', dataIndex: 'total_turnover', key: 'total_turnover', width: 160,
       render: amount => <span className={styles.amount}>{money(amount)}</span>,
@@ -145,7 +110,6 @@ export const PartnersSection: React.FC<PartnersSectionProps> = ({ onView }) => {
       {' '}Оборот и доходы по дате начисления, время Москвы. Оборот рассчитан по исходным суммам начислений, как в кабинете директора. Рефералы показаны за всё время.
     </p>
     {report.isError && <Alert type="error" showIcon message="Не удалось загрузить статистику партнёров" action={<Button onClick={() => report.refetch()}>Повторить</Button>} />}
-    {managers.isError && <Alert type="warning" showIcon message="Список менеджеров недоступен. Назначение временно отключено." action={<Button onClick={() => managers.refetch()}>Повторить</Button>} />}
     <Card className={styles.partnersCard}>
       <Table<ReportPartner>
         columns={columns} dataSource={rows} rowKey="id" loading={report.isPending || report.isFetching}

@@ -158,6 +158,7 @@ class UserViewSet(viewsets.ModelViewSet):
         'create': 'register',
         'request_password_reset': 'password_reset',
         'reset_password_with_code': 'password_reset',
+        'verify_reset_code': 'password_reset',
         'verify_email_code': 'email_verify',
         'resend_verification_code': 'email_verify',
     }
@@ -489,44 +490,9 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def request_password_reset(self, request):
-        """
-        Запрос кода для сброса пароля
-        
-        Ожидает:
-        {
-            "email": "user@example.com"
-        }
-        """
-        email = request.data.get('email')
-        
-        if not email:
-            return Response(
-                {'error': 'Email обязателен'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            # Не раскрываем, существует ли пользователь
-            return Response(
-                {'message': 'Если пользователь с таким email существует, код был отправлен'},
-                status=status.HTTP_200_OK
-            )
-        
-        # Создаем и отправляем код в фоне
-        code = create_password_reset_code(user)
-        threading.Thread(
-            target=send_password_reset_code,
-            args=(email, code),
-            daemon=True,
-        ).start()
-        
-        return Response(
-            {'message': 'Код для сброса пароля отправлен на ваш email'},
-            status=status.HTTP_200_OK
-        )
-    
+        from .account_security import request_reset
+        return request_reset(request.data)
+
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def verify_reset_code(self, request):
         email = request.data.get('email')
@@ -553,78 +519,9 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def reset_password_with_code(self, request):
-        """
-        Сброс пароля с помощью кода
-        
-        Ожидает:
-        {
-            "email": "user@example.com",
-            "code": "123456",
-            "new_password": "newpassword123"
-        }
-        """
-        import logging
-        logger = logging.getLogger(__name__)
-        
-        email = request.data.get('email')
-        code = request.data.get('code')
-        new_password = request.data.get('new_password')
-        
-        logger.info(f"🔐 Password reset request received for email={email}")
-        
-        if not all([email, code, new_password]):
-            logger.warning("❌ Missing required fields")
-            return Response(
-                {'error': 'Email, код и новый пароль обязательны'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if len(new_password) < 8:
-            return Response(
-                {'error': 'Пароль должен содержать минимум 8 символов'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Проверяем код
-        user_id = verify_password_reset_code(email, code)
-        logger.info(f"🔍 Code verification result: user_id={user_id}")
-        
-        if not user_id:
-            logger.warning(f"❌ Invalid or expired code for email: {email}")
-            return Response(
-                {'error': 'Неверный или истекший код'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            user = User.objects.get(id=user_id)
-            logger.info(f"✅ User found: {user.username}")
-        except User.DoesNotExist:
-            logger.error(f"❌ User not found with id: {user_id}")
-            return Response(
-                {'error': 'Пользователь не найден'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Устанавливаем новый пароль
-        user.set_password(new_password)
-        user.save()
-        logger.info(f"✅ Password updated for user: {user.username}")
-        
-        # Удаляем код из кеша
-        delete_password_reset_code(email)
-        
-        # Генерируем токены для автоматического входа
-        refresh = RefreshToken.for_user(user)
-        logger.info(f"✅ Tokens generated for user: {user.username}")
-        
-        return Response({
-            'message': 'Пароль успешно изменен',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'user': UserSerializer(user).data
-        }, status=status.HTTP_200_OK)
-    
+        from .account_security import confirm_reset
+        return confirm_reset(request.data)
+
     @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
     def telegram_auth(self, request):
         """
@@ -924,6 +821,8 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
         if 'partner_manager_id' in request.data:
+            if user.role != 'director':
+                return Response({'error': 'Назначать администратора партнёру может только директор.'}, status=status.HTTP_403_FORBIDDEN)
             from .partner_admin import validate_manager
             partner.partner_manager = validate_manager(partner, request.data['partner_manager_id'])
 

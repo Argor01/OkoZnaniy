@@ -256,6 +256,8 @@ export interface ExpenseDetail {
 }
 
 export interface Partner {
+  total_turnover?: number;
+  manager?: { id: number; name: string; email: string; is_active: boolean; role: string } | null;
   id: number;
   firstName?: string;
   lastName?: string;

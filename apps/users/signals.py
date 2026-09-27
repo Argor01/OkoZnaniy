@@ -91,3 +91,10 @@ def update_partner_statistics(partner):
     partner.active_referrals = active_referrals
     partner.total_earnings = total_earnings
     partner.save(update_fields=['total_referrals', 'active_referrals', 'total_earnings'])
+
+
+@receiver(post_save, sender=User)
+def send_new_partner_login(sender, instance, created, raw=False, **kwargs):
+    if created and not raw and instance.role == 'partner':
+        from .partner_welcome import enqueue_partner_welcome
+        enqueue_partner_welcome(instance)

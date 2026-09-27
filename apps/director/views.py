@@ -479,6 +479,15 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         if not role:
             return Response({'detail': 'Укажите роль'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if role == 'partner':
+            from django.core.validators import validate_email
+            from django.core.exceptions import ValidationError
+            try:
+                email = (email or '').strip().lower()
+                validate_email(email)
+            except (ValidationError, AttributeError):
+                return Response({'detail': 'Для партнёра обязательна действующая почта: на неё придёт логин.'}, status=400)
+
         # Проверяем обязательность города для партнеров
         if role == 'partner' and not city:
             return Response({'detail': 'Для партнеров обязательно указание города проживания'}, status=status.HTTP_400_BAD_REQUEST)
@@ -495,7 +504,7 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
 
         # Уникальность email/телефона — проверяем только среди активных пользователей,
         # чтобы архивированные сотрудники не блокировали регистрацию с тем же контактом.
-        if email and User.objects.filter(email=email, is_active=True).exists():
+        if email and User.objects.filter(email__iexact=email, is_active=True).exists():
             return Response({'detail': 'Пользователь с таким email уже существует'}, status=status.HTTP_400_BAD_REQUEST)
         if phone and User.objects.filter(phone=phone, is_active=True).exists():
             return Response({'detail': 'Пользователь с таким телефоном уже существует'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1041,29 +1050,25 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
 
     def list(self, request):
         """Список всех партнеров"""
-        partners = User.objects.filter(role='partner').annotate(
-            total_referrals_count=Count('referrals'),
-            total_earnings_sum=Sum('earnings__amount')
-        )
-
+        from apps.users.partner_admin import manager_data
+        partners = User.objects.filter(role='partner').select_related('partner_manager').annotate(
+            total_referrals_count=Count('referrals', distinct=True))
+        totals = {row['partner_id']: row for row in PartnerEarning.objects.values('partner_id').annotate(
+            earnings_sum=Sum('amount'), turnover_sum=Sum('source_amount'))}
         partners_data = []
         for partner in partners:
+            amounts = totals.get(partner.pk, {})
             partners_data.append({
-                'id': partner.id,
-                'username': partner.username,
-                'email': partner.email,
-                'first_name': partner.first_name,
-                'last_name': partner.last_name,
-                'phone': partner.phone,
-                'is_active': partner.is_active,
-                'referral_code': partner.referral_code,
+                'id': partner.id, 'username': partner.username, 'email': partner.email,
+                'first_name': partner.first_name, 'last_name': partner.last_name, 'phone': partner.phone,
+                'is_active': partner.is_active, 'referral_code': partner.referral_code,
                 'commission_percent': float(partner.partner_commission_rate),
                 'total_referrals': partner.total_referrals_count or 0,
                 'active_referrals': partner.active_referrals,
-                'total_earnings': float(partner.total_earnings_sum or 0),
-                'date_joined': partner.date_joined
+                'total_earnings': float(amounts.get('earnings_sum') or 0),
+                'total_turnover': float(amounts.get('turnover_sum') or 0),
+                'manager': manager_data(partner.partner_manager), 'date_joined': partner.date_joined,
             })
-
         return Response(partners_data)
 
     @action(detail=False, methods=['get'], url_path='turnover')

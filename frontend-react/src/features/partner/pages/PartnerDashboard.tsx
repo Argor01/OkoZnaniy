@@ -1,3 +1,4 @@
+import AccountSecurityLink from '@/features/auth/components/AccountSecurityLink';
 import React, { useState } from 'react';
 import { Layout, Menu, Button, Typography, Space, message, Modal, Card, Row, Col, Statistic, Table, Tag, Input, Spin, Alert, Drawer, Grid, DatePicker } from 'antd';
 import {
@@ -779,6 +780,7 @@ const PartnerDashboard: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AccountSecurityLink />
             <ThemeToggle size={isMobile ? 'small' : 'middle'} />
             <Button
               icon={<LogoutOutlined />}

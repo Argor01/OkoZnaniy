@@ -76,7 +76,6 @@ const EmployeeRegistration: React.FC = () => {
       ...(values.role === 'partner' && values.city ? { city: values.city } : {}), // Добавляем город только если роль партнер и город указан
     };
 
-    logger.log('Отправляемые данные:', data); // Для отладки
     registerMutation.mutate(data);
   };
 
@@ -102,6 +101,7 @@ const EmployeeRegistration: React.FC = () => {
         >
           Регистрация нового сотрудника
         </Title>
+        <Typography.Paragraph type="secondary">Новому партнёру придёт письмо с логином и инструкцией по установке пароля.</Typography.Paragraph>
         <Form
           form={form}
           layout="vertical"

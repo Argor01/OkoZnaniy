@@ -19,12 +19,14 @@ import { legalRoutes } from './legalRoutes';
 
 const ImprovementsSurveyPage = lazy(() => import('@/features/improvements/pages/ImprovementsSurveyPage'));
 const PaymentResult = lazy(() => import('@/features/payments/pages/PaymentResult'));
+const AccountSecurity = lazy(() => import('@/features/auth/pages/AccountSecurity'));
 const NotFound = lazy(() => import('@/features/common/pages/NotFound'));
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {authRoutes}
+      <Route path="/account/security" element={<ProtectedRoute><DashboardLayout><AccountSecurity /></DashboardLayout></ProtectedRoute>} />
 
       <Route path={ROUTES.dashboard} element={<DashboardRedirect />} />
 

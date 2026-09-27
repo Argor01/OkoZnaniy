@@ -76,14 +76,14 @@ class PartnerAdminTests(TestCase):
         self.assertEqual({row['id'] for row in response.data}, {self.admin.pk, self.other.pk})
 
     def test_assign_and_clear_manager(self):
-        response = self.call('admin_update_partner', method='patch', username=self.partner.pk,
+        response = self.call('admin_update_partner', user=self.director, method='patch', username=self.partner.pk,
             data={'partner_manager_id': self.other.pk})
         self.assertEqual(response.status_code, 200)
         self.partner.refresh_from_db()
         self.assertEqual(self.partner.partner_manager_id, self.other.pk)
         rows = self.call('admin_partners').data
         self.assertEqual(next(row for row in rows if row['id'] == self.partner.pk)['manager']['id'], self.other.pk)
-        response = self.call('admin_update_partner', method='patch', username=self.partner.pk,
+        response = self.call('admin_update_partner', user=self.director, method='patch', username=self.partner.pk,
             data={'partner_manager_id': None})
         self.assertEqual(response.status_code, 200)
         self.partner.refresh_from_db()
@@ -91,7 +91,7 @@ class PartnerAdminTests(TestCase):
 
     def test_invalid_manager_cannot_change_other_fields(self):
         for invalid in [self.referral_user.pk, self.director.pk, self.inactive.pk, 999999999, True, 1.5, 'bad']:
-            response = self.call('admin_update_partner', method='patch', username=self.partner.pk,
+            response = self.call('admin_update_partner', user=self.director, method='patch', username=self.partner.pk,
                 data={'partner_manager_id': invalid, 'first_name': 'Should not persist'})
             self.assertEqual(response.status_code, 400)
             self.partner.refresh_from_db()
@@ -99,7 +99,7 @@ class PartnerAdminTests(TestCase):
             self.assertEqual(self.partner.first_name, '')
 
     def test_non_partner_cannot_receive_manager(self):
-        response = self.call('admin_update_partner', method='patch', username=self.referral_user.pk,
+        response = self.call('admin_update_partner', user=self.director, method='patch', username=self.referral_user.pk,
             data={'partner_manager_id': self.admin.pk})
         self.assertEqual(response.status_code, 400)
 

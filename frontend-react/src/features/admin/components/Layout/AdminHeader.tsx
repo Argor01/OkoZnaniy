@@ -1,3 +1,4 @@
+import AccountSecurityLink from '@/features/auth/components/AccountSecurityLink';
 import React from 'react';
 import { Layout, Typography, Button } from 'antd';
 import { 
@@ -54,6 +55,7 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       <div className={styles.rightSection}>
+            <AccountSecurityLink />
         <ThemeToggle size={isMobile ? 'small' : 'middle'} />
 
         <Button

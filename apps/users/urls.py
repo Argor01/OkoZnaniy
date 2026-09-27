@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views, vkid
+from .account_security import PasswordSecurityView
 from .cookie_views import CookieTokenRefreshView, CookieLogoutView
 
 """config URL Configuration
@@ -24,6 +25,9 @@ router = DefaultRouter()
 router.register('', views.UserViewSet)
 
 urlpatterns = [
+    path('password/change/', PasswordSecurityView.as_view(), name='password-change'),
+    path('password/recovery/', PasswordSecurityView.as_view(operation='request'), name='password-recovery'),
+    path('password/recovery/confirm/', PasswordSecurityView.as_view(operation='confirm'), name='password-recovery-confirm'),
     path('token/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('token/logout/', CookieLogoutView.as_view(), name='token_logout'),
