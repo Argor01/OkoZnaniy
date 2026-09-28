@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Tag, Space, Empty, Spin, Select, Row, Col, InputNumber, message, Avatar, Tooltip, Pagination } from 'antd';
+import { Typography, Tag, Space, Empty, Spin, Select, Row, Col, InputNumber, message, Avatar, Tooltip, Pagination, Segmented } from 'antd';
 import { ClockCircleOutlined, SearchOutlined, FilterOutlined, UserOutlined, DeleteOutlined, FileOutlined, FilePdfOutlined, FileWordOutlined, FileImageOutlined, FileZipOutlined, DownloadOutlined, ShareAltOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/ru';
 import styles from './OrdersFeed.module.css';
+import scopeStyles from './FeedScope.module.css';
 import { formatCurrency } from '@/utils/formatters';
 import BidModal from '../../components/BidModal';
 import { AppButton, AppCard, AppInput, AppSpinner, AppEmpty } from '@/components/ui';
@@ -59,6 +60,7 @@ const OrdersFeed: React.FC = () => {
     import.meta.env.DEV &&
     typeof window !== 'undefined' &&
     window.localStorage?.getItem('debug_api') === '1';
+  const [feedScope, setFeedScope] = useState<'all' | 'my-bids'>('all');
   const [searchText, setSearchText] = useState('');
   const [orderIdSearch, setOrderIdSearch] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<number | undefined>();
@@ -79,6 +81,13 @@ const OrdersFeed: React.FC = () => {
 
   
   const {data: userProfile} = useCurrentUser();
+
+  React.useEffect(() => {
+    setFeedScope('all');
+    setMyBidsByOrderId({});
+    setCurrentPage(1);
+  }, [userProfile?.id]);
+
 
   const {data: fetchedSubjects = []} = useSubjects();
 
@@ -227,7 +236,22 @@ const OrdersFeed: React.FC = () => {
   }, [orders, userProfile?.role, userProfile?.id, myBidsByOrderId]);
 
   
+  const orderHasMyBid = (order: OrdersFeedOrder) => {
+    if (userProfile?.role !== 'expert') return false;
+    // The server scopes this flag to the authenticated user. The local cache
+    // makes a newly submitted bid visible without waiting for the next refresh.
+    const cached = myBidsByOrderId[order.id];
+    if (typeof cached === 'boolean') return cached;
+    if (typeof order.user_has_bid === 'boolean') return order.user_has_bid;
+    return Array.isArray(order.bids) &&
+      order.bids.some((bid) => bid.expert?.id === userProfile.id);
+  };
+
   const filteredOrders = orders.filter((order) => {
+    if (userProfile?.role === 'expert' && feedScope === 'my-bids' && !orderHasMyBid(order)) {
+      return false;
+    }
+
     const matchesSearch = !searchText || 
       order.title?.toLowerCase().includes(searchText.toLowerCase()) ||
       order.description?.toLowerCase().includes(searchText.toLowerCase());
@@ -256,7 +280,13 @@ const OrdersFeed: React.FC = () => {
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchText, orderIdSearch, selectedSubject, selectedWorkType, budgetRange, responsesFilter]);
+  }, [feedScope, searchText, orderIdSearch, selectedSubject, selectedWorkType, budgetRange, responsesFilter]);
+
+  React.useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PER_PAGE));
+    setCurrentPage((page) => Math.min(page, lastPage));
+  }, [filteredOrders.length]);
+
 
   const paginatedOrders = React.useMemo(() => {
     const start = (currentPage - 1) * ORDERS_PER_PAGE;
@@ -370,6 +400,25 @@ const OrdersFeed: React.FC = () => {
                 : 'Найдите подходящий заказ для работы'}
             </Text>
           </div>
+        </div>
+      )}
+
+      {userProfile?.role === 'expert' && (
+        <div className={scopeStyles.scopeSwitcher}>
+          <Segmented
+            aria-label="Раздел ленты заказов"
+            size="large"
+            block={isMobile}
+            value={feedScope}
+            options={[
+              { label: 'Все заказы', value: 'all' },
+              { label: 'Мои отклики', value: 'my-bids' },
+            ]}
+            onChange={(value) => {
+              setFeedScope(value as 'all' | 'my-bids');
+              setCurrentPage(1);
+            }}
+          />
         </div>
       )}
 
@@ -529,8 +578,10 @@ const OrdersFeed: React.FC = () => {
           description={
             <div>
               <Text className={styles.emptyText}>
-                                {searchText || orderIdSearch || selectedSubject || selectedWorkType 
+                                {searchText || orderIdSearch || selectedSubject || selectedWorkType || budgetRange[0] > 0 || budgetRange[1] > 0 || responsesFilter !== 'all'
                   ? 'Заказы не найдены. Попробуйте изменить фильтры.'
+                  : userProfile?.role === 'expert' && feedScope === 'my-bids'
+                    ? 'В ленте пока нет заказов с вашими откликами. Откликнитесь на заказ в разделе «Все заказы».'
                   : userProfile?.role === 'client' 
                     ? 'В ленте пока нет заказов'
                     : 'Пока нет доступных заказов'}
@@ -551,16 +602,7 @@ const OrdersFeed: React.FC = () => {
 
             const cachedMyBid = typeof order.id === 'number' ? myBidsByOrderId[order.id] : undefined;
             const checkingMyBid = cachedMyBid === 'loading';
-            const hasMyBid =
-              userProfile?.role === 'expert'
-                ? (typeof cachedMyBid === 'boolean'
-                    ? cachedMyBid
-                    : typeof order.user_has_bid === 'boolean'
-                    ? order.user_has_bid
-                    : (Array.isArray(order.bids) && order.bids.some((bid) => bid.expert?.id === userProfile?.id))
-                      ? true
-                      : (typeof cachedMyBid === 'boolean' ? cachedMyBid : false))
-                : false;
+            const hasMyBid = orderHasMyBid(order);
             const canBid =
               typeof order.available_actions?.can_bid === 'boolean'
                 ? order.available_actions.can_bid
