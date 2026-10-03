@@ -149,6 +149,7 @@ class UserSerializer(serializers.ModelSerializer):
             'average_rating',
             'total_referrals', 'active_referrals', 'total_earnings',
             'city', 'email_verified', 'is_active', 'is_blocked',
+            'application_approved', 'has_submitted_application',
             'date_joined', 'last_login', 'blocked_at', 'block_reason',
             'unblock_date', 'contact_violations_count'
         ]
@@ -156,6 +157,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'balance', 'frozen_balance', 'is_verified',
             'referral_code', 'total_referrals', 'active_referrals',
             'total_earnings', 'email_verified', 'is_blocked',
+            'application_approved', 'has_submitted_application',
             'date_joined', 'last_login', 'blocked_at', 'block_reason',
             'unblock_date', 'contact_violations_count'
         ]

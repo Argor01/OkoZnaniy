@@ -741,6 +741,8 @@ const FooterDark: React.FC = () => (
         </div>
         <div className={styles.footerCol}>
           <div className={styles.footerColTitle}>Документы</div>
+          <a href="/docs/Soglasie_na_reklamu.docx" download>Согласие на получение рекламы (DOCX)</a>
+          <a href="/docs/Politika_obrabotki_PD_Oko_znanii_774.pdf" target="_blank" rel="noopener noreferrer">Политика обработки персональных данных (PDF)</a>
           <a href="/docs/privacy_policy.pdf" target="_blank" rel="noopener noreferrer">Политика конфиденциальности</a>
           <a href="/docs/personal_data_processing.pdf" target="_blank" rel="noopener noreferrer">Согласие на обработку ПД</a>
           <a href="/docs/user_agreement_client.pdf" target="_blank" rel="noopener noreferrer">Пользовательское соглашение (Клиент)</a>

@@ -233,9 +233,10 @@ class DirectorPersonnelViewSet(viewsets.ModelViewSet):
         # Показываем всех сотрудников:
         # - Все роли кроме обычных клиентов
         # - Включаем архивированных и деактивированных экспертов для фильтров
+        # Page-number pagination needs a deterministic order with a unique tie-breaker.
         return User.objects.exclude(
             Q(role='client') & ~deactivated_expert_filter
-        ).distinct()
+        ).distinct().order_by('-date_joined', '-id')
 
     def get_serializer_class(self):
         return UserSerializer
@@ -1244,6 +1245,11 @@ class DirectorPartnersViewSet(viewsets.ViewSet):
             'username': partner.username,
             'commission_percent': float(partner.partner_commission_rate)
         })
+
+    @action(detail=True, methods=['post'], url_path='toggle-status', url_name='toggle-status-hyphen')
+    def toggle_status_hyphen(self, request, pk=None):
+        # Support the published frontend while preserving the underscore route.
+        return self.toggle_status(request, pk=pk)
 
     @action(detail=True, methods=['post'])
     def toggle_status(self, request, pk=None):

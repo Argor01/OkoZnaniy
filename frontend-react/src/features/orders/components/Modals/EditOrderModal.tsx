@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Form, Typography, message, Modal } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Form, Typography, message, Modal, Upload } from 'antd';
+import type { UploadFile } from 'antd';
+import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
@@ -54,6 +55,20 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
   const [newSubjectModalVisible, setNewSubjectModalVisible] = useState(false);
   const [deadlineTime, setDeadlineTime] = useState<{ hours: number; minutes: number }>({ hours: 12, minutes: 0 });
   const submitGuardRef = useRef(false);
+  const initializedOrderRef = useRef<number | null>(null);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [removedFileIds, setRemovedFileIds] = useState<number[]>([]);
+  const canManageFiles = Boolean(canEditFiles());
+
+  function canEditFiles() {
+    return order && (!order.expert || order.status === 'new')
+      && order.available_actions?.can_upload_task_files !== false;
+  }
+
+  const closeModal = () => {
+    if (!submitGuardRef.current) onClose();
+  };
+
 
   const lockSubmit = () => {
     submitGuardRef.current = true;
@@ -75,7 +90,18 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
   // Инициализация формы данными заказа
   useEffect(() => {
-    if (visible && order) {
+    if (!visible) {
+      initializedOrderRef.current = null;
+      return;
+    }
+    if (order && initializedOrderRef.current !== order.id) {
+      initializedOrderRef.current = order.id;
+      setFileList((order.files || []).filter(file => file.file_type === 'task').map(file => ({
+        uid: `existing-${file.id}`,
+        name: file.filename,
+        status: 'done' as const,
+      })));
+      setRemovedFileIds([]);
       // Устанавливаем значения формы
       const deadlineDate = order.deadline ? dayjs(order.deadline) : dayjs().add(7, 'day');
       setDeadlineTime({
@@ -130,8 +156,24 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
 
   // Обновление заказа
   const updateOrderMutation = useMutation({
-    mutationFn: ({ orderId, data }: { orderId: number; data: Partial<Order> }) =>
-      ordersApi.updateOrder(orderId, data as any),
+    mutationFn: async ({ orderId, data }: { orderId: number; data: Partial<Order> }) => {
+      await ordersApi.updateOrder(orderId, data as any);
+      // Keep successful operations in local state so retry never reuploads them.
+      // Upload replacements first: a failed upload must not delete original files.
+      for (const entry of fileList) {
+        if (!entry.originFileObj) continue;
+        const uploaded = await ordersApi.uploadOrderFile(orderId, entry.originFileObj, { file_type: 'task' });
+        setFileList(current => current.map(file => file.uid === entry.uid ? {
+          uid: `existing-${uploaded.id}`,
+          name: uploaded.filename || entry.name,
+          status: 'done' as const,
+        } : file));
+      }
+      for (const fileId of removedFileIds) {
+        await ordersApi.deleteOrderFile(orderId, fileId);
+        setRemovedFileIds(current => current.filter(id => id !== fileId));
+      }
+    },
     onSuccess: () => {
       message.success('Заказ успешно обновлен!');
       queryClient.invalidateQueries({ queryKey: ['order'] });
@@ -141,7 +183,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
     },
     onError: (error: Error) => {
       logger.error('Ошибка обновления заказа:', error);
-      message.error('Ошибка при обновлении заказа. Попробуйте еще раз.');
+      // The catch below explains partial success without closing the editor.
     },
   });
 
@@ -184,7 +226,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
         (error as any)?.response?.data?.deadline?.[0] ||
         (error as any)?.response?.data?.budget?.[0] ||
         (error as Error)?.message;
-      message.error(errMsg || 'Не удалось обновить заказ');
+      message.error(`Не удалось сохранить все изменения. Успешные изменения сохранены; повторите сохранение оставшихся. ${errMsg || ''}`);
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     } finally {
       unlockSubmit();
     }
@@ -201,7 +245,10 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
           </div>
         }
         open={visible}
-        onCancel={onClose}
+        onCancel={closeModal}
+        closable={!submitLocked}
+        maskClosable={!submitLocked}
+        keyboard={!submitLocked}
         onOk={() => form.submit()}
         width={isMobile ? '100%' : isTablet ? 700 : 900}
         style={isMobile ? { top: 0, paddingBottom: 0 } : { top: 20 }}
@@ -214,7 +261,8 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
           size: isMobile ? 'large' : 'large',
         }}
         cancelButtonProps={{
-          onClick: onClose,
+          onClick: closeModal,
+          disabled: submitLocked,
           size: isMobile ? 'large' : 'large',
         }}
         wrapClassName={`${styles.editOrderModalWrap} ${isMobile ? styles.editOrderModalMobile : isTablet ? styles.editOrderModalTablet : styles.editOrderModalDesktop}`}
@@ -232,7 +280,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
           layout="vertical"
           onFinish={onFinish}
           onFinishFailed={unlockSubmit}
-          disabled={!canEdit}
+          disabled={!canEdit || submitLocked}
         >
           <div className={styles.orderSection}>
             <Form.Item
@@ -363,6 +411,52 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({
                 rows={6}
                 className={styles.descriptionTextarea}
               />
+            </Form.Item>
+
+            <Form.Item
+              label="Файлы заказа"
+              extra="До 50 МБ на файл. Добавление и удаление применяются после нажатия «Сохранить изменения». Кнопка «Отмена» не меняет файлы."
+            >
+              <Upload
+                multiple
+                fileList={fileList}
+                disabled={!canManageFiles || submitLocked}
+                accept=".doc,.docx,.pdf,.rtf,.txt,.ppt,.pptx,.xls,.xlsx,.csv,.dwg,.dxf,.cdr,.cdw,.bak,.jpg,.jpeg,.png,.bmp,.svg,.zip,.rar,.7z"
+                beforeUpload={(file) => {
+                  if (file.size >= 50 * 1024 * 1024) {
+                    message.error('Максимальный размер файла: 50 МБ');
+                    return Upload.LIST_IGNORE;
+                  }
+                  const allowed = ['doc', 'docx', 'pdf', 'rtf', 'txt', 'ppt', 'pptx', 'xls', 'xlsx', 'csv', 'dwg', 'dxf', 'cdr', 'cdw', 'bak', 'jpg', 'jpeg', 'png', 'bmp', 'svg', 'zip', 'rar', '7z'];
+                  if (!allowed.includes(file.name.split('.').pop()?.toLowerCase() || '')) {
+                    message.error('Неподдерживаемый формат файла');
+                    return Upload.LIST_IGNORE;
+                  }
+                  setFileList(current => [...current, {
+                    uid: file.uid, name: file.name, originFileObj: file,
+                  }]);
+                  return false;
+                }}
+                onRemove={(file) => {
+                  if (submitGuardRef.current || !canManageFiles) return false;
+                  if (file.uid.startsWith('existing-')) {
+                    const id = Number(file.uid.slice('existing-'.length));
+                    setRemovedFileIds(current => current.includes(id) ? current : [...current, id]);
+                  }
+                  setFileList(current => current.filter(entry => entry.uid !== file.uid));
+                  return true;
+                }}
+                showUploadList={{ showRemoveIcon: canManageFiles && !submitLocked }}
+              >
+                <AppButton variant="secondary" icon={<UploadOutlined />} disabled={!canManageFiles || submitLocked}>
+                  Добавить файлы
+                </AppButton>
+              </Upload>
+              {removedFileIds.length > 0 && (
+                <Typography.Text type="warning">
+                  Будет удалено файлов: {removedFileIds.length}
+                </Typography.Text>
+              )}
             </Form.Item>
 
             <Form.Item
